@@ -75,7 +75,8 @@
         font-size: 19px;
         font-weight: 400;
         line-height: 22.8px;
-        max-width: 300px;
+        width: 300px;
+        max-width: calc(100%  - 50px);
       }
     }
 
@@ -116,5 +117,9 @@
         color: #dc2a1f;
       }
     }
+  }
+
+  @media (max-width: 520px) {
+    padding: 0;
   }
 }
