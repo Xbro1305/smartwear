@@ -46,7 +46,7 @@ export const Signup = () => {
         </label>
         <h3 className={styles.signup_form_confirm}>
           Продолжив регистрацию, я соглашаюсь с{" "}
-          <Link to="/politics">политикой конфиденциальности</Link>и
+          <Link to="/politics">политикой конфиденциальности</Link> и{" "}
           <Link to="/oferta">публичной офертой</Link>
         </h3>
         <button className={styles.signup_form_button}>Продолжить</button>
