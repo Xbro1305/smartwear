@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import styles from "./Signup.module.scss";
+import styles from "../Signup.module.scss";
 import { PatternFormat } from "react-number-format";
 import { enqueueSnackbar } from "notistack";
 import { useRegisterMutation, useConfirmRegistrationMutation } from "@/entities/auth";

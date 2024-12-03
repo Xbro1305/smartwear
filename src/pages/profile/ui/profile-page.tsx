@@ -1,8 +1,8 @@
-import styles from "@/signup/Signup.module.scss"; // Пример с алиасом
-import sale from "@/assets/images/sale.png"; // Пример с алиасом для изображений
-import itemImg from "@/assets/images/image 139.png"; // Тоже с алиасом
-import question from "@/assets/images/svg (3).svg";
-import deleteItem from "@/assets/images/Union (1).svg";
+import styles from "./Profile.module.scss"; // Пример с алиасом
+import sale from "../../../assets/images/sale.png"; // Пример с алиасом для изображений
+import itemImg from "../../../assets/images/image 139.png"; // Тоже с алиасом
+import question from "../../../assets/images/svg (3).svg";
+import deleteItem from "../../../assets/images/Union (1).svg";
 import { Link } from "react-router-dom";
 import { PatternFormat } from "react-number-format";
 

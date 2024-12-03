@@ -7,7 +7,7 @@
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
-    --header-height: 56px;
+    --header-height: 0;
 
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;

@@ -1,8 +1,8 @@
 import styles from "./Header.module.scss";
-import logo from "../../images/logo.png";
-import search from "../../images/svg.svg";
-import profile from "../../images/svg (1).svg";
-import cart from "../../images/svg (2).svg";
+import logo from "../../../assets/images/logo.png";
+import search from "../../../assets/images/svg.svg";
+import profile from "../../../assets/images/svg (1).svg";
+import cart from "../../../assets/images/svg (2).svg";
 import { Link } from "react-router-dom";
 import { ROUTER_PATHS } from "@/shared/config/routes";
 

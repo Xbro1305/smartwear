@@ -1,8 +1,8 @@
 import styles from "./Footer.module.scss";
-import i1 from "../../images/Vector.svg";
-import i2 from "../../images/Vector (1).svg";
-import i3 from "../../images/vk logo.svg";
-import i4 from "../../images/Union.svg";
+import i1 from "../../../assets/images/Vector.svg";
+import i2 from "../../../assets/images/Vector (1).svg";
+import i3 from "../../../assets/images/vk logo.svg";
+import i4 from "../../../assets/images/Union.svg";
 import { Link } from "react-router-dom";
 import { ROUTER_PATHS } from "@/shared/config/routes";
 
