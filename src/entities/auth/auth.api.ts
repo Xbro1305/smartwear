@@ -2,6 +2,7 @@ import { baseApi } from '@/shared/api';
 import { RegisterDto, RequestAdminCodeDto, RequestCodeDto, ConfirmCodeDto, LoginDto } from './auth.types';
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    
     register: builder.mutation<void, RegisterDto>({
       query: (body) => ({
         url: '/auth/register',
@@ -41,6 +42,17 @@ export const authApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+
+    getMe: builder.query<any, void>({
+      query: () => ({
+        url: '/users/me',
+        method: 'GET',
+        
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }),
+    }),
   }),
 });
 
@@ -50,4 +62,5 @@ export const {
   useRequestCodeMutation,
   useRequestAdminCodeMutation,
   useLoginMutation,
+  useGetMeQuery, 
 } = authApi;

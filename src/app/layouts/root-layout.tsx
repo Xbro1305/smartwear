@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom'
 import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
-import { useMeQuery } from '@/entities/auth'
+import { useGetMeQuery } from '@/entities/auth'
 
 
 export const RootLayout = () => {
-  const { isError, isLoading } = useMeQuery()
+  const { isError, isLoading } = useGetMeQuery()
   const isAuthenticated = !isError && !isLoading
 
   if (isLoading) {

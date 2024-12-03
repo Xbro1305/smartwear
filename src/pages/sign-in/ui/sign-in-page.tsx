@@ -21,7 +21,7 @@ export const SignInPage: React.FC = () => {
   const [requestCode] = useRequestCodeMutation();
   const [login] = useLoginMutation();
 
-  // Получаем код
+  
   const getCode = async (phone: string) => {
     try {
       await requestCode({ phone }).unwrap();
@@ -55,27 +55,34 @@ export const SignInPage: React.FC = () => {
     e.preventDefault();
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const value = Object.fromEntries(formData) as FormData;
+  const value = Object.fromEntries(formData) as FormData;
 
-    if (value.code?.includes("-")) {
-      return enqueueSnackbar("Неправильный код", {
-        variant: "error",
-      });
-    }
+ 
+  if (value.code?.includes("-")) {
+    return enqueueSnackbar("Неправильный код", {
+      variant: "error",
+    });
+  }
 
-    try {
-      
-      await login({ code: value.code! }).unwrap();
-      enqueueSnackbar("Вы успешно зарегистрировались", {
-        variant: "success",
-      });
-      navigate(ROUTER_PATHS.SIGN_IN);
-    } catch (error) {
-      enqueueSnackbar("Ошибка при подтверждении кода", {
-        variant: "error",
-      });
-    }
-  };
+  try {
+    
+    const { access_token } = await login({ code: value.code! }).unwrap();
+
+    
+    localStorage.setItem('token', access_token);
+
+    enqueueSnackbar("Вы успешно зарегистрировались", {
+      variant: "success",
+    });
+
+   
+    navigate(ROUTER_PATHS.PROFILE);  
+  } catch (error) {
+    enqueueSnackbar("Ошибка при подтверждении кода", {
+      variant: "error",
+    });
+  }
+};
 
   return (
     <div className={styles.signup}>
