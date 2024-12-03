@@ -4,7 +4,8 @@ import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
-const { SIGN_IN, SIGN_UP } = ROUTER_PATHS
+
+const { SIGN_IN, SIGN_UP, adminLogin } = ROUTER_PATHS
 
 export const publicRoutes: RouteObject[] = [
   {

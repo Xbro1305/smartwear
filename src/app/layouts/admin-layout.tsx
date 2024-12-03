@@ -3,7 +3,7 @@ import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
 import { useGetMeQuery } from '@/entities/auth'
 
-export const RootLayout = () => {
+export const AdminLayout = () => {
   const { isError, isLoading } = useGetMeQuery()
   const isAuthenticated = !isError && !isLoading
 
@@ -28,7 +28,6 @@ export const RootLayout = () => {
   if (isAuthenticated) {
     return (
       <>
-        <Header />
         <div
           className={
             'px-8 flex h-screen flex-1 gap-5 md:grid md:grid-cols-[220px_minmax(0,1fr)] lg:justify-center lg:items-center justify-center items-center lg:grid-cols-[220px_minmax(0,1fr)]'
@@ -37,16 +36,9 @@ export const RootLayout = () => {
         >
           {renderMain}
         </div>
-        <Footer />
       </>
     )
   }
 
-  return (
-    <div className={'h-screen min-w-full flex flex-col'}>
-      <Header />
-      {!isLoading && renderMain}
-      <Footer />
-    </div>
-  )
+  return <div className={'h-screen min-w-full flex flex-col'}>{!isLoading && renderMain}</div>
 }

@@ -8,9 +8,12 @@ import '@fontsource/inter/500.css'
 import '@fontsource/inter/700.css'
 
 import { Providers } from './providers'
+import { SnackbarProvider } from 'notistack'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Providers />
+    <SnackbarProvider>
+      <Providers />
+    </SnackbarProvider>
   </StrictMode>
 )
