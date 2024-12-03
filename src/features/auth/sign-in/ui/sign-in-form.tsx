@@ -4,7 +4,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useSignInMutation } from '@/entities/session'
+import { useSignInMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { cn } from '@/shared/lib/tailwind'
 import { TextField } from '@/shared/ui/text-field'

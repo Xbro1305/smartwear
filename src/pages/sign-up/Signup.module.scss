@@ -1,0 +1,161 @@
+.signup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: #f2f2f2;
+  padding: 100px 0;
+  min-height: 100vh;
+
+  &_form {
+    background: #ffffff;
+    padding: 40px;
+    width: 100%;
+    max-width: 526px;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+
+    &_h1 {
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 48px;
+      text-align: center;
+    }
+
+    &_label {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+
+      p {
+        font-size: 19px;
+        font-weight: 400;
+        line-height: 22.8px;
+        color: #b0b7bf;
+      }
+
+      input {
+        padding: 10px;
+        border: none;
+        background: none;
+        outline: none;
+        border-bottom: 3px solid #b0b7bf;
+        font-size: 22px;
+        font-weight: 400;
+        color: #282b32;
+        line-height: 28.6px;
+      }
+    }
+
+    &_confirmLabel {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      cursor: pointer;
+      position: relative;
+
+      input {
+        width: 24px;
+        height: 24px;
+        border: none;
+        z-index: 1;
+        border-radius: 5px;
+      }
+
+      p::after {
+        content: "";
+        border: 3px solid #b0b7bf;
+        display: block;
+        margin-left: -0.5px;
+        margin-top: -0.5px;
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+        z-index: 3;
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      p::before {
+        content: "";
+        border: 3px solid #fff;
+        display: block;
+        margin-left: -1px;
+        margin-top: -1px;
+        width: 21px;
+        height: 21px;
+        border-radius: 0;
+        z-index: 2;
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      p {
+        font-size: 19px;
+        font-weight: 400;
+        line-height: 22.8px;
+        width: 300px;
+        max-width: calc(100% - 50px);
+      }
+    }
+
+    &_confirm {
+      font-size: 19px;
+      font-weight: 400;
+      line-height: 22.8px;
+      text-align: center;
+      color: #282b32;
+
+      a {
+        color: #282b32;
+      }
+    }
+
+    &_button {
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 26.4px;
+      width: fit-content;
+      padding: 12px 24px;
+      margin: 0 auto;
+      background: #dc2a1f;
+      border-radius: 8px;
+      border: none;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    &_link {
+      font-size: 19px;
+      font-weight: 400;
+      line-height: 22.8px;
+      text-align: center;
+
+      a {
+        text-decoration: none;
+        color: #dc2a1f;
+      }
+    }
+
+    &_againButton {
+      font-size: 19px;
+      font-weight: 400;
+      line-height: 22.8px;
+      text-align: center;
+      background: none;
+      border: none;
+    }
+  }
+
+  @media (max-width: 526px) {
+    padding: 0;
+
+    &_form {
+      padding: 20px 10px;
+    }
+  }
+}

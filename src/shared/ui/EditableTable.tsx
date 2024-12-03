@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
 
-import { useMeQuery } from '@/entities/session'
+import { useMeQuery } from '@/entities/auth'
 import {
   Table,
   TableBody,

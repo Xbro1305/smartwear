@@ -6,7 +6,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { useSignUpMutation } from '@/entities/session'
+import { useSignUpMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { RoleSelect } from '@/shared/ui/RoleSelect'
 import { Button } from '@/shared/ui-shad-cn/ui/button'

@@ -1,0 +1,1 @@
+export { PoliticsPage } from "./ui/politics-page";

@@ -1,17 +1,15 @@
-import type { RouteObject } from 'react-router-dom'
+import type { RouteObject } from 'react-router-dom';
 
+import { HomePage } from '@/pages/home';
+import { PoliticsPage } from '@/pages/politics';
+import { OfertaPage } from '@/pages/oferta';
+import { ProfilePage } from '@/pages/profile';
 
-import { HomePage } from '@/pages/home'
+import { ROUTER_PATHS } from '@/shared/config/routes';
 
-import { ROUTER_PATHS } from '@/shared/config/routes'
+import { AuthGuard } from './auth-guard';
 
-import { AuthGuard } from './auth-guard'
-
-const {
-  
-  HOME,
- 
-} = ROUTER_PATHS
+const { HOME, POLITICS, OFERTA, PROFILE } = ROUTER_PATHS;
 
 export const privateRoutes: RouteObject[] = [
   {
@@ -20,8 +18,19 @@ export const privateRoutes: RouteObject[] = [
         element: <HomePage />,
         path: HOME,
       },
-      
+      {
+        element: <PoliticsPage />, 
+        path: POLITICS,
+      },
+      {
+        element: <OfertaPage />, 
+        path: OFERTA,
+      },
+      {
+        element: <ProfilePage />,
+        path: PROFILE,
+      }
     ],
     element: <AuthGuard />,
   },
-]
+];
