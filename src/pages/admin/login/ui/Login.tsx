@@ -1,6 +1,7 @@
 import styles from './Login.module.scss'
 import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
+import send from '../../../../assets/images/message-sent.svg'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useRequestAdminCodeMutation } from '@/entities/auth'
@@ -92,7 +93,10 @@ export const AdminLogin = () => {
       )}
       {stage === 2 && (
         <form onSubmit={handleRequestCodeSubmit}>
-          <h1>Введите код подтверждения</h1>
+          <div className={styles.adminLogin_sendSect}>
+            <img src={send} alt="" />
+          </div>
+          <h1 style={{ marginBottom: '0' }}>Введите код подтверждения</h1>
           <p>Мы отправили код на телефон +7 (999) ***-**-67 </p>
           <section className={styles.adminLogin_code_sect}>
             <input
@@ -157,7 +161,7 @@ export const AdminLogin = () => {
             />
           </section>
           <input placeholder="Продолжить" type="submit" />
-          <p>Отправить код ещё раз {'можно через 0:' + timer}</p>
+          <p>Отправить код ещё раз {timer ? 'можно через 0:' + timer : ''}</p>
         </form>
       )}
     </div>
