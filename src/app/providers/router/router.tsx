@@ -12,7 +12,7 @@ const router = createBrowserRouter([
     element: <RootLayout />,
   },
   {
-    children: [...adminRoutes, ...privateRoutes],
+    children: [...adminRoutes],
     element: <AdminLayout />,
   },
 ])

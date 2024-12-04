@@ -28,7 +28,7 @@ export const AdminLayout = () => {
       <>
         <div
           className={
-            'px-8 flex h-screen flex-1 gap-5 md:grid md:grid-cols-[220px_minmax(0,1fr)] lg:justify-center lg:items-center justify-center items-center lg:grid-cols-[220px_minmax(0,1fr)]'
+            'px-8 flex h-screen flex-1 gap-5 md:grid  lg:justify-center lg:items-center justify-center items-center'
           }
           translate={'no'}
         >

@@ -10,24 +10,26 @@ export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
   const [inputType, setInputType] = useState<boolean>(false)
   const [timer, setTimer] = useState<number>(60)
+  const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
 
   const setSt = (e: any, num: number) => {
     if (num === 2) {
-      setStage(2)
       setInputType(false)
-      const formData = new FormData(e.target)
-      const value = Object.fromEntries(formData) as Record<string, string>
-      console.log(value)
-
-      let tm = 60
-      const interval = setInterval(() => {
-        tm -= 1
-        setTimer(tm)
-      }, 1000)
-
-      setTimeout(() => clearInterval(interval), 60000)
+      handleRequestCodeSubmit(e)
     }
+    if (num === 3) {
+    }
+  }
+
+  const sendCode = () => {
+    let tm = 60
+    const interval = setInterval(() => {
+      tm -= 1
+      setTimer(tm)
+    }, 1000)
+
+    setTimeout(() => clearInterval(interval), 60000)
   }
 
   const handleRequestCodeSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,9 +40,12 @@ export const AdminLogin = () => {
 
     try {
       await requestAdminCode({ email, password }).unwrap()
-      setStage(3)
+      setStage(2)
+      sendCode()
     } catch (err) {
       console.error('Ошибка при отправке кода:', error)
+      setStage(2)
+      sendCode()
       alert('Произошла ошибка. Попробуйте снова.')
     }
   }
@@ -72,8 +77,11 @@ export const AdminLogin = () => {
       inps.forEach((inp: any) => {
         inp.blur()
       })
+      setCode(code)
     }
   }
+
+  const handleSubmitCode = () => {}
 
   return (
     <div className={styles.adminLogin}>
@@ -87,17 +95,19 @@ export const AdminLogin = () => {
               <img src={!inputType ? eye : eyeon} alt="" />
             </button>
           </section>
-          <input placeholder="Продолжить" type="submit" />
+          <input placeholder="Продолжить" type="submit" style={{ cursor: 'pointer' }} />
           <Link to="/admin/recover">Восстановить доступ</Link>
         </form>
       )}
       {stage === 2 && (
-        <form onSubmit={handleRequestCodeSubmit}>
+        <form onSubmit={e => setSt(e, 3)}>
           <div className={styles.adminLogin_sendSect}>
             <img src={send} alt="" />
           </div>
           <h1 style={{ marginBottom: '0' }}>Введите код подтверждения</h1>
-          <p>Мы отправили код на телефон +7 (999) ***-**-67 </p>
+          <p>
+            Мы отправили код на телефон <b>+7 (999) ***-**-67</b>
+          </p>
           <section className={styles.adminLogin_code_sect}>
             <input
               className="code-inp"
@@ -160,8 +170,14 @@ export const AdminLogin = () => {
               placeholder="0"
             />
           </section>
-          <input placeholder="Продолжить" type="submit" />
-          <p>Отправить код ещё раз {timer ? 'можно через 0:' + timer : ''}</p>
+          <input placeholder="Продолжить" type="submit" style={{ cursor: 'pointer' }} />
+          <p
+            style={{ cursor: timer <= 0 ? 'pointer' : 'default' }}
+            onClick={() => (timer <= 0 ? sendCode() : '')}
+          >
+            Отправить код ещё раз{' '}
+            {timer ? 'можно через 0:' + (timer >= 10 ? timer : '0' + timer) : ''}
+          </p>
         </form>
       )}
     </div>

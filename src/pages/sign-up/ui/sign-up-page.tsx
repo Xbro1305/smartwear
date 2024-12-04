@@ -2,7 +2,7 @@ import { useState, FormEvent } from "react";
 import styles from "../Signup.module.scss";
 import { PatternFormat } from "react-number-format";
 import { enqueueSnackbar } from "notistack";
-import { useRegisterMutation, useConfirmRegistrationMutation } from "@/entities/auth";
+import { useRegisterMutation, useConfirmRegistrationMutation, useRequestCodeMutation } from "@/entities/auth";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { ROUTER_PATHS } from "@/shared/config/routes";
@@ -26,6 +26,11 @@ export const SignUpPage: React.FC = () => {
 
   const [register] = useRegisterMutation();
   const [confirmRegister] = useConfirmRegistrationMutation();
+  const [request] = useRequestCodeMutation()
+
+  const handleRequest = () => {
+    request({phone: data.phone as string})
+  }
 
   const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -137,30 +142,31 @@ export const SignUpPage: React.FC = () => {
         </form>
       )}
 
-      {stage === 2 && (
-        <form onSubmit={handleConfirm} className={styles.signup_form}>
-          <h1 className={styles.signup_form_h1}>Регистрация</h1>
-          <p className={styles.signup_form_againButton}>
-            На ваш номер придёт сообщение с кодом.
-            <button className={styles.signup_form_againButton}>
-              Отправить повторно {timer !== 0 ? "через " + timer : ""}
-            </button>
-          </p>
-          <label className={styles.signup_form_label}>
-            <p>Введите смс код</p>
-            <PatternFormat
-              format="### ###"
-              allowEmptyFormatting
-              mask="-"
-              name="code"
-              required
-            />
-          </label>
-          <button className={styles.signup_form_button}>
-            Перейти в личный кабинет
-          </button>
-        </form>
+{stage === 2 && (
+  <form onSubmit={handleConfirm} className={styles.signup_form}>
+    <h1 className={styles.signup_form_h1}>Регистрация</h1>
+    <p className={styles.signup_form_againButton}>
+      На ваш номер придёт сообщение с кодом.
+      <button className={styles.signup_form_againButton} onClick={() => handleRequest()}>
+        Отправить повторно {timer !== 0 ? "через " + timer : ""}
+      </button>
+    </p>
+    <label className={styles.signup_form_label}>
+      <p>Введите смс код</p>
+      <PatternFormat
+        format="#####"
+        allowEmptyFormatting
+        mask="_"
+        name="code"
+        required
+      />
+    </label>
+    <button className={styles.signup_form_button}>
+      Перейти в личный кабинет
+    </button>
+  </form>
       )}
     </div>
   );
 };
+
