@@ -1,10 +1,13 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+
+import { useRequestAdminCodeMutation } from '@/entities/auth'
+
 import styles from './Login.module.scss'
+
 import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
 import send from '../../../../assets/images/message-sent.svg'
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useRequestAdminCodeMutation } from '@/entities/auth'
 
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
@@ -13,6 +16,7 @@ export const AdminLogin = () => {
   const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
   const navigate = useNavigate()
+
   console.log(code)
 
   const setSt = (e: any, num: number) => {
@@ -73,6 +77,7 @@ export const AdminLogin = () => {
 
   function checkCode(inps: any) {
     let code = ''
+
     inps.forEach((inp: any) => {
       code += inp.value
     })
@@ -89,21 +94,25 @@ export const AdminLogin = () => {
       {stage === 1 && (
         <form onSubmit={e => setSt(e, 2)}>
           <h1>Вход</h1>
-          <input type="text" name="login" placeholder="Логин" />
+          <input name={'login'} placeholder={'Логин'} type={'text'} />
           <section>
-            <input type={!inputType ? 'password' : 'text'} name="password" placeholder="Пароль" />
-            <button onClick={() => setInputType(!inputType)} type="button">
-              <img src={!inputType ? eye : eyeon} alt="" />
+            <input
+              name={'password'}
+              placeholder={'Пароль'}
+              type={!inputType ? 'password' : 'text'}
+            />
+            <button onClick={() => setInputType(!inputType)} type={'button'}>
+              <img alt={''} src={!inputType ? eye : eyeon} />
             </button>
           </section>
-          <input placeholder="Продолжить" type="submit" style={{ cursor: 'pointer' }} />
-          <Link to="/admin/restore-pass">Восстановить доступ</Link>
+          <input placeholder={'Продолжить'} style={{ cursor: 'pointer' }} type={'submit'} />
+          <Link to={'/admin/restore-pass'}>Восстановить доступ</Link>
         </form>
       )}
       {stage === 2 && (
         <form onSubmit={e => setSt(e, 3)}>
           <div className={styles.adminLogin_sendSect}>
-            <img src={send} alt="" />
+            <img alt={''} src={send} />
           </div>
           <h1 style={{ marginBottom: '0' }}>Введите код подтверждения</h1>
           <p>
@@ -111,70 +120,70 @@ export const AdminLogin = () => {
           </p>
           <section className={styles.adminLogin_code_sect}>
             <input
-              className="code-inp"
+              className={'code-inp'}
               maxLength={1}
-              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 1, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
               }}
-              type="text"
-              pattern="[0-9]"
-              placeholder="0"
+              pattern={'[0-9]'}
+              placeholder={'0'}
+              style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
+              type={'text'}
             />
             <input
-              className="code-inp"
+              className={'code-inp'}
               maxLength={1}
-              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 2, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
               }}
-              type="text"
-              pattern="[0-9]"
-              placeholder="0"
+              pattern={'[0-9]'}
+              placeholder={'0'}
+              style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
+              type={'text'}
             />
             <input
-              className="code-inp"
+              className={'code-inp'}
               maxLength={1}
-              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 3, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
               }}
-              type="text"
-              pattern="[0-9]"
-              placeholder="0"
+              pattern={'[0-9]'}
+              placeholder={'0'}
+              style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
+              type={'text'}
             />
             <input
-              className="code-inp"
+              className={'code-inp'}
               maxLength={1}
-              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 4, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
               }}
-              type="text"
-              pattern="[0-9]"
-              placeholder="0"
+              pattern={'[0-9]'}
+              placeholder={'0'}
+              style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
+              type={'text'}
             />
             <input
-              className="code-inp"
+              className={'code-inp'}
               maxLength={1}
-              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 5, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
               }}
-              type="text"
-              pattern="[0-9]"
-              placeholder="0"
+              pattern={'[0-9]'}
+              placeholder={'0'}
+              style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
+              type={'text'}
             />
           </section>
-          <input placeholder="Продолжить" type="submit" style={{ cursor: 'pointer' }} />
+          <input placeholder={'Продолжить'} style={{ cursor: 'pointer' }} type={'submit'} />
           <p
-            style={{ cursor: timer <= 0 ? 'pointer' : 'default' }}
             onClick={() => (timer <= 0 ? sendCode() : '')}
+            style={{ cursor: timer <= 0 ? 'pointer' : 'default' }}
           >
             Отправить код ещё раз{' '}
             {timer ? 'можно через 0:' + (timer >= 10 ? timer : '0' + timer) : ''}

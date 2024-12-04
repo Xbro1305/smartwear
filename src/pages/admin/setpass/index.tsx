@@ -1,1 +1,1 @@
-import {RestorePass} from './ui/Restore'
+export { RestorePass } from './ui/Restore'
