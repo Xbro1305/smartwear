@@ -1,6 +1,6 @@
 // import type { AuthContext } from './types'
 
-// import { Navigate, Outlet, useOutletContext } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 // import { ROUTER_PATHS } from '@/shared/config/routes'
 
