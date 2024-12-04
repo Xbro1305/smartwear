@@ -12,6 +12,8 @@ export const AdminLogin = () => {
   const [timer, setTimer] = useState<number>(60)
   const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
+  
+ console.log(code)
 
   const setSt = (e: any, num: number) => {
     if (num === 2) {
@@ -21,6 +23,8 @@ export const AdminLogin = () => {
     if (num === 3) {
     }
   }
+
+
 
   const sendCode = () => {
     let tm = 60
@@ -81,7 +85,7 @@ export const AdminLogin = () => {
     }
   }
 
-  const handleSubmitCode = () => {}
+  
 
   return (
     <div className={styles.adminLogin}>
