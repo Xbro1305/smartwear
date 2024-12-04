@@ -97,7 +97,7 @@ export const AdminLogin = () => {
             </button>
           </section>
           <input placeholder="Продолжить" type="submit" style={{ cursor: 'pointer' }} />
-          <Link to="/admin/recover">Восстановить доступ</Link>
+          <Link to="/admin/restore-pass">Восстановить доступ</Link>
         </form>
       )}
       {stage === 2 && (

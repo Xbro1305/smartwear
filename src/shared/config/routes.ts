@@ -21,5 +21,6 @@ export const ROUTER_PATHS = {
   ORDER_HISTORY: '/order-history',
   TRACK_ORDER: '/track-order',
   BOOKMARKS: '/bookmarks',
+  RESTOREPASS: '/admin/restore-pass',
   ADMINLOGIN: '/admin/login',
 } as const
