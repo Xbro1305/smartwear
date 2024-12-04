@@ -61,6 +61,7 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('token', access_token)
 
         navigate('/profile')
+        window.location.reload()
       })
       .catch(error => {
         console.log(error)
