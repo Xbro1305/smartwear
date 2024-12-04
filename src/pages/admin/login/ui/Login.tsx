@@ -3,7 +3,7 @@ import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
 import send from '../../../../assets/images/message-sent.svg'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useRequestAdminCodeMutation } from '@/entities/auth'
 
 export const AdminLogin = () => {
@@ -12,8 +12,8 @@ export const AdminLogin = () => {
   const [timer, setTimer] = useState<number>(60)
   const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
-  
- console.log(code)
+  const navigate = useNavigate()
+  console.log(code)
 
   const setSt = (e: any, num: number) => {
     if (num === 2) {
@@ -21,10 +21,9 @@ export const AdminLogin = () => {
       handleRequestCodeSubmit(e)
     }
     if (num === 3) {
+      navigate('/admin')
     }
   }
-
-
 
   const sendCode = () => {
     let tm = 60
@@ -84,8 +83,6 @@ export const AdminLogin = () => {
       setCode(code)
     }
   }
-
-  
 
   return (
     <div className={styles.adminLogin}>
