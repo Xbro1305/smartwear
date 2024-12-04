@@ -34,9 +34,16 @@
     width: 100px; /* Можно изменять на нужный размер */
     height: auto;
   }
-  
+
   &_menu {
     display: none;
+  }
+
+  &_logo {
+    img {
+      width: 100px !important;
+      height: auto !important;
+    }
   }
 
   @media (max-width: 1440px) {
@@ -50,6 +57,10 @@
   @media (max-width: 900px) {
     a {
       display: none;
+    }
+
+    &_logo {
+      display: flex !important;
     }
 
     &_menu {

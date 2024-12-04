@@ -10,7 +10,7 @@ export const Header: React.FC = () => {
   return (
     <header className={styles.header}>
       <div className={styles.header_sect}>
-        <Link to={ROUTER_PATHS.HOME}>
+        <Link to={ROUTER_PATHS.HOME} className={styles.header_logo}>
           <div className={styles.header_logo_wrapper}>
             <img className={styles.header_logo} src={logo} alt="Logo" />
           </div>
