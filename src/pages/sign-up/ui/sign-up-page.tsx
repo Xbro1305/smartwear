@@ -90,7 +90,7 @@ export const SignUpPage: React.FC = () => {
         enqueueSnackbar('Вы успешно зарегистрировались', {
           variant: 'success',
         })
-        navigate(ROUTER_PATHS.SIGN_IN)
+        navigate('/sign-in')
       })
       .catch(() => {
         enqueueSnackbar('Ошибка при подтверждении регистрации', {
@@ -144,7 +144,9 @@ export const SignUpPage: React.FC = () => {
             <Link to={ROUTER_PATHS.POLITICS}>политикой конфиденциальности</Link> и{' '}
             <Link to={ROUTER_PATHS.OFERTA}>публичной офертой</Link>
           </h3>
-          <button className={styles.signup_form_button}>Продолжить</button>
+          <button type="submit" className={styles.signup_form_button}>
+            Продолжить
+          </button>
           <h2 className={styles.signup_form_link}>
             Уже есть аккаунт? <Link to={ROUTER_PATHS.SIGN_IN}>Войти</Link>
           </h2>
@@ -170,7 +172,9 @@ export const SignUpPage: React.FC = () => {
               required
             />
           </label>
-          <button className={styles.signup_form_button}>Перейти в личный кабинет</button>
+          <button type="submit" className={styles.signup_form_button}>
+            Перейти в личный кабинет
+          </button>
         </form>
       )}
     </div>
