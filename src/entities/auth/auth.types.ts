@@ -17,7 +17,6 @@ export type RequestCodeDto = {
 };
 
 export type RequestAdminCodeDto = {
-  phone: string;
   email: string;
   password: string;
 };

@@ -1,7 +1,9 @@
+@charset "UTF-8";
 .header {
   padding: 5px 150px;
   display: flex;
   justify-content: space-between;
+  background: #fff;
 }
 .header_sect {
   display: flex;
@@ -20,8 +22,14 @@
   width: 30px;
   height: 30px;
 }
+.header_logo_wrapper {
+  display: inline-block; /* Логотип не будет сжиматься */
+  width: auto;
+  height: auto;
+}
 .header_logo {
-  width: 100px;
+  width: 100px; /* Можно изменять на нужный размер */
+  height: auto;
 }
 .header_menu {
   display: none;

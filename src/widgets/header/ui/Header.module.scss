@@ -24,8 +24,15 @@
     }
   }
 
+  &_logo_wrapper {
+    display: inline-block; /* Логотип не будет сжиматься */
+    width: auto;
+    height: auto;
+  }
+
   &_logo {
-    width: 100px;
+    width: 100px; /* Можно изменять на нужный размер */
+    height: auto;
   }
   
   &_menu {

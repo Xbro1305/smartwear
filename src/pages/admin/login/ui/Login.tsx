@@ -1,27 +1,41 @@
 import styles from './Login.module.scss'
 import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
-import send from '../../../../assets/images/message-sent.svg'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useRequestAdminCodeMutation } from '@/entities/auth'
 
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
   const [inputType, setInputType] = useState<boolean>(false)
+  const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
 
   const setSt = (e: any, num: number) => {
-    if (num == 2) {
+    if (num === 2) {
       setStage(2)
       setInputType(false)
       const formData = new FormData(e.target)
-      const value = Object.fromEntries(formData)
+      const value = Object.fromEntries(formData) as Record<string, string>
       console.log(value)
     }
   }
 
-  function moveToNext(elem: any, index: any, inputs: any) {
-    console.log(elem.length, inputs)
+  const handleRequestCodeSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.target as HTMLFormElement)
+    const value = Object.fromEntries(formData) as Record<string, string>
+    const { email, password } = value
 
+    try {
+      await requestAdminCode({ email, password }).unwrap()
+      setStage(3)
+    } catch (err) {
+      console.error('Ошибка при отправке кода:', error)
+      alert('Произошла ошибка. Попробуйте снова.')
+    }
+  }
+
+  function moveToNext(elem: any, index: any, inputs: any) {
     if (elem.length === 1) {
       if (index < inputs.length) {
         inputs[index].focus()
@@ -32,8 +46,6 @@ export const AdminLogin = () => {
   }
 
   function checkBackspace(ek: any, index: any, inputs: any) {
-    console.log(ek)
-
     if (ek === 'Backspace') {
       if (index > 0) {
         inputs[index - 1].focus()
@@ -47,7 +59,6 @@ export const AdminLogin = () => {
       code += inp.value
     })
     if (code.length === 5) {
-      console.log(code)
       inps.forEach((inp: any) => {
         inp.blur()
       })
@@ -56,7 +67,7 @@ export const AdminLogin = () => {
 
   return (
     <div className={styles.adminLogin}>
-      {stage == 1 && (
+      {stage === 1 && (
         <form onSubmit={e => setSt(e, 2)}>
           <h1>Вход</h1>
           <input type="text" name="login" placeholder="Логин" />
@@ -70,8 +81,8 @@ export const AdminLogin = () => {
           <Link to="/admin/recover">Восстановить доступ</Link>
         </form>
       )}
-      {stage == 2 && (
-        <form onSubmit={e => setSt(e, 3)}>
+      {stage === 2 && (
+        <form onSubmit={handleRequestCodeSubmit}>
           <h1>Введите код подтверждения</h1>
           <section>
             <input
@@ -136,7 +147,6 @@ export const AdminLogin = () => {
             />
           </section>
           <input placeholder="Продолжить" type="submit" />
-          b
         </form>
       )}
     </div>
