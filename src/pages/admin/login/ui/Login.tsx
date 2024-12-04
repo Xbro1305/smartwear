@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { useGetMeQuery } from '@/entities/auth'
 import { useRequestAdminCodeMutation } from '@/entities/auth'
 
 import styles from './Login.module.scss'
@@ -16,6 +17,8 @@ export const AdminLogin = () => {
   const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
   const navigate = useNavigate()
+  const { data: user } = useGetMeQuery()
+  const phone = user?.phone
 
   console.log(code)
 
@@ -116,7 +119,7 @@ export const AdminLogin = () => {
           </div>
           <h1 style={{ marginBottom: '0' }}>Введите код подтверждения</h1>
           <p>
-            Мы отправили код на телефон <b>+7 (999) ***-**-67</b>
+            Мы отправили код на телефон <b>{phone}</b>
           </p>
           <section className={styles.adminLogin_code_sect}>
             <input
