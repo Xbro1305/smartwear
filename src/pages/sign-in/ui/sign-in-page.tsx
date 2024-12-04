@@ -1,7 +1,6 @@
 import { useState, FormEvent } from 'react'
 import styles from '../../sign-up/Signup.module.scss'
 import { PatternFormat } from 'react-number-format'
-import { enqueueSnackbar } from 'notistack'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
@@ -33,9 +32,7 @@ export const SignInPage: React.FC = () => {
 
       setTimeout(() => clearInterval(interval), 30000)
     } catch (error) {
-      enqueueSnackbar('Ошибка при отправке кода', {
-        variant: 'error',
-      })
+      console.log(error)
     }
   }
 
@@ -44,7 +41,6 @@ export const SignInPage: React.FC = () => {
 
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as FormData
-    //setData(value);
 
     getCode(value.phone!)
   }
@@ -56,9 +52,7 @@ export const SignInPage: React.FC = () => {
     const value = Object.fromEntries(formData) as FormData
 
     if (value.code?.includes('-')) {
-      return enqueueSnackbar('Неправильный код', {
-        variant: 'error',
-      })
+      alert('вы не ввели код')
     }
 
     login({ code: value.code! })
@@ -66,16 +60,10 @@ export const SignInPage: React.FC = () => {
       .then(({ access_token }) => {
         localStorage.setItem('token', access_token)
 
-        enqueueSnackbar('Вы успешно зарегистрировались', {
-          variant: 'success',
-        })
-
         navigate('/profile')
       })
-      .catch(() => {
-        enqueueSnackbar('Ошибка при подтверждении кода', {
-          variant: 'error',
-        })
+      .catch(error => {
+        console.log(error)
       })
   }
 

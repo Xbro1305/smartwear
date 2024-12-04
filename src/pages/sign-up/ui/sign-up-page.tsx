@@ -66,9 +66,7 @@ export const SignUpPage: React.FC = () => {
 
       setTimeout(() => clearInterval(interval), 30000)
     } catch (error) {
-      enqueueSnackbar('Ошибка при регистрации', {
-        variant: 'error',
-      })
+      console.log(error)
     }
   }
 
@@ -79,23 +77,16 @@ export const SignUpPage: React.FC = () => {
     const value = Object.fromEntries(formData) as FormData
 
     if (value.code?.includes('-')) {
-      return enqueueSnackbar('Неправильный код', {
-        variant: 'error',
-      })
+      console.log('вы не ввели код')
     }
 
     confirmRegister({ code: value.code!, phone: data.phone! })
       .unwrap()
       .then(() => {
-        enqueueSnackbar('Вы успешно зарегистрировались', {
-          variant: 'success',
-        })
         navigate('/sign-in')
       })
-      .catch(() => {
-        enqueueSnackbar('Ошибка при подтверждении регистрации', {
-          variant: 'error',
-        })
+      .catch(error => {
+        console.log(error)
       })
   }
 
@@ -167,7 +158,7 @@ export const SignUpPage: React.FC = () => {
             <PatternFormat
               allowEmptyFormatting
               format={'#####'}
-              mask={'_'}
+              mask={'-'}
               name={'code'}
               required
             />
