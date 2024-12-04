@@ -3,7 +3,6 @@ import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
 import { useGetMeQuery } from '@/entities/auth'
 
-
 export const RootLayout = () => {
   const { isError, isLoading } = useGetMeQuery()
   const isAuthenticated = !isError && !isLoading
@@ -12,13 +11,8 @@ export const RootLayout = () => {
     return <div>Проверка ваших полномочий...</div>
   }
 
-  
   const renderMain = (
-    <main
-      className={
-        'grow flex  flex-col lg:justify-center lg:items-center justify-center items-center pt-[var(--header-height)]'
-      }
-    >
+    <main>
       <Outlet />
     </main>
   )
@@ -31,22 +25,14 @@ export const RootLayout = () => {
     return (
       <>
         <Header />
-        <div
-          className={
-            'px-8 flex h-screen flex-1 gap-5 md:grid md:grid-cols-[220px_minmax(0,1fr)] lg:justify-center lg:items-center justify-center items-center lg:grid-cols-[220px_minmax(0,1fr)]'
-          }
-          translate={'no'}
-        >
-          
-          {renderMain}
-        </div>
-        < Footer />
+        <div>{renderMain}</div>
+        <Footer />
       </>
     )
   }
 
   return (
-    <div className={'h-screen min-w-full flex flex-col'}>
+    <div>
       <Header />
       {!isLoading && renderMain}
     </div>

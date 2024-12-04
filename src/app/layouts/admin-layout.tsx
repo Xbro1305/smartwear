@@ -10,11 +10,7 @@ export const AdminLayout = () => {
   }
 
   const renderMain = (
-    <main
-      className={
-        'grow flex  flex-col lg:justify-center lg:items-center justify-center items-center pt-[var(--header-height)]'
-      }
-    >
+    <main>
       <Outlet />
     </main>
   )
@@ -26,14 +22,7 @@ export const AdminLayout = () => {
   if (isAuthenticated) {
     return (
       <>
-        <div
-          className={
-            'px-8 flex h-screen flex-1 gap-5 md:grid  lg:justify-center lg:items-center justify-center items-center'
-          }
-          translate={'no'}
-        >
-          {renderMain}
-        </div>
+        <div>{renderMain}</div>
       </>
     )
   }
