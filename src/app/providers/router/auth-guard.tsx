@@ -1,8 +1,8 @@
-import type { AuthContext } from './types'
+// import type { AuthContext } from './types'
 
-import { Navigate, Outlet, useOutletContext } from 'react-router-dom'
+// import { Navigate, Outlet, useOutletContext } from 'react-router-dom'
 
-import { ROUTER_PATHS } from '@/shared/config/routes'
+// import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const AuthGuard = () => {
   // const { isAuthenticated, permissions } = useOutletContext<AuthContext>()

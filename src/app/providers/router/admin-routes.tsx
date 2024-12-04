@@ -1,6 +1,5 @@
 import type { RouteObject } from 'react-router-dom'
 
-import { HomePage } from '@/pages/home'
 import { AdminLogin } from '@/pages/admin/login'
 
 import { ROUTER_PATHS } from '@/shared/config/routes'
