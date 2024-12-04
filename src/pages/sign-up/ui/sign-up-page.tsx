@@ -65,31 +65,32 @@ export const SignUpPage: React.FC = () => {
     }
   };
 
-  const handleConfirm = async (e: FormEvent<HTMLFormElement>) => {
+  const handleConfirm = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     const formData = new FormData(e.target as HTMLFormElement);
     const value = Object.fromEntries(formData) as FormData;
-
+  
     if (value.code?.includes("-")) {
       return enqueueSnackbar("Неправильный код", {
         variant: "error",
       });
     }
-
-    try {
-      await confirmRegister({ phone: data.phone!, code: value.code! }).unwrap();
-      enqueueSnackbar("Вы успешно зарегистрировались", {
-        variant: "success",
+  
+    confirmRegister({ phone: data.phone!, code: value.code! })
+      .unwrap()
+      .then(() => {
+        enqueueSnackbar("Вы успешно зарегистрировались", {
+          variant: "success",
+        });
+        navigate(ROUTER_PATHS.SIGN_IN);
+      })
+      .catch(() => {
+        enqueueSnackbar("Ошибка при подтверждении регистрации", {
+          variant: "error",
+        });
       });
-      navigate(ROUTER_PATHS.SIGN_IN);
-    } catch (error) {
-      enqueueSnackbar("Ошибка при подтверждении регистрации", {
-        variant: "error",
-      });
-    }
   };
-
   return (
     <div className={styles.signup}>
       {stage === 1 && (

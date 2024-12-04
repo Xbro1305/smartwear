@@ -1,5 +1,5 @@
 import { baseApi } from '@/shared/api';  
-import { RegisterDto, RequestAdminCodeDto, RequestCodeDto, ConfirmCodeDto, LoginDto } from './auth.types';
+import { RegisterDto, RequestAdminCodeDto, RequestCodeDto, ConfirmCodeDto, LoginDto, RegisteredDto } from './auth.types';
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     
@@ -43,7 +43,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    getMe: builder.query<any, void>({
+    getMe: builder.query<RegisteredDto, void>({
       query: () => ({
         url: '/users/me',
         method: 'GET',

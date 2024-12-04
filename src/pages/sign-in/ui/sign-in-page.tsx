@@ -51,38 +51,38 @@ export const SignInPage: React.FC = () => {
     getCode(value.phone!);
   };
 
-  const submit = async (e: FormEvent<HTMLFormElement>) => {
+  const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     const formData = new FormData(e.target as HTMLFormElement);
-  const value = Object.fromEntries(formData) as FormData;
-
- 
-  if (value.code?.includes("-")) {
-    return enqueueSnackbar("Неправильный код", {
-      variant: "error",
-    });
-  }
-
-  try {
-    
-    const { access_token } = await login({ code: value.code! }).unwrap();
-
-    
-    localStorage.setItem('token', access_token);
-
-    enqueueSnackbar("Вы успешно зарегистрировались", {
-      variant: "success",
-    });
-
-   
-    navigate(ROUTER_PATHS.PROFILE);  
-  } catch (error) {
-    enqueueSnackbar("Ошибка при подтверждении кода", {
-      variant: "error",
-    });
-  }
-};
+    const value = Object.fromEntries(formData) as FormData;
+  
+    if (value.code?.includes("-")) {
+      return enqueueSnackbar("Неправильный код", {
+        variant: "error",
+      });
+    }
+  
+    login({ code: value.code! })
+      .unwrap()
+      .then(({ access_token }) => {
+        
+        localStorage.setItem('token', access_token);
+  
+        
+        enqueueSnackbar("Вы успешно зарегистрировались", {
+          variant: "success",
+        });
+  
+        
+        navigate(ROUTER_PATHS.PROFILE, { replace: true });
+      })
+      .catch(() => {
+        enqueueSnackbar("Ошибка при подтверждении кода", {
+          variant: "error",
+        });
+      });
+  };
 
   return (
     <div className={styles.signup}>

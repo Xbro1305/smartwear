@@ -7,6 +7,12 @@ export type RegisterDto = {
   isSubscribed: boolean;
 };
 
+export type RegisteredDto = RegisterDto & {
+  id: number;
+  isApproved: boolean;
+  role: string;
+  createdAt: string;
+};
 export type ConfirmCodeDto = {
   phone: string;
   code: string;
