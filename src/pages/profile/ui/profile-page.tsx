@@ -20,7 +20,9 @@ export const ProfilePage = () => {
   return (
     <div className={styles.profile}>
       <div className={styles.profile_top}>
-        <h1 className={styles.profile_top_title}>Иванов Иван Иванович</h1>
+        <h1 className={styles.profile_top_title}>
+          {user?.surName} {user?.name} {user?.middleName}
+        </h1>
         <div className={styles.profile_top_sale}>
           <img alt={'sale'} src={sale} />
           <div className={styles.profile_top_sale_bottom}>
@@ -56,7 +58,7 @@ export const ProfilePage = () => {
             <PatternFormat
               allowEmptyFormatting
               defaultValue={user?.phone}
-              format={'+7 (###) ### ##-##'}
+              format={'+ (###) ### ##-##'}
               mask={'_'}
               name={'phone'}
             />
