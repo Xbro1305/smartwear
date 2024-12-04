@@ -8,6 +8,7 @@ import { useRequestAdminCodeMutation } from '@/entities/auth'
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
   const [inputType, setInputType] = useState<boolean>(false)
+  const [timer, setTimer] = useState<number>(60)
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
 
   const setSt = (e: any, num: number) => {
@@ -17,6 +18,14 @@ export const AdminLogin = () => {
       const formData = new FormData(e.target)
       const value = Object.fromEntries(formData) as Record<string, string>
       console.log(value)
+
+      let tm = 60
+      const interval = setInterval(() => {
+        tm -= 1
+        setTimer(tm)
+      }, 1000)
+
+      setTimeout(() => clearInterval(interval), 60000)
     }
   }
 
@@ -84,11 +93,12 @@ export const AdminLogin = () => {
       {stage === 2 && (
         <form onSubmit={handleRequestCodeSubmit}>
           <h1>Введите код подтверждения</h1>
-          <section>
+          <p>Мы отправили код на телефон +7 (999) ***-**-67 </p>
+          <section className={styles.adminLogin_code_sect}>
             <input
               className="code-inp"
               maxLength={1}
-              style={{ width: '60px' }}
+              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 1, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
@@ -100,7 +110,7 @@ export const AdminLogin = () => {
             <input
               className="code-inp"
               maxLength={1}
-              style={{ width: '60px' }}
+              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 2, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
@@ -112,7 +122,7 @@ export const AdminLogin = () => {
             <input
               className="code-inp"
               maxLength={1}
-              style={{ width: '60px' }}
+              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 3, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
@@ -124,7 +134,7 @@ export const AdminLogin = () => {
             <input
               className="code-inp"
               maxLength={1}
-              style={{ width: '60px' }}
+              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 4, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
@@ -136,7 +146,7 @@ export const AdminLogin = () => {
             <input
               className="code-inp"
               maxLength={1}
-              style={{ width: '60px' }}
+              style={{ width: '80px', height: '80px', textAlign: 'center', padding: '0' }}
               onChange={e => moveToNext(e.target.value, 5, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
@@ -147,6 +157,7 @@ export const AdminLogin = () => {
             />
           </section>
           <input placeholder="Продолжить" type="submit" />
+          <p>Отправить код ещё раз {'можно через 0:' + timer}</p>
         </form>
       )}
     </div>

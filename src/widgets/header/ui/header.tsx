@@ -1,24 +1,24 @@
-import styles from "./Header.module.scss";
-import logo from "../../../assets/images/logo.png";
-import search from "../../../assets/images/svg.svg";
-import profile from "../../../assets/images/svg (1).svg";
-import cart from "../../../assets/images/svg (2).svg";
-import { Link } from "react-router-dom";
-import { ROUTER_PATHS } from "@/shared/config/routes";
+import styles from './Header.module.scss'
+import logo from '../../../assets/images/logo.png'
+import search from '../../../assets/images/svg.svg'
+import profile from '../../../assets/images/svg (1).svg'
+import cart from '../../../assets/images/svg (2).svg'
+import { Link } from 'react-router-dom'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const Header: React.FC = () => {
   return (
     <header className={styles.header}>
       <div className={styles.header_sect}>
-      <Link to={ROUTER_PATHS.HOME}>
-    <div className={styles.header_logo_wrapper}>
-      <img className={styles.header_logo} src={logo} alt="Logo" />
-    </div>
-  </Link>
-        <Link to={ROUTER_PATHS.CATALOG}>Каталог</Link> 
-        <Link to={ROUTER_PATHS.ABOUT}>О нас</Link> 
-        <Link to={ROUTER_PATHS.CONTACTS}>Контакты</Link> 
-        <Link to={ROUTER_PATHS.DELIVERY}>Доставка</Link> 
+        <Link to={ROUTER_PATHS.HOME}>
+          <div className={styles.header_logo_wrapper}>
+            <img className={styles.header_logo} src={logo} alt="Logo" />
+          </div>
+        </Link>
+        <Link to={ROUTER_PATHS.CATALOG}>Каталог</Link>
+        <Link to={ROUTER_PATHS.ABOUT}>О нас</Link>
+        <Link to={ROUTER_PATHS.CONTACTS}>Контакты</Link>
+        <Link to={ROUTER_PATHS.DELIVERY}>Доставка</Link>
       </div>
       <div className={styles.header_sect}>
         <Link to={ROUTER_PATHS.SEARCH}>
@@ -37,5 +37,5 @@ export const Header: React.FC = () => {
         <span></span>
       </button>
     </header>
-  );
-};
+  )
+}

@@ -9,6 +9,8 @@
   form {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     gap: 16px;
     width: fit-content;
     height: fit-content;
@@ -65,5 +67,18 @@
       color: #737373;
       text-align: center;
     }
+    p {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 19.36px;
+      text-align: center;
+    }
+  }
+
+  &_code_sect {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
   }
 }
