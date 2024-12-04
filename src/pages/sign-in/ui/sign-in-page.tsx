@@ -117,7 +117,7 @@ export const SignInPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>Введите смс код</p>
             <PatternFormat
-              format="### ###"
+              format="#####"
               allowEmptyFormatting
               mask="-"
               name="code"
