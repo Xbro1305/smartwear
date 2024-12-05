@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { useRequestAdminCodeMutation } from '@/entities/auth'
+import { useLoginMutation, useRequestAdminCodeMutation } from '@/entities/auth'
 
 import styles from './Login.module.scss'
 
@@ -16,17 +16,31 @@ export const AdminLogin = () => {
   const [phone, setPhone] = useState<string>('')
   const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
+  const [login] = useLoginMutation()
   const navigate = useNavigate()
 
-  console.log(code)
+  const handleLogin = () => {
+    login({ code })
+      .unwrap()
+      .then(({ access_token, user }) => {
+        localStorage.setItem('token', access_token)
+        localStorage.setItem('username', user.name)
+        localStorage.setItem('usersurname', user.surName)
+        localStorage.setItem('usermiddlename', user.middleName)
+        localStorage.setItem('useremail', user.email)
+        localStorage.setItem('userphone', user.phone)
+
+        navigate('/main')
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
 
   const setSt = (e: any, num: number) => {
     if (num === 2) {
       setInputType(false)
       handleRequestCodeSubmit(e)
-    }
-    if (num === 3) {
-      navigate('/main')
     }
   }
 
@@ -113,7 +127,7 @@ export const AdminLogin = () => {
         </form>
       )}
       {stage === 2 && (
-        <form onSubmit={e => setSt(e, 3)}>
+        <form onSubmit={handleLogin}>
           <div className={styles.adminLogin_sendSect}>
             <img alt={''} src={send} />
           </div>
