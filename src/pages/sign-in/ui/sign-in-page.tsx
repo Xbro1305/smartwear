@@ -99,7 +99,7 @@ export const SignInPage: React.FC = () => {
 
       {stage === 2 && (
         <form className={styles.signup_form} onSubmit={submit}>
-          <h1 className={styles.signup_form_h1}>Регистрация</h1>
+          <h1 className={styles.signup_form_h1}>Вход</h1>
           <p className={styles.signup_form_againButton}>
             На ваш номер придёт сообщение с кодом.
             <button className={styles.signup_form_againButton}>
