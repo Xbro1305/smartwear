@@ -1,16 +1,18 @@
 import type { RouteObject } from 'react-router-dom'
 
+import { AboutPage } from '@/pages/about'
+import { CatalogPage } from '@/pages/catalog'
+import { ContactPage } from '@/pages/contacts'
+import { DeliveryPage } from '@/pages/delivery'
+import { MainPage } from '@/pages/main'
+import { OfertaPage } from '@/pages/oferta'
+import { PoliticsPage } from '@/pages/politics'
 import { SignInPage } from '@/pages/sign-in'
-import { PoliticsPage } from '@/pages/politics';
-import { OfertaPage } from '@/pages/oferta';
-import { CatalogPage } from '@/pages/catalog';
 import { SignUpPage } from '@/pages/sign-up'
-import { AboutPage } from '@/pages/about';
-import { ContactPage } from '@/pages/contacts';
-import { DeliveryPage } from '@/pages/delivery';
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
-const { SIGN_IN, SIGN_UP, POLITICS, OFERTA, CATALOG, ABOUT, CONTACTS, DELIVERY } = ROUTER_PATHS
+const { ABOUT, CATALOG, CONTACTS, DELIVERY, MAIN, OFERTA, POLITICS, SIGN_IN, SIGN_UP } =
+  ROUTER_PATHS
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -20,15 +22,19 @@ export const publicRoutes: RouteObject[] = [
         path: SIGN_IN,
       },
       {
+        element: <MainPage />,
+        path: MAIN,
+      },
+      {
         element: <SignUpPage />,
         path: SIGN_UP,
       },
       {
-        element: <PoliticsPage />, 
+        element: <PoliticsPage />,
         path: POLITICS,
       },
       {
-        element: <OfertaPage />, 
+        element: <OfertaPage />,
         path: OFERTA,
       },
       {
