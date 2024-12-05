@@ -1,14 +1,16 @@
-import { useState, FormEvent } from 'react'
-import styles from '../../sign-up/Signup.module.scss'
+import { FormEvent, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+
+import { useLoginMutation, useRequestCodeMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import { useRequestCodeMutation, useLoginMutation } from '@/entities/auth'
+
+import styles from '../../sign-up/Signup.module.scss'
 
 interface FormData {
-  phone?: string
   code?: string
+  phone?: string
 }
 
 export const SignInPage: React.FC = () => {
@@ -57,11 +59,15 @@ export const SignInPage: React.FC = () => {
 
     login({ code: value.code! })
       .unwrap()
-      .then(({ access_token }) => {
+      .then(({ access_token, user }) => {
         localStorage.setItem('token', access_token)
+        localStorage.setItem('username', user.name)
+        localStorage.setItem('usersurname', user.surName)
+        localStorage.setItem('usermiddlename', user.middleName)
+        localStorage.setItem('useremail', user.email)
+        localStorage.setItem('userphone', user.phone)
 
         navigate('/profile')
-        window.location.reload()
       })
       .catch(error => {
         console.log(error)
@@ -75,9 +81,14 @@ export const SignInPage: React.FC = () => {
           <h1 className={styles.signup_form_h1}>Вход</h1>
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
-            <PatternFormat format="+7 (###) ### ##-##" allowEmptyFormatting mask="_" name="phone" />
+            <PatternFormat
+              allowEmptyFormatting
+              format={'+7 (###) ### ##-##'}
+              mask={'_'}
+              name={'phone'}
+            />
           </label>
-          <button type="submit" className={styles.signup_form_button}>
+          <button className={styles.signup_form_button} type={'submit'}>
             Получить код
           </button>
           <h2 className={styles.signup_form_link}>
@@ -87,7 +98,7 @@ export const SignInPage: React.FC = () => {
       )}
 
       {stage === 2 && (
-        <form onSubmit={submit} className={styles.signup_form}>
+        <form className={styles.signup_form} onSubmit={submit}>
           <h1 className={styles.signup_form_h1}>Регистрация</h1>
           <p className={styles.signup_form_againButton}>
             На ваш номер придёт сообщение с кодом.
@@ -97,9 +108,15 @@ export const SignInPage: React.FC = () => {
           </p>
           <label className={styles.signup_form_label}>
             <p>Введите смс код</p>
-            <PatternFormat format="#####" allowEmptyFormatting mask="-" name="code" required />
+            <PatternFormat
+              allowEmptyFormatting
+              format={'#####'}
+              mask={'-'}
+              name={'code'}
+              required
+            />
           </label>
-          <button type="submit" className={styles.signup_form_button}>
+          <button className={styles.signup_form_button} type={'submit'}>
             Перейти в личный кабинет
           </button>
         </form>

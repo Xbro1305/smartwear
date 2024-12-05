@@ -1,6 +1,5 @@
 import styles from './Profile.module.scss' // Пример с алиасом
 import sale from '../../../assets/images/sale.png' // Пример с алиасом для изображений
-import { useGetMeQuery } from '@/entities/auth'
 
 import itemImg from '../../../assets/images/image 139.png' // Тоже с алиасом
 //import { RegisteredDto } from "@/entities/auth/auth.types";
@@ -14,14 +13,17 @@ export const ProfilePage = () => {
   const current = 17200
   const next = 30000
   const percent = (17200 * 100) / 30000
-
-  const { data: user } = useGetMeQuery()
+  const surName = localStorage.getItem('usersurname') || ''
+  const name = localStorage.getItem('username') || ''
+  const middleName = localStorage.getItem('usermiddlename') || ''
+  const email = localStorage.getItem('useremail') || ''
+  const phone = localStorage.getItem('userphone') || ''
 
   return (
     <div className={styles.profile}>
       <div className={styles.profile_top}>
         <h1 className={styles.profile_top_title}>
-          {user?.surName} {user?.name} {user?.middleName}
+          {surName} {name} {middleName}
         </h1>
         <div className={styles.profile_top_sale}>
           <img alt={'sale'} src={sale} />
@@ -43,29 +45,29 @@ export const ProfilePage = () => {
         <form className={styles.profile_form}>
           <label className={styles.profile_form_label}>
             <p>Фамилия</p>
-            <input defaultValue={user?.surName} name={'surname'} type={'text'} />
+            <input defaultValue={surName} name={'surname'} type={'text'} />
           </label>
           <label className={styles.profile_form_label}>
             <p>Имя</p>
-            <input defaultValue={user?.name} name={'name'} type={'text'} />
+            <input defaultValue={name} name={'name'} type={'text'} />
           </label>
           <label className={styles.profile_form_label}>
             <p>Отчество</p>
-            <input defaultValue={user?.middleName} name={'patronomic'} type={'text'} />
+            <input defaultValue={middleName} name={'patronomic'} type={'text'} />
           </label>
           <label className={styles.profile_form_label}>
             <p>Номер телефона</p>
             <PatternFormat
               allowEmptyFormatting
-              defaultValue={user?.phone}
-              format={'+ (###) ### ##-##'}
+              defaultValue={phone}
+              format={'+ #(##) ### ##-##'}
               mask={'_'}
               name={'phone'}
             />
           </label>
           <label className={styles.profile_form_label}>
             <p>E-mail</p>
-            <input defaultValue={user?.email} name={'email'} type={'email'} />
+            <input defaultValue={email} name={'email'} type={'email'} />
           </label>
         </form>
         <label className={styles.profile_form_confirmLabel}>

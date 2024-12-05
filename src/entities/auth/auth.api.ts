@@ -1,6 +1,7 @@
 import { baseApi } from '@/shared/api'
 
 import {
+  AdminData,
   ConfirmCodeDto,
   LoginDto,
   RegisterDto,
@@ -25,7 +26,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    login: builder.mutation<{ access_token: string }, LoginDto>({
+    login: builder.mutation<{ access_token: string; user: RegisteredDto }, LoginDto>({
       query: body => ({
         body,
         method: 'POST',
@@ -41,7 +42,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    requestAdminCode: builder.mutation<void, RequestAdminCodeDto>({
+    requestAdminCode: builder.mutation<AdminData, RequestAdminCodeDto>({
       query: body => ({
         body,
         method: 'POST',

@@ -1,32 +1,36 @@
 export type RegisterDto = {
-  email: string;
-  name: string;
-  middleName: string;
-  surName: string;
-  phone: string;
-  isSubscribed: boolean;
-};
+  email: string
+  isSubscribed: boolean
+  middleName: string
+  name: string
+  phone: string
+  surName: string
+}
 
-export type RegisteredDto = RegisterDto & {
-  id: number;
-  isApproved: boolean;
-  role: string;
-  createdAt: string;
-};
+export type RegisteredDto = {
+  createdAt: string
+  id: number
+  isApproved: boolean
+  role: string
+} & RegisterDto
 export type ConfirmCodeDto = {
-  phone: string;
-  code: string;
-};
+  code: string
+  phone: string
+}
+
+export type AdminData = {
+  phone: string
+}
 
 export type RequestCodeDto = {
-  phone: string;
-};
+  phone: string
+}
 
 export type RequestAdminCodeDto = {
-  email: string;
-  password: string;
-};
+  email: string
+  password: string
+}
 
 export type LoginDto = {
-  code: string;
-};
+  code: string
+}

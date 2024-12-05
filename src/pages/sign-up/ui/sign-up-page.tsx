@@ -9,7 +9,6 @@ import {
   useRequestCodeMutation,
 } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import { enqueueSnackbar } from 'notistack'
 
 import styles from '../Signup.module.scss'
 
@@ -135,7 +134,7 @@ export const SignUpPage: React.FC = () => {
             <Link to={ROUTER_PATHS.POLITICS}>политикой конфиденциальности</Link> и{' '}
             <Link to={ROUTER_PATHS.OFERTA}>публичной офертой</Link>
           </h3>
-          <button type="submit" className={styles.signup_form_button}>
+          <button className={styles.signup_form_button} type={'submit'}>
             Продолжить
           </button>
           <h2 className={styles.signup_form_link}>
@@ -163,7 +162,7 @@ export const SignUpPage: React.FC = () => {
               required
             />
           </label>
-          <button type="submit" className={styles.signup_form_button}>
+          <button className={styles.signup_form_button} type={'submit'}>
             Перейти в личный кабинет
           </button>
         </form>

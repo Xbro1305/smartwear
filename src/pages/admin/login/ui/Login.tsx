@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { useGetMeQuery } from '@/entities/auth'
 import { useRequestAdminCodeMutation } from '@/entities/auth'
 
 import styles from './Login.module.scss'
@@ -14,11 +13,10 @@ export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
   const [inputType, setInputType] = useState<boolean>(false)
   const [timer, setTimer] = useState<number>(60)
+  const [phone, setPhone] = useState<string>('')
   const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
   const navigate = useNavigate()
-  const { data: user } = useGetMeQuery()
-  const phone = user?.phone
 
   console.log(code)
 
@@ -49,7 +47,9 @@ export const AdminLogin = () => {
     const { email, password } = value
 
     try {
-      await requestAdminCode({ email, password }).unwrap()
+      await requestAdminCode({ email, password })
+        .unwrap()
+        .then(({ phone }) => setPhone(phone))
       setStage(2)
       sendCode()
     } catch (err) {
