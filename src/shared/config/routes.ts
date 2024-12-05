@@ -1,5 +1,6 @@
 export const ROUTER_PATHS = {
   ABOUT: '/about',
+  ADMIN: '/admin',
   ADMINLOGIN: '/admin/login',
   BOOKMARKS: '/bookmarks',
   CARE: '/care',
@@ -8,7 +9,6 @@ export const ROUTER_PATHS = {
   CONTACTS: '/contacts',
   DELIVERY: '/delivery',
   HOME: '/',
-  MAIN: '/main',
   MANUFACTURERS: '/manufacturers',
   NEWSLETTER: '/newsletter',
   OFERTA: '/oferta',

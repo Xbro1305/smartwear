@@ -31,7 +31,7 @@ export const AdminLogin = () => {
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
 
-        navigate('/main')
+        navigate('/admin')
       })
       .catch(error => {
         console.log(error)
