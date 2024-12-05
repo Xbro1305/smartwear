@@ -111,7 +111,7 @@ export const AdminLogin = () => {
       {stage === 1 && (
         <form onSubmit={e => setSt(e, 2)}>
           <h1>Вход</h1>
-          <input name={'login'} placeholder={'Логин'} type={'text'} />
+          <input name={'email'} placeholder={'Логин'} type={'text'} />
           <section>
             <input
               name={'password'}
