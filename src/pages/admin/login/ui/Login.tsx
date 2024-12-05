@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useLoginMutation, useRequestAdminCodeMutation } from '@/entities/auth'
@@ -19,7 +19,8 @@ export const AdminLogin = () => {
   const [login] = useLoginMutation()
   const navigate = useNavigate()
 
-  const handleLogin = () => {
+  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     login({ code })
       .unwrap()
       .then(({ access_token, user }) => {
