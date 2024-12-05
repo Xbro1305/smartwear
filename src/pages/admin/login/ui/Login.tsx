@@ -26,7 +26,7 @@ export const AdminLogin = () => {
       handleRequestCodeSubmit(e)
     }
     if (num === 3) {
-      navigate('/admin')
+      navigate('/main')
     }
   }
 
