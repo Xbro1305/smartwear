@@ -3,7 +3,7 @@ import sale from '../../../assets/images/sale.png' // Пример с алиас
 
 import itemImg from '../../../assets/images/image 139.png' // Тоже с алиасом
 //import { RegisteredDto } from "@/entities/auth/auth.types";
-import { PatternFormat } from 'react-number-format'
+import { NumericFormat, PatternFormat } from 'react-number-format'
 import { Link } from 'react-router-dom'
 
 import deleteItem from '../../../assets/images/Union (1).svg'
@@ -60,7 +60,7 @@ export const ProfilePage = () => {
             <PatternFormat
               allowEmptyFormatting
               defaultValue={phone}
-              format={'+ #(##) ### ##-##'}
+              format={'+# (###) ### ##-##'}
               mask={'_'}
               name={'phone'}
             />
@@ -87,7 +87,8 @@ export const ProfilePage = () => {
                   <p>{i.status}</p>
                 </div>
                 <p className={styles.profile_orders_item_price}>
-                  {i.price} {i.currency}
+                  <NumericFormat thousandSeparator={' '} displayType="text" value={i.price} />{' '}
+                  {i.currency}
                 </p>
                 <div className={styles.profile_orders_item_details}>
                   <p>
@@ -124,7 +125,8 @@ export const ProfilePage = () => {
                   <p>{i.status}</p>
                 </div>
                 <p className={styles.profile_orders_item_price}>
-                  {i.price} {i.currency}
+                  <NumericFormat thousandSeparator={' '} displayType="text" value={i.price} />{' '}
+                  {i.currency}
                 </p>
                 <div className={styles.profile_orders_item_details}>
                   <p>
@@ -150,6 +152,7 @@ export const ProfilePage = () => {
         </div>
       </div>
       <div className={styles.profile_adresses}>
+        <h1 className={styles.profile_top_title}>Адреса</h1>
         {persData.adresses.map(i => (
           <p key={i.id}>
             <img alt={'delete'} src={deleteItem} />

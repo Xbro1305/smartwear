@@ -145,6 +145,7 @@ export const AdminLogin = () => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
               }}
               pattern={'[0-9]'}
+              autoFocus
               placeholder={'0'}
               style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
               type={'text'}

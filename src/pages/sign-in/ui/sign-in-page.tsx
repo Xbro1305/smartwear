@@ -82,10 +82,12 @@ export const SignInPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
             <PatternFormat
-              allowEmptyFormatting
+              // allowEmptyFormatting
               format={'+7 (###) ### ##-##'}
               mask={'_'}
               name={'phone'}
+              displayType="input"
+              autoFocus
             />
           </label>
           <button className={styles.signup_form_button} type={'submit'}>

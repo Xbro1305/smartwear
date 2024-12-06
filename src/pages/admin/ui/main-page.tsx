@@ -1,4 +1,13 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 export const MainPage = () => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    navigate("/admin/login")
+  }, [navigate])
+  
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
       <h1 style={{ color: '#2c3e50' }}>MainPage</h1>

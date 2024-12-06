@@ -35,6 +35,7 @@ export const RootLayout = () => {
     <div>
       <Header />
       {!isLoading && renderMain}
+      <Footer />
     </div>
   )
 }
