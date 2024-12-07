@@ -16,6 +16,7 @@ interface FormData {
 export const SignInPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
   const [timer, setTimer] = useState<number>(30)
+  const [phone, setPhone] = useState<null | string>(null)
   // const [data, setData] = useState<FormData>({});
   const navigate = useNavigate()
 
@@ -33,7 +34,12 @@ export const SignInPage: React.FC = () => {
       }, 1000)
 
       setTimeout(() => clearInterval(interval), 30000)
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.data?.message === 'User not found') {
+        alert('Пользователь с таким номером телефона не найден')
+      } else {
+        alert('Произошла ошибка при запросе кода. Попробуйте снова.')
+      }
       console.log(error)
     }
   }
@@ -44,7 +50,14 @@ export const SignInPage: React.FC = () => {
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as FormData
 
+    setPhone(value.phone!)
     getCode(value.phone!)
+  }
+
+  const requestCodeAgain = () => {
+    if (phone) {
+      getCode(phone)
+    }
   }
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
@@ -104,7 +117,12 @@ export const SignInPage: React.FC = () => {
           <h1 className={styles.signup_form_h1}>Вход</h1>
           <p className={styles.signup_form_againButton}>
             На ваш номер придёт сообщение с кодом.
-            <button className={styles.signup_form_againButton}>
+            <button
+              className={styles.signup_form_againButton}
+              disabled={timer > 0}
+              onClick={requestCodeAgain}
+              type={'button'}
+            >
               Отправить повторно {timer !== 0 ? 'через ' + timer : ''}
             </button>
           </p>

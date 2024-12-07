@@ -69,7 +69,6 @@ export const AdminLogin = () => {
       sendCode()
     } catch (err) {
       console.error('Ошибка при отправке кода:', error)
-      setStage(2)
       sendCode()
       alert('Произошла ошибка. Попробуйте снова.')
     }
