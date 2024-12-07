@@ -1,16 +1,11 @@
-// import type { AuthContext } from './types'
-
 import { Outlet } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 
-// import { ROUTER_PATHS } from '@/shared/config/routes'
+import { useGetMeQuery } from '@/entities/auth'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const AuthGuard = () => {
-  // const { isAuthenticated, permissions } = useOutletContext<AuthContext>()
+  const { data: userData } = useGetMeQuery()
 
-  // return isAuthenticated ? (
-  //   <Outlet context={{ isAuthenticated, permissions }} />
-  // ) : (
-  //   <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
-  // )
-  return <Outlet/>
+  return userData?.id ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
 }

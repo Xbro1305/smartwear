@@ -138,6 +138,7 @@ export const AdminLogin = () => {
           </p>
           <section className={styles.adminLogin_code_sect}>
             <input
+              autoFocus
               className={'code-inp'}
               maxLength={1}
               onChange={e => moveToNext(e.target.value, 1, document.querySelectorAll('.code-inp'))}
@@ -145,7 +146,6 @@ export const AdminLogin = () => {
                 checkBackspace(e.key, this, document.querySelectorAll('.code-inp'))
               }}
               pattern={'[0-9]'}
-              autoFocus
               placeholder={'0'}
               style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
               type={'text'}
