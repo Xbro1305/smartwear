@@ -1,4 +1,22 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { useGetMeQuery } from '@/entities/auth'
+
 export const MainPage = () => {
+  const navigate = useNavigate()
+  const { data: user, isLoading } = useGetMeQuery()
+
+  useEffect(() => {
+    if (!isLoading && user?.role !== 'admin') {
+      navigate('/admin/login')
+    }
+  }, [isLoading, user, navigate])
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
       <h1 style={{ color: '#2c3e50' }}>MainPage</h1>
