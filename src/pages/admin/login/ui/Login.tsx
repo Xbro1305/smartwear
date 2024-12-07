@@ -63,11 +63,11 @@ export const AdminLogin = () => {
     const value = Object.fromEntries(formData) as Record<string, string>
     const { email, password } = value
 
-    setStage(2)
     try {
       await requestAdminCode({ email, password })
         .unwrap()
         .then(({ phone }) => setPhone(phone))
+      setStage(2)
       sendCode()
     } catch (err) {
       console.error('Ошибка при отправке кода:', error)
