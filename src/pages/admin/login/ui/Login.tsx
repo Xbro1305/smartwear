@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useLoginMutation, useRequestAdminCodeMutation } from '@/entities/auth'
@@ -15,6 +15,7 @@ export const AdminLogin = () => {
   const [inputType, setInputType] = useState<boolean>(false)
   const [timer, setTimer] = useState<number>(60)
   const [phone, setPhone] = useState<string>('')
+  const [values, setValues] = useState<string[]>(Array(5).fill(''))
   const [code, setCode] = useState<string>('')
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
   const [login] = useLoginMutation()
@@ -106,6 +107,41 @@ export const AdminLogin = () => {
   //     setCode(code)
   //   }
   // }
+
+  // const handleFocus = (index: number) => {
+  //   if (index > 0 && !values[index - 1]) {
+  //     const prevInput = document.getElementById(`code-input-${index - 1}`) as HTMLInputElement
+  //     prevInput?.focus()
+  //   }
+  // }
+
+  const handleChange = (value: string, index: number) => {
+    if (/^\d$/.test(value)) {
+      const newValues = [...values]
+      newValues[index] = value
+      setValues(newValues)
+
+      if (index === newValues.length - 1) {
+        setCode(newValues.join(''))
+      } else {
+        const nextInput = document.getElementById(`code-input-${index + 1}`) as HTMLInputElement
+        nextInput?.focus()
+      }
+    }
+  }
+
+  const handleKeyDown = (key: string, index: number) => {
+    if (key === 'Backspace') {
+      const newValues = [...values]
+      newValues[index] = ''
+      setValues(newValues)
+
+      if (index > 0) {
+        const prevInput = document.getElementById(`code-input-${index - 1}`) as HTMLInputElement
+        prevInput?.focus()
+      }
+    }
+  }
 
   return (
     <div className={styles.adminLogin}>
@@ -212,8 +248,29 @@ export const AdminLogin = () => {
               placeholder={'0'}
               style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
               type={'text'}
+              <PatternFormat format="#####" allowEmptyFormatting autoFocus />
             /> */}
-            <PatternFormat format="#####" allowEmptyFormatting autoFocus />
+            {values.map((value, index) => (
+              <input
+                key={index}
+                id={`code-input-${index}`}
+                value={value}
+                className="code-inp"
+                maxLength={1}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(e.target.value, index)}
+                onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => handleKeyDown(e.key, index)}
+                pattern="[0-9]"
+                placeholder="0"
+                style={{
+                  height: '80px',
+                  width: '80px',
+                  textAlign: 'center',
+                  fontSize: '24px',
+                }}
+                type="text"
+                // onFocus={()=>handleFocus(index)}
+              />
+            ))}
           </section>
           <input placeholder={'Продолжить'} style={{ cursor: 'pointer' }} type={'submit'} />
           <p
