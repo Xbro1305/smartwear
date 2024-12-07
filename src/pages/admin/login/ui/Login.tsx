@@ -141,6 +141,7 @@ export const AdminLogin = () => {
               <input
                 key={index}
                 id={`code-input-${index}`}
+                autoFocus={index === 0}
                 value={value}
                 className="code-inp"
                 maxLength={1}
@@ -155,7 +156,6 @@ export const AdminLogin = () => {
                   fontSize: '24px',
                 }}
                 type="text"
-                onFocus={() => handleFocus(index)}
                 disabled={codeId < index ? true : false}
               />
             ))}
