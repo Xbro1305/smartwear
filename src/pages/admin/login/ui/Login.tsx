@@ -8,6 +8,7 @@ import styles from './Login.module.scss'
 import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
 import send from '../../../../assets/images/message-sent.svg'
+import { PatternFormat } from 'react-number-format'
 
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
@@ -61,11 +62,11 @@ export const AdminLogin = () => {
     const value = Object.fromEntries(formData) as Record<string, string>
     const { email, password } = value
 
+    setStage(2)
     try {
       await requestAdminCode({ email, password })
         .unwrap()
         .then(({ phone }) => setPhone(phone))
-      setStage(2)
       sendCode()
     } catch (err) {
       console.error('Ошибка при отправке кода:', error)
@@ -74,44 +75,44 @@ export const AdminLogin = () => {
     }
   }
 
-  function moveToNext(elem: any, index: any, inputs: any) {
-    if (elem.length === 1) {
-      if (index < inputs.length) {
-        inputs[index].focus()
-      } else {
-        checkCode(inputs)
-      }
-    }
-  }
+  // function moveToNext(elem: any, index: any, inputs: any) {
+  //   if (elem.length === 1) {
+  //     if (index < inputs.length) {
+  //       inputs[index].focus()
+  //     } else {
+  //       checkCode(inputs)
+  //     }
+  //   }
+  // }
 
-  function checkBackspace(ek: any, index: any, inputs: any) {
-    if (ek === 'Backspace') {
-      if (index > 0) {
-        inputs[index - 1].focus()
-      }
-    }
-  }
+  // function checkBackspace(ek: any, index: any, inputs: any) {
+  //   if (ek === 'Backspace') {
+  //     if (index > 0) {
+  //       inputs[index - 1].focus()
+  //     }
+  //   }
+  // }
 
-  function checkCode(inps: any) {
-    let code = ''
+  // function checkCode(inps: any) {
+  //   let code = ''
 
-    inps.forEach((inp: any) => {
-      code += inp.value
-    })
-    if (code.length === 5) {
-      inps.forEach((inp: any) => {
-        inp.blur()
-      })
-      setCode(code)
-    }
-  }
+  //   inps.forEach((inp: any) => {
+  //     code += inp.value
+  //   })
+  //   if (code.length === 5) {
+  //     inps.forEach((inp: any) => {
+  //       inp.blur()
+  //     })
+  //     setCode(code)
+  //   }
+  // }
 
   return (
     <div className={styles.adminLogin}>
       {stage === 1 && (
         <form onSubmit={e => setSt(e, 2)}>
           <h1>Вход</h1>
-          <input name={'email'} placeholder={'Логин'} type={'text'} />
+          <input autoFocus name={'email'} placeholder={'Логин'} type={'text'} />
           <section>
             <input
               name={'password'}
@@ -136,9 +137,12 @@ export const AdminLogin = () => {
             Мы отправили код на телефон <b>{phone}</b>
           </p>
           <section className={styles.adminLogin_code_sect}>
-            <input
+            {/* <input
               autoFocus
               className={'code-inp'}
+              onFocus={() => {
+                document.querySelectorAll('.codeinp')[1].setAttribute("readonly")
+              }}
               maxLength={1}
               onChange={e => moveToNext(e.target.value, 1, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
@@ -151,6 +155,9 @@ export const AdminLogin = () => {
             />
             <input
               className={'code-inp'}
+              onFocus={() => {
+                document.querySelectorAll('.codeinp')[2].setAttribute("readonly")
+              }}
               maxLength={1}
               onChange={e => moveToNext(e.target.value, 2, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
@@ -163,6 +170,9 @@ export const AdminLogin = () => {
             />
             <input
               className={'code-inp'}
+              onFocus={() => {
+                document.querySelectorAll('.codeinp')[3].setAttribute("readonly")
+              }}
               maxLength={1}
               onChange={e => moveToNext(e.target.value, 3, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
@@ -175,6 +185,9 @@ export const AdminLogin = () => {
             />
             <input
               className={'code-inp'}
+              onFocus={() => {
+                document.querySelectorAll('.codeinp')[4].setAttribute("readonly")
+              }}
               maxLength={1}
               onChange={e => moveToNext(e.target.value, 4, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
@@ -187,6 +200,9 @@ export const AdminLogin = () => {
             />
             <input
               className={'code-inp'}
+              onFocus={() => {
+                document.querySelectorAll('.codeinp')[5].setAttribute("readonly")
+              }}
               maxLength={1}
               onChange={e => moveToNext(e.target.value, 5, document.querySelectorAll('.code-inp'))}
               onKeyDown={e => {
@@ -196,7 +212,8 @@ export const AdminLogin = () => {
               placeholder={'0'}
               style={{ height: '80px', padding: '0', textAlign: 'center', width: '80px' }}
               type={'text'}
-            />
+            /> */}
+            <PatternFormat format="#####" allowEmptyFormatting autoFocus />
           </section>
           <input placeholder={'Продолжить'} style={{ cursor: 'pointer' }} type={'submit'} />
           <p

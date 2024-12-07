@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
@@ -97,8 +97,8 @@ export const SignInPage: React.FC = () => {
             <PatternFormat
               autoFocus
               displayType={'input'}
-              // allowEmptyFormatting
-              format={'+7 (###) ### ##-##'}
+              allowEmptyFormatting
+              format={'+# (###) ### ##-##'}
               mask={'_'}
               name={'phone'}
             />
@@ -134,6 +134,7 @@ export const SignInPage: React.FC = () => {
               mask={'-'}
               name={'code'}
               required
+              autoFocus
             />
           </label>
           <button className={styles.signup_form_button} type={'submit'}>

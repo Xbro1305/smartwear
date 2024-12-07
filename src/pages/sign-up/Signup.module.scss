@@ -9,6 +9,7 @@
   color: #282b32;
 
   &_form {
+    border-radius: 8px;
     background: #ffffff;
     padding: 40px;
     width: 100%;
@@ -159,6 +160,7 @@
 
     &_form {
       padding: 20px 10px;
+      border-radius: 0px;
     }
   }
 }

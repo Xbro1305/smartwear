@@ -152,7 +152,7 @@ export const ProfilePage = () => {
         </div>
       </div>
       <div className={styles.profile_adresses}>
-        <h1 className={styles.profile_top_title}>Адреса</h1>
+        <h1 className={styles.profile_adresses_title}>Адреса</h1>
         {persData.adresses.map(i => (
           <p key={i.id}>
             <img alt={'delete'} src={deleteItem} />

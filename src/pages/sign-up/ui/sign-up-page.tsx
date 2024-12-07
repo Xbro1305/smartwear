@@ -114,7 +114,7 @@ export const SignUpPage: React.FC = () => {
             <p>Номер телефона</p>
             <PatternFormat
               allowEmptyFormatting
-              format={'+7 (###) ### ##-##'}
+              format={'+# (###) ### ##-##'}
               mask={'_'}
               name={'phone'}
             />
@@ -160,6 +160,7 @@ export const SignUpPage: React.FC = () => {
               mask={'-'}
               name={'code'}
               required
+              autoFocus
             />
           </label>
           <button className={styles.signup_form_button} type={'submit'}>
