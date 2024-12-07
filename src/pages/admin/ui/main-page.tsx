@@ -8,7 +8,7 @@ export const MainPage = () => {
   const { data: user, isLoading } = useGetMeQuery()
 
   useEffect(() => {
-    if (!isLoading && user?.role !== 'admin') {
+    if (!isLoading && user?.role !== 'ADMIN') {
       navigate('/admin/login')
     }
   }, [isLoading, user, navigate])
