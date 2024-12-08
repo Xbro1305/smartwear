@@ -35,9 +35,9 @@ export const Header: React.FC = () => {
         <Link to={ROUTER_PATHS.PROFILE}>
           <img alt={'Profile'} src={profile} />
         </Link>
-        <button className={styles.header_button} onClick={handleLogout}>
+        <Link to="" className={styles.header_button} onClick={handleLogout}>
           <img alt={'Cart'} src={cart} />
-        </button>
+        </Link>
       </div>
       <button className={styles.header_menu}>
         <span></span>
