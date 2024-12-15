@@ -10,11 +10,11 @@ export const RootLayout = () => {
   const isAuthenticated = !isError && !isLoading
 
   useEffect(() => {
-    let isActive = true
+    localStorage.setItem('isActive', 'true')
     let closeTimeout: any
 
     const markActive = () => {
-      isActive = true
+      localStorage.setItem('isActive', 'true')
       clearTimeout(closeTimeout)
       localStorage.setItem('lastActivity', Date.now().toString())
     }
@@ -30,9 +30,10 @@ export const RootLayout = () => {
     }
 
     const handleBeforeUnload = () => {
-      isActive = false
+      localStorage.setItem('isActive', '')
+
       closeTimeout = setTimeout(() => {
-        if (!isActive && data?.role === 'ADMIN') {
+        if (!localStorage.getItem('isActive') && data?.role === 'ADMIN') {
           localStorage.removeItem('token')
         }
       }, 5000)
