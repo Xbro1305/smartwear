@@ -3,8 +3,8 @@
   flex-direction: column;
   padding: 50px 150px;
   gap: 20px;
-  background: #fff;
-  color: #282b32;
+  background: var(--white);
+  color: var(--dark);
 
   &_top {
     display: flex;
@@ -28,7 +28,7 @@
       display: flex;
       gap: 20px;
       align-items: flex-start;
-      background: #f2f2f2;
+      background: var(--gray);
       padding: 36px;
       width: 65%;
       border-radius: 8px;
@@ -91,7 +91,7 @@
           font-size: 19px;
           font-weight: 400;
           line-height: 22.8px;
-          color: #dc2a1f;
+          color: var(--red);
           text-decoration: none;
 
           @media (max-width: 1024px) {
@@ -105,10 +105,10 @@
       &_line {
         width: 100%;
         height: 3px;
-        background: #b0b7bf;
+        background: var(--service);
 
         div {
-          background: #dc2a1f;
+          background: var(--red);
           height: 3px;
         }
       }
@@ -163,7 +163,7 @@
         font-size: 19px;
         font-weight: 400;
         line-height: 22.8px;
-        color: #b0b7bf;
+        color: var(--service);
       }
 
       input {
@@ -171,10 +171,10 @@
         border: none;
         background: none;
         outline: none;
-        border-bottom: 3px solid #b0b7bf;
+        border-bottom: 3px solid var(--service);
         font-size: 22px;
         font-weight: 400;
-        color: #282b32;
+        color: var(--dark);
         line-height: 28.6px;
       }
     }
@@ -198,7 +198,7 @@
 
       p::after {
         content: '';
-        border: 3px solid #b0b7bf;
+        border: 3px solid var(--service);
         display: block;
         margin-left: -0.5px;
         margin-top: -0.5px;
@@ -213,7 +213,7 @@
 
       p::before {
         content: '';
-        border: 3px solid #fff;
+        border: 3px solid var(--white);
         display: block;
         margin-left: -1px;
         margin-top: -1px;
@@ -253,7 +253,7 @@
     flex-direction: column;
     gap: 20px;
     padding-bottom: 30px;
-    border-bottom: 3px solid #f2f2f2;
+    border-bottom: 3px solid var(--gray);
 
     > h1 {
       font-size: 28px;
@@ -282,7 +282,7 @@
       justify-content: space-between;
       gap: 15px;
       padding: 20px;
-      background: #f2f2f2;
+      background: var(--gray);
       border-radius: 8px;
 
       > img {
@@ -322,7 +322,7 @@
           font-size: 22px;
           font-weight: 400;
           line-height: 28.6px;
-          color: #dc2a1f;
+          color: var(--red);
           min-width: 130px;
           display: flex;
           justify-content: flex-end;
@@ -395,10 +395,10 @@
         font-weight: 500;
         line-height: 26.4px;
         width: fit-content;
-        background: #dc2a1f;
+        background: var(--red);
         padding: 12px 18px;
         border-radius: 8px;
-        color: #fff;
+        color: var(--white);
         border: none;
 
         @media (max-width: 1565px) {

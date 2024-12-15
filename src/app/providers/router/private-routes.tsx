@@ -20,6 +20,6 @@ export const privateRoutes: RouteObject[] = [
         path: PROFILE,
       },
     ],
-    element: <AuthGuard />,
+    // element: <AuthGuard />,
   },
 ]
