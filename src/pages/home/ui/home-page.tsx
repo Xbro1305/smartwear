@@ -1,25 +1,30 @@
-import { useNavigate } from 'react-router-dom'
-import '@/app/global.css'
+import { Link, useNavigate } from 'react-router-dom'
 import styles from '../home.module.scss'
 import intro from '@/assets/images/homeIntro.png'
 import brands from '@/assets/images/homeBrands.png'
 import catalog from '@/assets/images/homeCatalog.jpeg'
-import location from '@/assets/images/homeLocation.png'
+import star from '@/assets/images/homeStar.svg'
 import sales from '@/assets/images/homeSales.png'
 import heart from '@/assets/images/homeHeart.svg'
-import fire from '@/assets/images/homeFire.png'
+import fire from '@/assets/images/homeFire.svg'
 import info from '@/assets/images/homeInfo.png'
 import news from '@/assets/images/homeNews.jpeg'
 import homeadv1 from '@/assets/images/homeadv (1).svg'
 import homeadv2 from '@/assets/images/homeadv (4).svg'
 import homeadv3 from '@/assets/images/homeadv (3).svg'
 import homeadv4 from '@/assets/images/homeadv (2).svg'
+import man from '@/assets/images/homeMan.jpeg'
+import woman from '@/assets/images/homeWoman.jpeg'
+import acs from '@/assets/images/homeAcs.png'
 import { NumericFormat } from 'react-number-format'
 import { useState } from 'react'
+import Slider from 'react-slick'
+import arrow from '@/assets/images/Vector 46 (Stroke).svg'
 
 export const HomePage = () => {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
   const [checkedInfo, setCheckedInfo] = useState(0)
+  const [mobCheckedInfo, setMobCheckedInfo] = useState(-1)
 
   return (
     <div className={styles.home}>
@@ -42,6 +47,32 @@ export const HomePage = () => {
               </div>
             </div>
           ))}
+        </div>
+        <div className={styles.home_categories_mob}>
+          <div className={styles.home_categories_mob_top}>
+            <Link to={''}>
+              <img src={fire} alt="" />
+              Скидки
+            </Link>
+            <Link to="">
+              <img src={star} alt="" />
+              Новые поступления
+            </Link>
+          </div>
+          <div className={styles.home_categories_mob_bottom}>
+            <Link to={''} className={styles.home_categories_mob_item}>
+              <img src={woman} alt="" />
+              Женские куртки
+            </Link>
+            <Link to={''} className={styles.home_categories_mob_item}>
+              <img src={man} alt="" />
+              Мужские куртки
+            </Link>
+            <Link to={''} className={styles.home_categories_mob_item}>
+              <img src={acs} alt="" />
+              Аксессуары
+            </Link>
+          </div>
         </div>
       </div>
       <div className={styles.home_sales}>
@@ -85,6 +116,39 @@ export const HomePage = () => {
             </div>
           ))}
         </div>
+
+        <Slider className={styles.home_recommendations_mob} {...settings}>
+          {recomendations.map(i => (
+            <div className={styles.home_recommendations_item}>
+              <img src={i.img} alt="" />
+              <div className={styles.home_recommendations_item_info}>
+                <div className={styles.home_recommendations_item_top}>
+                  <div className={styles.home_recommendations_item_colors}>
+                    {i.colors.map(c => (
+                      <div
+                        style={{ background: `${c}` }}
+                        className={styles.home_recommendations_item_color}
+                      ></div>
+                    ))}
+                  </div>
+                  <img src={heart} alt="" />
+                </div>
+                <h5 className="h5">{i.title}</h5>
+                <NumericFormat
+                  displayType="text"
+                  className="h5"
+                  value={i.price}
+                  decimalSeparator="."
+                  thousandSeparator=" "
+                  suffix=" ₽"
+                />
+                <a href="" className="button">
+                  Подробнее
+                </a>
+              </div>
+            </div>
+          ))}
+        </Slider>
       </div>
       <div className={styles.home_info}>
         <div className={styles.home_info_top}>
@@ -100,6 +164,24 @@ export const HomePage = () => {
         <div className={styles.home_info_wrapper}>
           <p className="p1">{infoTexxt[checkedInfo].title}</p>
           <img src={infoTexxt[checkedInfo].img} alt="" />
+        </div>
+
+        <div className={styles.home_info_mob}>
+          {infoCategories.map((i, index) => (
+            <div
+              className={styles.home_info_mob_item}
+              aria-active={index == mobCheckedInfo ? true : false}
+              onClick={() => {
+                index == mobCheckedInfo ? setMobCheckedInfo(-1) : setMobCheckedInfo(index)
+              }}
+            >
+              <h5 className="h5">
+                {i}
+                <img src={arrow} alt="" />
+              </h5>
+              <p className="p1">{infoTexxt[index].title}</p>
+            </div>
+          ))}
         </div>
       </div>
       <div className={styles.home_news}>
@@ -129,7 +211,6 @@ export const HomePage = () => {
           </div>
         ))}
       </div>
-
       <div className={styles.home_contact}>
         <div className={styles.home_contact_left}>
           <h2 className="h2">Контакты</h2>
@@ -158,10 +239,47 @@ export const HomePage = () => {
             <br /> 8 931 364–70–37
           </p>
         </div>
-        <img src={location} alt="" />
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1998.9505168433507!2d30.435165976698904!3d59.93296326255773!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x469631fd48c60077%3A0x658b7dc8beb92b9!2z0JfQsNC90LXQstGB0LrQuNC5INC_0YAt0YIuLCA2NyDQutC-0YDQv9GD0YEgMiwg0KHQsNC90LrRgi3Qn9C10YLQtdGA0LHRg9GA0LMsIDE5NTI3Nw!5e0!3m2!1sru!2sru!4v1734367980606!5m2!1sru!2sru"
+          width="40%"
+          height="700"
+          style={{ border: '0' }}
+          // allowfullscreen=""
+          loading="lazy"
+          // referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
       </div>
     </div>
   )
+}
+
+function SampleNextArrow(props: any) {
+  const { onClick } = props
+  return <div className={styles.slick_next} onClick={onClick} />
+}
+
+function SamplePrevArrow(props: any) {
+  const { onClick } = props
+  return <div className={styles.slick_prev} onClick={onClick} />
+}
+
+const settings = {
+  infinite: true,
+  speed: 500,
+  slidesToShow: 2,
+  slidesToScroll: 2,
+  nextArrow: <SampleNextArrow />,
+  prevArrow: <SamplePrevArrow />,
+  responsive: [
+    {
+      breakpoint: 520,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        initialSlide: 1,
+      },
+    },
+  ],
 }
 
 const catalogItems = [
