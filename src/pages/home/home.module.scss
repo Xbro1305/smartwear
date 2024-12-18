@@ -328,6 +328,7 @@
         padding: 20px 30px;
         border-left: 3px solid #ebeff2;
         color: #282b32;
+        cursor: pointer;
       }
 
       > :nth-child(1) {
@@ -370,6 +371,10 @@
     }
 
     &_mob {
+      @media (min-width: 1024px) {
+        display: none;
+      }
+
       display: grid;
       grid-template-columns: repeat(2, calc(50% - 10px));
 

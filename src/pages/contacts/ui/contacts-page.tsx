@@ -1,42 +1,49 @@
+import styles from '../Contacts.module.scss'
+
 export const ContactPage = () => {
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#2c3e50' }}>Контакты</h1>
-      
-      <p style={{ fontSize: '16px', lineHeight: '1.5' }}>
-        Добро пожаловать на страницу <strong>Контакты</strong>! Здесь вы сможете узнать, как связаться с нашей командой для получения дополнительной информации или для решения ваших вопросов.
-      </p>
-
-      <h2 style={{ color: '#34495e' }}>Как с нами связаться?</h2>
-      <p>
-        Вы можете использовать один из следующих способов для связи с нами:
-      </p>
-      <ul style={{ fontSize: '16px', lineHeight: '1.8' }}>
-        <li><strong>Электронная почта:</strong> support@example.com</li>
-        <li><strong>Телефон:</strong> +7 (123) 456-78-90</li>
-        <li><strong>Адрес:</strong> г. Москва, ул. Примерная, д. 123</li>
-      </ul>
-
-      <h2 style={{ color: '#34495e' }}>Наши социальные сети</h2>
-      <p>
-        Вы также можете следить за нами в социальных сетях и задавать вопросы через:
-      </p>
-      <ul style={{ fontSize: '16px', lineHeight: '1.8' }}>
-        <li><strong>Facebook:</strong> <a href="https://facebook.com/yourpage" target="_blank" rel="noopener noreferrer">facebook.com/yourpage</a></li>
-        <li><strong>Instagram:</strong> <a href="https://instagram.com/yourpage" target="_blank" rel="noopener noreferrer">instagram.com/yourpage</a></li>
-        <li><strong>Twitter:</strong> <a href="https://twitter.com/yourpage" target="_blank" rel="noopener noreferrer">twitter.com/yourpage</a></li>
-      </ul>
-
-      <h2 style={{ color: '#34495e' }}>Как мы можем помочь?</h2>
-      <p>
-        Если у вас возникли вопросы или предложения, наша команда всегда готова помочь. Пожалуйста, не стесняйтесь обратиться к нам любым удобным способом.
-      </p>
-
-      <footer style={{ marginTop: '40px', fontSize: '14px', color: '#7f8c8d' }}>
-        <p>
-          Мы ценим ваше время и всегда стараемся ответить как можно быстрее!
+    <div className={styles.contact}>
+      <div className={styles.contact_left}>
+        <h2 className="h2">Контакты</h2>
+        <p className="p1">
+          ИП Ефремова Елена Вячеславовна ОРГНИП 305470604700010 info@maxiscomfort.ru Отправляем
+          интернет-заказы на следующий будний день после оформления. Наш менеджер ответит на ваши
+          вопросы в онлайн-чате ежедневно с 11:00 до 19:00.
         </p>
-      </footer>
+        <h5 className="h5">«Умная Одежда» у станции метро «Ладожская»</h5>
+        <p className="p2">
+          Заневский проспект, 67к2
+          <br />
+          ТРК «Заневский Каскад-1», 2 этаж, помещение 2-94
+          <br />
+          <br />8 921 908–00–39
+        </p>
+        <h5 className="h5">AutoJack & LimoLady у станции метро «Ладожская»</h5>
+        <p className="p2">
+          Заневский проспект, 67к2
+          <br />
+          ТРК «Заневский Каскад-1», 1-й этаж, помещение 1-89
+          <br />
+          <br /> 8 901 300–58–54
+        </p>
+        <h5 className="h5">NorthBloom у станции метро «Проспект Просвещения»</h5>
+        <p>
+          Проспект Энгельса, 154
+          <br />
+          ТРК «Гранд Каньон», 2 этаж, помещение 2-19
+          <br />
+          <br /> 8 931 364–70–37
+        </p>
+      </div>
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1998.9505168433507!2d30.435165976698904!3d59.93296326255773!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x469631fd48c60077%3A0x658b7dc8beb92b9!2z0JfQsNC90LXQstGB0LrQuNC5INC_0YAt0YIuLCA2NyDQutC-0YDQv9GD0YEgMiwg0KHQsNC90LrRgi3Qn9C10YLQtdGA0LHRg9GA0LMsIDE5NTI3Nw!5e0!3m2!1sru!2sru!4v1734367980606!5m2!1sru!2sru"
+        width="50%"
+        height="700"
+        style={{ border: '0' }}
+        // allowfullscreen=""
+        loading="lazy"
+        // referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
     </div>
-  );
-};
+  )
+}

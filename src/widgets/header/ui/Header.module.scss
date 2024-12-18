@@ -1,5 +1,5 @@
 .header {
-  padding: 5px 150px;
+  padding: 10px var(--sides-padding);
   display: flex;
   justify-content: space-between;
   background: #fff;
@@ -46,13 +46,7 @@
     }
   }
 
-  @media (max-width: 1124px) {
-    padding: 10px 50px;
-  }
-
   @media (max-width: 900px) {
-    padding: 10px 20px;
-
     a {
       display: none;
     }
@@ -77,13 +71,5 @@
         background: #000;
       }
     }
-  }
-
-  @media (max-width: 1440px) {
-    padding: 10px 50px;
-  }
-
-  @media (max-width: 1024px) {
-    padding: 10px;
   }
 }

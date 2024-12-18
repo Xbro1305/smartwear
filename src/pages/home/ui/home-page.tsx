@@ -347,6 +347,7 @@ const recomendations = [
 ]
 
 const infoCategories = ['Климат-контроль', 'Как стирать', 'Материалы', 'Условия доставки']
+
 const infoTexxt = [
   { title: 'Климат-контроль', img: info },
   { title: 'Как стирать', img: info },
