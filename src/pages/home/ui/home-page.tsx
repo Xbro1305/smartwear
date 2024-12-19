@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import Slider from 'react-slick'
 import styles from '../home.module.scss'
 import intro from '@/assets/images/homeIntro.png'
 import brands from '@/assets/images/homeBrands.png'
@@ -18,7 +19,6 @@ import woman from '@/assets/images/homeWoman.jpeg'
 import acs from '@/assets/images/homeAcs.png'
 import { NumericFormat } from 'react-number-format'
 import { useState } from 'react'
-import Slider from 'react-slick'
 import arrow from '@/assets/images/Vector 46 (Stroke).svg'
 
 export const HomePage = () => {
