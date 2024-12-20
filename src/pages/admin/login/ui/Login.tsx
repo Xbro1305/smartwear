@@ -7,6 +7,7 @@ import styles from './Login.module.scss'
 
 import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
+import logo from '../../../../assets/images/logo.png'
 
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
@@ -22,9 +23,11 @@ export const AdminLogin = () => {
   const [err, setErr] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [pass, setPass] = useState<string>('')
+  const [loading, setLoding] = useState<boolean>(false)
 
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e?.preventDefault()
+    setLoding(true)
     login({ code })
       .unwrap()
       .then(({ access_token, user }) => {
@@ -40,6 +43,7 @@ export const AdminLogin = () => {
       .catch(error => {
         console.log(error)
       })
+      .finally(() => setLoding(false))
   }
 
   const setSt = (e: any, num: number) => {
@@ -102,6 +106,7 @@ export const AdminLogin = () => {
           .catch(error => {
             console.log(error)
           })
+          .finally(() => setLoding(false))
       } else {
         setCodeId(index + 1)
         const nextInput = document.getElementById(`code-input-${index + 1}`) as HTMLInputElement
@@ -218,6 +223,9 @@ export const AdminLogin = () => {
           </p>
         </form>
       )}
+      <div style={{ display: loading ? 'flex' : 'none' }} className={styles.adminLogin_loading}>
+        <img src={logo} alt="" />
+      </div>
     </div>
   )
 }
