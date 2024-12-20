@@ -11,6 +11,7 @@
     gap: 20px;
     flex-direction: column;
     padding: var(--top-padding) var(--sides-padding);
+    overflow: hidden;
 
     img {
       position: absolute;
@@ -21,6 +22,7 @@
       object-fit: cover;
       z-index: -1;
       object-position: top;
+      transform: scale(1.1);
     }
 
     h1 {
@@ -221,7 +223,7 @@
     img {
       max-width: 40%;
       height: auto;
-      object-fit: contain;
+      object-fit: cover;
       object-position: top;
 
       @media (max-width: 1024px) {

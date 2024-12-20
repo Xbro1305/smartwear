@@ -47,7 +47,7 @@
     --top-padding: 90px;
   }
 
-  @media (max-width: 1440px) {
+  @media (max-width: 1200px) {
     :root {
       --sides-padding: 50px;
       --top-padding: 50px;
