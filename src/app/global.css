@@ -127,28 +127,28 @@ fonts
 
 .h1 {
   font-size: 64px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 76.8px;
   color: var(--dark);
 }
 
 .h2 {
   font-size: 40px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 48px;
   color: var(--dark);
 }
 
 .h4 {
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 33.6px;
   color: var(--dark);
 }
 
 .h5 {
   font-size: 23px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 27.6px;
   color: var(--dark);
 }
