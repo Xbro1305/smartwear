@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-
+import './Login.css'
 import { useLoginMutation, useRequestAdminCodeMutation } from '@/entities/auth'
 
 import styles from './Login.module.scss'
@@ -20,6 +20,9 @@ export const AdminLogin = () => {
   const [requestAdminCode, { error }] = useRequestAdminCodeMutation()
   const [login] = useLoginMutation()
   const navigate = useNavigate()
+  const [err, setErr] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [pass, setPass] = useState<string>('')
 
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -72,7 +75,7 @@ export const AdminLogin = () => {
     } catch (err) {
       console.error('Ошибка при отправке кода:', error)
       sendCode()
-      alert('Произошла ошибка. Попробуйте снова.')
+      setErr('Произошла ошибка. Попробуйте снова.')
     }
   }
 
@@ -112,19 +115,52 @@ export const AdminLogin = () => {
       {stage === 1 && (
         <form onSubmit={e => setSt(e, 2)}>
           <h1>Вход</h1>
-          <input autoFocus name={'email'} placeholder={'Логин'} type={'text'} />
-          <section>
+          <p className={styles.adminLogin_infoP}>
+            Введите данные от личного кабинета администратора
+          </p>
+          <div className="form-element">
             <input
-              name={'password'}
-              placeholder={'Пароль'}
-              type={!inputType ? 'password' : 'text'}
+              style={{ border: err != '' ? '1px solid #DC2A1E' : '' }}
+              autoFocus
+              onChange={e => {
+                setEmail(e.target.value)
+                setErr('')
+              }}
+              name={'email'}
+              className="form-input"
+              required
+              type={'text'}
             />
+            <label className="form-label">Логин</label>
+          </div>
+          <section>
+            <div className="form-element">
+              <input
+                name={'password'}
+                style={{ border: err != '' ? '1px solid #DC2A1E' : '' }}
+                onChange={e => {
+                  setPass(e.target.value)
+                  setErr('')
+                }}
+                className="form-input"
+                required
+                type={!inputType ? 'password' : 'text'}
+              />
+              <label className="form-label">Пароль</label>
+            </div>
+            <p className={styles.adminLogin_err}>{err}</p>
             <button onClick={() => setInputType(!inputType)} type={'button'}>
               <img alt={''} src={!inputType ? eye : eyeon} />
             </button>
           </section>
-          <input placeholder={'Продолжить'} style={{ cursor: 'pointer' }} type={'submit'} />
-          <Link to={'/admin/restore-pass'}>Восстановить доступ</Link>
+          <input
+            value={'Войти'}
+            disabled={email == '' || pass == '' ? true : false}
+            style={{ cursor: 'pointer' }}
+            type={'submit'}
+          />
+          {/* <Link to={'/admin/restore-pass'}>Не получается войти</Link> */}
+          <Link to={''}>Не получается войти</Link>
         </form>
       )}
       {stage === 2 && (

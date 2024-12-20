@@ -27,9 +27,9 @@
 
     input {
       background: #f6f6f6;
-      padding: 15px 20px;
+      padding: 20px 20px 10px;
 
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 400;
       line-height: 24.2px;
       color: #202224;
@@ -46,13 +46,14 @@
     }
 
     input[type='submit'] {
-      background: #eb8f75;
+      background: #dc2a1e;
       color: #fff;
+      padding: 15px 20px;
       margin-top: 20px;
     }
 
     input[type='submit']:disabled {
-      background: #737373;
+      background: #dc2a1e80;
     }
 
     section {
@@ -96,5 +97,25 @@
     border: 1px solid #ebebeb;
     border-radius: 10px;
     background: #fff;
+  }
+
+  &_infoP {
+    font-size: 18px !important;
+    font-weight: 400;
+    max-width: 466px;
+    line-height: 24px !important;
+    color: #a4a4a4 !important;
+  }
+
+  &_err {
+    font-size: 12px !important;
+    font-weight: 400;
+    line-height: 24px !important;
+    text-align-last: left;
+    text-align: left;
+    color: #dc2a1e !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: flex-end;
   }
 }

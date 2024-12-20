@@ -328,12 +328,17 @@
 
       p {
         font-size: 32px;
-        font-weight: 600;
+        font-weight: 500;
         line-height: 38.4px;
         padding: 20px 30px;
         border-left: 3px solid #ebeff2;
         color: #282b32;
         cursor: pointer;
+
+        @media (max-width: 1350px) {
+          font-size: 26px;
+          line-height: 31.2px;
+        }
       }
 
       > :nth-child(1) {
