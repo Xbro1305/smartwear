@@ -37,3 +37,7 @@
 .form-input:focus ~ .form-label {
   color: #000;
 }
+
+.code-inp {
+  padding: 15px 20px !important;
+}

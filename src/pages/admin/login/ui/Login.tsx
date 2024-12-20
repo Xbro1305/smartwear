@@ -7,7 +7,6 @@ import styles from './Login.module.scss'
 
 import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
-import send from '../../../../assets/images/message-sent.svg'
 
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
@@ -25,7 +24,7 @@ export const AdminLogin = () => {
   const [pass, setPass] = useState<string>('')
 
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e?.preventDefault()
     login({ code })
       .unwrap()
       .then(({ access_token, user }) => {
@@ -87,6 +86,22 @@ export const AdminLogin = () => {
 
       if (index === newValues.length - 1) {
         setCode(newValues.join(''))
+        const sendingCode = newValues.join('')
+        login({ code: sendingCode })
+          .unwrap()
+          .then(({ access_token, user }) => {
+            localStorage.setItem('token', access_token)
+            localStorage.setItem('username', user.name)
+            localStorage.setItem('usersurname', user.surName)
+            localStorage.setItem('usermiddlename', user.middleName)
+            localStorage.setItem('useremail', user.email)
+            localStorage.setItem('userphone', user.phone)
+
+            navigate('/admin')
+          })
+          .catch(error => {
+            console.log(error)
+          })
       } else {
         setCodeId(index + 1)
         const nextInput = document.getElementById(`code-input-${index + 1}`) as HTMLInputElement
@@ -165,11 +180,8 @@ export const AdminLogin = () => {
       )}
       {stage === 2 && (
         <form onSubmit={handleLogin}>
-          <div className={styles.adminLogin_sendSect}>
-            <img alt={''} src={send} />
-          </div>
-          <h1 style={{ marginBottom: '0' }}>Введите код подтверждения</h1>
-          <p>
+          <h1 style={{ marginBottom: '0' }}>Введите код</h1>
+          <p className={styles.adminLogin_infoP}>
             Мы отправили код на телефон <b>{phone}</b>
           </p>
           <section className={styles.adminLogin_code_sect}>
@@ -196,13 +208,13 @@ export const AdminLogin = () => {
               />
             ))}
           </section>
-          <input placeholder={'Продолжить'} style={{ cursor: 'pointer' }} type={'submit'} />
           <p
             onClick={() => (timer <= 0 ? sendCode() : '')}
             style={{ cursor: timer <= 0 ? 'pointer' : 'default' }}
+            className={styles.adminLogin_infoP}
           >
-            Отправить код ещё раз{' '}
-            {timer ? 'можно через 0:' + (timer >= 10 ? timer : '0' + timer) : ''}
+            Получить код повторно
+            {timer ? ' можно через ' + (timer >= 10 ? timer : '0' + timer) + ' секунд' : ''}
           </p>
         </form>
       )}
