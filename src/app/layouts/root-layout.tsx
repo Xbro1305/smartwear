@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-
 import { useGetMeQuery } from '@/entities/auth'
 import { Footer } from '@/widgets/footer'
 import { Header } from '@/widgets/header'
+import { Modal } from '@/pages/home/ui/Modal'
 
 export const RootLayout = () => {
   const { data, isError, isLoading } = useGetMeQuery()
@@ -65,6 +65,7 @@ export const RootLayout = () => {
   const renderMain = (
     <main>
       <Outlet />
+      <Modal />
     </main>
   )
 

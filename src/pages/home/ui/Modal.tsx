@@ -1,25 +1,27 @@
-type ModalProps = {
-  children: React.ReactNode
-  isOpen: boolean
-  onClose: () => void
-}
+import { Link } from 'react-router-dom'
+import styles from '../home.module.scss'
+import { ROUTER_PATHS } from '@/shared/config/routes'
+import { useState } from 'react'
 
-const Modal: React.FC<ModalProps> = ({ children, isOpen, onClose }) => {
-  if (!isOpen) {
-    return null
+export const Modal = () => {
+  const access = localStorage.getItem('isUserAccessedCookies')
+  const [display, setDisplay] = useState(access ? true : false)
+
+  const close = () => {
+    localStorage.setItem('isUserAccessedCookies', 'true')
+    setDisplay(true)
   }
 
   return (
-    <div className={'fixed inset-0 flex items-center justify-center z-50'}>
-      <div className={'fixed inset-0 bg-black opacity-50'} onClick={onClose}></div>
-      <div className={'bg-white p-6 rounded-lg z-10 max-w-lg w-full'}>
-        {children}
-        <button className={'mt-4 w-full bg-red-500 text-white py-2 rounded-lg'} onClick={onClose}>
-          Закрыть
-        </button>
-      </div>
+    <div style={{ display: display ? 'none' : 'flex' }} className={styles.modal}>
+      <p className={styles.modal_text}>
+        Продолжая пользоваться сайтом, вы соглашаетесь на обработку файлов cookie и других
+        пользовательских данных в соответствии с{' '}
+        <Link to={ROUTER_PATHS.POLITICS}>политикой конфиденциальности</Link>.
+      </p>
+      <button onClick={close} className={styles.modal_button}>
+        Понятно
+      </button>
     </div>
   )
 }
-
-export default Modal

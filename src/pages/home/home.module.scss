@@ -632,3 +632,53 @@
     content: url('@/assets/images/Vector 46 (Stroke).svg');
   }
 }
+
+.modal {
+  position: fixed;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 4px 10px 0px #0000006d;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 520px;
+  max-width: calc(100% - 40px);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  &_text {
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 14.52px;
+    color: #000000;
+
+    a {
+      text-decoration: underline !important;
+    }
+  }
+
+  &_button {
+    padding: 10px 24px;
+    border-radius: 24px;
+    background: var(--red);
+    color: #fff;
+    height: fit-content;
+  }
+
+  @media (max-width: 768px) {
+    &_text {
+      font-size: 8px;
+      font-weight: 400;
+      line-height: 9.68px;
+    }
+
+    &_button {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 14.52px;
+    }
+  }
+}

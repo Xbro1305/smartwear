@@ -17,6 +17,7 @@ export const SignInPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
   const [timer, setTimer] = useState<number>(30)
   const [phone, setPhone] = useState<null | string>(null)
+  const [number, setNumber] = useState<any>('+')
   // const [data, setData] = useState<FormData>({});
   const navigate = useNavigate()
 
@@ -94,14 +95,19 @@ export const SignInPage: React.FC = () => {
           <h1 className={styles.signup_form_h1}>Вход</h1>
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
-            <PatternFormat
-              autoFocus
-              displayType={'input'}
-              allowEmptyFormatting
-              format={'+# (###) ### ##-##'}
-              mask={'_'}
-              name={'phone'}
-            />
+            <section className={styles.signup_form_phonesect}>
+              <span>{number}</span>
+              <PatternFormat
+                allowEmptyFormatting
+                format={'# (###) ### ##-##'}
+                mask={'_'}
+                name={'phone'}
+                onChange={(e: any) => {
+                  if (e.target.value.split('')[0] == 8) setNumber('')
+                  if (e.target.value.split('')[0] == 7) setNumber('+')
+                }}
+              />
+            </section>
           </label>
           <button className={styles.signup_form_button} type={'submit'}>
             Получить код

@@ -74,4 +74,15 @@
       }
     }
   }
+
+  &_width {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: #00000090;
+    color: #fff;
+    padding: 10px;
+    font-size: 24px;
+    z-index: 2;
+  }
 }

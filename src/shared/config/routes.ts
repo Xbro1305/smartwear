@@ -5,7 +5,7 @@ export const ROUTER_PATHS = {
   BOOKMARKS: '/bookmarks',
   CARE: '/care',
   CART: '/cart',
-  CATALOG: '/catalog',
+  CATALOG: '/catalogue',
   CONTACTS: '/contacts',
   DELIVERY: '/delivery',
   HOME: '/',
@@ -24,4 +24,9 @@ export const ROUTER_PATHS = {
   SIGN_UP: '/sign-up',
   STORES: '/stores',
   TRACK_ORDER: '/track-order',
+  MEN: '/men',
+  WOMEN: '/women',
+  ACS: '/accessories',
+  SALES: '/accessories',
+  NEWS: '/news',
 } as const

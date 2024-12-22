@@ -8,12 +8,23 @@ import logo from '../../../assets/images/logo.png'
 import profile from '../../../assets/images/svg (1).svg'
 import cart from '../../../assets/images/svg (2).svg'
 import search from '../../../assets/images/svg.svg'
+import { useEffect, useState } from 'react'
 
 export const Header: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('token')
     alert('Токен удалён!')
   }
+
+  const [width, setWidth] = useState(window.innerWidth)
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <header className={styles.header}>
@@ -44,6 +55,7 @@ export const Header: React.FC = () => {
         <span></span>
         <span></span>
       </button>
+      <h1 className={styles.header_width}>{width}</h1>
     </header>
   )
 }

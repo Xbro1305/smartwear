@@ -20,6 +20,7 @@ interface FormData {
   patronomic?: string
   phone?: string
   surname?: string
+  prefix?: string
 }
 
 export const SignUpPage: React.FC = () => {
@@ -50,7 +51,7 @@ export const SignUpPage: React.FC = () => {
       isSubscribed: cb,
       middleName: value.patronomic as string,
       name: value.name as string,
-      phone: value.phone as string,
+      phone: ((value?.prefix as string) + value?.phone) as string,
       surName: value.surname as string,
     }
 
@@ -112,12 +113,18 @@ export const SignUpPage: React.FC = () => {
           </label>
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
-            <PatternFormat
-              allowEmptyFormatting
-              format={'+# (###) ### ##-##'}
-              mask={'_'}
-              name={'phone'}
-            />
+            <section className={styles.signup_form_phonesect}>
+              <select name="prefix" id="">
+                <option value="+7 ">+7</option>
+                <option value="8 ">8</option>
+              </select>
+              <PatternFormat
+                allowEmptyFormatting
+                format={'(###) ### ##-##'}
+                mask={'_'}
+                name={'phone'}
+              />
+            </section>
           </label>
           <label className={styles.signup_form_label}>
             <p>

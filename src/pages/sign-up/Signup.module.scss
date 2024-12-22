@@ -52,8 +52,8 @@
     }
 
     &_confirmLabel {
-      display: flex;
-      flex-direction: row;
+      display: grid;
+      grid-template-columns: 24px 1fr;
       gap: 20px;
       cursor: pointer;
       position: relative;
@@ -152,6 +152,26 @@
       text-align: center;
       background: none;
       border: none;
+    }
+
+    &_phonesect {
+      display: flex;
+      gap: 10px;
+      position: relative;
+
+      span {
+        font-size: 22px;
+        outline: none;
+        font-weight: 400;
+        border-bottom: 3px solid transparent;
+        position: absolute;
+        bottom: 10px;
+      }
+
+      input {
+        width: 100%;
+        padding-left: 15px;
+      }
     }
   }
 

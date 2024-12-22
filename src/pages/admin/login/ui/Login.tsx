@@ -8,6 +8,7 @@ import styles from './Login.module.scss'
 import eye from '../../../../assets/images/eye-off-outline.svg'
 import eyeon from '../../../../assets/images/eye-outline.svg'
 import logo from '../../../../assets/images/logo.png'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
@@ -132,6 +133,12 @@ export const AdminLogin = () => {
 
   return (
     <div className={styles.adminLogin}>
+      <header className={styles.adminLogin_header}>
+        <img src={logo} alt="" />
+        <Link to={ROUTER_PATHS.HOME}>Сайт компании</Link>
+        {/* <Link to={'/admin/help'}>Поддержка</Link> */}
+        <Link to={ROUTER_PATHS.SIGN_IN}>Войти</Link>
+      </header>
       {stage === 1 && (
         <form onSubmit={e => setSt(e, 2)}>
           <h1>Вход</h1>
@@ -223,6 +230,11 @@ export const AdminLogin = () => {
           </p>
         </form>
       )}
+
+      <footer className={styles.adminLogin_footer}>
+        <Link to={ROUTER_PATHS.POLITICS}>Политика конфиденциальности</Link>
+        <span>2023 © Умная одежда</span>
+      </footer>
       <div style={{ display: loading ? 'flex' : 'none' }} className={styles.adminLogin_loading}>
         <img src={logo} alt="" />
       </div>

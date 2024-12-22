@@ -1,27 +1,46 @@
+import styles from './catalog.module.scss'
+import { Link } from 'react-router-dom'
+
+import man from '@/assets/images/homeMan.jpeg'
+import woman from '@/assets/images/homeWoman.jpeg'
+import banner from '@/assets/images/catalogBanner.svg'
+import acs from '@/assets/images/homeAcs.png'
+import star from '@/assets/images/homeStar.svg'
+import fire from '@/assets/images/homeFire.svg'
+import { ROUTER_PATHS as paths } from '@/shared/config/routes'
+
 export const CatalogPage = () => {
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#2c3e50' }}>Публичный каталог</h1>
-      
-      <p style={{ fontSize: '16px', lineHeight: '1.5' }}>
-        Добро пожаловать в наш <strong>Публичный каталог</strong>! Эта страница является временной заглушкой, которая скоро будет обновлена с полным каталогом наших товаров и услуг.
-      </p>
-
-      <h2 style={{ color: '#34495e' }}>Что здесь будет?</h2>
-      <p>
-        В ближайшее время мы разместим подробную информацию о предлагаемой продукции, условиях предоставления услуг, а также полную публичную оферту, которая будет включать все важные условия, права и обязанности сторон.
-      </p>
-
-      <h2 style={{ color: '#34495e' }}>Что дальше?</h2>
-      <p>
-        Мы работаем над расширением каталога, чтобы предоставить вам самую актуальную информацию. Следите за обновлениями!
-      </p>
-      
-      <footer style={{ marginTop: '40px', fontSize: '14px', color: '#7f8c8d' }}>
-        <p>
-          Если у вас есть вопросы, не стесняйтесь обращаться к нам. Мы всегда рады помочь!
-        </p>
-      </footer>
+    <div className={styles.catalog}>
+      <div className={styles.catalog_top}>
+        <img src={banner} alt="" />
+      </div>
+      <div className={styles.catalog_wrapper}>
+        <div className={styles.catalog_wrapper_top}>
+          <Link to={paths.SALES}>
+            <img src={fire} alt="" />
+            Скидки
+          </Link>
+          <Link to={paths.NEWS}>
+            <img src={star} alt="" />
+            Новые поступления
+          </Link>
+        </div>
+        <div className={styles.catalog_bottom}>
+          <Link to={paths.WOMEN} className={styles.catalog_item}>
+            <img src={woman} alt="" />
+            Женские куртки
+          </Link>
+          <Link to={paths.MEN} className={styles.catalog_item}>
+            <img src={man} alt="" />
+            Мужские куртки
+          </Link>
+          <Link to={paths.ACS} className={styles.catalog_item}>
+            <img src={acs} alt="" />
+            Аксессуары
+          </Link>
+        </div>
+      </div>
     </div>
-  );
-};
+  )
+}
