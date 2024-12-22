@@ -28,6 +28,8 @@ export const SignUpPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
   const [timer, setTimer] = useState<number>(30)
   const [data, setData] = useState<FormData>({})
+  const [phone, setPhone] = useState<null | string>(null)
+  const [number, setNumber] = useState<any>('+')
   const navigate = useNavigate()
 
   const [register] = useRegisterMutation()
@@ -45,13 +47,14 @@ export const SignUpPage: React.FC = () => {
     const value = Object.fromEntries(formData) as FormData
 
     setData(value)
+    console.log((number + value?.phone) as string)
 
     const registerData = {
       email: value.email as string,
       isSubscribed: cb,
       middleName: value.patronomic as string,
       name: value.name as string,
-      phone: ((value?.prefix as string) + value?.phone) as string,
+      phone: ((number as string) + value?.phone) as string,
       surName: value.surname as string,
     }
 
@@ -114,15 +117,22 @@ export const SignUpPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
             <section className={styles.signup_form_phonesect}>
-              <select name="prefix" id="">
-                <option value="+7 ">+7</option>
-                <option value="8 ">8</option>
-              </select>
+              <span>{number}</span>
               <PatternFormat
-                allowEmptyFormatting
-                format={'(###) ### ##-##'}
+                // allowEmptyFormatting
+                format={'# (###) ### ##-##'}
                 mask={'_'}
                 name={'phone'}
+                value={phone}
+                onChange={(e: any) => {
+                  if (e.target.value.split('')[0] == 9) {
+                    setPhone('+7' + e.target.value)
+                    setNumber('+')
+                  } else if (e.target.value.split('')[0] == 8) setNumber('')
+                  else if (e.target.value.split('')[0] == 7) setNumber('+')
+                  else setPhone(' ')
+                  console.log(phone)
+                }}
               />
             </section>
           </label>

@@ -52,7 +52,7 @@ export const SignInPage: React.FC = () => {
     const value = Object.fromEntries(formData) as FormData
 
     setPhone(value.phone!)
-    getCode(value.phone!)
+    getCode(number + value.phone!)
   }
 
   const requestCodeAgain = () => {
@@ -98,13 +98,19 @@ export const SignInPage: React.FC = () => {
             <section className={styles.signup_form_phonesect}>
               <span>{number}</span>
               <PatternFormat
-                allowEmptyFormatting
+                // allowEmptyFormatting
                 format={'# (###) ### ##-##'}
                 mask={'_'}
                 name={'phone'}
+                value={phone}
                 onChange={(e: any) => {
-                  if (e.target.value.split('')[0] == 8) setNumber('')
-                  if (e.target.value.split('')[0] == 7) setNumber('+')
+                  if (e.target.value.split('')[0] == 9) {
+                    setPhone('+7' + e.target.value)
+                    setNumber('+')
+                  } else if (e.target.value.split('')[0] == 8) setNumber('')
+                  else if (e.target.value.split('')[0] == 7) setNumber('+')
+                  else setPhone(' ')
+                  console.log(phone)
                 }}
               />
             </section>
