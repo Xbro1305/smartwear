@@ -54,7 +54,7 @@ export const SignUpPage: React.FC = () => {
       isSubscribed: cb,
       middleName: value.patronomic as string,
       name: value.name as string,
-      phone: ((number as string) + value?.phone) as string,
+      phone: ((number  as string) + value?.phone) as string,
       surName: value.surname as string,
     }
 

@@ -1,6 +1,5 @@
 import styles from './catalog.module.scss'
 import { Link } from 'react-router-dom'
-
 import man from '@/assets/images/homeMan.jpeg'
 import woman from '@/assets/images/homeWoman.jpeg'
 import banner from '@/assets/images/catalogBanner.svg'
