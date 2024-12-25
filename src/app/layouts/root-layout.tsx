@@ -26,6 +26,7 @@ export const RootLayout = () => {
 
       if (now - lastActivity > timeout) {
         localStorage.removeItem('token')
+        localStorage.removeItem('isUserAccessedCookies')
       }
     }
 
@@ -35,6 +36,7 @@ export const RootLayout = () => {
       closeTimeout = setTimeout(() => {
         if (!localStorage.getItem('isActive') && data?.role === 'ADMIN') {
           localStorage.removeItem('token')
+          localStorage.removeItem('isUserAccessedCookies')
         }
       }, 5000)
     }
