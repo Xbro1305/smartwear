@@ -80,6 +80,7 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('usermiddlename', user.middleName)
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
+        localStorage.removeItem('isUserAccessedCookies')
 
         navigate('/profile')
       })
@@ -102,16 +103,20 @@ export const SignInPage: React.FC = () => {
                 format={'# (###) ### ##-##'}
                 mask={'_'}
                 name={'phone'}
-                value={phone}
                 onChange={(e: any) => {
                   if (e.target.value.split('')[0] == 9) {
                     setPhone('+7' + e.target.value)
                     setNumber('+')
-                  } else if (e.target.value.split('')[0] == 8) setNumber('')
-                  else if (e.target.value.split('')[0] == 7) setNumber('+')
-                  else setPhone(' ')
+                  } else if (e.target.value.split('')[0] == 8) {
+                    setNumber('')
+                  } else if (e.target.value.split('')[0] == 7) {
+                    setNumber('+')
+                  } else {
+                    setPhone(' ')
+                  }
                   console.log(phone)
                 }}
+                value={phone}
               />
             </section>
           </label>
@@ -142,11 +147,11 @@ export const SignInPage: React.FC = () => {
             <p>Введите смс код</p>
             <PatternFormat
               allowEmptyFormatting
+              autoFocus
               format={'#####'}
               mask={'-'}
               name={'code'}
               required
-              autoFocus
             />
           </label>
           <button className={styles.signup_form_button} type={'submit'}>

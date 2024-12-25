@@ -4,7 +4,7 @@ import { HomePage } from '@/pages/home'
 import { ProfilePage } from '@/pages/profile'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
-// import { AuthGuard } from './auth-guard'
+import { AuthGuard } from './auth-guard'
 
 const { HOME, PROFILE } = ROUTER_PATHS
 
@@ -20,6 +20,6 @@ export const privateRoutes: RouteObject[] = [
         path: PROFILE,
       },
     ],
-    // element: <AuthGuard />,
+    element: <AuthGuard />,
   },
 ]
