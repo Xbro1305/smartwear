@@ -99,22 +99,19 @@ export const SignInPage: React.FC = () => {
             <section className={styles.signup_form_phonesect}>
               <span>{number}</span>
               <PatternFormat
-                // allowEmptyFormatting
                 format={'# (###) ### ##-##'}
                 mask={'_'}
                 name={'phone'}
                 onChange={(e: any) => {
-                  if (e.target.value.split('')[0] == 9) {
-                    setPhone('+7' + e.target.value)
-                    setNumber('+')
-                  } else if (e.target.value.split('')[0] == 8) {
-                    setNumber('')
-                  } else if (e.target.value.split('')[0] == 7) {
-                    setNumber('+')
+                  const value = e.target.value
+
+                  if (value.startsWith('7') || value.startsWith('8')) {
+                    setPhone('+7' + value.slice(1))
+                  } else if (value.length === 1) {
+                    setPhone('+7' + value)
                   } else {
-                    setPhone(' ')
+                    setPhone('+7' + value)
                   }
-                  console.log(phone)
                 }}
                 value={phone}
               />
