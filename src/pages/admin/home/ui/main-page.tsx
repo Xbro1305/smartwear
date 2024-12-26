@@ -26,14 +26,15 @@ const returnsPoints = [9, 8, 5, 6, 8, 7, 9, 10, 9, 10, 10, 9, 11, 7]
 
 export const MainPage = () => {
   const [openNavigation, setOpenNavigation] = useState<boolean>()
-  const { data: user, isLoading } = useGetMeQuery()
+  const { data: user } = useGetMeQuery()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isLoading && user?.role !== 'ADMIN') {
+    if (user?.role !== 'ADMIN') {
       navigate('/admin/login')
     }
-  }, [isLoading, user, navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>

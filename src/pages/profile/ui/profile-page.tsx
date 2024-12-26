@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import styles from './Profile.module.scss' // Пример с алиасом
 import sale from '../../../assets/images/sale.png' // Пример с алиасом для изображений
 import { useEffect } from 'react'
@@ -26,10 +27,11 @@ export const ProfilePage = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    console.log('navigate: ' + (!isLoading && !user))
+    if (!user) {
       navigate('/sign-in')
     }
-  }, [isLoading, user, navigate])
+  }, [])
 
   return (
     <div className={styles.profile}>
