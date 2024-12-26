@@ -1,11 +1,14 @@
-import { Outlet } from 'react-router-dom'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const AdminGuard = () => {
-  const { data: userData } = useGetMeQuery()
+  const { data: userData, isLoading } = useGetMeQuery()
 
-  return userData?.role == 'ADMIN' ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
+  if (isLoading) {
+    return <div>Загрузка...</div>
+  }
+
+  return userData?.role === 'ADMIN' ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
 }
