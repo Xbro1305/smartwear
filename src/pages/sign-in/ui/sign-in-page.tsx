@@ -93,7 +93,7 @@ export const SignInPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
             <section className={styles.signup_form_phonesect}>
-              <span>+7</span>
+              <span></span>
               <PatternFormat
                 format={'# (###) ### ##-##'}
                 mask={'_'}
