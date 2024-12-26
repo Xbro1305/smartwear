@@ -1,5 +1,9 @@
 import styles from './Profile.module.scss' // Пример с алиасом
 import sale from '../../../assets/images/sale.png' // Пример с алиасом для изображений
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { useGetMeQuery } from '@/entities/auth'
 
 import itemImg from '../../../assets/images/image 139.png' // Тоже с алиасом
 //import { RegisteredDto } from "@/entities/auth/auth.types";
@@ -18,6 +22,14 @@ export const ProfilePage = () => {
   const middleName = localStorage.getItem('usermiddlename') || ''
   const email = localStorage.getItem('useremail') || ''
   const phone = localStorage.getItem('userphone') || ''
+  const { data: user, isLoading } = useGetMeQuery()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/sign-in')
+    }
+  }, [isLoading, user, navigate])
 
   return (
     <div className={styles.profile}>
@@ -87,7 +99,7 @@ export const ProfilePage = () => {
                   <p>{i.status}</p>
                 </div>
                 <p className={styles.profile_orders_item_price}>
-                  <NumericFormat thousandSeparator={' '} displayType="text" value={i.price} />{' '}
+                  <NumericFormat displayType={'text'} thousandSeparator={' '} value={i.price} />{' '}
                   {i.currency}
                 </p>
                 <div className={styles.profile_orders_item_details}>
@@ -125,7 +137,7 @@ export const ProfilePage = () => {
                   <p>{i.status}</p>
                 </div>
                 <p className={styles.profile_orders_item_price}>
-                  <NumericFormat thousandSeparator={' '} displayType="text" value={i.price} />{' '}
+                  <NumericFormat displayType={'text'} thousandSeparator={' '} value={i.price} />{' '}
                   {i.currency}
                 </p>
                 <div className={styles.profile_orders_item_details}>

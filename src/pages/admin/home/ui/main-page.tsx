@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import cube from '@/assets/images/Cube.svg'
 import Infographic from '@/assets/images/Infographic.svg'
@@ -24,7 +26,14 @@ const returnsPoints = [9, 8, 5, 6, 8, 7, 9, 10, 9, 10, 10, 9, 11, 7]
 
 export const MainPage = () => {
   const [openNavigation, setOpenNavigation] = useState<boolean>()
-  const { data: user } = useGetMeQuery()
+  const { data: user, isLoading } = useGetMeQuery()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoading && user?.role !== 'ADMIN') {
+      navigate('/admin/login')
+    }
+  }, [isLoading, user, navigate])
 
   return (
     <>
