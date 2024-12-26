@@ -8,17 +8,11 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from '../../sign-up/Signup.module.scss'
 
-interface FormData {
-  code?: string
-  phone?: string
-}
-
 export const SignInPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
   const [timer, setTimer] = useState<number>(30)
-  const [phone, setPhone] = useState<null | string>(null)
-  const [number, setNumber] = useState<any>('+')
-  // const [data, setData] = useState<FormData>({});
+  const [phone, setPhone] = useState<string>('') // Просто храним номер
+
   const navigate = useNavigate()
 
   const [requestCode] = useRequestCodeMutation()
@@ -49,10 +43,12 @@ export const SignInPage: React.FC = () => {
     e.preventDefault()
 
     const formData = new FormData(e.target as HTMLFormElement)
-    const value = Object.fromEntries(formData) as FormData
+    const value = Object.fromEntries(formData) as { phone: string }
 
-    setPhone(value.phone!)
-    getCode(number + value.phone!)
+    const fullPhone = '+7' + value.phone // Составляем полный номер с префиксом
+
+    setPhone(fullPhone)
+    getCode(fullPhone)
   }
 
   const requestCodeAgain = () => {
@@ -65,7 +61,7 @@ export const SignInPage: React.FC = () => {
     e.preventDefault()
 
     const formData = new FormData(e.target as HTMLFormElement)
-    const value = Object.fromEntries(formData) as FormData
+    const value = Object.fromEntries(formData) as { code: string }
 
     if (value.code?.includes('-')) {
       alert('вы не ввели код')
@@ -97,23 +93,15 @@ export const SignInPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
             <section className={styles.signup_form_phonesect}>
-              <span>{number}</span>
+              <span>+7</span>
               <PatternFormat
                 format={'# (###) ### ##-##'}
                 mask={'_'}
                 name={'phone'}
                 onChange={(e: any) => {
-                  const value = e.target.value
-
-                  if (value.startsWith('7') || value.startsWith('8')) {
-                    setPhone('+7' + value.slice(1))
-                  } else if (value.length === 1) {
-                    setPhone('+7' + value)
-                  } else {
-                    setPhone('+7' + value)
-                  }
+                  setPhone('+7' + e.target.value.slice(1)) // Обновляем номер с префиксом +7
                 }}
-                value={phone}
+                value={phone.slice(2)} // Отображаем только номер без префикса
               />
             </section>
           </label>
