@@ -31,7 +31,7 @@ export const SignInPage: React.FC = () => {
       setTimeout(() => clearInterval(interval), 30000)
     } catch (error: any) {
       if (error?.data?.message === 'User not found') {
-        alert('Пользователь с таким номером телефона не найден')
+        alert('Пользователь с таким номером телефона не наиден')
       } else {
         alert('Произошла ошибка при запросе кода. Попробуйте снова.')
       }
