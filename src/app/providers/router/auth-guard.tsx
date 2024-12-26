@@ -10,5 +10,5 @@ export const AuthGuard = () => {
     return <div>Загрузка...</div>
   }
 
-  return userData?.id ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
+  return userData ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
 }

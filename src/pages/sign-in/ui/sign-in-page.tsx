@@ -45,7 +45,7 @@ export const SignInPage: React.FC = () => {
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as { phone: string }
 
-    const fullPhone = '+7' + value.phone // Составляем полный номер с префиксом
+    const fullPhone = value.phone // Составляем полный номер с префиксом
 
     setPhone(fullPhone)
     getCode(fullPhone)

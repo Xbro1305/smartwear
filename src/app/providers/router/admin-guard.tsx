@@ -10,5 +10,7 @@ export const AdminGuard = () => {
     return <div>Загрузка...</div>
   }
 
+  console.log('isAdmin: ' + userData?.role)
+
   return userData?.role === 'ADMIN' ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
 }
