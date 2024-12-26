@@ -19,8 +19,6 @@ export const SignInPage: React.FC = () => {
   const [requestCode] = useRequestCodeMutation()
   const [login] = useLoginMutation()
 
-  const { refetch } = useGetMeQuery()
-
   const getCode = async (phone: string) => {
     try {
       await requestCode({ phone }).unwrap()
@@ -81,9 +79,9 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('userphone', user.phone)
         localStorage.removeItem('isUserAccessedCookies')
 
-        refetch()
-
-        navigate('/profile')
+        setTimeout(() => {
+          navigate('/profile')
+        }, 0)
       })
       .catch(error => {
         console.log(error)

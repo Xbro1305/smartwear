@@ -1,7 +1,7 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_APP_API_URL || "https://test.maxiscomfort.ru/api",
+  baseUrl: import.meta.env.VITE_APP_API_URL || 'https://test.maxiscomfort.ru/api',
   credentials: 'include',
   prepareHeaders: headers => {
     const token = localStorage.getItem('token')

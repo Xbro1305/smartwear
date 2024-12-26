@@ -1,7 +1,6 @@
 import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { useGetMeQuery } from '@/entities/auth'
 import { useLoginMutation, useRequestAdminCodeMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
@@ -29,8 +28,6 @@ export const AdminLogin = () => {
   const [pass, setPass] = useState<string>('')
   const [loading, setLoding] = useState<boolean>(false)
 
-  const { refetch } = useGetMeQuery()
-
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e?.preventDefault()
     setLoding(true)
@@ -45,9 +42,9 @@ export const AdminLogin = () => {
         localStorage.setItem('userphone', user.phone)
         localStorage.removeItem('isUserAccessedCookies')
 
-        refetch()
-
-        navigate('/admin')
+        setTimeout(() => {
+          navigate('/admin')
+        }, 0)
       })
       .catch(error => {
         console.log(error)
