@@ -99,9 +99,16 @@ export const SignInPage: React.FC = () => {
                 mask={'_'}
                 name={'phone'}
                 onChange={(e: any) => {
-                  setPhone('+7' + e.target.value.slice(1)) // Обновляем номер с префиксом +7
+                  const value = e.target.value
+
+                  const normalizedPhone =
+                    value.startsWith('7') || value.startsWith('8')
+                      ? '+7' + value.slice(1)
+                      : '+7' + value
+
+                  setPhone(normalizedPhone)
                 }}
-                value={phone.slice(2)} // Отображаем только номер без префикса
+                value={phone}
               />
             </section>
           </label>
