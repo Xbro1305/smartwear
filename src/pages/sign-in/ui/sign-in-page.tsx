@@ -3,6 +3,7 @@ import { PatternFormat } from 'react-number-format'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 
+import { useGetMeQuery } from '@/entities/auth'
 import { useLoginMutation, useRequestCodeMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
@@ -17,6 +18,8 @@ export const SignInPage: React.FC = () => {
 
   const [requestCode] = useRequestCodeMutation()
   const [login] = useLoginMutation()
+
+  const { refetch } = useGetMeQuery()
 
   const getCode = async (phone: string) => {
     try {
@@ -77,6 +80,8 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
         localStorage.removeItem('isUserAccessedCookies')
+
+        refetch()
 
         navigate('/profile')
       })
