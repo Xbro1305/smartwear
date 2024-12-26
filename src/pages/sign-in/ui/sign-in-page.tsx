@@ -79,9 +79,8 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('userphone', user.phone)
         localStorage.removeItem('isUserAccessedCookies')
 
-        setTimeout(() => {
-          navigate('/profile')
-        }, 0)
+        navigate('/profile')
+        window.location.reload()
       })
       .catch(error => {
         console.log(error)
