@@ -27,7 +27,7 @@ export const RootLayout = () => {
 
       if (now - lastActivity > timeout) {
         localStorage.removeItem('token')
-        localStorage.removeItem('isUserAccessedCookies')
+        window.location.reload()
       }
     }
 

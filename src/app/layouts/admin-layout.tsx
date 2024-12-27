@@ -22,6 +22,7 @@ export const AdminLayout = () => {
 
       if (now - lastActivity > timeout) {
         localStorage.removeItem('token')
+        window.location.reload()
       }
     }
 
