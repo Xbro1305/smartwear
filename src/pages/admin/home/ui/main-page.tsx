@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
-
+import chart_line from '@/assets/images/chart-line.svg'
 import cube from '@/assets/images/Cube.svg'
 import Infographic from '@/assets/images/Infographic.svg'
 import people from '@/assets/images/People.svg'
@@ -16,23 +16,21 @@ import './select.css'
 import styles from './home.module.scss'
 
 import { ChartComponent } from './chart'
-import { Select } from './select'
+import { MonthsSelect, Select } from './select'
 
-//(labels) снизу цифры которые
-const labels = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14']
 const sellsPoints = [380, 204, 222, 203, 312, 318, 115, 145, 120, 128, 143, 176, 140, 145]
 const ordersPoints = [128, 80, 130, 65, 89, 130, 115, 145, 120, 128, 143, 176, 140, 145]
 const returnsPoints = [9, 8, 5, 6, 8, 7, 9, 10, 9, 10, 10, 9, 11, 7]
 
 export const MainPage = () => {
-  const [openNavigation, setOpenNavigation] = useState<boolean>()
+  const [openNavigation, setOpenNavigation] = useState<boolean>(true)
   const { data: user } = useGetMeQuery()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (user?.role !== 'ADMIN') {
-      navigate('/admin/login')
-    }
+    // if (user?.role !== 'ADMIN') {
+    //   navigate('/admin/login')
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -133,52 +131,37 @@ export const MainPage = () => {
             <div className={styles.adminHome_right_goodStats_top}>
               <h3 className={styles.adminHome_h3}>Продажи</h3>
               <section className={styles.adminHome_right_goodStats_top_params}>
-                <select id={''} name={'sells_month'}>
-                  <option value={'0'}>Месяц</option>
-                  {months.map(i => (
-                    <option value={i.id}>{i.month}</option>
-                  ))}
-                </select>
-                <Select />
+                <MonthsSelect options={months} />
+                <Select options={[{ value: 'chart', image: chart_line }]} />
                 <button>...</button>
               </section>
             </div>
             <div className={styles.adminHome_right_chart}>
-              <ChartComponent labels={labels} max={600} points={sellsPoints} />
+              <ChartComponent points={sellsPoints} />
               <p>Тыс. ₽</p>
             </div>
             <div className={styles.adminHome_right_goodStats_top}>
               <h3 className={styles.adminHome_h3}>Заказы</h3>
               <section className={styles.adminHome_right_goodStats_top_params}>
-                <select id={''} name={'sells_month'}>
-                  <option value={'0'}>Месяц</option>
-                  {months.map(i => (
-                    <option value={i.id}>{i.month}</option>
-                  ))}
-                </select>
-                <Select />
+                <MonthsSelect options={months} />
+                <Select options={[{ value: 'chart', image: chart_line }]} />
                 <button>...</button>
               </section>
             </div>
             <div className={styles.adminHome_right_chart}>
-              <ChartComponent labels={labels} max={200} points={ordersPoints} />
+              <ChartComponent points={ordersPoints} />
               <p>Количество заказов</p>
             </div>
             <div className={styles.adminHome_right_goodStats_top}>
               <h3 className={styles.adminHome_h3}>Bозвраты</h3>
               <section className={styles.adminHome_right_goodStats_top_params}>
-                <select id={''} name={'sells_month'}>
-                  <option value={'0'}>Месяц</option>
-                  {months.map(i => (
-                    <option value={i.id}>{i.month}</option>
-                  ))}
-                </select>
-                <Select />
+                <MonthsSelect options={months} />
+                <Select options={[{ value: 'chart', image: chart_line }]} />
                 <button>...</button>
               </section>
             </div>
             <div className={styles.adminHome_right_chart}>
-              <ChartComponent labels={labels} max={16} points={returnsPoints} />
+              <ChartComponent points={returnsPoints} />
               <p>Количество возвратов</p>
             </div>
           </div>
@@ -192,18 +175,18 @@ export const MainPage = () => {
 }
 
 const months = [
-  { id: 1, month: 'January' },
-  { id: 2, month: 'February' },
-  { id: 3, month: 'March' },
-  { id: 4, month: 'April' },
-  { id: 5, month: 'May' },
-  { id: 6, month: 'June' },
-  { id: 7, month: 'July' },
-  { id: 8, month: 'August' },
-  { id: 9, month: 'September' },
-  { id: 10, month: 'October' },
-  { id: 11, month: 'November' },
-  { id: 12, month: 'December' },
+  { id: 1, value: 'January' },
+  { id: 2, value: 'February' },
+  { id: 3, value: 'March' },
+  { id: 4, value: 'April' },
+  { id: 5, value: 'May' },
+  { id: 6, value: 'June' },
+  { id: 7, value: 'July' },
+  { id: 8, value: 'August' },
+  { id: 9, value: 'September' },
+  { id: 10, value: 'October' },
+  { id: 11, value: 'November' },
+  { id: 12, value: 'December' },
 ]
 
 const menuItems = [

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import styles from './adminHader.module.scss'
 import { FaSearch } from 'react-icons/fa'
 
@@ -18,12 +18,14 @@ export const AdminHeader = () => {
     <header className={styles.adminHeader}>
       <section className={styles.adminHeader_links}>
         {menuItems.map(i => (
-          <Link to={'/admin' + i.link}>{i.label}</Link>
+          <NavLink className="adminHeader_link" to={'/admin' + i.link}>
+            {i.label}
+          </NavLink>
         ))}
       </section>
       <label>
         <FaSearch />
-        <input type="text" placeholder='Поиск' />
+        <input type="text" placeholder="Поиск" />
       </label>
     </header>
   )

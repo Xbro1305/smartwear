@@ -12,8 +12,12 @@
     "lint": "eslint . --ext .jsx,.js,.tsx,.ts --no-error-on-unmatched-pattern --fix"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@fontsource/inter": "^5.0.19",
     "@hookform/resolvers": "^3.9.0",
+    "@mui/material": "^6.3.0",
+    "@mui/x-charts": "^7.23.2",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.1",

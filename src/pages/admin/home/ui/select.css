@@ -7,6 +7,15 @@
   height: 48px;
 }
 
+.custom-months-select {
+  position: relative;
+  font-family: Arial, sans-serif;
+  border: 1px solid #dadada;
+  border-radius: 12px;
+  width: 222px;
+  height: 48px;
+}
+
 .select-selected {
   cursor: pointer;
   display: flex;
@@ -26,6 +35,8 @@
   width: 100%;
   overflow-y: auto;
   margin-top: 5px;
+  background: #fff;
+  border-radius: 12px;
 }
 
 .select-item {
@@ -38,6 +49,7 @@
   flex-direction: row !important;
   align-items: center;
   gap: 10px;
+  height: 48px;
   cursor: pointer;
 }
 
@@ -61,4 +73,11 @@
 
 .select-item:not(.select-selected):hover {
   background-color: #f0f0f0;
+}
+
+.adminHeader_link.active {
+  background: #f8f8f8;
+  padding: 10px;
+  border-radius: 18px;
+  border-style: dashed;
 }
