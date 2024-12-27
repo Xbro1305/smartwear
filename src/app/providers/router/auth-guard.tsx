@@ -1,15 +1,30 @@
 import { Outlet } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 
-//import { useGetMeQuery } from '@/entities/auth'
-//import { ROUTER_PATHS } from '@/shared/config/routes'
+import { useGetMeQuery } from '@/entities/auth'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const AuthGuard = () => {
-  //const { data: userData, isLoading } = useGetMeQuery()
+  const { data: userData, error, isLoading } = useGetMeQuery()
 
-  //if (isLoading) {
-  // return <div>Загрузка...</div>
-  //}
+  if (isLoading) {
+    console.log('Загрузка данных пользователя...')
 
-  //return userData ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
-  return <Outlet />
+    return <div>Загрузка...</div>
+  }
+
+  if (error) {
+    console.error('Ошибка при загрузке данных пользователя:', error)
+
+    return <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
+  }
+
+  const isAuthenticated = Boolean(userData)
+
+  console.log(`Проверка аутентификации пользователя. Аутентифицирован: ${isAuthenticated}`)
+  if (userData) {
+    console.log(`Данные пользователя:`, userData)
+  }
+
+  return isAuthenticated ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
 }

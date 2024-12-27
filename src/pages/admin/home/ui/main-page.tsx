@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-import chart_line from '@/assets/images/chart-line.svg'
+
 import cube from '@/assets/images/Cube.svg'
 import Infographic from '@/assets/images/Infographic.svg'
 import people from '@/assets/images/People.svg'
+import chart_line from '@/assets/images/chart-line.svg'
 import clock from '@/assets/images/clock.svg'
 import { useGetMeQuery } from '@/entities/auth'
 import { AdminHeader } from '@/widgets/adminHeader/adminHeader'
@@ -25,14 +24,6 @@ const returnsPoints = [9, 8, 5, 6, 8, 7, 9, 10, 9, 10, 10, 9, 11, 7]
 export const MainPage = () => {
   const [openNavigation, setOpenNavigation] = useState<boolean>(true)
   const { data: user } = useGetMeQuery()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    // if (user?.role !== 'ADMIN') {
-    //   navigate('/admin/login')
-    // }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   return (
     <>
@@ -132,7 +123,7 @@ export const MainPage = () => {
               <h3 className={styles.adminHome_h3}>Продажи</h3>
               <section className={styles.adminHome_right_goodStats_top_params}>
                 <MonthsSelect options={months} />
-                <Select options={[{ value: 'chart', image: chart_line }]} />
+                <Select options={[{ image: chart_line, value: 'chart' }]} />
                 <button>...</button>
               </section>
             </div>
@@ -144,7 +135,7 @@ export const MainPage = () => {
               <h3 className={styles.adminHome_h3}>Заказы</h3>
               <section className={styles.adminHome_right_goodStats_top_params}>
                 <MonthsSelect options={months} />
-                <Select options={[{ value: 'chart', image: chart_line }]} />
+                <Select options={[{ image: chart_line, value: 'chart' }]} />
                 <button>...</button>
               </section>
             </div>
@@ -156,7 +147,7 @@ export const MainPage = () => {
               <h3 className={styles.adminHome_h3}>Bозвраты</h3>
               <section className={styles.adminHome_right_goodStats_top_params}>
                 <MonthsSelect options={months} />
-                <Select options={[{ value: 'chart', image: chart_line }]} />
+                <Select options={[{ image: chart_line, value: 'chart' }]} />
                 <button>...</button>
               </section>
             </div>

@@ -14,6 +14,7 @@ export const Header: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('token')
     alert('Токен удалён!')
+    window.location.reload()
   }
 
   const [width, setWidth] = useState(window.innerWidth)

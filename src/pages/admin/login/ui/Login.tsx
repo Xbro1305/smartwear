@@ -42,9 +42,8 @@ export const AdminLogin = () => {
         localStorage.setItem('userphone', user.phone)
         localStorage.removeItem('isUserAccessedCookies')
 
-        setTimeout(() => {
-          navigate('/admin')
-        }, 0)
+        navigate('/admin')
+        window.location.reload()
       })
       .catch(error => {
         console.log(error)

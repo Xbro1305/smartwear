@@ -5,7 +5,7 @@ import { AdminLogin } from '@/pages/admin/login'
 import { RestorePass } from '@/pages/admin/setpass/ui/Restore'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
-//import { AdminGuard } from './admin-guard'
+import { AdminGuard } from './admin-guard'
 
 const { ADMIN, ADMINLOGIN, RESTOREPASS } = ROUTER_PATHS
 
@@ -25,6 +25,6 @@ export const adminRoutes: RouteObject[] = [
         path: RESTOREPASS,
       },
     ],
-    //element: <AdminGuard />,
+    element: <AdminGuard />,
   },
 ]

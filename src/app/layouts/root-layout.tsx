@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
+
 import { useGetMeQuery } from '@/entities/auth'
+import { Modal } from '@/pages/home/ui/Modal'
 import { Footer } from '@/widgets/footer'
 import { Header } from '@/widgets/header'
-import { Modal } from '@/pages/home/ui/Modal'
 
 export const RootLayout = () => {
   const { data, isError, isLoading } = useGetMeQuery()
@@ -22,7 +23,7 @@ export const RootLayout = () => {
     const checkInactivity = () => {
       const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0', 10)
       const now = Date.now()
-      const timeout = data?.role === 'ADMIN' ? 30 * 60 * 1000 : 24 * 60 * 60 * 1000
+      const timeout = data?.role === 'ADMIN' ? 2 * 60 * 1000 : 24 * 60 * 60 * 1000
 
       if (now - lastActivity > timeout) {
         localStorage.removeItem('token')

@@ -1,10 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import styles from './Profile.module.scss' // Пример с алиасом
 import sale from '../../../assets/images/sale.png' // Пример с алиасом для изображений
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 
-import { useGetMeQuery } from '@/entities/auth'
+import { useNavigate } from 'react-router-dom'
 
 import itemImg from '../../../assets/images/image 139.png' // Тоже с алиасом
 //import { RegisteredDto } from "@/entities/auth/auth.types";
@@ -23,15 +21,6 @@ export const ProfilePage = () => {
   const middleName = localStorage.getItem('usermiddlename') || ''
   const email = localStorage.getItem('useremail') || ''
   const phone = localStorage.getItem('userphone') || ''
-  const { data: user, isLoading } = useGetMeQuery()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    console.log('navigate: ' + !user)
-    if (!user) {
-      navigate('/sign-in')
-    }
-  }, [])
 
   return (
     <div className={styles.profile}>
