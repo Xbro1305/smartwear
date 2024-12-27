@@ -109,6 +109,7 @@ export const AdminLogin = () => {
             localStorage.setItem('userphone', user.phone)
 
             navigate('/admin')
+            window.location.reload()
           })
           .catch(error => {
             console.log(error)
