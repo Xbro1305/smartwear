@@ -29,7 +29,7 @@ export const SignUpPage: React.FC = () => {
   const [timer, setTimer] = useState<number>(30)
   const [data, setData] = useState<FormData>({})
   const [phone, setPhone] = useState<null | string>(null)
-  const [number, setNumber] = useState<any>('+')
+  const [prefix, setPrefix] = useState<any>('+7')
   const navigate = useNavigate()
 
   const [register] = useRegisterMutation()
@@ -47,14 +47,14 @@ export const SignUpPage: React.FC = () => {
     const value = Object.fromEntries(formData) as FormData
 
     setData(value)
-    console.log((number + value?.phone) as string)
+    console.log((prefix + value?.phone) as string)
 
     const registerData = {
       email: value.email as string,
       isSubscribed: cb,
       middleName: value.patronomic as string,
       name: value.name as string,
-      phone: ((number  as string) + value?.phone) as string,
+      phone: ((prefix as string) + value?.phone) as string,
       surName: value.surname as string,
     }
 
@@ -117,7 +117,7 @@ export const SignUpPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
             <section className={styles.signup_form_phonesect}>
-              <span>{number}</span>
+              <span>{prefix}</span>
               <PatternFormat
                 // allowEmptyFormatting
                 format={'# (###) ### ##-##'}
@@ -127,11 +127,13 @@ export const SignUpPage: React.FC = () => {
                 onChange={(e: any) => {
                   if (e.target.value.split('')[0] == 9) {
                     setPhone('+7' + e.target.value)
-                    setNumber('+')
-                  } else if (e.target.value.split('')[0] == 8) setNumber('')
-                  else if (e.target.value.split('')[0] == 7) setNumber('+')
-                  else setPhone(' ')
-                  console.log(phone)
+                    setPrefix('+')
+                  } else if (e.target.value.split('')[0] == 8) setPrefix('')
+                  else if (e.target.value.split('')[0] == 7) setPrefix('+')
+                  else {
+                    setPhone('+79' + e.target.value)
+                    setPrefix('+')
+                  }
                 }}
               />
             </section>

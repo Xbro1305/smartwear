@@ -2,8 +2,7 @@ import { FormEvent, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-
-import { useGetMeQuery } from '@/entities/auth'
+// import { useGetMeQuery } from '@/entities/auth'
 import { useLoginMutation, useRequestCodeMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
@@ -12,7 +11,8 @@ import styles from '../../sign-up/Signup.module.scss'
 export const SignInPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
   const [timer, setTimer] = useState<number>(30)
-  const [phone, setPhone] = useState<string>('') // Просто храним номер
+  const [prefix, setPrefix] = useState<any>('+7')
+  const [phone, setPhone] = useState<string>('')
 
   const navigate = useNavigate()
 
@@ -46,7 +46,7 @@ export const SignInPage: React.FC = () => {
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as { phone: string }
 
-    const fullPhone = value.phone // Составляем полный номер с префиксом
+    const fullPhone = prefix + value.phone
 
     setPhone(fullPhone)
     getCode(fullPhone)
@@ -95,22 +95,23 @@ export const SignInPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
             <section className={styles.signup_form_phonesect}>
-              <span></span>
+              <span>{prefix}</span>
               <PatternFormat
                 format={'# (###) ### ##-##'}
                 mask={'_'}
                 name={'phone'}
-                onChange={(e: any) => {
-                  const value = e.target.value
-
-                  const normalizedPhone =
-                    value.startsWith('7') || value.startsWith('8')
-                      ? '+7' + value.slice(1)
-                      : '+7' + value
-
-                  setPhone(normalizedPhone)
-                }}
                 value={phone}
+                onChange={(e: any) => {
+                  if (e.target.value.split('')[0] == 9) {
+                    setPhone('+7' + e.target.value)
+                    setPrefix('+')
+                  } else if (e.target.value.split('')[0] == 8) setPrefix('')
+                  else if (e.target.value.split('')[0] == 7) setPrefix('+')
+                  else {
+                    setPhone('+79' + e.target.value)
+                    setPrefix('+')
+                  }
+                }}
               />
             </section>
           </label>

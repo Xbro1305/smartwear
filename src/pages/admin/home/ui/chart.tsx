@@ -1,9 +1,4 @@
-import { Chart, registerables } from 'chart.js'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { LineChart, lineElementClasses, markElementClasses } from '@mui/x-charts/LineChart'
-
-Chart.register(...registerables)
-Chart.register(ChartDataLabels)
 
 interface ChartComponentProps {
   points: any
@@ -36,6 +31,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({ points }) => {
           [`.${lineElementClasses.root}, .${markElementClasses.root}`]: {
             strokeWidth: 1,
             stroke: '#1b1b1b',
+            strokeDasharray: '5 2',
           },
           '.MuiLineElement-series-pvId': {
             strokeDasharray: '5 5',
@@ -50,6 +46,23 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({ points }) => {
           },
           [`& .${markElementClasses.highlighted}`]: {
             stroke: 'none',
+          },
+          [`.MuiAreaElement-root`]: {
+            padding: '10px',
+          },
+          ['.MuiChartsAxis-tick']: {
+            opacity: 0,
+            margin: '20px',
+            display: 'block',
+          },
+          ['.MuiChartsAxis-line']: {
+            opacity: 0,
+            margin: '20px',
+            display: 'block',
+          },
+          '.MuiChartsAxis-tickLabel': {
+            fontSize: '16px !important',
+            margin: '20px',
           },
         }}
       />

@@ -85,7 +85,7 @@ export const MainPage = () => {
             </div>
           </div>
           <div className={styles.adminHome_right_goods}>
-            <h2 className={styles.adminHome_h2}>Список дел</h2>
+            <h2 className={styles.adminHome_h2}>Статусы товаров</h2>
             <div className={styles.adminHome_right_goods_wrapper}>
               <div className={styles.adminHome_right_goods_item}>
                 <p className={styles.adminHome_p1}>

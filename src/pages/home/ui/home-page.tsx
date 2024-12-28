@@ -26,7 +26,6 @@ import homeadv2 from '@/assets/images/homeadv (4).svg'
 import styles from '../home.module.scss'
 
 export const HomePage = () => {
-  // const navigate = useNavigate()
   const [checkedInfo, setCheckedInfo] = useState(0)
   const [mobCheckedInfo, setMobCheckedInfo] = useState(-1)
 

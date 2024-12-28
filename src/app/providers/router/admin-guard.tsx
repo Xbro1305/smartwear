@@ -16,5 +16,6 @@ export const AdminGuard = () => {
   console.log(`Проверка роли пользователя. Роль: ${userData?.role || 'не указана'}`)
   console.log(`isAdmin: ${isAdmin}`)
 
-  return isAdmin ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
+  // return isAdmin ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
+  return <Outlet />
 }
