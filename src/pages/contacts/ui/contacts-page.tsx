@@ -4,7 +4,7 @@ export const ContactPage = () => {
   return (
     <div className={styles.contact}>
       <div className={styles.contact_left}>
-        <h2 className="h2">Контакты</h2>
+        <h2 className="h1">Контакты</h2>
         <p className="p1">
           ИП Ефремова Елена Вячеславовна ОРГНИП 305470604700010 info@maxiscomfort.ru Отправляем
           интернет-заказы на следующий будний день после оформления. Наш менеджер ответит на ваши

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: var(--top-padding) var(--sides-padding);
+  padding: 0 var(--sides-padding);
   gap: 20px;
 
   &_left {

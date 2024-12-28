@@ -26,11 +26,11 @@ export const AdminLogin = () => {
   const [err, setErr] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [pass, setPass] = useState<string>('')
-  const [loading, setLoding] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e?.preventDefault()
-    setLoding(true)
+    setLoading(true)
     login({ code })
       .unwrap()
       .then(({ access_token, user }) => {
@@ -48,7 +48,7 @@ export const AdminLogin = () => {
       .catch(error => {
         console.log(error)
       })
-      .finally(() => setLoding(false))
+      .finally(() => setLoading(false))
   }
 
   const setSt = (e: any, num: number) => {
@@ -97,6 +97,7 @@ export const AdminLogin = () => {
       if (index === newValues.length - 1) {
         setCode(newValues.join(''))
         const sendingCode = newValues.join('')
+        setLoading(true)
 
         login({ code: sendingCode })
           .unwrap()
@@ -114,7 +115,7 @@ export const AdminLogin = () => {
           .catch(error => {
             console.log(error)
           })
-          .finally(() => setLoding(false))
+          .finally(() => setLoading(false))
       } else {
         setCodeId(index + 1)
         const nextInput = document.getElementById(`code-input-${index + 1}`) as HTMLInputElement
