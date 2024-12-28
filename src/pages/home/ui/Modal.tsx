@@ -15,7 +15,7 @@ export const Modal = () => {
     if (userAccessedCookies && timestamp) {
       const elapsedTime = Date.now() - parseInt(timestamp)
 
-      if (elapsedTime > 10 * 60 * 1000) {
+      if (elapsedTime > 1 * 60 * 1000) {
         localStorage.removeItem('isUserAccessedCookies')
         localStorage.removeItem('cookiesTimestamp')
         setIsSeen(true)
