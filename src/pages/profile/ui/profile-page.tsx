@@ -2,7 +2,7 @@
 import styles from './Profile.module.scss' // Пример с алиасом
 import sale from '../../../assets/images/sale.png' // Пример с алиасом для изображений
 
-import { useNavigate } from 'react-router-dom'
+// import { useNavigate } from 'react-router-dom'
 
 import itemImg from '../../../assets/images/image 139.png' // Тоже с алиасом
 //import { RegisteredDto } from "@/entities/auth/auth.types";
