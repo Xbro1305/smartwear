@@ -40,7 +40,6 @@ export const AdminLogin = () => {
         localStorage.setItem('usermiddlename', user.middleName)
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
-        localStorage.removeItem('isUserAccessedCookies')
 
         navigate('/admin')
         window.location.reload()
@@ -97,6 +96,7 @@ export const AdminLogin = () => {
       if (index === newValues.length - 1) {
         setCode(newValues.join(''))
         const sendingCode = newValues.join('')
+
         setLoading(true)
 
         login({ code: sendingCode })

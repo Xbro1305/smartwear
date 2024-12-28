@@ -30,7 +30,7 @@ export const AdminLayout = () => {
       localStorage.setItem('isActive', '')
 
       closeTimeout = setTimeout(() => {
-        if (!localStorage.getItem('isActive') && data?.role === 'ADMIN') {
+        if (!localStorage.getItem('isActive')) {
           localStorage.removeItem('token')
         }
       }, 5000)

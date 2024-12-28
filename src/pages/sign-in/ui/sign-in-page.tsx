@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+
 // import { useGetMeQuery } from '@/entities/auth'
 import { useLoginMutation, useRequestCodeMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
@@ -77,7 +78,6 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('usermiddlename', user.middleName)
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
-        localStorage.removeItem('isUserAccessedCookies')
 
         navigate('/profile')
         window.location.reload()
@@ -100,18 +100,20 @@ export const SignInPage: React.FC = () => {
                 format={'# (###) ### ##-##'}
                 mask={'_'}
                 name={'phone'}
-                value={phone}
                 onChange={(e: any) => {
                   if (e.target.value.split('')[0] == 9) {
                     setPhone('+7' + e.target.value)
                     setPrefix('+')
-                  } else if (e.target.value.split('')[0] == 8) setPrefix('')
-                  else if (e.target.value.split('')[0] == 7) setPrefix('+')
-                  else {
+                  } else if (e.target.value.split('')[0] == 8) {
+                    setPrefix('')
+                  } else if (e.target.value.split('')[0] == 7) {
+                    setPrefix('+')
+                  } else {
                     setPhone('+79' + e.target.value)
                     setPrefix('+')
                   }
                 }}
+                value={phone}
               />
             </section>
           </label>
