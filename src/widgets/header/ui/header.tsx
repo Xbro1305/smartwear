@@ -8,7 +8,7 @@ import logo from '../../../assets/images/logo.png'
 import profile from '../../../assets/images/svg (1).svg'
 import cart from '../../../assets/images/svg (2).svg'
 import search from '../../../assets/images/svg.svg'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface MenuItem {
   title: string
@@ -40,6 +40,18 @@ export const Header: React.FC = () => {
   const [activeFirstColumn, setActiveFirstColumn] = useState<number | null>(null)
   const [activeSecondColumn, setActiveSecondColumn] = useState<string | null>(null)
   const [activeColumn, setActiveColumn] = useState(0)
+  const closeMenuTimer = useRef<NodeJS.Timeout | null>(null)
+
+  const handleMouseLeave = () => {
+    closeMenuTimer.current = setTimeout(() => setActiveColumn(0), 200)
+  }
+
+  const handleMouseEnter = () => {
+    if (closeMenuTimer.current) {
+      clearTimeout(closeMenuTimer.current)
+      closeMenuTimer.current = null
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -57,8 +69,6 @@ export const Header: React.FC = () => {
     }
   }, [])
 
-  console.log(activeFirstColumn)
-
   return (
     <header className={styles.header}>
       <div className={styles.header_sect}>
@@ -69,22 +79,25 @@ export const Header: React.FC = () => {
         </Link>
         <div className={styles.header_link_with_menu}>
           <Link
+            className={styles.header_catalogLink}
             onMouseEnter={() => {
               if (activeFirstColumn != null) setActiveColumn(2)
               if (activeSecondColumn != null) setActiveColumn(3)
               else setActiveColumn(1)
+              handleMouseEnter()
             }}
-            to="/catalog"
+            onMouseLeave={handleMouseLeave}
+            to={ROUTER_PATHS.CATALOG}
           >
             Каталог
           </Link>
-
-          {/* 1 */}
           <div
             className={styles.dropdown_menu}
             style={{ display: activeColumn >= 1 ? 'flex' : 'none' }}
-            onMouseLeave={() => setActiveColumn(0)}
+            onMouseLeave={handleMouseLeave}
+            onMouseEnter={handleMouseEnter}
           >
+            {/* 1 */}
             <div
               className={styles.dropdown_block}
               style={{ display: activeColumn >= 1 ? 'flex' : 'none' }}
@@ -115,7 +128,6 @@ export const Header: React.FC = () => {
             </div>
 
             {/* 2 */}
-
             {activeFirstColumn !== null && firstColumn[activeFirstColumn]?.subCategories && (
               <div
                 className={styles.dropdown_block}
@@ -128,7 +140,9 @@ export const Header: React.FC = () => {
                       setActiveSecondColumn(subCategory)
                     }}
                     key={index}
-                    style={{ color: activeSecondColumn == subCategory ? 'var(--red)' : '' }}
+                    style={{
+                      color: activeSecondColumn == subCategory ? 'var(--red)' : '',
+                    }}
                   >
                     <Link
                       style={{
@@ -144,7 +158,6 @@ export const Header: React.FC = () => {
             )}
 
             {/* 3 */}
-
             {activeSecondColumn && thirdColumnData[activeSecondColumn] && (
               <div
                 className={styles.dropdown_block}
