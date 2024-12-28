@@ -18,7 +18,7 @@ export const AdminLayout = () => {
     const checkInactivity = () => {
       const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0', 10)
       const now = Date.now()
-      const timeout = data?.role === 'ADMIN' ? 2 * 60 * 1000 : 24 * 60 * 60 * 1000
+      const timeout = 2 * 60 * 1000
 
       if (now - lastActivity > timeout) {
         localStorage.removeItem('token')
