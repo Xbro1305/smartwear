@@ -1,10 +1,10 @@
 import ReactECharts from 'echarts-for-react'
 
-interface chart {
-  points: Number[]
+interface ChartProps {
+  points: number[]
 }
 
-export const ChartComponent: React.FC<chart> = ({ points }) => {
+export const ChartComponent: React.FC<ChartProps> = ({ points }) => {
   const option = {
     grid: {
       left: '4%',
@@ -80,11 +80,27 @@ export const ChartComponent: React.FC<chart> = ({ points }) => {
             x: 0,
             y: 0,
             x2: 0,
-            y2: 1.5,
+            y2: 1,
             colorStops: [
-              { offset: 0, color: '#ebebeb' },
-              { offset: 1, color: '#fff' },
+              { offset: 0, color: 'rgb(195, 195, 195)' }, // Светлый серый с большей прозрачностью
+              { offset: 1, color: 'rgba(255, 255, 255, 0.6)' }, // Почти белый
             ],
+          },
+        },
+        emphasis: {
+          focus: 'series',
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgb(195, 195, 195)' }, // Светлый серый с большей прозрачностью
+                { offset: 1, color: 'rgba(255, 255, 255, 0.6)' },
+              ],
+            },
           },
         },
       },

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 40px var(--sides-padding);
+  padding: var(--top-padding) var(--sides-padding);
   gap: 20px;
 
   &_left {
@@ -23,7 +23,6 @@
   }
 
   @media (max-width: 900px) {
-    padding: 10px var(--sides-padding);
     display: flex;
     flex-direction: column-reverse;
 
