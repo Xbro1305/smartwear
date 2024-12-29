@@ -7,7 +7,7 @@ interface chart {
 export const ChartComponent: React.FC<chart> = ({ points }) => {
   const option = {
     grid: {
-      left: '3%',
+      left: '4%',
       right: '0%',
       bottom: '10%',
       top: '5%',
