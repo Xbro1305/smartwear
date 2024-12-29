@@ -44,12 +44,13 @@ export const AdminLogin = () => {
         setTimeout(() => {
           navigate('/admin')
           window.location.reload()
+          setLoading(false)
         }, 4000)
       })
       .catch(error => {
         console.log(error)
+        setLoading(false)
       })
-      .finally(() => setLoading(false))
   }
 
   const setSt = (e: any, num: number) => {

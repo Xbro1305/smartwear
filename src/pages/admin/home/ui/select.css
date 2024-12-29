@@ -76,7 +76,7 @@
 }
 
 .adminHeader_link.active {
-  background: #f8f8f8;
+  background: #fff;
   padding: 10px;
   border-radius: 18px;
   border-style: dashed;

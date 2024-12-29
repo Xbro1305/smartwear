@@ -135,6 +135,7 @@ export const SignUpPage: React.FC = () => {
                     setPrefix('+')
                   }
                 }}
+                style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
               />
             </section>
           </label>

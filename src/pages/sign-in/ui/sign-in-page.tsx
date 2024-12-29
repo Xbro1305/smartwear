@@ -114,6 +114,7 @@ export const SignInPage: React.FC = () => {
                   }
                 }}
                 value={phone}
+                style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
               />
             </section>
           </label>
