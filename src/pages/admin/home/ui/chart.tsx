@@ -1,71 +1,95 @@
-import { LineChart, lineElementClasses, markElementClasses } from '@mui/x-charts/LineChart'
+import ReactECharts from 'echarts-for-react'
 
-interface ChartComponentProps {
-  points: any
+interface chart {
+  points: Number[]
 }
 
-export const ChartComponent: React.FC<ChartComponentProps> = ({ points }) => {
-  return (
-    <>
-      <LineChart
-        series={[
-          {
-            curve: 'natural',
-            color: '#1b1b1b',
-            data: points,
-            area: true,
+export const ChartComponent: React.FC<chart> = ({ points }) => {
+  const option = {
+    grid: {
+      left: '3%',
+      right: '0%',
+      bottom: '10%',
+      top: '5%',
+    },
+    xAxis: {
+      type: 'category',
+      data: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14'],
+      axisLine: {
+        lineStyle: {
+          color: '#fff',
+        },
+      },
+      axisLabel: {
+        show: true,
+        color: '#1b1b1b',
+        fontSize: 16,
+        fontFamily: 'Inter',
+      },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        color: '#1b1b1b',
+        fontSize: 16,
+        fontFamily: 'Inter',
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#fff',
+        },
+      },
+    },
+    series: [
+      {
+        type: 'line',
+        data: points,
+        symbol: 'circle',
+        symbolSize: 6,
+        smooth: true,
+        lineStyle: {
+          width: 2,
+          type: 'dashed',
+          color: '#1b1b1b',
+        },
+        itemStyle: {
+          color: '#1b1b1b',
+        },
+        label: {
+          show: true,
+          position: 'top',
+          formatter: (params: any) => (params.value ? params.value : ''),
+          color: '#1b1b1b',
+          fontSize: 16,
+          fontFamily: 'Inter',
+          backgroundColor: '#f5f5f5',
+          padding: [3, 5],
+          borderRadius: 4,
+          borderWidth: 1,
+          borderColor: '#f5f5f5',
+        },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1.5,
+            colorStops: [
+              { offset: 0, color: '#ebebeb' },
+              { offset: 1, color: '#fff' },
+            ],
           },
-        ]}
-        yAxis={[
-          {
-            colorMap: {
-              type: 'continuous',
-              min: 0,
-              max: Math.max(...points),
-              color: ['#fff', '#ebebeb'],
-            },
-          },
-        ]}
-        xAxis={[{ scaleType: 'point', data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] }]}
-        sx={{
-          [`.${lineElementClasses.root}, .${markElementClasses.root}`]: {
-            strokeWidth: 1,
-            stroke: '#1b1b1b',
-            strokeDasharray: '5 2',
-          },
-          '.MuiLineElement-series-pvId': {
-            strokeDasharray: '5 5',
-            fill: '#1b1b1b',
-          },
-          '.MuiLineElement-series-uvId': {
-            strokeDasharray: '3 4 5 2',
-            fill: '#1b1b1b',
-          },
-          [`.${markElementClasses.root}:not(.${markElementClasses.highlighted})`]: {
-            fill: '#1b1b1b',
-          },
-          [`& .${markElementClasses.highlighted}`]: {
-            stroke: 'none',
-          },
-          [`.MuiAreaElement-root`]: {
-            padding: '10px',
-          },
-          ['.MuiChartsAxis-tick']: {
-            opacity: 0,
-            margin: '20px',
-            display: 'block',
-          },
-          ['.MuiChartsAxis-line']: {
-            opacity: 0,
-            margin: '20px',
-            display: 'block',
-          },
-          '.MuiChartsAxis-tickLabel': {
-            fontSize: '16px !important',
-            margin: '20px',
-          },
-        }}
-      />
-    </>
-  )
+        },
+      },
+    ],
+  }
+
+  return <ReactECharts option={option} style={{ height: 400, width: '100%' }} />
 }
