@@ -122,7 +122,6 @@ export const AdminLogin = () => {
             console.log(error)
             setLoading(false)
           })
-          .finally(() => setLoading(false))
       } else {
         setCodeId(index + 1)
         const nextInput = document.getElementById(`code-input-${index + 1}`) as HTMLInputElement
