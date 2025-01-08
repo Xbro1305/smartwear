@@ -1,33 +1,44 @@
+export enum Section {
+  NEWS = 'NEWS',
+  SEO = 'SEO',
+  USER = 'USER',
+}
+
+export enum Composition {
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+}
+
 export type ArticleDto = {
-  composition: string
+  composition: Composition
   description: string
   id: number
   metaDescription: string
   metaTitle: string
   paragraphs: ParagraphDto[]
-  section: string
+  section: Section
   title: string
   userId: number
 }
 
 export type CreateArticleDto = {
-  composition: string
+  composition: Composition
   description: string
   metaDescription: string
   metaTitle: string
   paragraphs: CreateParagraphDto[]
-  section: string
+  section: Section
   title: string
   userId: number
 }
 
 export type UpdateArticleDto = {
-  composition?: string
+  composition?: Composition
   description?: string
   imageUrl?: string
   metaDescription?: string
   metaTitle?: string
-  section?: string
+  section?: Section
   title?: string
 }
 
