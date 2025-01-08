@@ -46,6 +46,7 @@
     --service: #b0b7bf;
     --sides-padding: 150px;
     --top-padding: 90px;
+    --admin-dark: #292929;
   }
 
   @media (max-width: 1200px) {
@@ -114,18 +115,13 @@ input[type='search']::-webkit-search-results-decoration {
   appearance: none;
 }
 
-/* 
+/* fonts */
+/*  */
+/*  */
+/*  */
+/*  */
 
-
-
-
-
-
-
-
-fonts
-*/
-
+/* client */
 .h1 {
   font-size: 64px;
   font-weight: 500;
@@ -252,4 +248,148 @@ fonts
     font-size: 16px;
     line-height: 16px;
   }
+}
+
+/* admin */
+
+#h1 {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 46px;
+  color: var(--admin-dark);
+  font-family: Nunito Sans;
+}
+
+#h2 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--admin-dark);
+  font-family: Nunito Sans;
+}
+
+#h4 {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 33.6px;
+  color: var(--admin-dark);
+}
+
+#h5 {
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 27.6px;
+  color: var(--admin-dark);
+}
+
+#p1 {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 15px;
+  color: var(--admin-dark);
+  font-family: Nunito Sans;
+}
+
+#p2 {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 14px;
+  color: var(--admin-dark);
+  font-family: Nunito Sans;
+}
+
+#button {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 26.4px;
+  background: var(--red);
+  color: var(--white);
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+@media (max-width: 1440px) {
+  #h1 {
+    font-size: 56px;
+    line-height: 67.2px;
+  }
+
+  #h2 {
+    font-size: 34px;
+    line-height: 40.8px;
+  }
+
+  #h4 {
+    font-size: 24px;
+    line-height: 28.8px;
+  }
+
+  #h5 {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  #p1 {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  #p2 {
+    font-size: 16px;
+    line-height: 20.8px;
+  }
+
+  #button {
+    font-size: 17px;
+    line-height: 20.4px;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  #h1 {
+    font-size: 36px;
+    line-height: 39.6px;
+  }
+
+  #h2 {
+    font-size: 26px;
+    line-height: 28.6px;
+  }
+
+  #h4 {
+    font-size: 22px;
+    line-height: 26.4px;
+  }
+
+  #h5 {
+    font-size: 18px;
+    line-height: 23.4px;
+  }
+
+  #p1 {
+    font-size: 18px;
+    line-height: 23.4px;
+  }
+
+  #p2 {
+    font-size: 16px;
+    line-height: 20.8px;
+  }
+
+  #button {
+    font-size: 16px;
+    line-height: 16px;
+  }
+}
+
+#adminSideBar_link.active {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+#adminSideBar_link.active svg {
+  opacity: 1;
+  fill: #1e293b;
 }

@@ -39,7 +39,7 @@ export const Select: React.FC<Option> = ({ options }) => {
   )
 }
 
-export const MonthsSelect: React.FC<Option> = ({ options }) => {
+export const CustomSelect: React.FC<Option> = ({ options }) => {
   const [selectedOption, setSelectedOption] = useState<any>(options[0])
   const [isOpen, setIsOpen] = useState(false)
 

@@ -12,9 +12,8 @@ import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
-const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN, SIGN_UP } =
-  ROUTER_PATHS
-const { ACS, MEN, WOMEN } = ROUTER_PATHS
+const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN } = ROUTER_PATHS
+const { ACS, MEN, WOMEN, SIGN_UP } = ROUTER_PATHS
 
 export const publicRoutes: RouteObject[] = [
   {

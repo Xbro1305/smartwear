@@ -1,0 +1,135 @@
+.articles {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 60px;
+  gap: 56px;
+
+  &_top {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+
+    &_left {
+      display: flex;
+      gap: 12px;
+
+      label {
+        position: relative;
+
+        svg {
+          position: absolute;
+          top: 50%;
+          left: 15px;
+          transform: translateY(-50%);
+          fill: #202224;
+        }
+
+        .select-item img {
+          width: 16px !important;
+          height: 16px !important;
+        }
+
+        input {
+          padding: 0 48px;
+          display: flex;
+          align-items: center;
+          height: 48px;
+          padding-right: 13px;
+          gap: 16px;
+          border-radius: 12px;
+          opacity: 0px;
+          outline: none;
+          border: 1px solid #dadada;
+        }
+      }
+
+      &_button {
+        border-radius: 12px;
+        border: 1px solid #dadada;
+        height: 48px;
+        width: 48px;
+        display: flex;
+        justify-content: center;
+
+        align-items: center;
+        padding-top: 5px;
+        padding-bottom: 15px;
+        svg {
+          transform: scale(1.1);
+          margin-top: 8px;
+        }
+      }
+    }
+  }
+
+  &_list {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  &_section {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    > h2 {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      margin-bottom: 20px;
+
+      p {
+        transition: all 0.3s ease;
+      }
+
+      > button {
+        margin-left: auto;
+
+        svg {
+          transform: scale(0.5);
+        }
+      }
+    }
+
+    > button {
+      font-size: 15px;
+      font-weight: 500;
+      color: #b0b0b0;
+      line-height: 15px;
+    }
+
+    &_createButton {
+      display: flex;
+      text-align: left;
+      width: fit-content;
+    }
+
+    &_list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      &_item {
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+        display: flex;
+        gap: 20px;
+
+        h2 {
+          font-size: 15px;
+          font-weight: 500;
+          line-height: 15px;
+          flex: 1;
+        }
+
+        button {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-
+import { ROUTER_PATHS } from '@/shared/config/routes'
 import { useGetMeQuery } from '@/entities/auth'
+import { SideBar } from '@/widgets/adminSidebar/sidebar'
+import { AdminHeader } from '@/widgets/adminHeader/adminHeader'
 export const AdminLayout = () => {
   const { data } = useGetMeQuery()
 
@@ -54,11 +56,28 @@ export const AdminLayout = () => {
       clearTimeout(closeTimeout)
     }
   }, [data])
-  const renderMain = (
-    <main>
-      <Outlet />
-    </main>
-  )
+
+  const { ADMINLOGIN } = ROUTER_PATHS
+
+  const renderMain =
+    window.location.pathname != ADMINLOGIN ? (
+      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', width: '100%' }}>
+        <SideBar />
+        <main
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <AdminHeader />
+          <Outlet />
+        </main>
+      </div>
+    ) : (
+      <main>
+        <Outlet />
+      </main>
+    )
 
   return (
     <>

@@ -24,11 +24,6 @@
   gap: 10px;
 }
 
-.select-selected img {
-  width: 12px;
-  height: 12px;
-}
-
 .select-items {
   position: absolute;
   z-index: 99;
@@ -37,6 +32,7 @@
   margin-top: 5px;
   background: #fff;
   border-radius: 12px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
 .select-item {
@@ -55,11 +51,6 @@
 
 .select-items .select-item {
   padding: 10px 20px;
-}
-
-.select-item img {
-  width: 12px;
-  height: 12px;
 }
 
 .select-item svg {
