@@ -48,6 +48,13 @@ export const articleApi = baseApi.injectEndpoints({
       }),
     }),
 
+    searchArticleByKeyword: builder.query<ArticleDto | null, string>({
+      query: keyword => ({
+        method: 'GET',
+        url: `/articles/search/${keyword}`,
+      }),
+    }),
+
     updateArticle: builder.mutation<any, { data: UpdateArticleDto; id: number }>({
       query: ({ data, id }) => ({
         body: data,
@@ -72,6 +79,7 @@ export const {
   useDeleteArticleMutation,
   useGetArticleDraftsQuery,
   useGetArticlesQuery,
+  useSearchArticleByKeywordQuery,
   useUpdateArticleMutation,
   useUpdateParagraphMutation,
 } = articleApi
