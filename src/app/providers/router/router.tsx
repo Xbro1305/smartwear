@@ -6,8 +6,6 @@ import { RootLayout } from '../../layouts/root-layout'
 import { adminRoutes } from './admin-routes'
 import { privateRoutes } from './private-routes'
 import { publicRoutes } from './public-routes'
-import { adminRoutes } from './admin-routes'
-import { AdminLayout } from '@/app/layouts/admin-layout'
 
 const router = createBrowserRouter([
   {
