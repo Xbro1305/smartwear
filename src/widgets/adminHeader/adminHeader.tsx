@@ -8,12 +8,12 @@ const { ADMINARTICLES, ADMIN } = ROUTER_PATHS
 export const AdminHeader = () => {
   const menuItems = [
     { name: 'Главная', path: ADMIN, end: true },
-    { name: 'Сотрудники', path: '/admin/employees', end: false },
-    { name: 'Покупатели', path: '/admin/customers', end: false },
-    { name: 'Заказы', path: '/admin/orders', end: false },
+    { name: 'Статистика', path: '/admin/statistics', end: false },
+    // { name: 'Сотрудники', path: '/admin/employees', end: false },
+    { name: 'Клиенты', path: '/admin/clients', end: false },
     { name: 'Новости', path: '/admin/news', end: false },
-    { name: 'Настройки', path: '/admin/settings', end: false },
     { name: 'Статьи', path: ADMINARTICLES, end: false },
+    { name: 'Заказы', path: '/admin/orders', end: false },
     { name: 'Товары', path: '/products', end: false },
   ]
 

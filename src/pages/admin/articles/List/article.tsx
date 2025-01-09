@@ -22,9 +22,12 @@ export const Article: React.FC<ArticleProps> = ({ section, index }) => {
 
   return (
     <div key={index} className={styles.articles_section}>
-      <h2 id="h2" onClick={() => setOpened(!opened)}>
-        {section.category}{' '}
-        <p style={{ transform: opened ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+      <h2 id="h2">
+        <p onClick={() => setOpened(!opened)}>{section.category}</p>
+        <p
+          onClick={() => setOpened(!opened)}
+          style={{ transform: opened ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
           <IoIosArrowDown />
         </p>
         <button className={styles.articles_top_left_button}>
@@ -53,7 +56,7 @@ export const Article: React.FC<ArticleProps> = ({ section, index }) => {
               <h2>
                 {article.draft ? <strong>Черновик:</strong> : null} {article.title}
               </h2>
-              <button>
+              <button onClick={() => navigate(`/admin/edit-article/${article.title}`)}>
                 <FaPen />
               </button>
               <button>

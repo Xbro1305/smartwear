@@ -1,0 +1,62 @@
+.ql-snow .ql-picker.ql-size {
+  width: 50px;
+  height: 48px !important;
+  padding: 13px 1px;
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=''])::before {
+  font-size: 16px !important;
+}
+
+.ql-toolbar {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.ql-container {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  border-top: none !important;
+  padding: 0 !important;
+  display: flex;
+  min-height: 100px;
+  height: auto;
+  align-items: center;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.ql-sect {
+  height: 48px;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+.ql-toolbar button {
+  height: 28px !important;
+  width: 28px !important;
+  width: fit-content;
+  margin: auto 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ql-blank {
+  width: 100%;
+}
+
+.ql-toolbar button.ql-img {
+  width: 135px !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 20px;
+}

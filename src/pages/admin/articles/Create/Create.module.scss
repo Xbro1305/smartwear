@@ -1,0 +1,78 @@
+.createArticle {
+  display: grid;
+  grid-template-columns: 625px 400px;
+  justify-content: space-between;
+  width: 100%;
+  padding: 60px;
+  gap: 37px;
+
+  &_left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &_top {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+
+    &_title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    input {
+      outline: none;
+    }
+
+    &_type {
+      padding: 5px 20px;
+      border-radius: 15px;
+      color: linear-gradient(0deg, #202224, #202224),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
+      height: fit-content;
+      background: #f9f9f9;
+    }
+
+    &_buttons {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-radius: 12px;
+      }
+
+      &_left {
+        background: #f8fafc;
+      }
+
+      &_right {
+        background: #1e293b;
+        color: #fff;
+      }
+    }
+  }
+
+  &_paragraphs {
+    &_add {
+      margin: 0 auto;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      background: #f8fafc;
+      border-radius: 50%;
+      color: #475569;
+    }
+  }
+}

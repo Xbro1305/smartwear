@@ -61,7 +61,9 @@ export const AdminLayout = () => {
 
   const renderMain =
     window.location.pathname != ADMINLOGIN ? (
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', width: '100%' }}>
+      <div
+        style={{ display: 'grid', gridTemplateColumns: '300px calc(100% - 300px)', width: '100%' }}
+      >
         <SideBar />
         <main
           style={{
