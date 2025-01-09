@@ -90,6 +90,7 @@ export const RootLayout = () => {
       <Header />
       {!isLoading && renderMain}
       <Footer />
+      <Footer />
     </div>
   )
 }
