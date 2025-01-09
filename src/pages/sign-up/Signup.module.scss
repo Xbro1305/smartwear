@@ -3,13 +3,14 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  background: #f2f2f2;
+  background: var(--gray);
   padding: 100px 0;
   min-height: 100vh;
-  color: #282b32;
+  color: var(--dark);
 
   &_form {
-    background: #ffffff;
+    border-radius: 8px;
+    background: var(--white);
     padding: 40px;
     width: 100%;
     max-width: 526px;
@@ -34,7 +35,7 @@
         font-size: 19px;
         font-weight: 400;
         line-height: 22.8px;
-        color: #b0b7bf;
+        color: var(--service);
       }
 
       input {
@@ -42,32 +43,35 @@
         border: none;
         background: none;
         outline: none;
-        border-bottom: 3px solid #b0b7bf;
+        border-bottom: 3px solid var(--service);
         font-size: 22px;
         font-weight: 400;
-        color: #282b32;
+        color: var(--dark);
         line-height: 28.6px;
       }
     }
 
     &_confirmLabel {
-      display: flex;
-      flex-direction: row;
+      display: grid;
+      grid-template-columns: 24px 1fr;
       gap: 20px;
       cursor: pointer;
       position: relative;
 
       input {
+        min-width: 24px;
         width: 24px;
+        min-height: 24px;
         height: 24px;
         border: none;
         z-index: 1;
+        opacity: 0;
         border-radius: 5px;
       }
 
       p::after {
         content: '';
-        border: 3px solid #b0b7bf;
+        border: 3px solid var(--service);
         display: block;
         margin-left: -0.5px;
         margin-top: -0.5px;
@@ -80,9 +84,19 @@
         top: 0;
       }
 
+      input:checked ~ p::after {
+        background: var(--red);
+        content: '\2713';
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        border-color: var(--red);
+      }
+
       p::before {
         content: '';
-        border: 3px solid #fff;
+        border: 3px solid var(--white);
         display: block;
         margin-left: -1px;
         margin-top: -1px;
@@ -109,10 +123,10 @@
       font-weight: 400;
       line-height: 22.8px;
       text-align: center;
-      color: #282b32;
+      color: var(--dark);
 
       a {
-        color: #282b32;
+        color: var(--dark);
       }
     }
 
@@ -123,10 +137,10 @@
       width: fit-content;
       padding: 12px 24px;
       margin: 0 auto;
-      background: #dc2a1f;
+      background: var(--red);
       border-radius: 8px;
       border: none;
-      color: #ffffff;
+      color: var(--white);
       cursor: pointer;
     }
 
@@ -138,7 +152,7 @@
 
       a {
         text-decoration: none;
-        color: #dc2a1f;
+        color: var(--red);
       }
     }
 
@@ -150,6 +164,26 @@
       background: none;
       border: none;
     }
+
+    &_phonesect {
+      display: flex;
+      gap: 10px;
+      position: relative;
+
+      span {
+        font-size: 22px;
+        outline: none;
+        font-weight: 400;
+        border-bottom: 3px solid transparent;
+        position: absolute;
+        bottom: 10px;
+      }
+
+      input {
+        width: 100%;
+        padding-left: 15px;
+      }
+    }
   }
 
   @media (max-width: 526px) {
@@ -157,6 +191,7 @@
 
     &_form {
       padding: 20px 10px;
+      border-radius: 0px;
     }
   }
 }

@@ -1,27 +1,52 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
-type ModalProps = {
-  children: React.ReactNode
-  isOpen: boolean
-  onClose: () => void
-}
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
-const Modal: React.FC<ModalProps> = ({ children, isOpen, onClose }) => {
-  if (!isOpen) {
+import styles from '../home.module.scss'
+
+export const Modal = () => {
+  const [show, setIsSeen] = useState(!localStorage.getItem('isUserAccessedCookies'))
+
+  useEffect(() => {
+    const userAccessedCookies = localStorage.getItem('isUserAccessedCookies')
+    const timestamp = localStorage.getItem('cookiesTimestamp')
+
+    if (userAccessedCookies && timestamp) {
+      const elapsedTime = Date.now() - parseInt(timestamp)
+
+      if (elapsedTime > 1 * 60 * 1000) {
+        localStorage.removeItem('isUserAccessedCookies')
+        localStorage.removeItem('cookiesTimestamp')
+        setIsSeen(true)
+      } else {
+        setIsSeen(false)
+      }
+    } else {
+      setIsSeen(true)
+    }
+  }, [])
+
+  const close = () => {
+    localStorage.setItem('isUserAccessedCookies', 'true')
+    localStorage.setItem('cookiesTimestamp', Date.now().toString())
+    setIsSeen(false)
+  }
+
+  if (!show) {
     return null
   }
 
   return (
-    <div className={'fixed inset-0 flex items-center justify-center z-50'}>
-      <div className={'fixed inset-0 bg-black opacity-50'} onClick={onClose}></div>
-      <div className={'bg-white p-6 rounded-lg z-10 max-w-lg w-full'}>
-        {children}
-        <button className={'mt-4 w-full bg-red-500 text-white py-2 rounded-lg'} onClick={onClose}>
-          Закрыть
-        </button>
-      </div>
+    <div className={styles.modal}>
+      <p className={styles.modal_text}>
+        Продолжая пользоваться сайтом, вы соглашаетесь на обработку файлов cookie и других
+        пользовательских данных в соответствии с{' '}
+        <Link to={ROUTER_PATHS.POLITICS}>политикой конфиденциальности</Link>.
+      </p>
+      <button className={styles.modal_button} onClick={close}>
+        Понятно
+      </button>
     </div>
   )
 }
-
-export default Modal

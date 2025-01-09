@@ -1,0 +1,45 @@
+.adminHeader {
+  background: #ececec;
+  padding: 0 30px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  &_links {
+    display: flex;
+    align-items: center;
+
+    a {
+      font-family: Nunito Sans;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 14px;
+      padding: 12px 20px;
+    }
+  }
+
+  label {
+    position: relative;
+
+    svg {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      fill: #b0b0b0;
+    }
+
+    input {
+      padding: 13px 48px;
+      padding-right: 13px;
+      gap: 16px;
+      border-radius: 12px;
+      opacity: 0px;
+      outline: none;
+    }
+  }
+}

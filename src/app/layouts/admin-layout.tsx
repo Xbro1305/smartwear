@@ -1,44 +1,87 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { Header } from '@/widgets/header'
-import { Footer } from '@/widgets/footer'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 import { useGetMeQuery } from '@/entities/auth'
-
+import { SideBar } from '@/widgets/adminSidebar/sidebar'
+import { AdminHeader } from '@/widgets/adminHeader/adminHeader'
 export const AdminLayout = () => {
-  const { isError, isLoading } = useGetMeQuery()
-  const isAuthenticated = !isError && !isLoading
+  const { data } = useGetMeQuery()
 
-  if (isLoading) {
-    return <div>Проверка ваших полномочий...</div>
-  }
+  useEffect(() => {
+    localStorage.setItem('isActive', 'true')
+    let closeTimeout: any
 
-  const renderMain = (
-    <main
-      className={
-        'grow flex  flex-col lg:justify-center lg:items-center justify-center items-center pt-[var(--header-height)]'
+    const markActive = () => {
+      localStorage.setItem('isActive', 'true')
+      clearTimeout(closeTimeout)
+      localStorage.setItem('lastActivity', Date.now().toString())
+    }
+
+    const checkInactivity = () => {
+      const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0', 10)
+      const now = Date.now()
+      const timeout = 2 * 60 * 1000
+
+      if (now - lastActivity > timeout) {
+        localStorage.removeItem('token')
+        window.location.reload()
       }
-    >
-      <Outlet />
-    </main>
-  )
+    }
 
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
+    const handleBeforeUnload = () => {
+      localStorage.setItem('isActive', '')
 
-  if (isAuthenticated) {
-    return (
-      <>
-        <div
-          className={
-            'px-8 flex h-screen flex-1 gap-5 md:grid md:grid-cols-[220px_minmax(0,1fr)] lg:justify-center lg:items-center justify-center items-center lg:grid-cols-[220px_minmax(0,1fr)]'
-          }
-          translate={'no'}
+      closeTimeout = setTimeout(() => {
+        if (!localStorage.getItem('isActive')) {
+          localStorage.removeItem('token')
+        }
+      }, 5000)
+    }
+
+    window.addEventListener('mousemove', markActive)
+    window.addEventListener('keydown', markActive)
+    window.addEventListener('mousedown', markActive)
+    window.addEventListener('scroll', markActive)
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    const interval = setInterval(checkInactivity, 5 * 60 * 1000)
+
+    return () => {
+      window.removeEventListener('mousemove', markActive)
+      window.removeEventListener('keydown', markActive)
+      window.removeEventListener('mousedown', markActive)
+      window.removeEventListener('scroll', markActive)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      clearInterval(interval)
+      clearTimeout(closeTimeout)
+    }
+  }, [data])
+
+  const { ADMINLOGIN } = ROUTER_PATHS
+
+  const renderMain =
+    window.location.pathname != ADMINLOGIN ? (
+      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', width: '100%' }}>
+        <SideBar />
+        <main
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         >
-          {renderMain}
-        </div>
-      </>
+          <AdminHeader />
+          <Outlet />
+        </main>
+      </div>
+    ) : (
+      <main>
+        <Outlet />
+      </main>
     )
-  }
 
-  return <div className={'h-screen min-w-full flex flex-col'}>{!isLoading && renderMain}</div>
+  return (
+    <>
+      <div>{renderMain}</div>
+    </>
+  )
 }

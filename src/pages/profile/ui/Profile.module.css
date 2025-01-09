@@ -187,7 +187,7 @@
   border-radius: 5px;
 }
 .profile_form_confirmLabel p::after {
-  content: "";
+  content: '';
   border: 3px solid #b0b7bf;
   display: block;
   margin-left: -0.5px;
@@ -201,7 +201,7 @@
   top: 0;
 }
 .profile_form_confirmLabel p::before {
-  content: "";
+  content: '';
   border: 3px solid #fff;
   display: block;
   margin-left: -1px;
@@ -243,13 +243,13 @@
 }
 .profile_orders > h1 {
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 33.6px;
 }
 @media (max-width: 1024px) {
   .profile_orders > h1 {
     font-size: 22px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 26.4px;
   }
 }
@@ -275,10 +275,10 @@
   width: 120px;
   height: 120px;
   -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   border-radius: 8px;
   -o-object-position: center;
-     object-position: center;
+  object-position: center;
 }
 .profile_orders_item > div {
   width: calc(100% - 150px);
@@ -430,4 +430,4 @@
   .profile {
     padding: 12px 16px;
   }
-}/*# sourceMappingURL=Profile.module.css.map */
+} /*# sourceMappingURL=Profile.module.css.map */

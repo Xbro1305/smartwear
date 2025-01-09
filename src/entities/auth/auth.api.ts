@@ -1,66 +1,70 @@
-import { baseApi } from '@/shared/api';  
-import { RegisterDto, RequestAdminCodeDto, RequestCodeDto, ConfirmCodeDto, LoginDto } from './auth.types';
+import { baseApi } from '@/shared/api'
+
+import {
+  AdminData,
+  ConfirmCodeDto,
+  LoginDto,
+  RegisterDto,
+  RegisteredDto,
+  RequestAdminCodeDto,
+  RequestCodeDto,
+} from './auth.types'
 export const authApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    
-    register: builder.mutation<void, RegisterDto>({
-      query: (body) => ({
-        url: '/auth/register',
-        method: 'POST',
+  endpoints: builder => ({
+    confirmRegistration: builder.mutation<void, ConfirmCodeDto>({
+      query: body => ({
         body,
+        method: 'POST',
+        url: '/auth/confirm-registration',
       }),
     }),
 
-    confirmRegistration: builder.mutation<void, ConfirmCodeDto>({
-      query: (body) => ({
-        url: '/auth/confirm-registration',
-        method: 'POST',
+    getMe: builder.query<RegisteredDto, void>({
+      query: () => ({
+        method: 'GET',
+        url: '/users/me',
+      }),
+    }),
+
+    login: builder.mutation<{ access_token: string; user: RegisteredDto }, LoginDto>({
+      query: body => ({
         body,
+        method: 'POST',
+        url: '/auth/login',
+      }),
+    }),
+
+    register: builder.mutation<void, RegisterDto>({
+      query: body => ({
+        body,
+        method: 'POST',
+        url: '/auth/register',
+      }),
+    }),
+
+    requestAdminCode: builder.mutation<AdminData, RequestAdminCodeDto>({
+      query: body => ({
+        body,
+        method: 'POST',
+        url: '/auth/request-admin-code',
       }),
     }),
 
     requestCode: builder.mutation<void, RequestCodeDto>({
-      query: (body) => ({
+      query: body => ({
+        body,
+        method: 'POST',
         url: '/auth/request-code',
-        method: 'POST',
-        body,
-      }),
-    }),
-
-    requestAdminCode: builder.mutation<void, RequestAdminCodeDto>({
-      query: (body) => ({
-        url: '/auth/request-admin-code',
-        method: 'POST',
-        body,
-      }),
-    }),
-
-    login: builder.mutation<{ access_token: string }, LoginDto>({
-      query: (body) => ({
-        url: '/auth/login',
-        method: 'POST',
-        body,
-      }),
-    }),
-
-    getMe: builder.query<any, void>({
-      query: () => ({
-        url: '/users/me',
-        method: 'GET',
-        
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
       }),
     }),
   }),
-});
+})
 
 export const {
-  useRegisterMutation,
   useConfirmRegistrationMutation,
-  useRequestCodeMutation,
-  useRequestAdminCodeMutation,
+  useGetMeQuery,
   useLoginMutation,
-  useGetMeQuery, 
-} = authApi;
+  useRegisterMutation,
+  useRequestAdminCodeMutation,
+  useRequestCodeMutation,
+} = authApi

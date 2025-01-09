@@ -1,20 +1,26 @@
-import { useState, FormEvent } from 'react'
-import styles from '../Signup.module.scss'
+import { FormEvent, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
-import { enqueueSnackbar } from 'notistack'
-import { useRegisterMutation, useConfirmRegistrationMutation } from '@/entities/auth'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+
+import {
+  useConfirmRegistrationMutation,
+  useRegisterMutation,
+  useRequestCodeMutation,
+} from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
+import styles from '../Signup.module.scss'
+
 interface FormData {
-  surname?: string
+  code?: string
+  email?: string
+  isSubscribed?: boolean
   name?: string
   patronomic?: string
   phone?: string
-  email?: string
-  code?: string
-  isSubscribed?: boolean
+  surname?: string
+  prefix?: string
 }
 
 export const SignUpPage: React.FC = () => {
@@ -22,25 +28,34 @@ export const SignUpPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
   const [timer, setTimer] = useState<number>(30)
   const [data, setData] = useState<FormData>({})
+  const [phone, setPhone] = useState<null | string>(null)
+  const [prefix, setPrefix] = useState<any>('+7')
   const navigate = useNavigate()
 
   const [register] = useRegisterMutation()
   const [confirmRegister] = useConfirmRegistrationMutation()
+  const [request] = useRequestCodeMutation()
+
+  const handleRequest = () => {
+    request({ phone: data.phone as string })
+  }
 
   const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as FormData
+
     setData(value)
+    console.log((prefix + value?.phone) as string)
 
     const registerData = {
-      surName: value.surname as string,
-      name: value.name as string,
-      middleName: value.patronomic as string,
-      phone: value.phone as string,
       email: value.email as string,
       isSubscribed: cb,
+      middleName: value.patronomic as string,
+      name: value.name as string,
+      phone: ((prefix as string) + value?.phone) as string,
+      surName: value.surname as string,
     }
 
     try {
@@ -54,35 +69,28 @@ export const SignUpPage: React.FC = () => {
 
       setTimeout(() => clearInterval(interval), 30000)
     } catch (error) {
-      enqueueSnackbar('Ошибка при регистрации', {
-        variant: 'error',
-      })
+      console.log(error)
     }
   }
 
-  const handleConfirm = async (e: FormEvent<HTMLFormElement>) => {
+  const handleConfirm = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as FormData
 
     if (value.code?.includes('-')) {
-      return enqueueSnackbar('Неправильный код', {
-        variant: 'error',
-      })
+      console.log('вы не ввели код')
     }
 
-    try {
-      await confirmRegister({ phone: data.phone!, code: value.code! }).unwrap()
-      enqueueSnackbar('Вы успешно зарегистрировались', {
-        variant: 'success',
+    confirmRegister({ code: value.code!, phone: data.phone! })
+      .unwrap()
+      .then(() => {
+        navigate('/sign-in')
       })
-      navigate(ROUTER_PATHS.SIGN_IN)
-    } catch (error) {
-      enqueueSnackbar('Ошибка при подтверждении регистрации', {
-        variant: 'error',
+      .catch(error => {
+        console.log(error)
       })
-    }
   }
 
   return (
@@ -94,30 +102,51 @@ export const SignUpPage: React.FC = () => {
             <p>
               Фамилия <span style={{ color: 'red' }}>*</span>
             </p>
-            <input type="text" name="surname" required />
+            <input name={'surname'} required type={'text'} />
           </label>
           <label className={styles.signup_form_label}>
             <p>
               Имя <span style={{ color: 'red' }}>*</span>
             </p>
-            <input type="text" name="name" required />
+            <input name={'name'} required type={'text'} />
           </label>
           <label className={styles.signup_form_label}>
             <p>Отчество</p>
-            <input type="text" name="patronomic" />
+            <input name={'patronomic'} type={'text'} />
           </label>
           <label className={styles.signup_form_label}>
             <p>Номер телефона</p>
-            <PatternFormat format="+7 (###) ### ##-##" allowEmptyFormatting mask="_" name="phone" />
+            <section className={styles.signup_form_phonesect}>
+              <span>{prefix}</span>
+              <PatternFormat
+                // allowEmptyFormatting
+                format={'# (###) ### ##-##'}
+                mask={'_'}
+                name={'phone'}
+                value={phone}
+                onChange={(e: any) => {
+                  if (e.target.value.split('')[0] == 9) {
+                    setPhone('+7' + e.target.value)
+                    setPrefix('+')
+                  } else if (e.target.value.split('')[0] == 8) setPrefix('')
+                  else if (e.target.value.split('')[0] == 7) setPrefix('+')
+                  else {
+                    setPhone('+79' + e.target.value)
+                    setPrefix('+')
+                  }
+                }}
+                style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
+              />
+            </section>
           </label>
           <label className={styles.signup_form_label}>
             <p>
               E-mail <span style={{ color: 'red' }}>*</span>
             </p>
-            <input type="email" name="email" required />
+            <input name={'email'} required type={'email'} />
           </label>
           <label className={styles.signup_form_confirmLabel}>
-            <input type="checkbox" onChange={() => setCb(!cb)} />
+            <input onChange={() => setCb(!cb)} type={'checkbox'} />
             <p>Получать информацию о новинках и распродажах</p>
           </label>
           <h3 className={styles.signup_form_confirm}>
@@ -125,7 +154,9 @@ export const SignUpPage: React.FC = () => {
             <Link to={ROUTER_PATHS.POLITICS}>политикой конфиденциальности</Link> и{' '}
             <Link to={ROUTER_PATHS.OFERTA}>публичной офертой</Link>
           </h3>
-          <button className={styles.signup_form_button}>Продолжить</button>
+          <button className={styles.signup_form_button} type={'submit'}>
+            Продолжить
+          </button>
           <h2 className={styles.signup_form_link}>
             Уже есть аккаунт? <Link to={ROUTER_PATHS.SIGN_IN}>Войти</Link>
           </h2>
@@ -133,19 +164,28 @@ export const SignUpPage: React.FC = () => {
       )}
 
       {stage === 2 && (
-        <form onSubmit={handleConfirm} className={styles.signup_form}>
+        <form className={styles.signup_form} onSubmit={handleConfirm}>
           <h1 className={styles.signup_form_h1}>Регистрация</h1>
           <p className={styles.signup_form_againButton}>
             На ваш номер придёт сообщение с кодом.
-            <button className={styles.signup_form_againButton}>
+            <button className={styles.signup_form_againButton} onClick={() => handleRequest()}>
               Отправить повторно {timer !== 0 ? 'через ' + timer : ''}
             </button>
           </p>
           <label className={styles.signup_form_label}>
             <p>Введите смс код</p>
-            <PatternFormat format="### ###" allowEmptyFormatting mask="-" name="code" required />
+            <PatternFormat
+              allowEmptyFormatting
+              format={'#####'}
+              mask={'-'}
+              name={'code'}
+              required
+              autoFocus
+            />
           </label>
-          <button className={styles.signup_form_button}>Перейти в личный кабинет</button>
+          <button className={styles.signup_form_button} type={'submit'}>
+            Перейти в личный кабинет
+          </button>
         </form>
       )}
     </div>
