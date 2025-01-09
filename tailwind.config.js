@@ -1,9 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+import tailwindcssAnimate from 'tailwindcss-animate'
+
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: ['class'],
   plugins: [
-    require('tailwindcss-animate'),
+    tailwindcssAnimate,
     function ({ addUtilities }) {
       addUtilities({
         '.decoration-skip-ink-none': {
