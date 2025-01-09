@@ -1,100 +1,109 @@
-import { useEffect, useRef, useState } from 'react'
-import Quill from 'quill'
-import 'quill/dist/quill.snow.css'
+import { useState } from 'react'
+import styles from './Create.module.scss'
+import { FaCheck, FaPen } from 'react-icons/fa'
+import { LuFilePen } from 'react-icons/lu'
+import { Editor } from './editor'
 
-export const Articles: React.FC = () => {
-  const editorRef = useRef<HTMLDivElement>(null)
-  const toolbarRef = useRef<HTMLDivElement>(null)
-  const quillInstance = useRef<Quill | null>(null) // Для хранения экземпляра Quill
-  const [content, setContent] = useState<string>('')
+import { ArticleDto, ParagraphDto } from '@/entities/article/article.types'
 
-  const toolbarOptions = [
-    [{ size: ['8px', '10px', '12px', '14px', '18px', '24px', '32px', '48px'] }],
-    [{ header: [1, 2, 3, 4, 5, 6, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    ['link', 'image'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    ['clean'],
-  ]
+export const CreateArticle = () => {
+  const [editingTitle, setEditingTitle] = useState<boolean>(true)
+  const [title, setTitle] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
+  const [metaTitle, setMetaTitle] = useState<string>('')
+  const [metaDescription, setMetaDescription] = useState<string>('')
+  const [paragraphs, setParagraphs] = useState<ParagraphDto[]>([])
 
-  useEffect(() => {
-    if (editorRef.current && !quillInstance.current) {
-      quillInstance.current = new Quill(editorRef.current, {
-        theme: 'snow',
-        modules: {
-          toolbar: toolbarRef.current || toolbarOptions,
-        },
-        formats: [
-          'size',
-          'header',
-          'bold',
-          'italic',
-          'underline',
-          'strike',
-          'align',
-          'list',
-          'bullet',
-          'link',
-          'image',
-          'clean',
-        ],
-      })
+  const handleSubmit = (e: any) => {
+    e.preventDefault()
 
-      // Обновление содержимого при изменении текста
-      quillInstance.current.on('text-change', () => {
-        setContent(quillInstance.current?.root.innerHTML || '')
-      })
+    const articleData: ArticleDto = {
+      composition: 'LEFT',
+      description,
+      id: Date.now(),
+      metaDescription,
+      metaTitle,
+      paragraphs,
+      Section: 'SEO',
+      title,
+      userId: 123,
     }
-  }, [])
+    console.log('Article Data:', articleData)
+  }
 
-  // Получение содержимого при нажатии на кнопку
-  const getEditorContent = () => {
-    if (quillInstance.current) {
-      alert(quillInstance.current.root.innerHTML) // HTML форматированного текста
-    }
+  const addParagraph = () => {
+    setParagraphs([
+      ...paragraphs,
+      { id: Date.now(), title: '', content: '', order: paragraphs.length + 1, articleId: 1 },
+    ])
+  }
+
+  const handleParagraphChange = (index: number, content: string) => {
+    const updatedParagraphs = [...paragraphs]
+    updatedParagraphs[index].content = content
+    setParagraphs(updatedParagraphs)
   }
 
   return (
-    <div className="custom-quill-container">
-      {/* Custom toolbar */}
-      <div ref={toolbarRef}>
-        <select className="ql-size">
-          <option value="8px">8px</option>
-          <option value="10px">10px</option>
-          <option value="12px">12px</option>
-          <option value="14px">14px</option>
-          <option value="18px">18px</option>
-          <option value="24px">24px</option>
-          <option value="32px">32px</option>
-          <option value="48px">48px</option>
-        </select>
-        <button className="ql-bold"></button>
-        <button className="ql-italic"></button>
-        <button className="ql-underline"></button>
-        <button className="ql-strike"></button>
-        <button className="ql-align" value=""></button>
-        <button className="ql-align" value="center"></button>
-        <button className="ql-align" value="right"></button>
-        <button className="ql-list" value="ordered"></button>
-        <button className="ql-list" value="bullet"></button>
-        <button className="ql-link"></button>
-        <button className="ql-image"></button>
-        <button className="ql-clean"></button>
+    <form onSubmit={e => handleSubmit(e)} className={styles.createArticle}>
+      <div className={styles.createArticle_left}>
+        <div className={styles.createArticle_top}>
+          {editingTitle == true && (
+            <div className={styles.createArticle_top_title}>
+              <input
+                id="h2"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Заголовок статьи"
+              />
+              <button>
+                <FaCheck
+                  onClick={() => {
+                    if (title != '') setEditingTitle(false)
+                    else alert('Заполните заголовок')
+                  }}
+                />
+              </button>
+              <span className={styles.createArticle_top_type}>Seo</span>
+            </div>
+          )}
+          {editingTitle == false && (
+            <div className={styles.createArticle_top_title}>
+              <h1 id="h2">{title}</h1>
+              <button>
+                <FaPen onClick={() => setEditingTitle(true)} />
+              </button>
+              <span className={styles.createArticle_top_type}>Seo</span>
+            </div>
+          )}
+        </div>
+        <Editor />
+        {paragraphs.map((paragraph, index) => (
+          <Editor
+            key={paragraph.id}
+            value={paragraph.content}
+            onChange={content => handleParagraphChange(index, content)}
+          />
+        ))}
+        <button
+          className={styles.createArticle_paragraphs_add}
+          type="button"
+          onClick={addParagraph}
+        >
+          +
+        </button>
       </div>
 
-      {/* Quill editor */}
-      <div ref={editorRef}></div>
-
-      {/* Кнопка для вывода содержимого */}
-      <button onClick={getEditorContent}>Получить содержимое</button>
-
-      {/* Вывод содержимого для проверки */}
-      <div>
-        <h3>Отображение содержимого:</h3>
-        <div dangerouslySetInnerHTML={{ __html: content }}></div>
+      <div className={styles.createArticle_right}>
+        <div className={styles.createArticle_top_buttons}>
+          <button className={styles.createArticle_top_buttons_left}>
+            <LuFilePen />
+            Сохранить черновик
+          </button>
+          <button className={styles.createArticle_top_buttons_right}>Опубликовать</button>
+        </div>
+        
       </div>
-    </div>
+    </form>
   )
 }
-
-export default Articles

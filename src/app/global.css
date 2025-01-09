@@ -309,7 +309,7 @@ input[type='search']::-webkit-search-results-decoration {
   text-decoration: none;
 }
 
-@media (max-width: 1440px) {
+/* @media (max-width: 1440px) {
   #h1 {
     font-size: 56px;
     line-height: 67.2px;
@@ -345,7 +345,7 @@ input[type='search']::-webkit-search-results-decoration {
     line-height: 20.4px;
     padding: 10px 16px;
   }
-}
+} */
 
 @media (max-width: 1024px) {
   #h1 {
