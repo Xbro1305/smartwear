@@ -33,9 +33,9 @@ export const imageApi = baseApi.injectEndpoints({
 
     uploadParagraphImage: builder.mutation<
       { imagePath: string; message: string },
-      { file: File; id: number }
+      { file: File; paragraphId: string }
     >({
-      query: ({ file, id }) => {
+      query: ({ file, paragraphId }) => {
         const formData = new FormData()
 
         formData.append('file', file)
@@ -43,7 +43,7 @@ export const imageApi = baseApi.injectEndpoints({
         return {
           body: formData,
           method: 'POST',
-          url: `/images/upload-paragraph/${id}`,
+          url: `/images/upload-paragraph/${paragraphId}`,
         }
       },
     }),

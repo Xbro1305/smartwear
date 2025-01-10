@@ -1,28 +1,30 @@
 import { useState } from 'react'
+
+import { FaEye, FaPen, FaTrash } from 'react-icons/fa'
+
 import styles from './articles.module.scss'
-import { FaPen, FaEye, FaTrash } from 'react-icons/fa'
 const { CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
+
+import { useNavigate } from 'react-router-dom'
+
+import { SectionDto } from '@/entities/article/article.types'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { FaSortAmountUp } from 'react-icons/fa'
 import { IoIosArrowDown } from 'react-icons/io'
 import { IoCopy } from 'react-icons/io5'
-import { useNavigate } from 'react-router-dom'
-import { FaSortAmountUp } from 'react-icons/fa'
 
 interface ArticleProps {
-  section: {
-    category: string
-    articles: { title: string; draft: boolean }[]
-  }
   index: number
+  section: SectionDto
 }
 
-export const Article: React.FC<ArticleProps> = ({ section, index }) => {
+export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   const [opened, setOpened] = useState(true)
   const navigate = useNavigate()
 
   return (
-    <div key={index} className={styles.articles_section}>
-      <h2 id="h2">
+    <div className={styles.articles_section} key={index}>
+      <h2 id={'h2'}>
         <p onClick={() => setOpened(!opened)}>{section.category}</p>
         <p
           onClick={() => setOpened(!opened)}

@@ -26,7 +26,7 @@ export type CreateArticleDto = {
   description: string
   metaDescription: string
   metaTitle: string
-  paragraphs: CreateParagraphDto[]
+  paragraphs: CreateParagraphinArticleDto[]
   section: Section
   title: string
   userId: number
@@ -61,9 +61,32 @@ export type CreateParagraphDto = {
   title: string
 }
 
+export type CreateParagraphinArticleDto = {
+  content: string
+  imageFile?: File
+  order: number
+  title: string
+}
+
+export type ParagraphinArticleDto = {
+  content: string
+  id: number
+  imageFile?: File
+  order: number
+  title: string
+}
+
 export type UpdateParagraphDto = {
   content?: string
   imageUrl?: string
   order?: number
   title?: string
+}
+
+export type SectionDto = {
+  articles: Array<{
+    draft?: boolean
+    title: string
+  }>
+  category: string
 }
