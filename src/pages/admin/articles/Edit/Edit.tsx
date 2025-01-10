@@ -1,13 +1,33 @@
-import { useState } from 'react'
-import { ArticleDto, Composition, ParagraphDto } from '@/entities/article/article.types'
-import { Section } from '@/entities/article/article.types'
-import { FaCheck, FaPen } from 'react-icons/fa'
-import { LuFilePen } from 'react-icons/lu'
-import styles from '../Create/Create.module.scss'
-import { Editor } from '../Create/editor'
+/* eslint-disable max-lines */
+import { useEffect, useState } from 'react'
+
 import cat from '@/assets/images/Cat.png'
+import {
+  useCreateParagraphMutation,
+  useSearchArticleByKeywordQuery,
+  useUpdateArticleMutation,
+} from '@/entities/article'
+import {
+  ArticleDto,
+  Composition,
+  CreateParagraphDto,
+  ParagraphDto,
+  ParagraphinArticleDto,
+  UpdateArticleDto,
+} from '@/entities/article/article.types'
+import { Section } from '@/entities/article/article.types'
+import {
+  useUploadArticleImageMutation,
+  useUploadParagraphImageMutation,
+} from '@/entities/image/image.api'
 import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
-import { FaChartBar, FaUser, FaRegNewspaper } from 'react-icons/fa'
+import { FaCheck, FaPen } from 'react-icons/fa'
+import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
+import { LuFilePen } from 'react-icons/lu'
+
+import styles from '../Create/Create.module.scss'
+
+import { Editor } from '../Create/editor'
 
 export const EditArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -15,37 +35,84 @@ export const EditArticle = () => {
   const [description, setDescription] = useState<string>('')
   const [metaTitle, setMetaTitle] = useState<string>('')
   const [metaDescription, setMetaDescription] = useState<string>('')
-  const [paragraphs, setParagraphs] = useState<ParagraphDto[]>([])
+  const [paragraphs, setParagraphs] = useState<ParagraphinArticleDto[]>([])
   const [file, setFile] = useState<any>(null)
   const [url, setUrl] = useState<string>('')
   const [section, setSection] = useState<any>()
   const [composition, setComposition] = useState<any>()
 
+  const { data: article, isLoading } = useSearchArticleByKeywordQuery(title || '')
+  const [updateArticle] = useUpdateArticleMutation()
+  const [createParagraph] = useCreateParagraphMutation()
+
+  const [uploadArticleImage] = useUploadArticleImageMutation()
+  const [uploadParagraphImage] = useUploadParagraphImageMutation()
+
+  useEffect(() => {
+    if (article) {
+      setTitle(article.title)
+      setDescription(article.description)
+      setMetaTitle(article.metaTitle)
+      setMetaDescription(article.metaDescription)
+      setComposition(article.composition)
+      setSection(article.section)
+      setParagraphs(article.paragraphs)
+    }
+  }, [article])
+
   console.log(composition)
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault()
 
-    const articleData: ArticleDto = {
+    const articleData: UpdateArticleDto = {
       composition,
       description,
-      id: Date.now(),
       metaDescription,
       metaTitle,
-      paragraphs,
       section,
       title,
-      userId: 123,
     }
 
-    console.log('Article Data:', articleData)
+    try {
+      await updateArticle({ data: articleData, id: article?.id || 0 })
+
+      if (paragraphs.length > 0) {
+        for (const paragraph of paragraphs) {
+          const paragraphData: CreateParagraphDto = {
+            articleId: article?.id || 0,
+            content: paragraph.content,
+            order: paragraph.order,
+            title: paragraph.title,
+          }
+
+          await createParagraph(paragraphData)
+        }
+      }
+
+      if (file && article) {
+        await uploadArticleImage({ file, id: article?.id })
+
+        for (let i = 0; i < paragraphs.length; i++) {
+          const paragraph = paragraphs[i]
+          const paragraphId = `${article.id}-${paragraph.order}`
+
+          if (paragraph.imageFile) {
+            await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
+          }
+        }
+      }
+
+      console.log('Статья и параграфы успешно обновлены')
+    } catch (error) {
+      console.error('Ошибка при обновлении статьи или создании параграфов', error)
+    }
   }
 
   const addParagraph = () => {
     setParagraphs([
       ...paragraphs,
       {
-        articleId: 1,
         content: '',
         id: Date.now(),
         order: paragraphs.length + 1,
@@ -104,19 +171,20 @@ export const EditArticle = () => {
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <div className={styles.createArticle_photoLabel_img}>
               <input
-                type="file"
-                name="photo"
-                className="inp"
-                accept="image/*"
-                size={1}
+                accept={'image/*'}
+                className={'inp'}
+                name={'photo'}
                 onChange={e => {
                   if (e.target.files && e.target.files[0]) {
                     const img = URL.createObjectURL(e.target.files[0])
+
                     setFile(img)
                   }
                 }}
+                size={1}
+                type={'file'}
               />
-              <img src={cat} alt="cat" />
+              <img alt={'cat'} src={cat} />
               <p>Загрузить изображение</p>
               <span>Добавьте фотографию с компьютера</span>
             </div>
@@ -137,19 +205,20 @@ export const EditArticle = () => {
                 </p>
                 <div className={styles.createArticle_photoLabel_img}>
                   <input
-                    type="file"
-                    name="photo"
-                    className="inp"
-                    accept="image/*"
-                    size={1}
+                    accept={'image/*'}
+                    className={'inp'}
+                    name={'photo'}
                     onChange={e => {
                       if (e.target.files && e.target.files[0]) {
                         const img = URL.createObjectURL(e.target.files[0])
+
                         setFile(img)
                       }
                     }}
+                    size={1}
+                    type={'file'}
                   />
-                  <img src={cat} alt="cat" />
+                  <img alt={'cat'} src={cat} />
                   <p>Загрузить изображение</p>
                   <span>Добавьте фотографию с компьютера</span>
                 </div>
@@ -178,7 +247,7 @@ export const EditArticle = () => {
           <p className={styles.createArticle_photoLabel_title}>Абзацы</p>
           <div className={styles.createArticle_photoLabel_content}>
             {paragraphs.map((paragraph, index) => (
-              <div key={paragraph.id} className={styles.createArticle_photoLabel_paragraphs}>
+              <div className={styles.createArticle_photoLabel_paragraphs} key={paragraph.id}>
                 <p>Абзац {index + 1}</p>
                 <button
                   onClick={() => {
@@ -212,36 +281,36 @@ export const EditArticle = () => {
             <p>Композиция</p>
             <div className={styles.createArticle_photoLabel_composition}>
               <label
+                onClick={() => setComposition(Composition.RIGHT)}
                 style={{
-                  display: 'flex',
                   alignItems: 'center',
                   background: composition === Composition.RIGHT ? '#cbd5e1' : 'white',
+                  display: 'flex',
                 }}
-                onClick={() => setComposition(Composition.RIGHT)}
               >
                 <CiAlignRight />
                 <input
-                  type="radio"
-                  name="composition"
+                  name={'composition'}
                   onChange={() => setComposition(Composition.RIGHT)}
+                  type={'radio'}
                   value={Composition.RIGHT}
                 />
               </label>
 
               <label
+                onClick={() => setComposition(Composition.LEFT)}
                 style={{
-                  display: 'flex',
                   alignItems: 'center',
                   background: composition === Composition.LEFT ? '#cbd5e1' : 'white',
+                  display: 'flex',
                 }}
-                onClick={() => setComposition(Composition.LEFT)}
               >
                 <CiAlignLeft />
                 <input
-                  type="radio"
-                  name="composition"
-                  value={Composition.LEFT}
+                  name={'composition'}
                   onChange={() => setComposition(Composition.LEFT)}
+                  type={'radio'}
+                  value={Composition.LEFT}
                 />
               </label>
             </div>
@@ -250,21 +319,21 @@ export const EditArticle = () => {
                 <FaChartBar />
                 <p>Seo</p>{' '}
               </section>
-              <input type="radio" name="section" value={Section.SEO} />
+              <input name={'section'} type={'radio'} value={Section.SEO} />
             </label>
             <label className={styles.createArticle_photoLabel_section}>
               <section>
                 <FaUser />
                 <p>Пользовательские</p>{' '}
               </section>
-              <input type="radio" name="section" value={Section.USER} />
+              <input name={'section'} type={'radio'} value={Section.USER} />
             </label>
             <label className={styles.createArticle_photoLabel_section}>
               <section>
                 <FaRegNewspaper />
                 <p>Новости</p>{' '}
               </section>
-              <input type="radio" name="section" value={Section.NEWS} />
+              <input name={'section'} type={'radio'} value={Section.NEWS} />
             </label>
           </div>
         </div>
@@ -274,32 +343,32 @@ export const EditArticle = () => {
             <label>
               <p>URL на статью</p>
               <input
-                type="text"
+                id={''}
+                name={'url'}
                 onChange={e => setUrl(e.target.value)}
+                placeholder={'Ссылка на статью'}
+                type={'text'}
                 value={url}
-                name="url"
-                placeholder="Ссылка на статью"
-                id=""
               />
             </label>
             <label>
               <p>Meta-tag title</p>
               <textarea
-                name="metaTitle"
+                id={''}
+                name={'metaTitle'}
                 onChange={e => setMetaTitle(e.target.value)}
+                placeholder={'Seo-заголовок'}
                 value={metaTitle}
-                placeholder="Seo-заголовок"
-                id=""
               ></textarea>
             </label>
             <label>
               <p>Meta-tag description</p>
               <textarea
-                name="metaDescription"
+                id={''}
+                name={'metaDescription'}
                 onChange={e => setMetaDescription(e.target.value)}
+                placeholder={'Seo-описание'}
                 value={metaDescription}
-                placeholder="Seo-описание"
-                id=""
               ></textarea>
             </label>
           </div>
