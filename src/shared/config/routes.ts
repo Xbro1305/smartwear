@@ -25,6 +25,7 @@ export const ROUTER_PATHS = {
   RETURNS: '/returns',
   SEARCH: '/search',
   SIGN_IN: '/sign-in',
+  adminLogin: '/admin/login',
   SIGN_UP: '/sign-up',
   STORES: '/stores',
   TRACK_ORDER: '/track-order',
