@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import styles from './articles.module.scss'
 import { FaPen, FaEye, FaTrash } from 'react-icons/fa'
-const { CREATEARTICLE } = ROUTER_PATHS
+const { CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { IoIosArrowDown } from 'react-icons/io'
 import { IoCopy } from 'react-icons/io5'
@@ -56,7 +56,7 @@ export const Article: React.FC<ArticleProps> = ({ section, index }) => {
               <h2>
                 {article.draft ? <strong>Черновик:</strong> : null} {article.title}
               </h2>
-              <button onClick={() => navigate(`/admin/edit-article/${article.title}`)}>
+              <button onClick={() => navigate(`${EDITARTICLE}/${article.title}`)}>
                 <FaPen />
               </button>
               <button>
