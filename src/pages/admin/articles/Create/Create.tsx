@@ -33,12 +33,11 @@ export const CreateArticle = () => {
   const [url, setUrl] = useState<string>('')
   const [section, setSection] = useState<any>()
   const [composition, setComposition] = useState<any>()
+  const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
 
   const [createArticle] = useCreateArticleMutation()
   const [uploadArticleImage] = useUploadArticleImageMutation()
   const [uploadParagraphImage] = useUploadParagraphImageMutation()
-
-  console.log(composition)
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
@@ -87,7 +86,7 @@ export const CreateArticle = () => {
 
         imageFile: undefined,
         order: paragraphs.length + 1,
-        title: '',
+        title: 'Абзац ' + (paragraphs.length + 1),
       },
     ])
   }
@@ -148,7 +147,7 @@ export const CreateArticle = () => {
         </div>
         <div className={styles.createArticle_editorLabel}>
           <p>Описание статьи</p>
-          <Editor onChange={setDescription} value={description} />
+          <Editor isimg={true} onChange={setDescription} value={description} />
           <label className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <div className={styles.createArticle_photoLabel_img}>
@@ -175,33 +174,52 @@ export const CreateArticle = () => {
         <div className={styles.createArticle_editorLabel}>
           {paragraphs.map((paragraph, index) => (
             <>
-              <p>Описание абзаца {index + 1}</p>
+              <p>Описание {paragraph.title}</p>
               <Editor
+                isimg={false}
+                setimg={() => {
+                  setParagraphsWithImg([...paragraphsWithImg, index])
+                }}
                 key={paragraph.order}
                 onChange={content => handleParagraphChange(index, content)}
                 value={paragraph.content}
               />
-              <label className={styles.createArticle_photoLabel}>
-                <p className={styles.createArticle_photoLabel_title}>
-                  Картинка для абзаца {index + 1}
-                </p>
-                <div className={styles.createArticle_photoLabel_img}>
-                  <input
-                    accept={'image/*'}
-                    className={'inp'}
-                    name={'photo'}
-                    onChange={e => handleParagraphImageChange(index, e)}
-                    size={1}
-                    type={'file'}
-                  />
-                  <img
-                    alt={'cat'}
-                    src={paragraph.imageFile ? URL.createObjectURL(paragraph.imageFile) : cat}
-                  />
-                  <p>Загрузить изображение</p>
-                  <span>Добавьте фотографию с компьютера</span>
+              {paragraphsWithImg.includes(index) && (
+                <div className={styles.createArticle_photoLabel}>
+                  <p className={styles.createArticle_photoLabel_title}>
+                    Картинка для абзаца {index + 1}
+                    <button
+                      className={styles.createArticle_photoLabel_close}
+                      onClick={() => {
+                        const updatedParagraphs = [...paragraphs]
+
+                        updatedParagraphs[index].imageFile = undefined
+                        setParagraphs(updatedParagraphs)
+
+                        setParagraphsWithImg(paragraphsWithImg.filter(i => i !== index))
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </p>
+                  <label className={styles.createArticle_photoLabel_img}>
+                    <input
+                      accept={'image/*'}
+                      className={'inp'}
+                      name={'photo'}
+                      onChange={e => handleParagraphImageChange(index, e)}
+                      size={1}
+                      type={'file'}
+                    />
+                    <img
+                      alt={'cat'}
+                      src={paragraph.imageFile ? URL.createObjectURL(paragraph.imageFile) : cat}
+                    />
+                    <p>Загрузить изображение</p>
+                    <span>Добавьте фотографию с компьютера</span>
+                  </label>
                 </div>
-              </label>
+              )}{' '}
             </>
           ))}
         </div>
@@ -227,7 +245,16 @@ export const CreateArticle = () => {
           <div className={styles.createArticle_photoLabel_content}>
             {paragraphs.map((paragraph, index) => (
               <div className={styles.createArticle_photoLabel_paragraphs} key={paragraph.order}>
-                <p>Абзац {index + 1}</p>
+                <input
+                  type="text"
+                  value={paragraph.title}
+                  onChange={e => {
+                    const updatedParagraphs = [...paragraphs]
+
+                    updatedParagraphs[index].title = e.target.value
+                    setParagraphs(updatedParagraphs)
+                  }}
+                />
                 <button
                   onClick={() => {
                     setParagraphs(paragraphs.filter(p => p.order !== paragraph.order))
