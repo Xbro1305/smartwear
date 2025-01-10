@@ -3,7 +3,7 @@ export const ROUTER_PATHS = {
   ADMIN: '/admin',
   ADMINLOGIN: '/admin/login',
   CREATEARTICLE: '/admin/create-article',
-  EDITARTICLE: '/admin/edit-article/:name',
+  EDITARTICLE: '/admin/edit-article',
   ADMINARTICLES: '/admin/articles',
   ARTICLE: '/article/:name',
   BOOKMARKS: '/bookmarks',

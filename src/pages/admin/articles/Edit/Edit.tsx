@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { ArticleDto, Composition, ParagraphDto, Section } from '@/entities/article/article.types'
+import { ArticleDto, Composition, ParagraphDto } from '@/entities/article/article.types'
+import { Section } from '@/entities/article/article.types'
 import { FaCheck, FaPen } from 'react-icons/fa'
 import { LuFilePen } from 'react-icons/lu'
-import styles from './Create.module.scss'
-import { Editor } from './editor'
+import styles from '../Create/Create.module.scss'
+import { Editor } from '../Create/editor'
 import cat from '@/assets/images/Cat.png'
 import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
 import { FaChartBar, FaUser, FaRegNewspaper } from 'react-icons/fa'
 
-export const CreateArticle = () => {
+export const EditArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
