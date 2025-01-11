@@ -7,9 +7,11 @@ import { FaRegImage } from 'react-icons/fa'
 type EditorProps = {
   value?: string
   onChange?: (content: string) => void
+  setimg?: any
+  isimg?: boolean
 }
 
-export const Editor: React.FC<EditorProps> = ({ value, onChange }) => {
+export const Editor: React.FC<EditorProps> = ({ value, onChange, setimg, isimg }) => {
   const editorRef = useRef<HTMLDivElement>(null)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const quillInstance = useRef<Quill | null>(null)
@@ -76,7 +78,12 @@ export const Editor: React.FC<EditorProps> = ({ value, onChange }) => {
           <button className="ql-list" value="ordered"></button>
           <button className="ql-list" value="bullet"></button>
         </div>
-        <button className="ql-img">
+        <button
+          className="ql-img"
+          onClick={setimg}
+          disabled={isimg}
+          style={{ color: isimg ? '#00000030' : '#202224' }}
+        >
           <FaRegImage /> Изображение
         </button>
       </div>

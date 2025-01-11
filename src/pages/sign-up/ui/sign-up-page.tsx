@@ -62,30 +62,20 @@ export const SignUpPage: React.FC = () => {
       await register(registerData).unwrap()
       setStage(2)
       let tm = 30
-      await register(registerData).unwrap()
-      setStage(2)
-      let tm = 30
       const interval = setInterval(() => {
         tm -= 1
         setTimer(tm)
       }, 1000)
-        tm -= 1
-        setTimer(tm)
-      }, 1000)
 
-      setTimeout(() => clearInterval(interval), 30000)
       setTimeout(() => clearInterval(interval), 30000)
     } catch (error) {
       console.log(error)
     }
   }
-  }
 
   const handleConfirm = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const formData = new FormData(e.target as HTMLFormElement)
-    const value = Object.fromEntries(formData) as FormData
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as FormData
 
@@ -111,13 +101,11 @@ export const SignUpPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>
               Фамилия <span style={{ color: 'red' }}>*</span>
-              Фамилия <span style={{ color: 'red' }}>*</span>
             </p>
             <input name={'surname'} required type={'text'} />
           </label>
           <label className={styles.signup_form_label}>
             <p>
-              Имя <span style={{ color: 'red' }}>*</span>
               Имя <span style={{ color: 'red' }}>*</span>
             </p>
             <input name={'name'} required type={'text'} />
@@ -154,7 +142,6 @@ export const SignUpPage: React.FC = () => {
           <label className={styles.signup_form_label}>
             <p>
               E-mail <span style={{ color: 'red' }}>*</span>
-              E-mail <span style={{ color: 'red' }}>*</span>
             </p>
             <input name={'email'} required type={'email'} />
           </label>
@@ -163,8 +150,6 @@ export const SignUpPage: React.FC = () => {
             <p>Получать информацию о новинках и распродажах</p>
           </label>
           <h3 className={styles.signup_form_confirm}>
-            Продолжив регистрацию, я соглашаюсь с{' '}
-            <Link to={ROUTER_PATHS.POLITICS}>политикой конфиденциальности</Link> и{' '}
             Продолжив регистрацию, я соглашаюсь с{' '}
             <Link to={ROUTER_PATHS.POLITICS}>политикой конфиденциальности</Link> и{' '}
             <Link to={ROUTER_PATHS.OFERTA}>публичной офертой</Link>
