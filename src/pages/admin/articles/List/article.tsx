@@ -58,7 +58,7 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
               <h2>
                 {article.draft ? <strong>Черновик:</strong> : null} {article.title}
               </h2>
-              <button onClick={() => navigate(`${EDITARTICLE}/${article.title}`)}>
+              <button onClick={() => navigate(`${EDITARTICLE}/${article.id}`)}>
                 <FaPen />
               </button>
               <button>

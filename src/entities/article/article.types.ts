@@ -87,6 +87,7 @@ export type SectionDto = {
   articles: Array<{
     draft?: boolean
     title: string
+    id: number
   }>
   category: string
 }
