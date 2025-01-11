@@ -1,0 +1,38 @@
+.contact {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: var(--top-padding) var(--sides-padding);
+  gap: 20px;
+
+  &_left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+    max-width: 50%;
+
+    h5 {
+      margin-bottom: -22px;
+      margin-top: -14px;
+    }
+
+    h2 {
+      margin-bottom: 14px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    display: flex;
+    flex-direction: column-reverse;
+
+    &_left {
+      max-width: 100%;
+    }
+
+    iframe {
+      width: 100%;
+      height: 400px;
+    }
+  }
+}

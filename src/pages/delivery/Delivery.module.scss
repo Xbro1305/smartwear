@@ -1,0 +1,43 @@
+.delivery {
+  display: grid;
+  grid-template-columns: repeat(2, calc(50% - 10px));
+  gap: 20px;
+  padding: var(--top-padding) var(--sides-padding);
+
+  &_left,
+  &_right {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+
+    h4 {
+      margin-bottom: -12px;
+    }
+
+    p,
+    h4,
+    h1 {
+      max-width: 530px;
+    }
+  }
+
+  &_right h1 {
+    max-width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(1, 100%);
+
+    p,
+    h4,
+    h1 {
+      max-width: 100%;
+      margin-bottom: 0;
+    }
+
+    &_right,
+    &_left {
+      gap: 12px;
+    }
+  }
+}

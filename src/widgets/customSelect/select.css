@@ -1,0 +1,74 @@
+.custom-select {
+  position: relative;
+  font-family: Arial, sans-serif;
+  border: 1px solid #dadada;
+  border-radius: 12px;
+  width: 104px;
+  height: 48px;
+}
+
+.custom-months-select {
+  position: relative;
+  font-family: Arial, sans-serif;
+  border: 1px solid #dadada;
+  border-radius: 12px;
+  width: 222px;
+  height: 48px;
+}
+
+.select-selected {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  gap: 10px;
+}
+
+.select-items {
+  position: absolute;
+  z-index: 99;
+  width: 100%;
+  overflow-y: auto;
+  margin-top: 5px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.select-item {
+  padding: 0 20px;
+  border-radius: 12px;
+  padding-right: 3px;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  cursor: pointer;
+}
+
+.select-items .select-item {
+  padding: 10px 20px;
+}
+
+.select-item svg {
+  transform: scale(calc(12 / 16));
+  opacity: 0.8;
+}
+
+.custom-select:hover {
+  background-color: #f0f0f0;
+}
+
+.select-item:not(.select-selected):hover {
+  background-color: #f0f0f0;
+}
+
+.adminHeader_link.active {
+  background: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border-style: dashed;
+}
