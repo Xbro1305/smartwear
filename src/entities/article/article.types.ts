@@ -19,6 +19,7 @@ export type ArticleDto = {
   section: Section
   title: string
   userId: number
+  imageUrl?: string
 }
 
 export type CreateArticleDto = {

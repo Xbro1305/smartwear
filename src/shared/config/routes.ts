@@ -1,11 +1,11 @@
 export const ROUTER_PATHS = {
   ABOUT: '/about',
   ADMIN: '/admin',
+  ARTICLES: '/articles',
   ADMINLOGIN: '/admin/login',
   CREATEARTICLE: '/admin/create-article',
   EDITARTICLE: '/admin/edit-article',
   ADMINARTICLES: '/admin/articles',
-  ARTICLE: '/article/:name',
   BOOKMARKS: '/bookmarks',
   CARE: '/care',
   CART: '/cart',

@@ -136,6 +136,14 @@ input[type='search']::-webkit-search-results-decoration {
   color: var(--dark);
 }
 
+.h3 {
+  font-family: Inter;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 38.4px;
+  color: var(--dark);
+}
+
 .h4 {
   font-size: 28px;
   font-weight: 500;
