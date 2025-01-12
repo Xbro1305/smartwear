@@ -35,7 +35,7 @@ export const CreateArticle = () => {
   const [file, setFile] = useState<any>(null)
   const [url, setUrl] = useState<string>('')
   const [section, setSection] = useState<Section>(Section.SEO)
-  const [composition, setComposition] = useState<any>()
+  const [composition, setComposition] = useState<Composition>(Composition.LEFT)
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
 
   const [createArticle] = useCreateArticleMutation()
@@ -85,6 +85,7 @@ export const CreateArticle = () => {
   }
 
   const addParagraph = () => {
+    if (section === Section.NEWS) return alert('Нельзя добавить абзац в новости')
     setParagraphs([
       ...paragraphs,
       {
@@ -95,6 +96,12 @@ export const CreateArticle = () => {
         title: 'Абзац ' + (paragraphs.length + 1),
       },
     ])
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]) // Сохраняем файл в состоянии
+    }
   }
 
   const handleParagraphChange = (index: number, content: string) => {
@@ -159,28 +166,32 @@ export const CreateArticle = () => {
         <div className={styles.createArticle_editorLabel}>
           <p>Описание статьи</p>
           <Editor isimg onChange={setDescription} value={description} />
-          <label className={styles.createArticle_photoLabel}>
+          <div className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
-            <div className={styles.createArticle_photoLabel_img}>
+            <label
+              style={{ padding: file ? '20px' : '40px' }}
+              className={styles.createArticle_photoLabel_img}
+            >
               <input
                 accept={'image/*'}
                 className={'inp'}
                 name={'photo'}
-                onChange={e => {
-                  if (e.target.files && e.target.files[0]) {
-                    const img = URL.createObjectURL(e.target.files[0])
-
-                    setFile(img)
-                  }
-                }}
+                onChange={handleFileChange}
                 size={1}
                 type={'file'}
               />
-              <img alt={'cat'} src={cat} />
-              <p>Загрузить изображение</p>
-              <span>Добавьте фотографию с компьютера</span>
-            </div>
-          </label>
+
+              {file != null ? (
+                <img alt={'selected image'} src={URL.createObjectURL(file as Blob)} />
+              ) : (
+                <>
+                  <img alt={'default'} src={cat} />
+                  <p>Загрузить изображение</p>
+                  <span>Добавьте фотографию с компьютера</span>
+                </>
+              )}
+            </label>
+          </div>
         </div>
         <div className={styles.createArticle_editorLabel}>
           {paragraphs.map((paragraph, index) => (
@@ -213,7 +224,10 @@ export const CreateArticle = () => {
                       &times;
                     </button>
                   </p>
-                  <label className={'styles.createArticle_photoLabel_img'}>
+                  <label
+                    className={styles.createArticle_photoLabel_img}
+                    style={{ padding: paragraph.imageFile ? '20px' : '40px' }}
+                  >
                     <input
                       accept={'image/*'}
                       className={'inp'}
@@ -223,16 +237,18 @@ export const CreateArticle = () => {
                       type={'file'}
                     />
                     {/* Показываем изображение, если оно выбрано */}
-                    {file ? (
+                    {paragraph.imageFile ? (
                       <img
                         alt={'selected image'}
                         src={URL.createObjectURL(paragraph.imageFile as Blob)}
                       />
                     ) : (
-                      <img alt={'default'} src={cat} />
+                      <>
+                        <img alt={'default'} src={cat} />
+                        <p>Загрузить изображение</p>
+                        <span>Добавьте фотографию с компьютера</span>
+                      </>
                     )}
-                    <p>Загрузить изображение</p>
-                    <span>Добавьте фотографию с компьютера</span>
                   </label>
                 </div>
               )}
@@ -357,7 +373,12 @@ export const CreateArticle = () => {
                 <FaChartBar />
                 <p>Seo</p>{' '}
               </section>
-              <input name={'section'} type={'radio'} value={Section.SEO} />
+              <input
+                checked={section === Section.SEO}
+                name={'section'}
+                type={'radio'}
+                value={Section.SEO}
+              />
             </label>
             <label
               className={styles.createArticle_photoLabel_section}
@@ -367,17 +388,31 @@ export const CreateArticle = () => {
                 <FaUser />
                 <p>Пользовательские</p>{' '}
               </section>
-              <input name={'section'} type={'radio'} value={Section.USER} />
+              <input
+                checked={section === Section.USER}
+                name={'section'}
+                type={'radio'}
+                value={Section.USER}
+              />
             </label>
             <label
               className={styles.createArticle_photoLabel_section}
-              onClick={() => setSection(Section.NEWS)}
+              onClick={() => {
+                setSection(Section.NEWS)
+                setParagraphs([])
+              }}
             >
               <section>
                 <FaRegNewspaper />
                 <p>Новости</p>{' '}
               </section>
-              <input name={'section'} type={'radio'} value={Section.NEWS} />
+
+              <input
+                checked={section === Section.NEWS}
+                name={'section'}
+                type={'radio'}
+                value={Section.NEWS}
+              />
             </label>
           </div>
         </div>

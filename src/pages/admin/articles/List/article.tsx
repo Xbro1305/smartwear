@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { FaEye, FaPen, FaTrash } from 'react-icons/fa'
 
 import styles from './articles.module.scss'
-const { CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
+const { CREATEARTICLE, EDITARTICLE, ARTICLES } = ROUTER_PATHS
 
 import { useNavigate } from 'react-router-dom'
 
@@ -16,6 +16,16 @@ import { IoCopy } from 'react-icons/io5'
 interface ArticleProps {
   index: number
   section: SectionDto
+}
+
+const handleCopy = () => {
+  //создание такой же статьи только с draft: true
+  alert('Копировать статью?')
+}
+
+const handleDelete = () => {
+  //удаление статьи
+  alert('Удалить статью?')
 }
 
 export const Article: React.FC<ArticleProps> = ({ index, section }) => {
@@ -61,13 +71,13 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
               <button onClick={() => navigate(`${EDITARTICLE}/${article.id}`)}>
                 <FaPen />
               </button>
-              <button>
+              <button onClick={handleCopy}>
                 <IoCopy />
               </button>
-              <button>
+              <button onClick={() => navigate(`${ARTICLES}/${article.title}`)}>
                 <FaEye />
               </button>
-              <button>
+              <button onClick={handleDelete}>
                 <FaTrash />
               </button>
             </li>

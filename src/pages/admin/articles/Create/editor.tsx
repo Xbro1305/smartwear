@@ -49,7 +49,7 @@ export const Editor: React.FC<EditorProps> = ({ isimg, onChange, setimg, value }
   }, [])
 
   return (
-    <div className={'custom-quill-container'}>
+    <div className={'custom-quill-container'} style={{ width: '100%', height: 'fit-content' }}>
       <div ref={toolbarRef}>
         <div className={'ql-sect'}>
           <select className={'ql-size'}>
