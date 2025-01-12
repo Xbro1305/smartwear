@@ -10,7 +10,6 @@ import styles from './articles.module.scss'
 import { Article } from './article'
 
 export const ArticlesList = () => {
-  // Хук для получения списка статей
   const { data: articles, isLoading } = useGetArticlesQuery()
 
   if (isLoading) {

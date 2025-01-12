@@ -2,7 +2,7 @@ import { baseApi } from '@/shared/api'
 
 export const imageApi = baseApi.injectEndpoints({
   endpoints: builder => ({
-    getImage: builder.query<Blob, { id: string; type: string }>({
+    getImage: builder.query<File, { id: string; type: string }>({
       query: ({ id, type }) => ({
         method: 'GET',
         responseHandler: async response => {
@@ -16,7 +16,7 @@ export const imageApi = baseApi.injectEndpoints({
 
     uploadArticleImage: builder.mutation<
       { imagePath: string; message: string },
-      { file: File; id: number }
+      { file: Blob; id: number }
     >({
       query: ({ file, id }) => {
         const formData = new FormData()
@@ -33,7 +33,7 @@ export const imageApi = baseApi.injectEndpoints({
 
     uploadParagraphImage: builder.mutation<
       { imagePath: string; message: string },
-      { file: File; paragraphId: string }
+      { file: Blob; paragraphId: string }
     >({
       query: ({ file, paragraphId }) => {
         const formData = new FormData()

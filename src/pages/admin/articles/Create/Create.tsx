@@ -3,12 +3,14 @@ import { useState } from 'react'
 
 import cat from '@/assets/images/Cat.png'
 import { useCreateArticleMutation } from '@/entities/article'
+import { sectionMapping } from '@/entities/article/article.types'
 import {
   Composition,
   CreateArticleDto,
   CreateParagraphinArticleDto,
   Section,
 } from '@/entities/article/article.types'
+import { useGetMeQuery } from '@/entities/auth'
 import {
   useUploadArticleImageMutation,
   useUploadParagraphImageMutation,
@@ -27,11 +29,12 @@ export const CreateArticle = () => {
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [metaTitle, setMetaTitle] = useState<string>('')
+  const [draft, setDraft] = useState<boolean>(false)
   const [metaDescription, setMetaDescription] = useState<string>('')
   const [paragraphs, setParagraphs] = useState<CreateParagraphinArticleDto[]>([])
   const [file, setFile] = useState<any>(null)
   const [url, setUrl] = useState<string>('')
-  const [section, setSection] = useState<any>()
+  const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<any>()
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
 
@@ -39,19 +42,22 @@ export const CreateArticle = () => {
   const [uploadArticleImage] = useUploadArticleImageMutation()
   const [uploadParagraphImage] = useUploadParagraphImageMutation()
 
-  const handleSubmit = async (e: any) => {
+  const { data: user } = useGetMeQuery()
+
+  const handleSubmit = async (e: any, draft: boolean) => {
     e.preventDefault()
 
     const articleData: CreateArticleDto = {
       composition,
       description,
-
+      draft,
+      keyword: url.split('/').pop(),
       metaDescription,
       metaTitle,
       paragraphs,
       section,
       title,
-      userId: 123,
+      userId: user?.id || 1,
     }
 
     try {
@@ -98,19 +104,24 @@ export const CreateArticle = () => {
     setParagraphs(updatedParagraphs)
   }
 
-  const handleParagraphImageChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleParagraphImageChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files ? event.target.files[0] : null
+
+    alert(file)
 
     if (file) {
       const updatedParagraphs = [...paragraphs]
 
-      updatedParagraphs[index].imageFile = file // Сохраняем файл изображения в абзаце
+      updatedParagraphs[index].imageFile = file
       setParagraphs(updatedParagraphs)
     }
   }
 
   return (
-    <form className={styles.createArticle} onSubmit={e => handleSubmit(e)}>
+    <form className={styles.createArticle} onSubmit={e => handleSubmit(e, draft)}>
       <div className={styles.createArticle_left}>
         <div className={styles.createArticle_top}>
           {editingTitle == true && (
@@ -132,7 +143,7 @@ export const CreateArticle = () => {
                   }}
                 />
               </button>
-              <span className={styles.createArticle_top_type}>Seo</span>
+              <span className={styles.createArticle_top_type}>{sectionMapping[section]}</span>
             </div>
           )}
           {editingTitle == false && (
@@ -147,7 +158,7 @@ export const CreateArticle = () => {
         </div>
         <div className={styles.createArticle_editorLabel}>
           <p>Описание статьи</p>
-          <Editor isimg={true} onChange={setDescription} value={description} />
+          <Editor isimg onChange={setDescription} value={description} />
           <label className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <div className={styles.createArticle_photoLabel_img}>
@@ -177,11 +188,11 @@ export const CreateArticle = () => {
               <p>Описание {paragraph.title}</p>
               <Editor
                 isimg={false}
+                key={paragraph.order}
+                onChange={content => handleParagraphChange(index, content)}
                 setimg={() => {
                   setParagraphsWithImg([...paragraphsWithImg, index])
                 }}
-                key={paragraph.order}
-                onChange={content => handleParagraphChange(index, content)}
                 value={paragraph.content}
               />
               {paragraphsWithImg.includes(index) && (
@@ -195,14 +206,14 @@ export const CreateArticle = () => {
 
                         updatedParagraphs[index].imageFile = undefined
                         setParagraphs(updatedParagraphs)
-
                         setParagraphsWithImg(paragraphsWithImg.filter(i => i !== index))
                       }}
+                      type={'button'}
                     >
                       &times;
                     </button>
                   </p>
-                  <label className={styles.createArticle_photoLabel_img}>
+                  <label className={'styles.createArticle_photoLabel_img'}>
                     <input
                       accept={'image/*'}
                       className={'inp'}
@@ -211,34 +222,50 @@ export const CreateArticle = () => {
                       size={1}
                       type={'file'}
                     />
-                    <img
-                      alt={'cat'}
-                      src={paragraph.imageFile ? URL.createObjectURL(paragraph.imageFile) : cat}
-                    />
+                    {/* Показываем изображение, если оно выбрано */}
+                    {file ? (
+                      <img
+                        alt={'selected image'}
+                        src={URL.createObjectURL(paragraph.imageFile as Blob)}
+                      />
+                    ) : (
+                      <img alt={'default'} src={cat} />
+                    )}
                     <p>Загрузить изображение</p>
                     <span>Добавьте фотографию с компьютера</span>
                   </label>
                 </div>
-              )}{' '}
+              )}
             </>
           ))}
+
+          <button
+            className={styles.createArticle_paragraphs_add}
+            onClick={addParagraph}
+            type={'button'}
+          >
+            +
+          </button>
         </div>
-        <button
-          className={styles.createArticle_paragraphs_add}
-          onClick={addParagraph}
-          type={'button'}
-        >
-          +
-        </button>
       </div>
 
       <div className={styles.createArticle_right}>
         <div className={styles.createArticle_top_buttons}>
-          <button className={styles.createArticle_top_buttons_left}>
+          <button
+            className={styles.createArticle_top_buttons_left}
+            onClick={() => setDraft(true)}
+            type={'button'}
+          >
             <LuFilePen />
             Сохранить черновик
           </button>
-          <button className={styles.createArticle_top_buttons_right}>Опубликовать</button>
+          <button
+            className={styles.createArticle_top_buttons_right}
+            onClick={() => setDraft(false)}
+            type={'button'}
+          >
+            Опубликовать
+          </button>
         </div>
         <div className={styles.createArticle_photoLabel}>
           <p className={styles.createArticle_photoLabel_title}>Абзацы</p>
@@ -246,14 +273,14 @@ export const CreateArticle = () => {
             {paragraphs.map((paragraph, index) => (
               <div className={styles.createArticle_photoLabel_paragraphs} key={paragraph.order}>
                 <input
-                  type="text"
-                  value={paragraph.title}
                   onChange={e => {
                     const updatedParagraphs = [...paragraphs]
 
                     updatedParagraphs[index].title = e.target.value
                     setParagraphs(updatedParagraphs)
                   }}
+                  type={'text'}
+                  value={paragraph.title}
                 />
                 <button
                   onClick={() => {
@@ -270,12 +297,14 @@ export const CreateArticle = () => {
             <button
               className={styles.createArticle_photoLabel_buttons_left}
               onClick={() => setParagraphs([])}
+              type={'button'}
             >
               Очистить всё
             </button>
             <button
               className={styles.createArticle_photoLabel_buttons_right}
               onClick={addParagraph}
+              type={'button'}
             >
               Добавить абзац
             </button>
@@ -321,8 +350,8 @@ export const CreateArticle = () => {
               </label>
             </div>
             <label
-              onClick={() => setSection(Section.SEO)}
               className={styles.createArticle_photoLabel_section}
+              onClick={() => setSection(Section.SEO)}
             >
               <section>
                 <FaChartBar />
@@ -331,8 +360,8 @@ export const CreateArticle = () => {
               <input name={'section'} type={'radio'} value={Section.SEO} />
             </label>
             <label
-              onClick={() => setSection(Section.USER)}
               className={styles.createArticle_photoLabel_section}
+              onClick={() => setSection(Section.USER)}
             >
               <section>
                 <FaUser />
@@ -341,8 +370,8 @@ export const CreateArticle = () => {
               <input name={'section'} type={'radio'} value={Section.USER} />
             </label>
             <label
-              onClick={() => setSection(Section.NEWS)}
               className={styles.createArticle_photoLabel_section}
+              onClick={() => setSection(Section.NEWS)}
             >
               <section>
                 <FaRegNewspaper />

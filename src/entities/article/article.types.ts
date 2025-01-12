@@ -4,6 +4,12 @@ export enum Section {
   USER = 'USER',
 }
 
+export const sectionMapping = {
+  [Section.NEWS]: 'Новости',
+  [Section.SEO]: 'Seo',
+  [Section.USER]: 'Пользовательские',
+}
+
 export enum Composition {
   LEFT = 'LEFT',
   RIGHT = 'RIGHT',
@@ -13,18 +19,20 @@ export type ArticleDto = {
   composition: Composition
   description: string
   id: number
+  imageUrl?: string
   metaDescription: string
   metaTitle: string
   paragraphs: ParagraphDto[]
   section: Section
   title: string
   userId: number
-  imageUrl?: string
 }
 
 export type CreateArticleDto = {
   composition: Composition
   description: string
+  draft: boolean
+  keyword?: string
   metaDescription: string
   metaTitle: string
   paragraphs: CreateParagraphinArticleDto[]
@@ -64,7 +72,7 @@ export type CreateParagraphDto = {
 
 export type CreateParagraphinArticleDto = {
   content: string
-  imageFile?: File
+  imageFile?: Blob
   order: number
   title: string
 }
@@ -72,7 +80,7 @@ export type CreateParagraphinArticleDto = {
 export type ParagraphinArticleDto = {
   content: string
   id: number
-  imageFile?: File
+  imageFile?: Blob
   order: number
   title: string
 }
@@ -87,8 +95,8 @@ export type UpdateParagraphDto = {
 export type SectionDto = {
   articles: Array<{
     draft?: boolean
-    title: string
     id: number
+    title: string
   }>
   category: string
 }

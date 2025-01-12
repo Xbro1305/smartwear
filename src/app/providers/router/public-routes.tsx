@@ -1,21 +1,21 @@
 import type { RouteObject } from 'react-router-dom'
 
 import { AboutPage } from '@/pages/about'
+import { Article } from '@/pages/article'
 import { CatalogPage } from '@/pages/catalog'
 import { CatalogCategory } from '@/pages/catalog-category'
 import { ContactPage } from '@/pages/contacts'
 import { DeliveryPage } from '@/pages/delivery'
 import { HomePage } from '@/pages/home'
+import { New } from '@/pages/new/'
 import { OfertaPage } from '@/pages/oferta'
 import { PoliticsPage } from '@/pages/politics'
 import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import { Article } from '@/pages/article'
-import { New } from '@/pages/new/'
 
 const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN } = ROUTER_PATHS
-const { ACS, MEN, WOMEN, SIGN_UP, ARTICLES, NEWS } = ROUTER_PATHS
+const { ACS, ARTICLES, MEN, NEWS, SIGN_UP, WOMEN } = ROUTER_PATHS
 
 export const publicRoutes: RouteObject[] = [
   {

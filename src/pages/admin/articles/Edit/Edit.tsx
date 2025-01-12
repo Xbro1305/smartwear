@@ -1,17 +1,16 @@
 /* eslint-disable max-lines */
 import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
 import {
   useCreateParagraphMutation,
-  useSearchArticleByKeywordQuery,
+  useGetArticleByIdQuery,
   useUpdateArticleMutation,
 } from '@/entities/article'
 import {
-  //   ArticleDto,
   Composition,
   CreateParagraphDto,
-  //   ParagraphDto,
   ParagraphinArticleDto,
   UpdateArticleDto,
 } from '@/entities/article/article.types'
@@ -42,7 +41,8 @@ export const EditArticle = () => {
   const [composition, setComposition] = useState<any>()
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
 
-  const { data: article } = useSearchArticleByKeywordQuery(title || '')
+  const { id } = useParams<{ id: string }>()
+  const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
   const [updateArticle] = useUpdateArticleMutation()
   const [createParagraph] = useCreateParagraphMutation()
 
@@ -129,6 +129,13 @@ export const EditArticle = () => {
     setParagraphs(updatedParagraphs)
   }
 
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (isError) {
+    return <div>Error loading article</div>
+  }
+
   return (
     <form className={styles.createArticle} onSubmit={e => handleSubmit(e)}>
       <div className={styles.createArticle_left}>
@@ -167,7 +174,7 @@ export const EditArticle = () => {
         </div>
         <div className={styles.createArticle_editorLabel}>
           <p>Описание статьи</p>
-          <Editor onChange={setDescription} value={description} isimg={true} />
+          <Editor isimg onChange={setDescription} value={description} />
           <label className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <div className={styles.createArticle_photoLabel_img}>
@@ -197,11 +204,11 @@ export const EditArticle = () => {
               <p>Описание {paragraph.title}</p>
               <Editor
                 isimg={false}
+                key={paragraph.id}
+                onChange={content => handleParagraphChange(index, content)}
                 setimg={() => {
                   setParagraphsWithImg([...paragraphsWithImg, index])
                 }}
-                key={paragraph.id}
-                onChange={content => handleParagraphChange(index, content)}
                 value={paragraph.content}
               />
               {paragraphsWithImg.includes(index) && (
@@ -269,14 +276,14 @@ export const EditArticle = () => {
             {paragraphs.map((paragraph, index) => (
               <div className={styles.createArticle_photoLabel_paragraphs} key={paragraph.id}>
                 <input
-                  type="text"
-                  value={paragraph.title}
                   onChange={e => {
                     const updatedParagraphs = [...paragraphs]
 
                     updatedParagraphs[index].title = e.target.value
                     setParagraphs(updatedParagraphs)
                   }}
+                  type={'text'}
+                  value={paragraph.title}
                 />
                 <button
                   onClick={() => {
