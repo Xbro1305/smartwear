@@ -30,10 +30,6 @@
       gap: 15px;
     }
 
-    input {
-      outline: none;
-    }
-
     &_type {
       padding: 5px 20px;
       border-radius: 15px;
@@ -310,4 +306,17 @@
       }
     }
   }
+}
+
+input {
+  outline: none;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  background-color: white !important;
+  color: black !important;
 }
