@@ -72,7 +72,7 @@ export type CreateParagraphDto = {
 
 export type CreateParagraphinArticleDto = {
   content: string
-  imageFile?: Blob
+  imageFile?: File
   order: number
   title: string
 }
@@ -80,7 +80,7 @@ export type CreateParagraphinArticleDto = {
 export type ParagraphinArticleDto = {
   content: string
   id: number
-  imageFile?: Blob
+  imageFile?: File
   order: number
   title: string
 }

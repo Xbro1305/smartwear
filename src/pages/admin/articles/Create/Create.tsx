@@ -85,7 +85,9 @@ export const CreateArticle = () => {
   }
 
   const addParagraph = () => {
-    if (section === Section.NEWS) return alert('Нельзя добавить абзац в новости')
+    if (section === Section.NEWS) {
+      return alert('Нельзя добавить абзац в новости')
+    }
     setParagraphs([
       ...paragraphs,
       {
@@ -169,8 +171,8 @@ export const CreateArticle = () => {
           <div className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <label
-              style={{ padding: file ? '20px' : '40px' }}
               className={styles.createArticle_photoLabel_img}
+              style={{ padding: file ? '20px' : '40px' }}
             >
               <input
                 accept={'image/*'}
