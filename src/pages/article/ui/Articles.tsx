@@ -2,7 +2,7 @@
 import { useParams } from 'react-router-dom'
 
 import { useSearchArticleByKeywordQuery } from '@/entities/article/article.api'
-//import { useGetImageQuery } from '@/entities/image/image.api'
+import { useGetImageQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
 
 import styles from './Articles.module.scss'
@@ -10,10 +10,10 @@ import styles from './Articles.module.scss'
 const Articles = () => {
   const { name } = useParams<{ name: string }>()
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
-  //const { data: articleImage, isLoading: isArticleImageLoading } = useGetImageQuery({
-  // id: article?.id.toString() as string,
-  //type: 'articles',
-  // })
+  const { data: articleImage, isLoading: isArticleImageLoading } = useGetImageQuery({
+    id: article?.id.toString() as string,
+    type: 'articles',
+  })
 
   if (isLoading) {
     return <div>Загрузка...</div>
@@ -34,7 +34,7 @@ const Articles = () => {
           <h1 className={'h1'}>{article.title}</h1>
           <h4 className={'h4'}>{article.description}</h4>
         </div>
-        {/*<div className={styles.articles_item_right}>
+        <div className={styles.articles_item_right}>
           {isArticleImageLoading && <p>Загрузка изображения...</p>}
 
           {!isArticleImageLoading && articleImage && (
@@ -42,7 +42,7 @@ const Articles = () => {
           )}
 
           {!isArticleImageLoading && !articleImage && <p>Изображение не найдено</p>}
-        </div>*/}
+        </div>
       </div>
 
       {article.paragraphs.map(paragraph => (
