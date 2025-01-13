@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { ROUTER_PATHS } from '@/shared/config/routes'
+
 import { useGetMeQuery } from '@/entities/auth'
-import { SideBar } from '@/widgets/adminSidebar/sidebar'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 import { AdminHeader } from '@/widgets/adminHeader/adminHeader'
+import { SideBar } from '@/widgets/adminSidebar/sidebar'
 export const AdminLayout = () => {
   const { data } = useGetMeQuery()
 
@@ -20,7 +21,7 @@ export const AdminLayout = () => {
     const checkInactivity = () => {
       const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0', 10)
       const now = Date.now()
-      const timeout = 2 * 60 * 1000
+      const timeout = 30 * 60 * 1000
 
       if (now - lastActivity > timeout) {
         localStorage.removeItem('token')
