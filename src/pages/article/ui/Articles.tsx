@@ -20,6 +20,9 @@ const Articles = () => {
     if (article) {
       if (article.metaTitle) {
         document.title = article.metaTitle
+        document
+          .querySelector('meta[name="title"]')
+          ?.setAttribute('content', article.metaDescription)
       }
       if (article.metaDescription) {
         document
