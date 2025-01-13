@@ -6,7 +6,7 @@ import styles from './articles.module.scss'
 const { CREATEARTICLE, EDITARTICLE, ARTICLES } = ROUTER_PATHS
 
 import { useNavigate } from 'react-router-dom'
-
+import { useDeleteArticleMutation } from '@/entities/article'
 import { SectionDto } from '@/entities/article/article.types'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { FaSortAmountUp } from 'react-icons/fa'
@@ -18,19 +18,32 @@ interface ArticleProps {
   section: SectionDto
 }
 
-const handleCopy = () => {
-  //создание такой же статьи только с draft: true
-  alert('Копировать статью?')
-}
-
-const handleDelete = () => {
-  //удаление статьи
-  alert('Удалить статью?')
-}
-
 export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   const [opened, setOpened] = useState(true)
   const navigate = useNavigate()
+  const [deleteArticle] = useDeleteArticleMutation()
+
+  const handleCopy = () => {
+    //создание такой же статьи только с draft: true
+    alert('Копировать статью?')
+  }
+
+  const handleDelete = async (id: number) => {
+    //удаление статьи
+    // alert('Удалить статью?')
+    // deleteArticle
+
+    const confirm = window.confirm('Вы точно хотите удалить эту статью?')
+
+    if (!confirm) return
+
+    try {
+      await deleteArticle(id)
+      alert('Удалено успешно!')
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className={styles.articles_section} key={index}>
@@ -77,7 +90,7 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
               <a href={`${ARTICLES}/${article.title}`} target="_blank">
                 <FaEye />
               </a>
-              <button onClick={handleDelete}>
+              <button onClick={() => handleDelete(article.id)}>
                 <FaTrash />
               </button>
             </li>

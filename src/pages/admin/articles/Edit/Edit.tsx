@@ -344,7 +344,7 @@ export const EditArticle = () => {
             <LuFilePen />
             Сохранить черновик
           </button>
-          <button className={styles.createArticle_top_buttons_right}>Опубликовать</button>
+          <button className={styles.createArticle_top_buttons_right}>{buttonValue}</button>
         </div>
         <div className={styles.createArticle_photoLabel}>
           <p className={styles.createArticle_photoLabel_title}>Абзацы</p>

@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { useGetMeQuery } from '@/entities/auth'
 import { IoExitOutline } from 'react-icons/io5'
 import logo from '@/assets/images/logo.png'
-import { FaUsers, FaBoxOpen, FaShoppingCart, FaNewspaper, FaCog, FaFileAlt } from 'react-icons/fa'
+import { FaUsers, FaBoxOpen, FaShoppingCart, FaCog, FaFileAlt } from 'react-icons/fa'
 import { FaSearch, FaHome } from 'react-icons/fa'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 

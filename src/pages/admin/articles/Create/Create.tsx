@@ -232,7 +232,7 @@ export const CreateArticle = () => {
                 isimg={false}
                 key={paragraph.order}
                 onChange={content => {
-                  setDescription(content)
+                  handleParagraphChange(index, content)
                   setButtonValue('Опубликовать')
                 }}
                 setimg={() => {
