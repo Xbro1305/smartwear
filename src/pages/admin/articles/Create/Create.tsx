@@ -37,6 +37,7 @@ export const CreateArticle = () => {
   const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<Composition>(Composition.LEFT)
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
+  const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
 
   const [createArticle] = useCreateArticleMutation()
   const [uploadArticleImage] = useUploadArticleImageMutation()
@@ -76,6 +77,7 @@ export const CreateArticle = () => {
           await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
         }
       }
+      setButtonValue('Опубликовано')
 
       alert('Статья успешно создана!')
     } catch (err) {
@@ -113,6 +115,18 @@ export const CreateArticle = () => {
     setParagraphs(updatedParagraphs)
   }
 
+  const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault()
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      setFile(event.dataTransfer.files[0])
+      event.dataTransfer.clearData()
+    }
+  }
+
+  const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault() // Предотвращает открытие файла в новой вкладке
+  }
+
   const handleParagraphImageChange = (
     index: number,
     event: React.ChangeEvent<HTMLInputElement>
@@ -137,7 +151,10 @@ export const CreateArticle = () => {
             <div className={styles.createArticle_top_title}>
               <input
                 id={'h2'}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => {
+                  setTitle(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Заголовок статьи'}
                 value={title}
               />
@@ -167,10 +184,19 @@ export const CreateArticle = () => {
         </div>
         <div className={styles.createArticle_editorLabel}>
           <p>Описание статьи</p>
-          <Editor isimg onChange={setDescription} value={description} />
+          <Editor
+            isimg
+            onChange={content => {
+              setDescription(content)
+              setButtonValue('Опубликовать')
+            }}
+            value={description}
+          />
           <div className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <label
+              onDrop={handleFileDrop}
+              onDragOver={handleDragOver}
               className={styles.createArticle_photoLabel_img}
               style={{ padding: file ? '20px' : '40px' }}
             >
@@ -178,7 +204,10 @@ export const CreateArticle = () => {
                 accept={'image/*'}
                 className={'inp'}
                 name={'photo'}
-                onChange={handleFileChange}
+                onChange={e => {
+                  handleFileChange(e)
+                  setButtonValue('Опубликовать')
+                }}
                 size={1}
                 type={'file'}
               />
@@ -202,39 +231,57 @@ export const CreateArticle = () => {
               <Editor
                 isimg={false}
                 key={paragraph.order}
-                onChange={content => handleParagraphChange(index, content)}
+                onChange={content => {
+                  setDescription(content)
+                  setButtonValue('Опубликовать')
+                }}
                 setimg={() => {
-                  setParagraphsWithImg([...paragraphsWithImg, index])
+                  paragraphsWithImg.includes(index)
+                    ? setParagraphsWithImg(paragraphsWithImg.filter(i => i !== index))
+                    : setParagraphsWithImg([...paragraphsWithImg, index])
+                  setButtonValue('Опубликовать')
                 }}
                 value={paragraph.content}
               />
               {paragraphsWithImg.includes(index) && (
                 <div className={styles.createArticle_photoLabel}>
                   <p className={styles.createArticle_photoLabel_title}>
-                    Картинка для абзаца {index + 1}
+                    <span>Картинка для {paragraph.title}</span>
                     <button
                       className={styles.createArticle_photoLabel_close}
                       onClick={() => {
                         const updatedParagraphs = [...paragraphs]
-
+                        setButtonValue('Опубликовать')
                         updatedParagraphs[index].imageFile = undefined
                         setParagraphs(updatedParagraphs)
                         setParagraphsWithImg(paragraphsWithImg.filter(i => i !== index))
                       }}
                       type={'button'}
+                      style={{ marginLeft: 'auto' }}
                     >
                       &times;
                     </button>
                   </p>
                   <label
                     className={styles.createArticle_photoLabel_img}
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={event => {
+                      event.preventDefault()
+                      if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+                        setFile(event.dataTransfer.files[0])
+                        event.dataTransfer.clearData()
+                      }
+                    }}
                     style={{ padding: paragraph.imageFile ? '20px' : '40px' }}
                   >
                     <input
                       accept={'image/*'}
                       className={'inp'}
                       name={'photo'}
-                      onChange={e => handleParagraphImageChange(index, e)}
+                      onChange={e => {
+                        handleParagraphImageChange(index, e)
+                        setButtonValue('Опубликовать')
+                      }}
                       size={1}
                       type={'file'}
                     />
@@ -259,7 +306,10 @@ export const CreateArticle = () => {
 
           <button
             className={styles.createArticle_paragraphs_add}
-            onClick={addParagraph}
+            onClick={() => {
+              addParagraph()
+              setButtonValue('Опубликовать')
+            }}
             type={'button'}
           >
             +
@@ -281,8 +331,9 @@ export const CreateArticle = () => {
             className={styles.createArticle_top_buttons_right}
             onClick={() => setDraft(false)}
             type={'button'}
+            disabled={buttonValue === 'Опубликовано'}
           >
-            Опубликовать
+            {buttonValue}
           </button>
         </div>
         <div className={styles.createArticle_photoLabel}>
@@ -293,15 +344,24 @@ export const CreateArticle = () => {
                 <input
                   onChange={e => {
                     const updatedParagraphs = [...paragraphs]
-
+                    setButtonValue('Опубликовать')
                     updatedParagraphs[index].title = e.target.value
                     setParagraphs(updatedParagraphs)
+                  }}
+                  onBlur={e => {
+                    if (e.target.value === '') {
+                      const updatedParagraphs = [...paragraphs]
+
+                      updatedParagraphs[index].title = 'Абзац' + (index + 1)
+                      setParagraphs(updatedParagraphs)
+                    }
                   }}
                   type={'text'}
                   value={paragraph.title}
                 />
                 <button
                   onClick={() => {
+                    setButtonValue('Опубликовать')
                     setParagraphs(paragraphs.filter(p => p.order !== paragraph.order))
                   }}
                 >
@@ -314,14 +374,20 @@ export const CreateArticle = () => {
           <div className={styles.createArticle_photoLabel_buttons}>
             <button
               className={styles.createArticle_photoLabel_buttons_left}
-              onClick={() => setParagraphs([])}
+              onClick={() => {
+                setParagraphs([])
+                setButtonValue('Опубликовать')
+              }}
               type={'button'}
             >
               Очистить всё
             </button>
             <button
               className={styles.createArticle_photoLabel_buttons_right}
-              onClick={addParagraph}
+              onClick={() => {
+                addParagraph()
+                setButtonValue('Опубликовать')
+              }}
               type={'button'}
             >
               Добавить абзац
@@ -334,7 +400,10 @@ export const CreateArticle = () => {
             <p>Композиция</p>
             <div className={styles.createArticle_photoLabel_composition}>
               <label
-                onClick={() => setComposition(Composition.RIGHT)}
+                onClick={() => {
+                  setComposition(Composition.RIGHT)
+                  setButtonValue('Опубликовать')
+                }}
                 style={{
                   alignItems: 'center',
                   background: composition === Composition.RIGHT ? '#cbd5e1' : 'white',
@@ -344,14 +413,20 @@ export const CreateArticle = () => {
                 <CiAlignRight />
                 <input
                   name={'composition'}
-                  onChange={() => setComposition(Composition.RIGHT)}
+                  onChange={() => {
+                    setComposition(Composition.RIGHT)
+                    setButtonValue('Опубликовать')
+                  }}
                   type={'radio'}
                   value={Composition.RIGHT}
                 />
               </label>
 
               <label
-                onClick={() => setComposition(Composition.LEFT)}
+                onClick={() => {
+                  setComposition(Composition.LEFT)
+                  setButtonValue('Опубликовать')
+                }}
                 style={{
                   alignItems: 'center',
                   background: composition === Composition.LEFT ? '#cbd5e1' : 'white',
@@ -361,7 +436,10 @@ export const CreateArticle = () => {
                 <CiAlignLeft />
                 <input
                   name={'composition'}
-                  onChange={() => setComposition(Composition.LEFT)}
+                  onChange={() => {
+                    setComposition(Composition.LEFT)
+                    setButtonValue('Опубликовать')
+                  }}
                   type={'radio'}
                   value={Composition.LEFT}
                 />
@@ -369,7 +447,10 @@ export const CreateArticle = () => {
             </div>
             <label
               className={styles.createArticle_photoLabel_section}
-              onClick={() => setSection(Section.SEO)}
+              onClick={() => {
+                setSection(Section.SEO)
+                setButtonValue('Опубликовать')
+              }}
             >
               <section>
                 <FaChartBar />
@@ -384,7 +465,10 @@ export const CreateArticle = () => {
             </label>
             <label
               className={styles.createArticle_photoLabel_section}
-              onClick={() => setSection(Section.USER)}
+              onClick={() => {
+                setSection(Section.USER)
+                setButtonValue('Опубликовать')
+              }}
             >
               <section>
                 <FaUser />
@@ -402,6 +486,7 @@ export const CreateArticle = () => {
               onClick={() => {
                 setSection(Section.NEWS)
                 setParagraphs([])
+                setButtonValue('Опубликовать')
               }}
             >
               <section>
@@ -424,9 +509,13 @@ export const CreateArticle = () => {
             <label>
               <p>URL на статью</p>
               <input
+                required
                 id={''}
                 name={'url'}
-                onChange={e => setUrl(e.target.value)}
+                onChange={e => {
+                  setUrl(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Ссылка на статью'}
                 type={'text'}
                 value={url}
@@ -435,9 +524,13 @@ export const CreateArticle = () => {
             <label>
               <p>Meta-tag title</p>
               <textarea
+                required
                 id={''}
                 name={'metaTitle'}
-                onChange={e => setMetaTitle(e.target.value)}
+                onChange={e => {
+                  setMetaTitle(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Seo-заголовок'}
                 value={metaTitle}
               ></textarea>
@@ -445,18 +538,19 @@ export const CreateArticle = () => {
             <label>
               <p>Meta-tag description</p>
               <textarea
+                required
                 id={''}
                 name={'metaDescription'}
-                onChange={e => setMetaDescription(e.target.value)}
+                onChange={e => {
+                  setMetaDescription(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Seo-описание'}
                 value={metaDescription}
               ></textarea>
             </label>
           </div>
           <div className={styles.createArticle_photoLabel_buttons}>
-            {/* Очистить всё */}
-            {/* Сохранить */}
-
             <button
               className={styles.createArticle_photoLabel_buttons_left}
               onClick={() => {

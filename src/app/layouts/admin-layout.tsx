@@ -59,8 +59,26 @@ export const AdminLayout = () => {
 
   const { ADMINLOGIN } = ROUTER_PATHS
 
-  const renderMain =
-    window.location.pathname != ADMINLOGIN ? (
+  const renderMain = (
+    <main>
+      <Outlet />
+    </main>
+  )
+
+  if (window.location.pathname == ADMINLOGIN) {
+    return (
+      <>
+        <div>{renderMain}</div>
+      </>
+    )
+  } else if (window.location.pathname == ADMINLOGIN + '/') {
+    return (
+      <>
+        <div>{renderMain}</div>
+      </>
+    )
+  } else {
+    return (
       <div
         style={{ display: 'grid', gridTemplateColumns: '300px calc(100% - 300px)', width: '100%' }}
       >
@@ -75,15 +93,6 @@ export const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
-    ) : (
-      <main>
-        <Outlet />
-      </main>
     )
-
-  return (
-    <>
-      <div>{renderMain}</div>
-    </>
-  )
+  }
 }

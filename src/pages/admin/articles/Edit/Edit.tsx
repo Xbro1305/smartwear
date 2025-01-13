@@ -40,6 +40,7 @@ export const EditArticle = () => {
   const [section, setSection] = useState<any>()
   const [composition, setComposition] = useState<any>()
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
+  const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
 
   const { id } = useParams<{ id: string }>()
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
@@ -86,7 +87,6 @@ export const EditArticle = () => {
             order: paragraph.order,
             title: paragraph.title,
           }
-
           await createParagraph(paragraphData)
         }
       }
@@ -103,16 +103,28 @@ export const EditArticle = () => {
           }
         }
       }
-
+      setButtonValue('Опубликовано')
       console.log('Статья и параграфы успешно обновлены')
     } catch (error) {
       console.error('Ошибка при обновлении статьи или создании параграфов', error)
     }
   }
 
+  const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault()
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      setFile(URL.createObjectURL(event.dataTransfer.files[0] as Blob))
+      event.dataTransfer.clearData()
+    }
+  }
+
+  const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault() // Предотвращает открытие файла в новой вкладке
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]) // Сохраняем файл в состоянии
+      setFile(URL.createObjectURL(e.target.files[0] as Blob)) // Сохраняем файл в состоянии
     }
   }
 
@@ -167,7 +179,10 @@ export const EditArticle = () => {
             <div className={styles.createArticle_top_title}>
               <input
                 id={'h2'}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => {
+                  setTitle(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Заголовок статьи'}
                 value={title}
               />
@@ -197,24 +212,36 @@ export const EditArticle = () => {
         </div>
         <div className={styles.createArticle_editorLabel}>
           <p>Описание статьи</p>
-          <Editor isimg onChange={setDescription} value={description} />
+          <Editor
+            isimg
+            onChange={content => {
+              setDescription(content)
+              setButtonValue('Опубликовать')
+            }}
+            value={description}
+          />
           <div className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <label
               style={{ padding: file ? '20px' : '40px' }}
+              onDrop={handleFileDrop}
+              onDragOver={handleDragOver}
               className={styles.createArticle_photoLabel_img}
             >
               <input
                 accept={'image/*'}
                 className={'inp'}
                 name={'photo'}
-                onChange={handleFileChange}
+                onChange={e => {
+                  setButtonValue('Опубликовать')
+                  handleFileChange(e)
+                }}
                 size={1}
                 type={'file'}
               />
 
               {file != null ? (
-                <img alt={'selected image'} src={URL.createObjectURL(file as Blob)} />
+                <img alt={'selected image'} src={file} />
               ) : (
                 <>
                   <img alt={'default'} src={cat} />
@@ -232,7 +259,10 @@ export const EditArticle = () => {
               <Editor
                 isimg={false}
                 key={paragraph.id}
-                onChange={content => handleParagraphChange(index, content)}
+                onChange={content => {
+                  handleParagraphChange(index, content)
+                  setButtonValue('Опубликовать')
+                }}
                 setimg={() => {
                   setParagraphsWithImg([...paragraphsWithImg, index])
                 }}
@@ -241,7 +271,7 @@ export const EditArticle = () => {
               {paragraphsWithImg.includes(index) && (
                 <div className={styles.createArticle_photoLabel}>
                   <p className={styles.createArticle_photoLabel_title}>
-                    Картинка для абзацa {index + 1}
+                    <span>Картинка для {paragraph.title}</span>
                     <button
                       className={styles.createArticle_photoLabel_close}
                       onClick={() => {
@@ -251,12 +281,21 @@ export const EditArticle = () => {
                         setParagraphs(updatedParagraphs)
 
                         setParagraphsWithImg(paragraphsWithImg.filter(i => i !== index))
+                        setButtonValue('Опубликовать')
                       }}
                     >
                       &times;
                     </button>
                   </p>
                   <label
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={event => {
+                      event.preventDefault()
+                      if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+                        setFile(URL.createObjectURL(event.dataTransfer.files[0] as Blob))
+                        event.dataTransfer.clearData()
+                      }
+                    }}
                     className={styles.createArticle_photoLabel_img}
                     style={{ padding: paragraph.imageFile ? '20px' : '40px' }}
                   >
@@ -264,7 +303,10 @@ export const EditArticle = () => {
                       accept={'image/*'}
                       className={'inp'}
                       name={'photo'}
-                      onChange={e => handleParagraphImageChange(index, e)}
+                      onChange={e => {
+                        handleParagraphImageChange(index, e)
+                        setButtonValue('Опубликовать')
+                      }}
                       size={1}
                       type={'file'}
                     />
@@ -315,6 +357,15 @@ export const EditArticle = () => {
 
                     updatedParagraphs[index].title = e.target.value
                     setParagraphs(updatedParagraphs)
+                    setButtonValue('Опубликовать')
+                  }}
+                  onBlur={e => {
+                    if (e.target.value === '') {
+                      const updatedParagraphs = [...paragraphs]
+
+                      updatedParagraphs[index].title = 'Абзац' + (index + 1)
+                      setParagraphs(updatedParagraphs)
+                    }
                   }}
                   type={'text'}
                   value={paragraph.title}
@@ -322,6 +373,7 @@ export const EditArticle = () => {
                 <button
                   onClick={() => {
                     setParagraphs(paragraphs.filter(p => p.id !== paragraph.id))
+                    setButtonValue('Опубликовать')
                   }}
                 >
                   Удалить
@@ -333,13 +385,19 @@ export const EditArticle = () => {
           <div className={styles.createArticle_photoLabel_buttons}>
             <button
               className={styles.createArticle_photoLabel_buttons_left}
-              onClick={() => setParagraphs([])}
+              onClick={() => {
+                setParagraphs([])
+                setButtonValue('Опубликовать')
+              }}
             >
               Очистить всё
             </button>
             <button
               className={styles.createArticle_photoLabel_buttons_right}
-              onClick={addParagraph}
+              onClick={() => {
+                setButtonValue('Опубликовать')
+                addParagraph()
+              }}
             >
               Добавить абзац
             </button>
@@ -351,7 +409,10 @@ export const EditArticle = () => {
             <p>Композиция</p>
             <div className={styles.createArticle_photoLabel_composition}>
               <label
-                onClick={() => setComposition(Composition.RIGHT)}
+                onClick={() => {
+                  setComposition(Composition.RIGHT)
+                  setButtonValue('Опубликовать')
+                }}
                 style={{
                   alignItems: 'center',
                   background: composition === Composition.RIGHT ? '#cbd5e1' : 'white',
@@ -361,14 +422,20 @@ export const EditArticle = () => {
                 <CiAlignRight />
                 <input
                   name={'composition'}
-                  onChange={() => setComposition(Composition.RIGHT)}
+                  onChange={() => {
+                    setComposition(Composition.RIGHT)
+                    setButtonValue('Опубликовать')
+                  }}
                   type={'radio'}
                   value={Composition.RIGHT}
                 />
               </label>
 
               <label
-                onClick={() => setComposition(Composition.LEFT)}
+                onClick={() => {
+                  setComposition(Composition.LEFT)
+                  setButtonValue('Опубликовать')
+                }}
                 style={{
                   alignItems: 'center',
                   background: composition === Composition.LEFT ? '#cbd5e1' : 'white',
@@ -378,14 +445,21 @@ export const EditArticle = () => {
                 <CiAlignLeft />
                 <input
                   name={'composition'}
-                  onChange={() => setComposition(Composition.LEFT)}
+                  onChange={() => {
+                    setComposition(Composition.LEFT)
+                    setButtonValue('Опубликовать')
+                  }}
                   type={'radio'}
                   value={Composition.LEFT}
                 />
               </label>
             </div>
             <label
-              onClick={() => setSection(Section.SEO)}
+              onClick={() => {
+                setSection(Section.SEO)
+
+                setButtonValue('Опубликовать')
+              }}
               className={styles.createArticle_photoLabel_section}
             >
               <section>
@@ -400,7 +474,10 @@ export const EditArticle = () => {
               />
             </label>
             <label
-              onClick={() => setSection(Section.USER)}
+              onClick={() => {
+                setSection(Section.USER)
+                setButtonValue('Опубликовать')
+              }}
               className={styles.createArticle_photoLabel_section}
             >
               <section>
@@ -417,6 +494,7 @@ export const EditArticle = () => {
             <label
               onClick={() => {
                 setSection(Section.NEWS)
+                setButtonValue('Опубликовать')
                 setParagraphs([])
               }}
               className={styles.createArticle_photoLabel_section}
@@ -442,7 +520,10 @@ export const EditArticle = () => {
               <input
                 id={''}
                 name={'url'}
-                onChange={e => setUrl(e.target.value)}
+                onChange={e => {
+                  setUrl(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Ссылка на статью'}
                 type={'text'}
                 value={url}
@@ -453,7 +534,10 @@ export const EditArticle = () => {
               <textarea
                 id={''}
                 name={'metaTitle'}
-                onChange={e => setMetaTitle(e.target.value)}
+                onChange={e => {
+                  setMetaTitle(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Seo-заголовок'}
                 value={metaTitle}
               ></textarea>
@@ -463,7 +547,10 @@ export const EditArticle = () => {
               <textarea
                 id={''}
                 name={'metaDescription'}
-                onChange={e => setMetaDescription(e.target.value)}
+                onChange={e => {
+                  setMetaDescription(e.target.value)
+                  setButtonValue('Опубликовать')
+                }}
                 placeholder={'Seo-описание'}
                 value={metaDescription}
               ></textarea>
@@ -478,6 +565,7 @@ export const EditArticle = () => {
               onClick={() => {
                 setMetaDescription('')
                 setMetaTitle('')
+                setButtonValue('Опубликовать')
               }}
             >
               Очистить всё

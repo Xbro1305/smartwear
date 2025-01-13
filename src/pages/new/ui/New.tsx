@@ -4,10 +4,24 @@ import { useSearchArticleByKeywordQuery } from '@/entities/article'
 import { useGetImageQuery } from '@/entities/image/image.api'
 
 import styles from '@/pages/article/ui/Articles.module.scss'
+import { useEffect } from 'react'
 
 export const New = () => {
   const { name } = useParams<{ name: string }>()
   const { data } = useSearchArticleByKeywordQuery(name || '')
+
+  useEffect(() => {
+    if (data) {
+      if (data.metaTitle) {
+        document.title = data.metaTitle
+      }
+      if (data.metaDescription) {
+        document
+          .querySelector('meta[name="description"]')
+          ?.setAttribute('content', data.metaDescription)
+      }
+    }
+  }, [data])
 
   const {
     data: articleImage,

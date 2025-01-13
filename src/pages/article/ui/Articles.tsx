@@ -6,6 +6,7 @@ import { useGetImageQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
 
 import styles from './Articles.module.scss'
+import { useEffect } from 'react'
 
 const Articles = () => {
   const { name } = useParams<{ name: string }>()
@@ -14,6 +15,19 @@ const Articles = () => {
     id: article?.id.toString() as string,
     type: 'articles',
   })
+
+  useEffect(() => {
+    if (article) {
+      if (article.metaTitle) {
+        document.title = article.metaTitle
+      }
+      if (article.metaDescription) {
+        document
+          .querySelector('meta[name="description"]')
+          ?.setAttribute('content', article.metaDescription)
+      }
+    }
+  }, [article])
 
   if (isLoading) {
     return <div>Загрузка...</div>
@@ -32,7 +46,9 @@ const Articles = () => {
       <div className={styles.articles_item}>
         <div className={styles.articles_item_left}>
           <h1 className={'h1'}>{article.title}</h1>
-          <h4 className={'h4'}>{article.description}</h4>
+          <h4 className={'h4'} dangerouslySetInnerHTML={{ __html: article.description }} />
+          {/* {article.description} */}
+          {/* </h4> */}
         </div>
         <div className={styles.articles_item_right}>
           {isArticleImageLoading && <p>Загрузка изображения...</p>}

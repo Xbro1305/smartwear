@@ -57,7 +57,7 @@ const menuItems = [
   { name: 'Сотрудники', icon: <FaUsers />, path: '/admin/employees', end: false },
   { name: 'Покупатели', icon: <FaShoppingCart />, path: '/admin/customers', end: false },
   { name: 'Заказы', icon: <FaBoxOpen />, path: '/admin/orders', end: false },
-  { name: 'Новости', icon: <FaNewspaper />, path: '/admin/news', end: false },
+  // { name: 'Новости', icon: <FaNewspaper />, path: '/admin/news', end: false },
   { name: 'Настройки', icon: <FaCog />, path: '/admin/settings', end: false },
   { name: 'Статьи', icon: <FaFileAlt />, path: ADMINARTICLES, end: false },
   { name: 'Товары', icon: <FaBoxOpen />, path: '/products', end: false },

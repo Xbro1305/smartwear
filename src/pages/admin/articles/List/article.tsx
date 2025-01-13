@@ -74,9 +74,9 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
               <button onClick={handleCopy}>
                 <IoCopy />
               </button>
-              <button onClick={() => navigate(`${ARTICLES}/${article.title}`)}>
+              <a href={`${ARTICLES}/${article.title}`} target="_blank">
                 <FaEye />
-              </button>
+              </a>
               <button onClick={handleDelete}>
                 <FaTrash />
               </button>
