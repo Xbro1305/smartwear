@@ -1,4 +1,5 @@
 /* eslint-disable no-nested-ternary */
+import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useSearchArticleByKeywordQuery } from '@/entities/article/article.api'
@@ -6,7 +7,6 @@ import { useGetImageQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
 
 import styles from './Articles.module.scss'
-import { useEffect } from 'react'
 
 const Articles = () => {
   const { name } = useParams<{ name: string }>()

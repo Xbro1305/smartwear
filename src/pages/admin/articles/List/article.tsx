@@ -3,11 +3,13 @@ import { useState } from 'react'
 import { FaEye, FaPen, FaTrash } from 'react-icons/fa'
 
 import styles from './articles.module.scss'
-const { CREATEARTICLE, EDITARTICLE, ARTICLES } = ROUTER_PATHS
+const { ARTICLES, CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
 
 import { useNavigate } from 'react-router-dom'
+
+import { useCreateArticleMutation, useGetArticlesQuery } from '@/entities/article'
 import { useDeleteArticleMutation } from '@/entities/article'
-import { SectionDto } from '@/entities/article/article.types'
+import { CreateArticleDto, ParagraphDto, SectionDto } from '@/entities/article/article.types'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { FaSortAmountUp } from 'react-icons/fa'
 import { IoIosArrowDown } from 'react-icons/io'
@@ -22,20 +24,56 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   const [opened, setOpened] = useState(true)
   const navigate = useNavigate()
   const [deleteArticle] = useDeleteArticleMutation()
+  const [createArticle] = useCreateArticleMutation()
 
-  const handleCopy = () => {
-    //создание такой же статьи только с draft: true
-    alert('Копировать статью?')
+  const { data: articles } = useGetArticlesQuery()
+
+  const handleCopy = async (id: number) => {
+    const confirm = window.confirm('Копировать статью?')
+
+    if (!confirm) {
+      return
+    }
+
+    try {
+      const existingArticle = articles?.find(article => article.id === id)
+
+      if (!existingArticle) {
+        alert('Ошибка: статья не найдена.')
+
+        return
+      }
+
+      const newArticleData: CreateArticleDto = {
+        composition: existingArticle.composition,
+        description: existingArticle.description,
+        draft: true,
+        metaDescription: existingArticle.metaDescription,
+        metaTitle: existingArticle.metaTitle,
+        paragraphs: existingArticle.paragraphs.map((paragraph: ParagraphDto) => ({
+          content: paragraph.content,
+          order: paragraph.order,
+          title: paragraph.title,
+        })),
+        section: existingArticle.section,
+        title: `${existingArticle.title} (Копия)`,
+        userId: existingArticle.userId,
+      }
+
+      await createArticle(newArticleData).unwrap()
+      alert('Копия успешно создана!')
+    } catch (error) {
+      console.error('Ошибка при создании копии статьи:', error)
+      alert('Ошибка при создании копии статьи.')
+    }
   }
 
   const handleDelete = async (id: number) => {
-    //удаление статьи
-    // alert('Удалить статью?')
-    // deleteArticle
-
     const confirm = window.confirm('Вы точно хотите удалить эту статью?')
 
-    if (!confirm) return
+    if (!confirm) {
+      return
+    }
 
     try {
       await deleteArticle(id)
@@ -84,10 +122,10 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
               <button onClick={() => navigate(`${EDITARTICLE}/${article.id}`)}>
                 <FaPen />
               </button>
-              <button onClick={handleCopy}>
+              <button onClick={() => handleCopy(article.id)}>
                 <IoCopy />
               </button>
-              <a href={`${ARTICLES}/${article.title}`} target="_blank">
+              <a href={`${ARTICLES}/${article.title}`} rel={'noreferrer'} target={'_blank'}>
                 <FaEye />
               </a>
               <button onClick={() => handleDelete(article.id)}>

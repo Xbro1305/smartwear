@@ -52,7 +52,7 @@ export const CreateArticle = () => {
       composition,
       description,
       draft,
-      keyword: url.split('/').pop(),
+      keyword: url,
       metaDescription,
       metaTitle,
       paragraphs,
@@ -195,9 +195,9 @@ export const CreateArticle = () => {
           <div className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <label
-              onDrop={handleFileDrop}
-              onDragOver={handleDragOver}
               className={styles.createArticle_photoLabel_img}
+              onDragOver={handleDragOver}
+              onDrop={handleFileDrop}
               style={{ padding: file ? '20px' : '40px' }}
             >
               <input
@@ -251,13 +251,14 @@ export const CreateArticle = () => {
                       className={styles.createArticle_photoLabel_close}
                       onClick={() => {
                         const updatedParagraphs = [...paragraphs]
+
                         setButtonValue('Опубликовать')
                         updatedParagraphs[index].imageFile = undefined
                         setParagraphs(updatedParagraphs)
                         setParagraphsWithImg(paragraphsWithImg.filter(i => i !== index))
                       }}
-                      type={'button'}
                       style={{ marginLeft: 'auto' }}
+                      type={'button'}
                     >
                       &times;
                     </button>
@@ -329,9 +330,9 @@ export const CreateArticle = () => {
           </button>
           <button
             className={styles.createArticle_top_buttons_right}
+            disabled={buttonValue === 'Опубликовано'}
             onClick={() => setDraft(false)}
             type={'button'}
-            disabled={buttonValue === 'Опубликовано'}
           >
             {buttonValue}
           </button>
@@ -342,12 +343,6 @@ export const CreateArticle = () => {
             {paragraphs.map((paragraph, index) => (
               <div className={styles.createArticle_photoLabel_paragraphs} key={paragraph.order}>
                 <input
-                  onChange={e => {
-                    const updatedParagraphs = [...paragraphs]
-                    setButtonValue('Опубликовать')
-                    updatedParagraphs[index].title = e.target.value
-                    setParagraphs(updatedParagraphs)
-                  }}
                   onBlur={e => {
                     if (e.target.value === '') {
                       const updatedParagraphs = [...paragraphs]
@@ -355,6 +350,13 @@ export const CreateArticle = () => {
                       updatedParagraphs[index].title = 'Абзац' + (index + 1)
                       setParagraphs(updatedParagraphs)
                     }
+                  }}
+                  onChange={e => {
+                    const updatedParagraphs = [...paragraphs]
+
+                    setButtonValue('Опубликовать')
+                    updatedParagraphs[index].title = e.target.value
+                    setParagraphs(updatedParagraphs)
                   }}
                   type={'text'}
                   value={paragraph.title}
@@ -509,7 +511,6 @@ export const CreateArticle = () => {
             <label>
               <p>URL на статью</p>
               <input
-                required
                 id={''}
                 name={'url'}
                 onChange={e => {
@@ -517,6 +518,7 @@ export const CreateArticle = () => {
                   setButtonValue('Опубликовать')
                 }}
                 placeholder={'Ссылка на статью'}
+                required
                 type={'text'}
                 value={url}
               />
@@ -524,7 +526,6 @@ export const CreateArticle = () => {
             <label>
               <p>Meta-tag title</p>
               <textarea
-                required
                 id={''}
                 name={'metaTitle'}
                 onChange={e => {
@@ -532,13 +533,13 @@ export const CreateArticle = () => {
                   setButtonValue('Опубликовать')
                 }}
                 placeholder={'Seo-заголовок'}
+                required
                 value={metaTitle}
               ></textarea>
             </label>
             <label>
               <p>Meta-tag description</p>
               <textarea
-                required
                 id={''}
                 name={'metaDescription'}
                 onChange={e => {
@@ -546,6 +547,7 @@ export const CreateArticle = () => {
                   setButtonValue('Опубликовать')
                 }}
                 placeholder={'Seo-описание'}
+                required
                 value={metaDescription}
               ></textarea>
             </label>
