@@ -17,7 +17,6 @@ const router = createBrowserRouter([
   },
   {
     children: adminRoutes.filter(route => route.path === ADMINLOGIN),
-    element: <RootLayout />,
   },
   {
     children: adminRoutes.filter(route => route.path !== ADMINLOGIN),
