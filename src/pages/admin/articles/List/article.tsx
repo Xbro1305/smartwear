@@ -7,9 +7,9 @@ const { ARTICLES, CREATEARTICLE, EDITARTICLE, CLONEARTICLE } = ROUTER_PATHS
 
 import { useNavigate } from 'react-router-dom'
 
-import { useCreateArticleMutation, useGetArticlesQuery } from '@/entities/article'
+import {  useGetArticlesQuery } from '@/entities/article'
 import { useDeleteArticleMutation } from '@/entities/article'
-import { CreateArticleDto, ParagraphDto, SectionDto } from '@/entities/article/article.types'
+import { SectionDto } from '@/entities/article/article.types'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { FaSortAmountUp } from 'react-icons/fa'
 import { IoIosArrowDown } from 'react-icons/io'
@@ -24,7 +24,7 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   const [opened, setOpened] = useState(true)
   const navigate = useNavigate()
   const [deleteArticle] = useDeleteArticleMutation()
-  const [createArticle] = useCreateArticleMutation()
+  // const [createArticle] = useCreateArticleMutation()
 
   const { data: articles } = useGetArticlesQuery()
 
