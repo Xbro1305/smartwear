@@ -21,7 +21,7 @@ import { FaCheck, FaPen } from 'react-icons/fa'
 import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
 import { LuFilePen } from 'react-icons/lu'
 
-import styles from './Create.module.scss'
+import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
 import { useParams } from 'react-router-dom'
