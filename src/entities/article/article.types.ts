@@ -98,6 +98,7 @@ export type SectionDto = {
     draft?: boolean
     id: number
     title: string
+    keyword: string
   }>
   category: string
 }
