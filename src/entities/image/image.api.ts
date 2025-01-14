@@ -14,13 +14,17 @@ export const imageApi = baseApi.injectEndpoints({
       }),
     }),
 
-    getParagraphsImages: builder.query<string[], { articleId: string }>({
+    getParagraphsImages: builder.query<Blob[], { articleId: string }>({
       query: ({ articleId }) => ({
         method: 'GET',
-        url: `/images/article/${articleId}/paragraphs`, // новый путь для получения всех изображений параграфов
+        responseHandler: async response => {
+          const blob = await response.blob()
+
+          return blob
+        },
+        url: `/images/article/${articleId}/paragraphs`,
       }),
     }),
-
     uploadArticleImage: builder.mutation<
       { imagePath: string; message: string },
       { file: File; id: number }

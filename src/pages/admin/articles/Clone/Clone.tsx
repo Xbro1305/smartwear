@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
 import { useCreateArticleMutation, useGetArticleByIdQuery } from '@/entities/article'
@@ -16,6 +17,7 @@ import {
   useUploadArticleImageMutation,
   useUploadParagraphImageMutation,
 } from '@/entities/image/image.api'
+import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
 import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
 import { FaCheck, FaPen } from 'react-icons/fa'
 import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
@@ -24,7 +26,6 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
-import { useParams } from 'react-router-dom'
 
 export const CloneArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -39,6 +40,7 @@ export const CloneArticle = () => {
   const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<Composition>(Composition.LEFT)
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
+  const [imagesByParagraph, setImagesByParagraph] = useState<Blob[]>([])
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
 
   const [createArticle] = useCreateArticleMutation()
@@ -47,6 +49,16 @@ export const CloneArticle = () => {
 
   const { id } = useParams<{ id: string }>()
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
+  const { data: paragraphsImages } = useGetParagraphsImagesQuery({
+    articleId: id || '',
+  })
+
+  useEffect(() => {
+    if (paragraphsImages && article?.paragraphs) {
+      setImagesByParagraph(paragraphsImages)
+    }
+  }, [article?.paragraphs, paragraphsImages])
+
   const { data: articleImage } = useGetImageQuery({
     id: article?.id.toString() as string,
     type: 'articles',
@@ -63,7 +75,6 @@ export const CloneArticle = () => {
       setComposition(article.composition)
       setSection(article.section)
       setParagraphs(article.paragraphs)
-      setFile(article?.imageUrl || null)
       // setUrl(article.keyword)
       console.log(article)
     }
@@ -333,7 +344,7 @@ export const CloneArticle = () => {
                     />
                     {/* Показываем изображение, если оно выбрано */}
                     {paragraph.imageFile ? (
-                      <img alt={'selected image'} src={paragraph.imageFile} />
+                      <img alt={'selected image'} src={file} />
                     ) : (
                       <>
                         <img alt={'default'} src={cat} />

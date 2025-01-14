@@ -16,7 +16,7 @@ const Articles = () => {
       articleId: article?.id.toString() || '',
     })
 
-  const [imagesByParagraph, setImagesByParagraph] = useState<(Blob | string)[]>([])
+  const [imagesByParagraph, setImagesByParagraph] = useState<Blob[]>([])
 
   useEffect(() => {
     if (paragraphImages && article?.paragraphs) {

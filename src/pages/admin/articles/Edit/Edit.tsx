@@ -12,10 +12,11 @@ import {
   Composition,
   CreateParagraphDto,
   ParagraphinArticleDto,
-  sectionMapping,
   UpdateArticleDto,
+  sectionMapping,
 } from '@/entities/article/article.types'
 import { Section } from '@/entities/article/article.types'
+import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
 import {
   useGetImageQuery,
   useUploadArticleImageMutation,
@@ -43,13 +44,31 @@ export const EditArticle = () => {
   const [composition, setComposition] = useState<any>()
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
-
   const { id } = useParams<{ id: string }>()
+  const { data: paragraphImages, isLoading: isParagraphImagesLoading } =
+    useGetParagraphsImagesQuery({
+      articleId: id?.toString() || '',
+    })
+
+  const [imagesByParagraph, setImagesByParagraph] = useState<Blob[]>([])
+
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
+
+  useEffect(() => {
+    if (paragraphImages && article?.paragraphs) {
+      setImagesByParagraph(paragraphImages)
+    }
+  }, [paragraphImages, article?.paragraphs])
   const { data: articleImage } = useGetImageQuery({
     id: article?.id.toString() as string,
     type: 'articles',
   })
+
+  useEffect(() => {
+    if (paragraphImages && article?.paragraphs) {
+      setImagesByParagraph(paragraphImages)
+    }
+  }, [paragraphImages, article?.paragraphs])
 
   const [updateArticle] = useUpdateArticleMutation()
   const [createParagraph] = useCreateParagraphMutation()
@@ -103,6 +122,7 @@ export const EditArticle = () => {
             order: paragraph.order,
             title: paragraph.title,
           }
+
           await createParagraph(paragraphData)
         }
       }
@@ -159,7 +179,9 @@ export const EditArticle = () => {
   }
 
   const addParagraph = () => {
-    if (section === Section.NEWS) return alert('Нельзя добавить абзац в новости')
+    if (section === Section.NEWS) {
+      return alert('Нельзя добавить абзац в новости')
+    }
     setParagraphs([
       ...paragraphs,
       {
@@ -237,10 +259,10 @@ export const EditArticle = () => {
           <div className={styles.createArticle_photoLabel}>
             <p className={styles.createArticle_photoLabel_title}>Обложка для статьи</p>
             <label
-              style={{ padding: file ? '20px' : '40px' }}
-              onDrop={handleFileDrop}
-              onDragOver={handleDragOver}
               className={styles.createArticle_photoLabel_img}
+              onDragOver={handleDragOver}
+              onDrop={handleFileDrop}
+              style={{ padding: file ? '20px' : '40px' }}
             >
               <input
                 accept={'image/*'}
@@ -302,6 +324,7 @@ export const EditArticle = () => {
                     </button>
                   </p>
                   <label
+                    className={styles.createArticle_photoLabel_img}
                     onDragOver={e => e.preventDefault()}
                     onDrop={event => {
                       event.preventDefault()
@@ -320,7 +343,6 @@ export const EditArticle = () => {
                         event.dataTransfer.clearData()
                       }
                     }}
-                    className={styles.createArticle_photoLabel_img}
                     style={{ padding: paragraph.imageFile ? '20px' : '40px' }}
                   >
                     <input
@@ -378,13 +400,6 @@ export const EditArticle = () => {
             {paragraphs.map((paragraph, index) => (
               <div className={styles.createArticle_photoLabel_paragraphs} key={paragraph.id}>
                 <input
-                  onChange={e => {
-                    const updatedParagraphs = [...paragraphs]
-
-                    updatedParagraphs[index].title = e.target.value
-                    setParagraphs(updatedParagraphs)
-                    setButtonValue('Опубликовать')
-                  }}
                   onBlur={e => {
                     if (e.target.value === '') {
                       const updatedParagraphs = [...paragraphs]
@@ -392,6 +407,13 @@ export const EditArticle = () => {
                       updatedParagraphs[index].title = 'Абзац' + (index + 1)
                       setParagraphs(updatedParagraphs)
                     }
+                  }}
+                  onChange={e => {
+                    const updatedParagraphs = [...paragraphs]
+
+                    updatedParagraphs[index].title = e.target.value
+                    setParagraphs(updatedParagraphs)
+                    setButtonValue('Опубликовать')
                   }}
                   type={'text'}
                   value={paragraph.title}
@@ -481,12 +503,12 @@ export const EditArticle = () => {
               </label>
             </div>
             <label
+              className={styles.createArticle_photoLabel_section}
               onClick={() => {
                 setSection(Section.SEO)
 
                 setButtonValue('Опубликовать')
               }}
-              className={styles.createArticle_photoLabel_section}
             >
               <section>
                 <FaChartBar />
@@ -500,11 +522,11 @@ export const EditArticle = () => {
               />
             </label>
             <label
+              className={styles.createArticle_photoLabel_section}
               onClick={() => {
                 setSection(Section.USER)
                 setButtonValue('Опубликовать')
               }}
-              className={styles.createArticle_photoLabel_section}
             >
               <section>
                 <FaUser />
@@ -518,12 +540,12 @@ export const EditArticle = () => {
               />
             </label>
             <label
+              className={styles.createArticle_photoLabel_section}
               onClick={() => {
                 setSection(Section.NEWS)
                 setButtonValue('Опубликовать')
                 setParagraphs([])
               }}
-              className={styles.createArticle_photoLabel_section}
             >
               <section>
                 <FaRegNewspaper />
