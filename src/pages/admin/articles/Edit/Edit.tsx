@@ -17,6 +17,7 @@ import {
 } from '@/entities/article/article.types'
 import { Section } from '@/entities/article/article.types'
 import {
+  useGetImageQuery,
   useUploadArticleImageMutation,
   useUploadParagraphImageMutation,
 } from '@/entities/image/image.api'
@@ -28,6 +29,7 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
+import { use } from 'echarts'
 
 export const EditArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -45,6 +47,11 @@ export const EditArticle = () => {
 
   const { id } = useParams<{ id: string }>()
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
+  const { data: articleImage, isLoading: isArticleImageLoading } = useGetImageQuery({
+    id: article?.id.toString() as string,
+    type: 'articles',
+  })
+
   const [updateArticle] = useUpdateArticleMutation()
   const [createParagraph] = useCreateParagraphMutation()
 
@@ -65,6 +72,12 @@ export const EditArticle = () => {
       console.log(article)
     }
   }, [article])
+
+  useEffect(() => {
+    if (articleImage) {
+      setFile(URL.createObjectURL(articleImage))
+    }
+  }, [articleImage])
 
   console.log(composition)
 
