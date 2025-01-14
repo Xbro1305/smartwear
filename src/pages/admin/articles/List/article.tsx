@@ -60,7 +60,9 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
         userId: existingArticle.userId,
       }
 
-      await createArticle(newArticleData).unwrap()
+      await createArticle(newArticleData)
+        .unwrap()
+        .then(res => navigate(`${EDITARTICLE}/${res.id}`))
       alert('Копия успешно создана!')
     } catch (error) {
       console.error('Ошибка при создании копии статьи:', error)
