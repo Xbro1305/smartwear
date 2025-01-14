@@ -36,10 +36,6 @@ export const Editor: React.FC<EditorProps> = ({ isimg, onChange, setimg, value }
         theme: 'snow',
       })
 
-      if (value) {
-        quillInstance.current.root.innerHTML = value
-      }
-
       quillInstance.current.on('text-change', () => {
         if (onChange) {
           onChange(quillInstance.current?.root.innerHTML || '')
@@ -47,6 +43,12 @@ export const Editor: React.FC<EditorProps> = ({ isimg, onChange, setimg, value }
       })
     }
   }, [])
+
+  useEffect(() => {
+    if (quillInstance.current && value !== quillInstance.current.root.innerHTML) {
+      quillInstance.current.root.innerHTML = value || ''
+    }
+  }, [value])
 
   return (
     <div className={'custom-quill-container'} style={{ width: '100%', height: 'fit-content' }}>

@@ -29,7 +29,6 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
-import { use } from 'echarts'
 
 export const EditArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -47,7 +46,7 @@ export const EditArticle = () => {
 
   const { id } = useParams<{ id: string }>()
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
-  const { data: articleImage, isLoading: isArticleImageLoading } = useGetImageQuery({
+  const { data: articleImage } = useGetImageQuery({
     id: article?.id.toString() as string,
     type: 'articles',
   })
