@@ -31,9 +31,7 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   const handleCopy = async (id: number) => {
     const confirm = window.confirm('Копировать статью?')
 
-    if (!confirm) {
-      return
-    }
+    if (!confirm) return
 
     try {
       const existingArticle = articles?.find(article => article.id === id)
