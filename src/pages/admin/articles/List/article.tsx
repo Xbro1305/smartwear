@@ -33,39 +33,15 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
 
     if (!confirm) return
 
-    try {
-      const existingArticle = articles?.find(article => article.id === id)
+    const existingArticle = articles?.find(article => article.id === id)
 
-      if (!existingArticle) {
-        alert('Ошибка: статья не найдена.')
+    if (!existingArticle) {
+      alert('Ошибка: статья не найдена.')
 
-        return
-      }
-
-      const newArticleData: CreateArticleDto = {
-        composition: existingArticle.composition,
-        description: existingArticle.description,
-        draft: true,
-        metaDescription: existingArticle.metaDescription,
-        metaTitle: existingArticle.metaTitle,
-        paragraphs: existingArticle.paragraphs.map((paragraph: ParagraphDto) => ({
-          content: paragraph.content,
-          order: paragraph.order,
-          title: paragraph.title,
-        })),
-        section: existingArticle.section,
-        title: `${existingArticle.title} (Копия)`,
-        userId: existingArticle.userId,
-      }
-
-      await createArticle(newArticleData)
-        .unwrap()
-        .then(() => navigate(`${CLONEARTICLE}/${existingArticle.id}`))
-      alert('Копия успешно создана!')
-    } catch (error) {
-      console.error('Ошибка при создании копии статьи:', error)
-      alert('Ошибка при создании копии статьи.')
+      return
     }
+
+    navigate(`${CLONEARTICLE}/${existingArticle.id}`)
   }
 
   const handleDelete = async (id: number) => {
