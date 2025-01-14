@@ -12,6 +12,7 @@ import {
   Composition,
   CreateParagraphDto,
   ParagraphinArticleDto,
+  sectionMapping,
   UpdateArticleDto,
 } from '@/entities/article/article.types'
 import { Section } from '@/entities/article/article.types'
@@ -37,7 +38,7 @@ export const EditArticle = () => {
   const [paragraphs, setParagraphs] = useState<ParagraphinArticleDto[]>([])
   const [file, setFile] = useState<any>(null)
   const [url, setUrl] = useState<string>('')
-  const [section, setSection] = useState<any>()
+  const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<any>()
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
@@ -59,6 +60,8 @@ export const EditArticle = () => {
       setComposition(article.composition)
       setSection(article.section)
       setParagraphs(article.paragraphs)
+      
+      console.log(article)
     }
   }, [article])
 
@@ -134,8 +137,6 @@ export const EditArticle = () => {
   ) => {
     const file = event.target.files ? event.target.files[0] : null
 
-    alert(file)
-
     if (file) {
       const updatedParagraphs = [...paragraphs]
 
@@ -197,7 +198,7 @@ export const EditArticle = () => {
                   }}
                 />
               </button>
-              <span className={styles.createArticle_top_type}>Seo</span>
+              <span className={styles.createArticle_top_type}>{sectionMapping[section]}</span>
             </div>
           )}
           {editingTitle == false && (
@@ -206,7 +207,7 @@ export const EditArticle = () => {
               <button>
                 <FaPen onClick={() => setEditingTitle(true)} />
               </button>
-              <span className={styles.createArticle_top_type}>Seo</span>
+              <span className={styles.createArticle_top_type}>{sectionMapping[section]}</span>
             </div>
           )}
         </div>
@@ -292,7 +293,17 @@ export const EditArticle = () => {
                     onDrop={event => {
                       event.preventDefault()
                       if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-                        setFile(URL.createObjectURL(event.dataTransfer.files[0] as Blob))
+                        const file = event.dataTransfer.files[0]
+                          ? event.dataTransfer.files[0]
+                          : null
+
+                        if (file) {
+                          const updatedParagraphs = [...paragraphs]
+
+                          updatedParagraphs[index].imageFile = file
+                          setParagraphs(updatedParagraphs)
+                        }
+
                         event.dataTransfer.clearData()
                       }
                     }}

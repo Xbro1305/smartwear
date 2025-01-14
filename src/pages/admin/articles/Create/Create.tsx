@@ -133,8 +133,6 @@ export const CreateArticle = () => {
   ) => {
     const file = event.target.files ? event.target.files[0] : null
 
-    alert(file)
-
     if (file) {
       const updatedParagraphs = [...paragraphs]
 
@@ -178,7 +176,7 @@ export const CreateArticle = () => {
               <button>
                 <FaPen onClick={() => setEditingTitle(true)} />
               </button>
-              <span className={styles.createArticle_top_type}>Seo</span>
+              <span className={styles.createArticle_top_type}>{sectionMapping[section]}</span>
             </div>
           )}
         </div>
@@ -269,7 +267,17 @@ export const CreateArticle = () => {
                     onDrop={event => {
                       event.preventDefault()
                       if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-                        setFile(event.dataTransfer.files[0])
+                        const file = event.dataTransfer.files[0]
+                          ? event.dataTransfer.files[0]
+                          : null
+
+                        if (file) {
+                          const updatedParagraphs = [...paragraphs]
+
+                          updatedParagraphs[index].imageFile = file
+                          setParagraphs(updatedParagraphs)
+                        }
+
                         event.dataTransfer.clearData()
                       }
                     }}
