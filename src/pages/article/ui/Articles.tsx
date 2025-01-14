@@ -1,9 +1,8 @@
-/* eslint-disable no-nested-ternary */
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useSearchArticleByKeywordQuery } from '@/entities/article/article.api'
-import { useGetImageQuery } from '@/entities/image/image.api'
+import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
 
 import styles from './Articles.module.scss'
@@ -11,10 +10,19 @@ import styles from './Articles.module.scss'
 const Articles = () => {
   const { name } = useParams<{ name: string }>()
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
-  const { data: articleImage, isLoading: isArticleImageLoading } = useGetImageQuery({
-    id: article?.id.toString() as string,
-    type: 'articles',
-  })
+
+  const { data: paragraphImages, isLoading: isParagraphImagesLoading } =
+    useGetParagraphsImagesQuery({
+      articleId: article?.id.toString() || '',
+    })
+
+  const [imagesByParagraph, setImagesByParagraph] = useState<(Blob | string)[]>([])
+
+  useEffect(() => {
+    if (paragraphImages && article?.paragraphs) {
+      setImagesByParagraph(paragraphImages)
+    }
+  }, [paragraphImages, article?.paragraphs])
 
   useEffect(() => {
     if (article) {
@@ -55,21 +63,14 @@ const Articles = () => {
         <div className={styles.articles_item_left}>
           <h1 className={'h1'}>{article.title}</h1>
           <h4 className={'h4'} dangerouslySetInnerHTML={{ __html: article.description }} />
-          {/* {article.description} */}
-          {/* </h4> */}
         </div>
         <div className={styles.articles_item_right}>
-          {isArticleImageLoading && <p>Загрузка изображения...</p>}
-
-          {!isArticleImageLoading && articleImage && (
-            <img alt={'Article'} src={URL.createObjectURL(articleImage)} />
-          )}
-
-          {!isArticleImageLoading && !articleImage && <p>Изображение не найдено</p>}
+          {isParagraphImagesLoading && <p>Загрузка изображений...</p>}
+          {!isParagraphImagesLoading && !paragraphImages && <p>Изображения не найдены</p>}
         </div>
       </div>
 
-      {article.paragraphs.map(paragraph => (
+      {article.paragraphs.map((paragraph, index) => (
         <div
           className={styles.articles_item}
           key={paragraph.id}
@@ -82,7 +83,16 @@ const Articles = () => {
             <div dangerouslySetInnerHTML={{ __html: paragraph.content }} />
           </div>
           <div className={styles.articles_item_right}>
-            {paragraph.imageUrl && <img alt={'Paragraph'} src={paragraph.imageUrl} />}
+            {imagesByParagraph[index] && (
+              <img
+                alt={'Paragraph'}
+                src={
+                  imagesByParagraph[index]
+                    ? URL.createObjectURL(imagesByParagraph[index] as Blob)
+                    : ''
+                }
+              />
+            )}
           </div>
         </div>
       ))}

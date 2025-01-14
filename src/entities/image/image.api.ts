@@ -14,6 +14,13 @@ export const imageApi = baseApi.injectEndpoints({
       }),
     }),
 
+    getParagraphsImages: builder.query<string[], { articleId: string }>({
+      query: ({ articleId }) => ({
+        method: 'GET',
+        url: `/images/article/${articleId}/paragraphs`, // новый путь для получения всех изображений параграфов
+      }),
+    }),
+
     uploadArticleImage: builder.mutation<
       { imagePath: string; message: string },
       { file: File; id: number }
@@ -50,5 +57,9 @@ export const imageApi = baseApi.injectEndpoints({
   }),
 })
 
-export const { useGetImageQuery, useUploadArticleImageMutation, useUploadParagraphImageMutation } =
-  imageApi
+export const {
+  useGetImageQuery,
+  useGetParagraphsImagesQuery,
+  useUploadArticleImageMutation,
+  useUploadParagraphImageMutation,
+} = imageApi
