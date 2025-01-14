@@ -9,9 +9,10 @@ import { RestorePass } from '@/pages/admin/setpass/ui/Restore'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import { AdminGuard } from './admin-guard'
+import { CloneArticle } from '@/pages/admin/articles/Clone/Clone'
 
 const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS } = ROUTER_PATHS
-const { EDITARTICLE } = ROUTER_PATHS
+const { EDITARTICLE, CLONEARTICLE } = ROUTER_PATHS
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -25,6 +26,7 @@ export const adminRoutes: RouteObject[] = [
       { element: <ArticlesList />, path: ADMINARTICLES },
       { element: <CreateArticle />, path: CREATEARTICLE },
       { element: <EditArticle />, path: `${EDITARTICLE}/:id` },
+      { element: <CloneArticle />, path: `${CLONEARTICLE}/:id` },
     ],
     element: <AdminGuard />,
   },

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { FaEye, FaPen, FaTrash } from 'react-icons/fa'
 
 import styles from './articles.module.scss'
-const { ARTICLES, CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
+const { ARTICLES, CREATEARTICLE, EDITARTICLE, CLONEARTICLE } = ROUTER_PATHS
 
 import { useNavigate } from 'react-router-dom'
 
@@ -62,7 +62,7 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
 
       await createArticle(newArticleData)
         .unwrap()
-        .then(res => navigate(`${EDITARTICLE}/${res.id}`))
+        .then(() => navigate(`${CLONEARTICLE}/${existingArticle.id}`))
       alert('Копия успешно создана!')
     } catch (error) {
       console.error('Ошибка при создании копии статьи:', error)

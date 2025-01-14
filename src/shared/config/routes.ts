@@ -33,4 +33,5 @@ export const ROUTER_PATHS = {
   ACS: '/accessories',
   SALES: '/accessories',
   NEWS: '/news',
+  CLONEARTICLE: '/admin/clone-article',
 } as const
