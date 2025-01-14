@@ -46,7 +46,12 @@ const Articles = () => {
 
   return (
     <div className={styles.articles}>
-      <div className={styles.articles_item}>
+      <div
+        className={styles.articles_item}
+        style={{
+          flexDirection: article.composition === 'RIGHT' ? 'row-reverse' : 'row',
+        }}
+      >
         <div className={styles.articles_item_left}>
           <h1 className={'h1'}>{article.title}</h1>
           <h4 className={'h4'} dangerouslySetInnerHTML={{ __html: article.description }} />

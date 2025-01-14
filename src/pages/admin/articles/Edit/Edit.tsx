@@ -60,7 +60,8 @@ export const EditArticle = () => {
       setComposition(article.composition)
       setSection(article.section)
       setParagraphs(article.paragraphs)
-      
+      setFile(article?.imageUrl || null)
+      setUrl(article.keyword)
       console.log(article)
     }
   }, [article])
@@ -355,7 +356,9 @@ export const EditArticle = () => {
             <LuFilePen />
             Сохранить черновик
           </button>
-          <button className={styles.createArticle_top_buttons_right}>{buttonValue}</button>
+          <button className={styles.createArticle_top_buttons_right} onClick={handleSubmit}>
+            {buttonValue}
+          </button>
         </div>
         <div className={styles.createArticle_photoLabel}>
           <p className={styles.createArticle_photoLabel_title}>Абзацы</p>

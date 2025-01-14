@@ -35,7 +35,10 @@ export const New = () => {
   return (
     <div
       className={styles.articles_item}
-      style={{ padding: 'var(--top-padding) var(--sides-padding)' }}
+      style={{
+        padding: 'var(--top-padding) var(--sides-padding)',
+        flexDirection: data?.composition === 'RIGHT' ? 'row-reverse' : 'row',
+      }}
     >
       <div className={styles.articles_item_left}>
         <h1 style={{ inlineSize: '100%' }}>{data?.title}</h1>

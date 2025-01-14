@@ -330,7 +330,10 @@ export const CreateArticle = () => {
         <div className={styles.createArticle_top_buttons}>
           <button
             className={styles.createArticle_top_buttons_left}
-            onClick={() => setDraft(true)}
+            onClick={e => {
+              setDraft(true)
+              handleSubmit(e, draft)
+            }}
             type={'button'}
           >
             <LuFilePen />
@@ -339,7 +342,10 @@ export const CreateArticle = () => {
           <button
             className={styles.createArticle_top_buttons_right}
             disabled={buttonValue === 'Опубликовано'}
-            onClick={() => setDraft(false)}
+            onClick={e => {
+              setDraft(false)
+              handleSubmit(e, draft)
+            }}
             type={'button'}
           >
             {buttonValue}

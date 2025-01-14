@@ -16,6 +16,7 @@ export enum Composition {
 }
 
 export type ArticleDto = {
+  keyword: string
   composition: Composition
   description: string
   id: number
