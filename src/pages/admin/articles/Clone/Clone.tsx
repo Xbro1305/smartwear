@@ -56,7 +56,7 @@ export const CloneArticle = () => {
 
   useEffect(() => {
     if (article) {
-      setTitle(article.title + " (Копия)")
+      setTitle(article.title + ' (Копия)')
       setDescription(article.description)
       setMetaTitle(article.metaTitle)
       setMetaDescription(article.metaDescription)
@@ -134,7 +134,7 @@ export const CloneArticle = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]) // Сохраняем файл в состоянии
+      setFile(URL.createObjectURL(e.target.files[0])) // Сохраняем файл в состоянии
     }
   }
 
@@ -148,7 +148,7 @@ export const CloneArticle = () => {
   const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault()
     if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-      setFile(event.dataTransfer.files[0])
+      setFile(URL.createObjectURL(event.dataTransfer.files[0]))
       event.dataTransfer.clearData()
     }
   }
@@ -248,7 +248,7 @@ export const CloneArticle = () => {
               />
 
               {file != null ? (
-                <img alt={'selected image'} src={URL.createObjectURL(file as Blob)} />
+                <img alt={'selected image'} src={file} />
               ) : (
                 <>
                   <img alt={'default'} src={cat} />
@@ -333,10 +333,7 @@ export const CloneArticle = () => {
                     />
                     {/* Показываем изображение, если оно выбрано */}
                     {paragraph.imageFile ? (
-                      <img
-                        alt={'selected image'}
-                        src={URL.createObjectURL(paragraph.imageFile as Blob)}
-                      />
+                      <img alt={'selected image'} src={paragraph.imageFile} />
                     ) : (
                       <>
                         <img alt={'default'} src={cat} />
