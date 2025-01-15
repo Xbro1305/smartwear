@@ -46,6 +46,7 @@ export const EditArticle = () => {
   const [composition, setComposition] = useState<any>()
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
+  const [newParagraphs, setNewParagraphs] = useState<ParagraphinArticleDto[]>([])
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: paragraphImages, isLoading: isParagraphImagesLoading } =
@@ -88,6 +89,7 @@ export const EditArticle = () => {
       setComposition(article.composition)
       setSection(article.section)
       setParagraphs(article.paragraphs)
+      // setExiParagraphs(article.paragraphs)
       setFile(article?.imageUrl || null)
       setUrl(article.keyword)
       console.log(article)
@@ -209,13 +211,39 @@ export const EditArticle = () => {
         title: 'Абзац' + (paragraphs.length + 1),
       },
     ])
+    setNewParagraphs([
+      ...newParagraphs,
+      {
+        content: '',
+        id: Date.now(),
+        order: paragraphs.length + 1,
+        title: 'Абзац' + (paragraphs.length + 1),
+      },
+    ])
   }
 
-  const handleParagraphChange = (index: number, content: string) => {
+  const handleParagraphChange = (index: number, content: string, id: number) => {
     const updatedParagraphs = [...paragraphs]
 
     updatedParagraphs[index].content = content
     setParagraphs(updatedParagraphs)
+
+    //we should update newParagraphs as well, and if we haven't this paragraph in newParagraphs, we should add it and update
+
+    if (newParagraphs[index]) {
+      newParagraphs[index].content = content
+      setNewParagraphs(newParagraphs)
+    } else {
+      setNewParagraphs([
+        ...newParagraphs,
+        {
+          content: content,
+          id: Date.now(),
+          order: paragraphs.length + 1,
+          title: 'Абзац' + (paragraphs.length + 1),
+        },
+      ])
+    }
   }
 
   if (isLoading) {
@@ -314,7 +342,7 @@ export const EditArticle = () => {
                 isimg={false}
                 key={paragraph.id}
                 onChange={content => {
-                  handleParagraphChange(index, content)
+                  handleParagraphChange(index, content, paragraph.id)
                   setButtonValue('Опубликовать')
                 }}
                 setimg={() => {
