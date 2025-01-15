@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
 import {
@@ -30,6 +30,7 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const EditArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -46,6 +47,7 @@ export const EditArticle = () => {
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { data: paragraphImages, isLoading: isParagraphImagesLoading } =
     useGetParagraphsImagesQuery({
       articleId: id?.toString() || '',
@@ -109,6 +111,8 @@ export const EditArticle = () => {
     }
   }
 
+  const { ADMINARTICLES } = ROUTER_PATHS
+
   const handleSubmit = async (e: any) => {
     e.preventDefault()
 
@@ -152,6 +156,8 @@ export const EditArticle = () => {
 
       setButtonValue('Опубликовано')
       console.log('Статья и параграфы успешно обновлены')
+      navigate(ADMINARTICLES)
+      window.location.reload()
     } catch (error) {
       console.error('Ошибка при обновлении статьи или создании параграфов', error)
     }

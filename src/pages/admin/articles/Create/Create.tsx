@@ -23,6 +23,8 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from './Create.module.scss'
 
 import { Editor } from './editor'
+import { useNavigate } from 'react-router-dom'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const CreateArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -42,9 +44,9 @@ export const CreateArticle = () => {
   const [createArticle] = useCreateArticleMutation()
   const [uploadArticleImage] = useUploadArticleImageMutation()
   const [uploadParagraphImage] = useUploadParagraphImageMutation()
-
+  const navigate = useNavigate()
   const { data: user } = useGetMeQuery()
-
+  const { ADMINARTICLES } = ROUTER_PATHS
   const handleSubmit = async (e: any, draft: boolean) => {
     e.preventDefault()
 
@@ -80,6 +82,8 @@ export const CreateArticle = () => {
       setButtonValue('Опубликовано')
 
       alert('Статья успешно создана!')
+      navigate(ADMINARTICLES)
+      window.location.reload()
     } catch (err) {
       console.error('Error creating article:', err)
       alert('Ошибка при создании статьи!')

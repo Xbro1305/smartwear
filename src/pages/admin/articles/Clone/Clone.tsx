@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
 import { useCreateArticleMutation, useGetArticleByIdQuery } from '@/entities/article'
@@ -26,6 +26,7 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const CloneArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -65,6 +66,8 @@ export const CloneArticle = () => {
   })
 
   const { data: user } = useGetMeQuery()
+  const { ADMINARTICLES } = ROUTER_PATHS
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (article) {
@@ -121,6 +124,8 @@ export const CloneArticle = () => {
       setButtonValue('Опубликовано')
 
       alert('Статья успешно создана!')
+      navigate(ADMINARTICLES)
+      window.location.reload()
     } catch (err) {
       console.error('Error creating article:', err)
       alert('Ошибка при создании статьи!')
