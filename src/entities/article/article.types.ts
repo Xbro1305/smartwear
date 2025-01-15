@@ -56,25 +56,27 @@ export type UpdateArticleDto = {
 export type ParagraphDto = {
   articleId: number
   content: string
-  id: number
+  id?: number
+  imageFile?: File
   imageUrl?: string
   isDeleted?: boolean
-  order: number
+  order?: number
   title: string
 }
 
 export type CreateParagraphDto = {
   articleId: number
   content: string
+  imageFile?: File
   imageUrl?: string
   isDeleted?: boolean
-  order: number
+  order?: number
   title: string
 }
 
 export type CreateParagraphinArticleDto = {
-  id: number
   content: string
+  id: number
   imageFile?: File
   order: number
   title: string
@@ -84,7 +86,7 @@ export type ParagraphinArticleDto = {
   content: string
   id: number
   imageFile?: File
-  order: number
+  order?: number
   title: string
 }
 

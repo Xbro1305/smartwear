@@ -11,6 +11,7 @@ import {
 import {
   Composition,
   CreateParagraphDto,
+  ParagraphDto,
   ParagraphinArticleDto,
   UpdateArticleDto,
   sectionMapping,
@@ -22,6 +23,7 @@ import {
   useUploadArticleImageMutation,
   useUploadParagraphImageMutation,
 } from '@/entities/image/image.api'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
 import { FaCheck, FaPen } from 'react-icons/fa'
 import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
@@ -30,7 +32,6 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
-import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const EditArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -39,14 +40,14 @@ export const EditArticle = () => {
   const [metaTitle, setMetaTitle] = useState<string>('')
   const [count, setCount] = useState(0)
   const [metaDescription, setMetaDescription] = useState<string>('')
-  const [paragraphs, setParagraphs] = useState<ParagraphinArticleDto[]>([])
+  const [paragraphs, setParagraphs] = useState<ParagraphDto[]>([])
   const [file, setFile] = useState<any>(null)
   const [url, setUrl] = useState<string>('')
   const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<any>()
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
-  const [newParagraphs, setNewParagraphs] = useState<ParagraphinArticleDto[]>([])
+
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: paragraphImages, isLoading: isParagraphImagesLoading } =
@@ -104,15 +105,6 @@ export const EditArticle = () => {
 
   console.log(composition)
 
-  const handleUploadParagraphImage = async (i: number) => {
-    const paragraph = paragraphs[i]
-    const paragraphId = `${article?.id}-${paragraph.order}`
-
-    if (paragraph.imageFile) {
-      await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
-    }
-  }
-
   const { ADMINARTICLES } = ROUTER_PATHS
 
   const handleSubmit = async (e: any) => {
@@ -135,7 +127,7 @@ export const EditArticle = () => {
           const paragraphData: CreateParagraphDto = {
             articleId: article?.id || 0,
             content: paragraph.content,
-            order: paragraph.order,
+            order: paragraph.order ? paragraph.order : undefined,
             title: paragraph.title,
           }
 
@@ -204,51 +196,14 @@ export const EditArticle = () => {
     }
     setParagraphs([
       ...paragraphs,
-      {
-        content: '',
-        id: Date.now(),
-        order: paragraphs.length + 1,
-        title: 'Абзац' + (paragraphs.length + 1),
-      },
-    ])
-    setNewParagraphs([
-      ...newParagraphs,
-      {
-        content: '',
-        id: Date.now(),
-        order: paragraphs.length + 1,
-        title: 'Абзац' + (paragraphs.length + 1),
-      },
+      { articleId: article?.id as number, content: '', title: 'Абзац' + (paragraphs.length + 1) },
     ])
   }
 
-  const handleParagraphChange = (index: number, content: string, id: number) => {
-    const updatedParagraphs = [...paragraphs]
-
-    updatedParagraphs[index].content = content
-    setParagraphs(updatedParagraphs)
-
-    //we should update newParagraphs as well, and if we haven't this paragraph in newParagraphs, we should add it and update
-    const isThere = newParagraphs.find(i => i.id == id)
-    if (isThere) {
-      const paragraphs = newParagraphs
-      const data = []
-      for (let i = 0; i > newParagraphs.length; i++) {
-        if (paragraphs[i].id == id) paragraphs[i].content = content
-        data.push(paragraphs[i])
-      }
-      setNewParagraphs(newParagraphs)
-    } else {
-      setNewParagraphs([
-        ...newParagraphs,
-        {
-          content: content,
-          id: Date.now(),
-          order: paragraphs.length + 1,
-          title: 'Абзац' + (paragraphs.length + 1),
-        },
-      ])
-    }
+  const handleParagraphChange = (index: number, content: string) => {
+    setParagraphs(prevParagraphs =>
+      prevParagraphs.map((paragraph, i) => (i === index ? { ...paragraph, content } : paragraph))
+    )
   }
 
   if (isLoading) {
@@ -347,7 +302,7 @@ export const EditArticle = () => {
                 isimg={false}
                 key={paragraph.id}
                 onChange={content => {
-                  handleParagraphChange(index, content, paragraph.id)
+                  handleParagraphChange(index, content)
                   setButtonValue('Опубликовать')
                 }}
                 setimg={() => {
