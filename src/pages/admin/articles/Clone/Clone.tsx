@@ -18,6 +18,7 @@ import {
   useUploadParagraphImageMutation,
 } from '@/entities/image/image.api'
 import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
 import { FaCheck, FaPen } from 'react-icons/fa'
 import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
@@ -26,7 +27,6 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
-import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const CloneArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)

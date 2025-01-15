@@ -76,9 +76,9 @@ export type CreateParagraphDto = {
 
 export type CreateParagraphinArticleDto = {
   content: string
-  id: number
+  id?: number
   imageFile?: File
-  order: number
+  order?: number
   title: string
 }
 
