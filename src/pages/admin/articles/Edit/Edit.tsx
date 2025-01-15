@@ -229,9 +229,14 @@ export const EditArticle = () => {
     setParagraphs(updatedParagraphs)
 
     //we should update newParagraphs as well, and if we haven't this paragraph in newParagraphs, we should add it and update
-
-    if (newParagraphs[index]) {
-      newParagraphs[index].content = content
+    const isThere = newParagraphs.find(i => i.id == id)
+    if (isThere) {
+      const paragraphs = newParagraphs
+      const data = []
+      for (let i = 0; i > newParagraphs.length; i++) {
+        if (paragraphs[i].id == id) paragraphs[i].content = content
+        data.push(paragraphs[i])
+      }
       setNewParagraphs(newParagraphs)
     } else {
       setNewParagraphs([
