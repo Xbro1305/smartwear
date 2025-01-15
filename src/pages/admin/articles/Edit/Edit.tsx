@@ -36,6 +36,7 @@ export const EditArticle = () => {
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [metaTitle, setMetaTitle] = useState<string>('')
+  const [count, setCount] = useState(0)
   const [metaDescription, setMetaDescription] = useState<string>('')
   const [paragraphs, setParagraphs] = useState<ParagraphinArticleDto[]>([])
   const [file, setFile] = useState<any>(null)
@@ -99,6 +100,15 @@ export const EditArticle = () => {
 
   console.log(composition)
 
+  const handleUploadParagraphImage = async (i: number) => {
+    const paragraph = paragraphs[i]
+    const paragraphId = `${article?.id}-${paragraph.order}`
+
+    if (paragraph.imageFile) {
+      await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
+    }
+  }
+
   const handleSubmit = async (e: any) => {
     e.preventDefault()
 
@@ -127,18 +137,19 @@ export const EditArticle = () => {
         }
       }
 
-      if (file && article) {
-        await uploadArticleImage({ file, id: article?.id })
+      if (count > 100) {
+        await uploadArticleImage({ file, id: article?.id as number })
+      }
 
-        for (let i = 0; i < paragraphs.length; i++) {
-          const paragraph = paragraphs[i]
-          const paragraphId = `${article.id}-${paragraph.order}`
+      for (let i = 0; i < paragraphs.length; i++) {
+        const paragraph = paragraphs[i]
+        const paragraphId = `${article?.id}-${paragraph.order}`
 
-          if (paragraph.imageFile) {
-            await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
-          }
+        if (paragraph.imageFile) {
+          await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
         }
       }
+
       setButtonValue('Опубликовано')
       console.log('Статья и параграфы успешно обновлены')
     } catch (error) {
@@ -160,7 +171,8 @@ export const EditArticle = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(URL.createObjectURL(e.target.files[0] as Blob)) // Сохраняем файл в состоянии
+      setFile(URL.createObjectURL(e.target.files[0] as Blob))
+      setCount(prev => prev + 1)
     }
   }
 
@@ -446,6 +458,7 @@ export const EditArticle = () => {
                 setButtonValue('Опубликовать')
                 addParagraph()
               }}
+              type={'button'}
             >
               Добавить абзац
             </button>

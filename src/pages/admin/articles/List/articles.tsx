@@ -11,6 +11,7 @@ import { Article } from './article'
 
 export const ArticlesList = () => {
   const { data: articles, isLoading } = useGetArticlesQuery()
+  const filtered = articles?.filter(article => !article.isDeleted)
 
   if (isLoading) {
     return <div>Загрузка...</div>
@@ -33,7 +34,7 @@ export const ArticlesList = () => {
       </div>
 
       <div className={styles.articles_list}>
-        {articles
+        {filtered
           ?.reduce<SectionDto[]>((sections, article: ArticleDto) => {
             const section = sections.find(s => s.category === article.section)
 

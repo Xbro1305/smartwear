@@ -16,11 +16,12 @@ export enum Composition {
 }
 
 export type ArticleDto = {
-  keyword: string
   composition: Composition
   description: string
   id: number
   imageUrl?: string
+  isDeleted: boolean
+  keyword: string
   metaDescription: string
   metaTitle: string
   paragraphs: ParagraphDto[]
@@ -97,8 +98,8 @@ export type SectionDto = {
   articles: Array<{
     draft?: boolean
     id: number
-    title: string
     keyword: string
+    title: string
   }>
   category: string
 }

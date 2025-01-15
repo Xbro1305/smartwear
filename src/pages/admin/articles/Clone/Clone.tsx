@@ -60,7 +60,7 @@ export const CloneArticle = () => {
   }, [article?.paragraphs, paragraphsImages])
 
   const { data: articleImage } = useGetImageQuery({
-    id: article?.id.toString() as string,
+    id: id as string,
     type: 'articles',
   })
 
@@ -82,7 +82,7 @@ export const CloneArticle = () => {
 
   useEffect(() => {
     if (articleImage) {
-      setFile(URL.createObjectURL(articleImage))
+      setFile(articleImage)
     }
   }, [articleImage])
 
@@ -145,7 +145,7 @@ export const CloneArticle = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(URL.createObjectURL(e.target.files[0])) // Сохраняем файл в состоянии
+      setFile(e.target.files[0]) // Сохраняем файл в состоянии
     }
   }
 
@@ -259,7 +259,10 @@ export const CloneArticle = () => {
               />
 
               {file != null ? (
-                <img alt={'selected image'} src={file} />
+                <img
+                  alt={'selected image'}
+                  src={typeof file === 'string' ? file : URL.createObjectURL(file)}
+                />
               ) : (
                 <>
                   <img alt={'default'} src={cat} />

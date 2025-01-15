@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 
 import { useSearchArticleByKeywordQuery } from '@/entities/article/article.api'
 import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
+import { useGetImageQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
 
 import styles from './Articles.module.scss'
@@ -15,6 +16,10 @@ const Articles = () => {
     useGetParagraphsImagesQuery({
       articleId: article?.id.toString() || '',
     })
+  const { data: articleImage, isLoading: isImageLoading } = useGetImageQuery({
+    id: article?.id.toString() || '',
+    type: 'articles',
+  })
 
   const [imagesByParagraph, setImagesByParagraph] = useState<Blob[]>([])
 
@@ -64,6 +69,17 @@ const Articles = () => {
           <h1 className={'h1'}>{article.title}</h1>
           <h4 className={'h4'} dangerouslySetInnerHTML={{ __html: article.description }} />
         </div>
+        <div className={styles.articles_item_right}>
+          {isImageLoading && <p>Загрузка изображения...</p>}
+          {articleImage && (
+            <img
+              alt={'Article'}
+              className={styles.article_image}
+              src={URL.createObjectURL(articleImage)}
+            />
+          )}
+        </div>
+
         <div className={styles.articles_item_right}>
           {isParagraphImagesLoading && <p>Загрузка изображений...</p>}
           {!isParagraphImagesLoading && !paragraphImages && <p>Изображения не найдены</p>}

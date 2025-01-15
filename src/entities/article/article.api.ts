@@ -12,6 +12,7 @@ import {
 export const articleApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     createArticle: builder.mutation<ArticleDto, CreateArticleDto>({
+      invalidatesTags: ['Articles'],
       query: body => ({
         body,
         method: 'POST',
@@ -28,9 +29,16 @@ export const articleApi = baseApi.injectEndpoints({
     }),
 
     deleteArticle: builder.mutation<any, number>({
+      invalidatesTags: ['Articles'],
       query: id => ({
         method: 'DELETE',
-        url: `/articles/${id}`,
+        url: `/articles/delete/${id}`,
+      }),
+    }),
+    deleteParagraph: builder.mutation<any, { articleId: number; order: number }>({
+      query: ({ articleId, order }) => ({
+        method: 'DELETE',
+        url: `/paragraphs/delete/${articleId}/${order}`,
       }),
     }),
 
@@ -49,6 +57,7 @@ export const articleApi = baseApi.injectEndpoints({
     }),
 
     getArticles: builder.query<ArticleDto[], void>({
+      providesTags: ['Articles'],
       query: () => ({
         method: 'GET',
         url: '/articles',
@@ -63,6 +72,7 @@ export const articleApi = baseApi.injectEndpoints({
     }),
 
     updateArticle: builder.mutation<any, { data: UpdateArticleDto; id: number }>({
+      invalidatesTags: ['Articles'],
       query: ({ data, id }) => ({
         body: data,
         method: 'PUT',
@@ -84,6 +94,7 @@ export const {
   useCreateArticleMutation,
   useCreateParagraphMutation,
   useDeleteArticleMutation,
+  useDeleteParagraphMutation,
   useGetArticleByIdQuery,
   useGetArticleDraftsQuery,
   useGetArticlesQuery,
