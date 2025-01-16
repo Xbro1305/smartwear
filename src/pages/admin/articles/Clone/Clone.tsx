@@ -17,7 +17,6 @@ import {
   useUploadArticleImageMutation,
   useUploadParagraphImageMutation,
 } from '@/entities/image/image.api'
-import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
 import { FaCheck, FaPen } from 'react-icons/fa'
@@ -50,15 +49,6 @@ export const CloneArticle = () => {
 
   const { id } = useParams<{ id: string }>()
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
-  const { data: paragraphsImages } = useGetParagraphsImagesQuery({
-    articleId: id || '',
-  })
-
-  useEffect(() => {
-    if (paragraphsImages && article?.paragraphs) {
-      setImagesByParagraph(paragraphsImages)
-    }
-  }, [article?.paragraphs, paragraphsImages])
 
   const { data: articleImage } = useGetImageQuery({
     id: id as string,

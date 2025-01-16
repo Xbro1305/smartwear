@@ -17,7 +17,6 @@ import {
   sectionMapping,
 } from '@/entities/article/article.types'
 import { Section } from '@/entities/article/article.types'
-import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
 import {
   useGetImageQuery,
   useUploadArticleImageMutation,
@@ -28,6 +27,8 @@ import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
 import { FaCheck, FaPen } from 'react-icons/fa'
 import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
 import { LuFilePen } from 'react-icons/lu'
+
+const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
 
 import styles from '../Create/Create.module.scss'
 
@@ -45,35 +46,67 @@ export const EditArticle = () => {
   const [url, setUrl] = useState<string>('')
   const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<any>()
+  //const [id, setId] = useState(null)
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
-
   const { id } = useParams<{ id: string }>()
+  const [articleId, setArticleId] = useState<string | undefined>(id)
+
+  console.log('idByParams ' + id)
   const navigate = useNavigate()
-  const { data: paragraphImages, isLoading: isParagraphImagesLoading } =
-    useGetParagraphsImagesQuery({
-      articleId: id?.toString() || '',
-    })
 
-  const [imagesByParagraph, setImagesByParagraph] = useState<Blob[]>([])
+  const [imagesByParagraph, setImagesByParagraph] = useState<Record<string, Blob>>({})
 
-  const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
+  const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(articleId))
 
   useEffect(() => {
-    if (paragraphImages && article?.paragraphs) {
-      setImagesByParagraph(paragraphImages)
+    const loadParagraphImages = async () => {
+      if (article && article.paragraphs) {
+        const paragraphImagePromises = article.paragraphs.map(async paragraph => {
+          const imageUrl = `${API_URL}/images/article/${article.id}/paragraph/${paragraph.title}`
+          const image = await fetch(imageUrl)
+
+          if (image.ok) {
+            const blob = await image.blob()
+
+            return { blob, title: paragraph.title }
+          }
+
+          return { blob: null, title: paragraph.title }
+        })
+
+        const paragraphImages = await Promise.all(paragraphImagePromises)
+
+        const imagesMap = paragraphImages.reduce((acc: Record<string, Blob>, { blob, title }) => {
+          if (blob) {
+            acc[title] = blob
+          }
+
+          return acc
+        }, {})
+
+        setImagesByParagraph(imagesMap)
+      }
     }
-  }, [paragraphImages, article?.paragraphs])
+
+    loadParagraphImages()
+  }, [article])
+
+  useEffect(() => {
+    if (imagesByParagraph && article?.paragraphs) {
+      setImagesByParagraph(imagesByParagraph)
+    }
+  }, [imagesByParagraph, article?.paragraphs])
+
+  useEffect(() => {
+    if (id !== articleId) {
+      setArticleId(id)
+    }
+  }, [id, articleId])
   const { data: articleImage } = useGetImageQuery({
-    id: article?.id.toString() as string,
+    id: articleId || '',
     type: 'articles',
   })
-
-  useEffect(() => {
-    if (paragraphImages && article?.paragraphs) {
-      setImagesByParagraph(paragraphImages)
-    }
-  }, [paragraphImages, article?.paragraphs])
 
   const [updateArticle] = useUpdateArticleMutation()
   const [createParagraph] = useCreateParagraphMutation()
@@ -91,7 +124,6 @@ export const EditArticle = () => {
       setSection(article.section)
       setParagraphs(article.paragraphs)
       // setExiParagraphs(article.paragraphs)
-      setFile(article?.imageUrl || null)
       setUrl(article.keyword)
       console.log(article)
     }
@@ -377,6 +409,15 @@ export const EditArticle = () => {
                         <p>Загрузить изображение</p>
                         <span>Добавьте фотографию с компьютера</span>
                       </>
+                    )}
+                    {imagesByParagraph[index] && (
+                      <div className={styles.paragraphImage}>
+                        <img
+                          alt={`Image for ${paragraph.title}`}
+                          className={styles.paragraphImage}
+                          src={URL.createObjectURL(imagesByParagraph[index])}
+                        />
+                      </div>
                     )}
                   </label>
                 </div>

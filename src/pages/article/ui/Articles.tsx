@@ -2,32 +2,61 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useSearchArticleByKeywordQuery } from '@/entities/article/article.api'
-import { useGetParagraphsImagesQuery } from '@/entities/image/image.api'
 import { useGetImageQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
 
 import styles from './Articles.module.scss'
 
+const enver = import.meta.env.VITE_APP_API_URL
+
+const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
+
 const Articles = () => {
   const { name } = useParams<{ name: string }>()
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
 
-  const { data: paragraphImages, isLoading: isParagraphImagesLoading } =
-    useGetParagraphsImagesQuery({
-      articleId: article?.id.toString() || '',
-    })
   const { data: articleImage, isLoading: isImageLoading } = useGetImageQuery({
     id: article?.id.toString() || '',
     type: 'articles',
   })
 
-  const [imagesByParagraph, setImagesByParagraph] = useState<Blob[]>([])
+  const [imagesByParagraph, setImagesByParagraph] = useState<Record<string, Blob>>({})
 
   useEffect(() => {
-    if (paragraphImages && article?.paragraphs) {
-      setImagesByParagraph(paragraphImages)
+    console.log('env: ' + enver)
+
+    const loadParagraphImages = async () => {
+      if (article && article.paragraphs) {
+        const paragraphImagePromises = article.paragraphs.map(async paragraph => {
+          console.log('title: ' + paragraph.title)
+          const imageUrl = `${API_URL}/images/article/${article.id}/paragraph/${paragraph.title}`
+          const image = await fetch(imageUrl)
+
+          if (image.ok) {
+            const blob = await image.blob()
+
+            return { blob, title: paragraph.title }
+          }
+
+          return { blob: null, title: paragraph.title }
+        })
+
+        const paragraphImages = await Promise.all(paragraphImagePromises)
+
+        const imagesMap = paragraphImages.reduce((acc: Record<string, Blob>, { blob, title }) => {
+          if (blob) {
+            acc[title] = blob
+          }
+
+          return acc
+        }, {})
+
+        setImagesByParagraph(imagesMap)
+      }
     }
-  }, [paragraphImages, article?.paragraphs])
+
+    loadParagraphImages()
+  }, [article])
 
   useEffect(() => {
     if (article) {
@@ -79,14 +108,9 @@ const Articles = () => {
             />
           )}
         </div>
-
-        <div className={styles.articles_item_right}>
-          {isParagraphImagesLoading && <p>Загрузка изображений...</p>}
-          {!isParagraphImagesLoading && !paragraphImages && <p>Изображения не найдены</p>}
-        </div>
       </div>
 
-      {article.paragraphs.map((paragraph, index) => (
+      {article.paragraphs.map(paragraph => (
         <div
           className={styles.articles_item}
           key={paragraph.id}
@@ -99,14 +123,10 @@ const Articles = () => {
             <div dangerouslySetInnerHTML={{ __html: paragraph.content }} />
           </div>
           <div className={styles.articles_item_right}>
-            {imagesByParagraph[index] && (
+            {imagesByParagraph[paragraph.title] && (
               <img
                 alt={'Paragraph'}
-                src={
-                  imagesByParagraph[index]
-                    ? URL.createObjectURL(imagesByParagraph[index] as Blob)
-                    : ''
-                }
+                src={URL.createObjectURL(imagesByParagraph[paragraph.title])}
               />
             )}
           </div>

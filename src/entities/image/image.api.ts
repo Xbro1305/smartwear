@@ -14,17 +14,18 @@ export const imageApi = baseApi.injectEndpoints({
       }),
     }),
 
-    getParagraphsImages: builder.query<Blob[], { articleId: string }>({
-      query: ({ articleId }) => ({
+    getParagraphImage: builder.query<Blob, { articleId: string; title: string }>({
+      query: ({ articleId, title }) => ({
         method: 'GET',
         responseHandler: async response => {
           const blob = await response.blob()
 
           return blob
         },
-        url: `/images/article/${articleId}/paragraphs`,
+        url: `/images/article/${articleId}/paragraph/${title}`,
       }),
     }),
+
     uploadArticleImage: builder.mutation<
       { imagePath: string; message: string },
       { file: File; id: number }
@@ -63,7 +64,7 @@ export const imageApi = baseApi.injectEndpoints({
 
 export const {
   useGetImageQuery,
-  useGetParagraphsImagesQuery,
+  useGetParagraphImageQuery,
   useUploadArticleImageMutation,
   useUploadParagraphImageMutation,
 } = imageApi
