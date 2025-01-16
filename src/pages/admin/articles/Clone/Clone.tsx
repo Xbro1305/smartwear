@@ -115,10 +115,13 @@ export const CloneArticle = () => {
 
       for (let i = 0; i < paragraphs.length; i++) {
         const paragraph = paragraphs[i]
-        const paragraphId = `${articleId}-${paragraph.order}`
 
         if (paragraph.imageFile) {
-          await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
+          await uploadParagraphImage({
+            articleId: article?.id as number,
+            file: paragraph.imageFile,
+            title: paragraph.title,
+          })
         }
       }
       setButtonValue('Опубликовано')

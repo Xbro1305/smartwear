@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
 import { useCreateArticleMutation } from '@/entities/article'
@@ -15,6 +16,7 @@ import {
   useUploadArticleImageMutation,
   useUploadParagraphImageMutation,
 } from '@/entities/image/image.api'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CiAlignLeft, CiAlignRight } from 'react-icons/ci'
 import { FaCheck, FaPen } from 'react-icons/fa'
 import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
@@ -23,8 +25,6 @@ import { LuFilePen } from 'react-icons/lu'
 import styles from './Create.module.scss'
 
 import { Editor } from './editor'
-import { useNavigate } from 'react-router-dom'
-import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const CreateArticle = () => {
   const [editingTitle, setEditingTitle] = useState<boolean>(true)
@@ -73,10 +73,13 @@ export const CreateArticle = () => {
 
       for (let i = 0; i < paragraphs.length; i++) {
         const paragraph = paragraphs[i]
-        const paragraphId = `${articleId}-${paragraph.order}`
 
         if (paragraph.imageFile) {
-          await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
+          await uploadParagraphImage({
+            articleId,
+            file: paragraph.imageFile,
+            title: paragraph.title,
+          })
         }
       }
       setButtonValue('Опубликовано')

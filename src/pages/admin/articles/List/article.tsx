@@ -3,11 +3,11 @@ import { useState } from 'react'
 import { FaEye, FaPen, FaTrash } from 'react-icons/fa'
 
 import styles from './articles.module.scss'
-const { ARTICLES, CREATEARTICLE, EDITARTICLE, CLONEARTICLE } = ROUTER_PATHS
+const { ARTICLES, CLONEARTICLE, CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
 
 import { useNavigate } from 'react-router-dom'
 
-import {  useGetArticlesQuery } from '@/entities/article'
+import { useGetArticlesQuery } from '@/entities/article'
 import { useDeleteArticleMutation } from '@/entities/article'
 import { SectionDto } from '@/entities/article/article.types'
 import { ROUTER_PATHS } from '@/shared/config/routes'
@@ -31,7 +31,9 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   const handleCopy = async (id: number) => {
     const confirm = window.confirm('Копировать статью?')
 
-    if (!confirm) return
+    if (!confirm) {
+      return
+    }
 
     const existingArticle = articles?.find(article => article.id === id)
 

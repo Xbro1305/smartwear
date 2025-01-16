@@ -141,10 +141,13 @@ export const EditArticle = () => {
 
       for (let i = 0; i < paragraphs.length; i++) {
         const paragraph = paragraphs[i]
-        const paragraphId = `${article?.id}-${paragraph.order}`
 
         if (paragraph.imageFile) {
-          await uploadParagraphImage({ file: paragraph.imageFile, paragraphId })
+          await uploadParagraphImage({
+            articleId: article?.id as number,
+            file: paragraph.imageFile,
+            title: paragraph.title,
+          })
         }
       }
 
@@ -166,7 +169,7 @@ export const EditArticle = () => {
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
-    event.preventDefault() // Предотвращает открытие файла в новой вкладке
+    event.preventDefault()
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
