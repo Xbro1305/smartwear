@@ -410,24 +410,18 @@ export const CloneArticle = () => {
                       size={1}
                       type={'file'}
                     />
-                    {/* Показываем изображение, если оно выбрано */}
-                    {paragraph.imageFile ? (
-                      <img alt={'selected image'} src={file} />
+                    {imagesByParagraph[paragraph.title] ? (
+                      <img
+                        alt={`Image for ${paragraph.title}`}
+                        className={styles.paragraphImage}
+                        src={URL.createObjectURL(imagesByParagraph[paragraph.title])}
+                      />
                     ) : (
                       <>
                         <img alt={'default'} src={cat} />
                         <p>Загрузить изображение</p>
                         <span>Добавьте фотографию с компьютера</span>
                       </>
-                    )}
-                    {imagesByParagraph[paragraph.title] && (
-                      <div className={styles.paragraphImage}>
-                        <img
-                          alt={`Image for ${paragraph.title}`}
-                          className={styles.paragraphImage}
-                          src={URL.createObjectURL(imagesByParagraph[paragraph.title])}
-                        />
-                      </div>
                     )}
                   </label>
                 </div>
