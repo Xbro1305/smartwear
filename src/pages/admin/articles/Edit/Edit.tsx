@@ -139,7 +139,7 @@ export const EditArticle = () => {
 
   useEffect(() => {
     if (article) {
-      setTitle(article.title + ' (Копия)')
+      setTitle(article.title)
       setDescription(article.description)
       setMetaTitle(article.metaTitle)
       setMetaDescription(article.metaDescription)
