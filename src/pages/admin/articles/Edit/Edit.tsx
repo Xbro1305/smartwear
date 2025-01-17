@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
+import { useDeleteParagraphMutation } from '@/entities/article'
 import {
   useCreateParagraphMutation,
   useGetArticleByIdQuery,
@@ -11,6 +12,7 @@ import {
 import {
   Composition,
   CreateParagraphDto,
+  CreateParagraphinArticleDto,
   ParagraphDto,
   ParagraphinArticleDto,
   UpdateArticleDto,
@@ -52,12 +54,33 @@ export const EditArticle = () => {
   const { id } = useParams<{ id: string }>()
   const [articleId, setArticleId] = useState<string | undefined>(id)
 
+  const [deleteParagraph] = useDeleteParagraphMutation()
+
   console.log('idByParams ' + id)
   const navigate = useNavigate()
 
   const [imagesByParagraph, setImagesByParagraph] = useState<Record<string, Blob>>({})
 
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(articleId))
+
+  const handleDelete = (paragraph: CreateParagraphinArticleDto) => {
+    if (paragraph.order) {
+      deleteParagraph({ articleId: article?.id as number, order: paragraph.order })
+        .then(() => {
+          setParagraphs(prevParagraphs =>
+            prevParagraphs.filter(p => p.frontOrder !== paragraph.frontOrder)
+          )
+        })
+        .catch(error => {
+          console.error('Error deleting paragraph:', error)
+          alert('Ошибка при удалении параграфа!')
+        })
+    } else {
+      setParagraphs(prevParagraphs =>
+        prevParagraphs.filter(p => p.frontOrder !== paragraph.frontOrder)
+      )
+    }
+  }
 
   useEffect(() => {
     const loadParagraphImages = async () => {
@@ -116,15 +139,19 @@ export const EditArticle = () => {
 
   useEffect(() => {
     if (article) {
-      setTitle(article.title)
+      setTitle(article.title + ' (Копия)')
       setDescription(article.description)
       setMetaTitle(article.metaTitle)
       setMetaDescription(article.metaDescription)
       setComposition(article.composition)
       setSection(article.section)
-      setParagraphs(article.paragraphs)
-      // setExiParagraphs(article.paragraphs)
-      setUrl(article.keyword)
+
+      const updatedParagraphs = article.paragraphs.map(paragraph => ({
+        ...paragraph,
+        frontOrder: paragraph.order,
+      }))
+
+      setParagraphs(updatedParagraphs)
       console.log(article)
     }
   }, [article])
@@ -231,7 +258,12 @@ export const EditArticle = () => {
     }
     setParagraphs([
       ...paragraphs,
-      { articleId: article?.id as number, content: '', title: 'Абзац' + (paragraphs.length + 1) },
+      {
+        articleId: article?.id as number,
+        content: '',
+        frontOrder: paragraphs.length + 1,
+        title: 'Абзац' + (paragraphs.length + 1),
+      },
     ])
   }
 
@@ -410,12 +442,12 @@ export const EditArticle = () => {
                         <span>Добавьте фотографию с компьютера</span>
                       </>
                     )}
-                    {imagesByParagraph[index] && (
+                    {imagesByParagraph[paragraph.title] && (
                       <div className={styles.paragraphImage}>
                         <img
                           alt={`Image for ${paragraph.title}`}
                           className={styles.paragraphImage}
-                          src={URL.createObjectURL(imagesByParagraph[index])}
+                          src={URL.createObjectURL(imagesByParagraph[paragraph.title])}
                         />
                       </div>
                     )}
@@ -470,8 +502,8 @@ export const EditArticle = () => {
                 />
                 <button
                   onClick={() => {
-                    setParagraphs(paragraphs.filter(p => p.id !== paragraph.id))
                     setButtonValue('Опубликовать')
+                    handleDelete(paragraph)
                   }}
                 >
                   Удалить

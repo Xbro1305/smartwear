@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useGetArticlesQuery } from '@/entities/article'
 import { useDeleteArticleMutation } from '@/entities/article'
+import { Section, sectionMapping } from '@/entities/article/article.types'
 import { SectionDto } from '@/entities/article/article.types'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { FaSortAmountUp } from 'react-icons/fa'
@@ -64,7 +65,7 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   return (
     <div className={styles.articles_section} key={index}>
       <h2 id={'h2'}>
-        <p onClick={() => setOpened(!opened)}>{section.category}</p>
+        <p onClick={() => setOpened(!opened)}>{sectionMapping[section.category as Section]}</p>
         <p
           onClick={() => setOpened(!opened)}
           style={{ transform: opened ? 'rotate(180deg)' : 'rotate(0deg)' }}

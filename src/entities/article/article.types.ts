@@ -56,6 +56,7 @@ export type UpdateArticleDto = {
 export type ParagraphDto = {
   articleId: number
   content: string
+  frontOrder?: number
   id?: number
   imageFile?: File
   imageUrl?: string
@@ -76,6 +77,7 @@ export type CreateParagraphDto = {
 
 export type CreateParagraphinArticleDto = {
   content: string
+  frontOrder?: number
   id?: number
   imageFile?: File
   order?: number

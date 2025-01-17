@@ -101,7 +101,6 @@ export const CreateArticle = () => {
       ...paragraphs,
       {
         content: '',
-        id: Date.now(),
         imageFile: undefined,
         order: paragraphs.length + 1,
         title: 'Абзац ' + (paragraphs.length + 1),

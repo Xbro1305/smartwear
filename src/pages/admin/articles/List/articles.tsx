@@ -13,9 +13,36 @@ export const ArticlesList = () => {
   const { data: articles, isLoading } = useGetArticlesQuery()
   const filtered = articles?.filter(article => !article.isDeleted)
 
+  const sectionMapping = {
+    NEWS: 'Новости',
+    SEO: 'Seo',
+    USER: 'Пользовательские',
+  }
+
   if (isLoading) {
     return <div>Загрузка...</div>
   }
+
+  const sections = filtered?.reduce<SectionDto[]>((sections, article: ArticleDto) => {
+    const section = sections.find(s => s.category === article.section)
+
+    if (section) {
+      section.articles.push(article)
+    } else {
+      sections.push({ articles: [article], category: article.section })
+    }
+
+    return sections
+  }, [])
+
+  const allSections = Object.keys(sectionMapping).map(sectionKey => {
+    const section = sections?.find(s => s.category === sectionKey)
+
+    return {
+      articles: section?.articles || [],
+      category: sectionKey,
+    }
+  })
 
   return (
     <div className={styles.articles}>
@@ -34,19 +61,9 @@ export const ArticlesList = () => {
       </div>
 
       <div className={styles.articles_list}>
-        {filtered
-          ?.reduce<SectionDto[]>((sections, article: ArticleDto) => {
-            const section = sections.find(s => s.category === article.section)
-
-            if (section) {
-              section.articles.push(article)
-            } else {
-              sections.push({ articles: [article], category: article.section })
-            }
-
-            return sections
-          }, [])
-          .map((section, index) => <Article index={index} key={index} section={section} />)}
+        {allSections.map((section, index) => (
+          <Article index={index} key={index} section={section} />
+        ))}
       </div>
     </div>
   )

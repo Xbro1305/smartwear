@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
+import { useDeleteParagraphMutation } from '@/entities/article'
 import { useCreateArticleMutation, useGetArticleByIdQuery } from '@/entities/article'
-import { sectionMapping } from '@/entities/article/article.types'
+import { ParagraphDto, sectionMapping } from '@/entities/article/article.types'
 import {
   Composition,
   CreateArticleDto,
@@ -23,6 +24,8 @@ import { FaCheck, FaPen } from 'react-icons/fa'
 import { FaChartBar, FaRegNewspaper, FaUser } from 'react-icons/fa'
 import { LuFilePen } from 'react-icons/lu'
 
+const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
+
 import styles from '../Create/Create.module.scss'
 
 import { Editor } from '../Create/editor'
@@ -40,12 +43,13 @@ export const CloneArticle = () => {
   const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<Composition>(Composition.LEFT)
   const [paragraphsWithImg, setParagraphsWithImg] = useState<number[]>([])
-  const [imagesByParagraph, setImagesByParagraph] = useState<Blob[]>([])
+  const [imagesByParagraph, setImagesByParagraph] = useState<Record<string, Blob>>({})
   const [buttonValue, setButtonValue] = useState<string>('Опубликовать')
 
   const [createArticle] = useCreateArticleMutation()
   const [uploadArticleImage] = useUploadArticleImageMutation()
   const [uploadParagraphImage] = useUploadParagraphImageMutation()
+  const [deleteParagraph] = useDeleteParagraphMutation()
 
   const { id } = useParams<{ id: string }>()
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
@@ -54,6 +58,25 @@ export const CloneArticle = () => {
     id: id as string,
     type: 'articles',
   })
+
+  const handleDelete = (paragraph: CreateParagraphinArticleDto) => {
+    if (paragraph.order) {
+      deleteParagraph({ articleId: article?.id as number, order: paragraph.order })
+        .then(() => {
+          setParagraphs(prevParagraphs =>
+            prevParagraphs.filter(p => p.frontOrder !== paragraph.frontOrder)
+          )
+        })
+        .catch(error => {
+          console.error('Error deleting paragraph:', error)
+          alert('Ошибка при удалении параграфа!')
+        })
+    } else {
+      setParagraphs(prevParagraphs =>
+        prevParagraphs.filter(p => p.frontOrder !== paragraph.frontOrder)
+      )
+    }
+  }
 
   const { data: user } = useGetMeQuery()
   const { ADMINARTICLES } = ROUTER_PATHS
@@ -67,10 +90,48 @@ export const CloneArticle = () => {
       setMetaDescription(article.metaDescription)
       setComposition(article.composition)
       setSection(article.section)
-      setParagraphs(article.paragraphs)
-      // setUrl(article.keyword)
+
+      const updatedParagraphs = article.paragraphs.map(paragraph => ({
+        ...paragraph,
+        frontOrder: paragraph.order,
+      }))
+
+      setParagraphs(updatedParagraphs)
       console.log(article)
     }
+  }, [article])
+
+  useEffect(() => {
+    const loadParagraphImages = async () => {
+      if (article && article.paragraphs) {
+        const paragraphImagePromises = article.paragraphs.map(async paragraph => {
+          const imageUrl = `${API_URL}/images/article/${article.id}/paragraph/${paragraph.title}`
+          const image = await fetch(imageUrl)
+
+          if (image.ok) {
+            const blob = await image.blob()
+
+            return { blob, title: paragraph.title }
+          }
+
+          return { blob: null, title: paragraph.title }
+        })
+
+        const paragraphImages = await Promise.all(paragraphImagePromises)
+
+        const imagesMap = paragraphImages.reduce((acc: Record<string, Blob>, { blob, title }) => {
+          if (blob) {
+            acc[title] = blob
+          }
+
+          return acc
+        }, {})
+
+        setImagesByParagraph(imagesMap)
+      }
+    }
+
+    loadParagraphImages()
   }, [article])
 
   useEffect(() => {
@@ -78,6 +139,12 @@ export const CloneArticle = () => {
       setFile(articleImage)
     }
   }, [articleImage])
+
+  useEffect(() => {
+    if (imagesByParagraph && article?.paragraphs) {
+      setImagesByParagraph(imagesByParagraph)
+    }
+  }, [imagesByParagraph, article?.paragraphs])
 
   const handleSubmit = async (e: any, draft: boolean) => {
     e.preventDefault()
@@ -133,9 +200,8 @@ export const CloneArticle = () => {
       ...paragraphs,
       {
         content: '',
-        id: Date.now(),
+        frontOrder: paragraphs.length + 1,
         imageFile: undefined,
-        order: paragraphs.length + 1,
         title: 'Абзац ' + (paragraphs.length + 1),
       },
     ])
@@ -353,6 +419,15 @@ export const CloneArticle = () => {
                         <span>Добавьте фотографию с компьютера</span>
                       </>
                     )}
+                    {imagesByParagraph[paragraph.title] && (
+                      <div className={styles.paragraphImage}>
+                        <img
+                          alt={`Image for ${paragraph.title}`}
+                          className={styles.paragraphImage}
+                          src={URL.createObjectURL(imagesByParagraph[paragraph.title])}
+                        />
+                      </div>
+                    )}
                   </label>
                 </div>
               )}
@@ -424,7 +499,7 @@ export const CloneArticle = () => {
                 <button
                   onClick={() => {
                     setButtonValue('Опубликовать')
-                    setParagraphs(paragraphs.filter(p => p.order !== paragraph.order))
+                    handleDelete(paragraph)
                   }}
                 >
                   Удалить
