@@ -505,6 +505,7 @@ export const EditArticle = () => {
                     setButtonValue('Опубликовать')
                     handleDelete(paragraph)
                   }}
+                  type={'button'}
                 >
                   Удалить
                 </button>

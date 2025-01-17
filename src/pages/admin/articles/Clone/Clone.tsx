@@ -501,6 +501,7 @@ export const CloneArticle = () => {
                     setButtonValue('Опубликовать')
                     handleDelete(paragraph)
                   }}
+                  type={'button'}
                 >
                   Удалить
                 </button>
