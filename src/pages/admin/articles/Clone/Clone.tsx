@@ -260,6 +260,7 @@ export const CloneArticle = () => {
           {editingTitle == true && (
             <div className={styles.createArticle_top_title}>
               <input
+                required
                 id={'h2'}
                 onChange={e => {
                   setTitle(e.target.value)

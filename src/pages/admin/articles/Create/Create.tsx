@@ -148,13 +148,14 @@ export const CreateArticle = () => {
   }
 
   return (
-    <form className={styles.createArticle} onSubmit={e => handleSubmit(e, draft)}>
+    <form className={styles.createArticle} onSubmit={e => e.preventDefault()}>
       <div className={styles.createArticle_left}>
         <div className={styles.createArticle_top}>
           {editingTitle == true && (
             <div className={styles.createArticle_top_title}>
               <input
                 id={'h2'}
+                required
                 onChange={e => {
                   setTitle(e.target.value)
                   setButtonValue('Опубликовать')
@@ -386,6 +387,7 @@ export const CreateArticle = () => {
                     setButtonValue('Опубликовать')
                     setParagraphs(paragraphs.filter(p => p.order !== paragraph.order))
                   }}
+                  type="button"
                 >
                   Удалить
                 </button>
