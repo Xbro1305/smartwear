@@ -397,7 +397,7 @@ export const CloneArticle = () => {
                         event.dataTransfer.clearData()
                       }
                     }}
-                    style={{ padding: paragraph.imageFile ? '20px' : '40px' }}
+                    style={{ padding: imagesByParagraph[paragraph.title] ? '20px' : '40px' }}
                   >
                     <input
                       accept={'image/*'}
