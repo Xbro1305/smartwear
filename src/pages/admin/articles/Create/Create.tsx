@@ -584,9 +584,6 @@ export const CreateArticle = () => {
             >
               Очистить всё
             </button>
-            <button className={styles.createArticle_photoLabel_buttons_right} type={'submit'}>
-              Сохранить
-            </button>
           </div>
         </div>
       </div>
