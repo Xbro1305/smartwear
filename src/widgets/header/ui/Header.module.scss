@@ -16,6 +16,9 @@
       text-align: center;
       text-decoration: none;
       color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
 
       img {
         width: 30px;
@@ -116,7 +119,14 @@
     padding: 10px;
     font-size: 24px;
     z-index: 2;
+
+    @media (max-width: 1024px) {
+      top: 100%;
+      right: 100%;
+      transform: translate(100%, -100%);
+    }
   }
+
   &_catalogLink:hover {
     opacity: 1 !important;
   }

@@ -43,7 +43,7 @@ export const Header: React.FC = () => {
   const closeMenuTimer = useRef<NodeJS.Timeout | null>(null)
 
   const handleMouseLeave = () => {
-    closeMenuTimer.current = setTimeout(() => setActiveColumn(0), 200)
+    closeMenuTimer.current = setTimeout(() => setActiveColumn(0), 0)
   }
 
   const handleMouseEnter = () => {
@@ -173,7 +173,8 @@ export const Header: React.FC = () => {
           </div>
         </div>
         <Link to="/about">О нас</Link>
-        <Link to="/contacts">Контакты</Link>
+        {/* <Link to="/contacts">Контакты</Link> */}
+        <Link to={ROUTER_PATHS.ARTICLES}>Статьи</Link>
         <Link to="/delivery">Доставка</Link>
       </div>
 
@@ -183,18 +184,17 @@ export const Header: React.FC = () => {
         </Link>
         <Link to={ROUTER_PATHS.PROFILE}>
           <img alt="Profile" src={profile} />
+          {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
-        <button className={styles.header_button} onClick={handleLogout}>
+        <Link to={ROUTER_PATHS.CART} className={styles.header_button} onClick={handleLogout}>
           <img alt="Cart" src={cart} />
-        </button>
+        </Link>
       </div>
       <button className={styles.header_menu}>
         <span></span>
         <span></span>
         <span></span>
       </button>
-
-      {/* You may want to hide this width display */}
       <h1 className={styles.header_width}>{width}</h1>
     </header>
   )

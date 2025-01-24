@@ -27,6 +27,7 @@ import styles from '../home.module.scss'
 
 export const HomePage = () => {
   const [checkedInfo, setCheckedInfo] = useState(0)
+  const [news, setNews] = useState(newsArr)
   const [mobCheckedInfo, setMobCheckedInfo] = useState(-1)
 
   return (
@@ -191,7 +192,7 @@ export const HomePage = () => {
         <h2 className={'h2'}>Новости</h2>
 
         <div className={styles.home_news_wrapper}>
-          {newsArr.map(i => (
+          {news.map(i => (
             <div className={styles.home_news_item}>
               <img alt={''} src={i.img} />
               <div className={styles.home_news_item_right}>

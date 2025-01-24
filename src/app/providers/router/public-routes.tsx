@@ -13,6 +13,7 @@ import { PoliticsPage } from '@/pages/politics'
 import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { Articles } from '@/pages/articles/ui/Articles'
 
 const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN } = ROUTER_PATHS
 const { ACS, ARTICLES, MEN, NEWS, SIGN_UP, WOMEN } = ROUTER_PATHS
@@ -27,6 +28,10 @@ export const publicRoutes: RouteObject[] = [
       {
         element: <Article />,
         path: `${ARTICLES}/:name`,
+      },
+      {
+        element: <Articles />,
+        path: ARTICLES,
       },
       {
         element: <New />,
