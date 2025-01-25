@@ -26,8 +26,12 @@ export const publicRoutes: RouteObject[] = [
         path: SIGN_IN,
       },
       {
-        element: <Article />,
+        element: <Article category="user" />,
         path: `${ARTICLES}/:name`,
+      },
+      {
+        element: <Article category="news" />,
+        path: `${NEWS}/:name`,
       },
       {
         element: <Articles />,

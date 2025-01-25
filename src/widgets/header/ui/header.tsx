@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from './Header.module.scss'
-
+import { MdMenu, MdClose } from 'react-icons/md'
 import logo from '../../../assets/images/logo.png'
 import profile from '../../../assets/images/svg (1).svg'
 import cart from '../../../assets/images/svg (2).svg'
 import search from '../../../assets/images/svg.svg'
 import { useEffect, useRef, useState } from 'react'
+import { CiHeart, CiHome, CiSearch } from 'react-icons/ci'
+import { CgProfile } from 'react-icons/cg'
+import { IoBagOutline } from 'react-icons/io5'
 
 interface MenuItem {
   title: string
@@ -41,6 +44,7 @@ export const Header: React.FC = () => {
   const [activeSecondColumn, setActiveSecondColumn] = useState<string | null>(null)
   const [activeColumn, setActiveColumn] = useState(0)
   const closeMenuTimer = useRef<NodeJS.Timeout | null>(null)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
 
   const handleMouseLeave = () => {
     closeMenuTimer.current = setTimeout(() => setActiveColumn(0), 0)
@@ -111,13 +115,13 @@ export const Header: React.FC = () => {
                   }}
                   style={{
                     display: activeColumn >= 1 ? 'flex' : 'none',
-                    color: activeFirstColumn == index ? '#dc2a1f' : '',
+                    color: activeFirstColumn == index ? 'var(--red)' : '',
                   }}
                   key={index}
                 >
                   <Link
                     style={{
-                      color: activeFirstColumn == index ? '#dc2a1f' : '',
+                      color: activeFirstColumn == index ? 'var(--red)' : '',
                     }}
                     to={ROUTER_PATHS.CATALOG}
                   >
@@ -146,7 +150,7 @@ export const Header: React.FC = () => {
                   >
                     <Link
                       style={{
-                        color: activeSecondColumn == subCategory ? '#dc2a1f' : '',
+                        color: activeSecondColumn == subCategory ? 'var(--red)' : '',
                       }}
                       to={ROUTER_PATHS.CATALOG}
                     >
@@ -190,12 +194,70 @@ export const Header: React.FC = () => {
           <img alt="Cart" src={cart} />
         </Link>
       </div>
-      <button className={styles.header_menu}>
-        <span></span>
-        <span></span>
-        <span></span>
+      <button className={styles.header_menu} onClick={() => setIsOpen(!isOpen)}>
+        {isOpen ? <MdClose /> : <MdMenu />}
       </button>
       <h1 className={styles.header_width}>{width}</h1>
+
+      <div
+        className={styles.header_sect}
+        style={
+          width <= 900 && isOpen
+            ? {
+                ...{ display: 'flex', position: 'fixed', top: '76px', width: `${width}px` },
+                ...{ flexDirection: 'row', background: 'var(--white)', padding: '40px' },
+                ...{ flexWrap: 'wrap', justifyContent: 'center', transition: 'all 0.3s ease' },
+                zIndex: '-1',
+              }
+            : {
+                ...{
+                  position: 'fixed',
+                  transform: 'translateY(-100%)',
+                  transition: 'all 0.3s ease',
+                },
+                ...{ width: `${width}px`, zIndex: '-1' },
+              }
+        }
+      >
+        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to={ROUTER_PATHS.CATALOG}>
+          Каталог
+        </Link>
+        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to="/about">
+          О нас
+        </Link>
+        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to="/contacts">
+          Контакты
+        </Link>
+        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to={ROUTER_PATHS.ARTICLES}>
+          Статьи
+        </Link>
+        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to="/delivery">
+          Доставка
+        </Link>
+      </div>
+
+      <div className={styles.mob_navigation}>
+        <Link className="p1" to={ROUTER_PATHS.HOME}>
+          <CiHome />
+          Главная
+        </Link>
+        <Link className="p1" to={ROUTER_PATHS.CATALOG}>
+          <CiSearch />
+          Каталог
+        </Link>
+        <Link className="p1" to={'/cart'}>
+          <CiHeart />
+          Избранное
+        </Link>
+        <Link className="p1" to={'/cart'}>
+          <IoBagOutline />
+          Корзина
+        </Link>
+        <Link className="p1" to={'/cart'}>
+          <CgProfile />
+          {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
+        </Link>
+      </div>
     </header>
   )
 }

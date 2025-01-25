@@ -3,6 +3,8 @@
   display: flex;
   justify-content: space-between;
   background: #fff;
+  position: sticky;
+  top: 0;
 
   &_sect {
     display: flex;
@@ -97,15 +99,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: none;
-      border: none;
-      gap: 5px;
 
-      span {
-        height: 3px;
-        width: 25px;
-        display: block;
-        background: #000;
+      svg {
+        transform: scale(2);
       }
     }
   }
@@ -173,4 +169,34 @@
 
 .dropdown_block a:hover {
   color: var(--red);
+}
+
+.mob_navigation {
+  display: none;
+
+  @media (max-width: 900px) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 70px;
+    background: var(--white);
+
+    a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+
+      svg {
+        transform: scale(1.5);
+      }
+    }
+  }
 }

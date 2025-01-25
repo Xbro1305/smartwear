@@ -104,9 +104,11 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
               <button onClick={() => handleCopy(article.id)}>
                 <IoCopy />
               </button>
-              <a href={`${ARTICLES}/${article.keyword}`} rel={'noreferrer'} target={'_blank'}>
-                <FaEye />
-              </a>
+              {!article?.draft && (
+                <a href={`${ARTICLES}/${article.keyword}`} rel={'noreferrer'} target={'_blank'}>
+                  <FaEye />
+                </a>
+              )}
               <button onClick={() => handleDelete(article.id)}>
                 <FaTrash />
               </button>

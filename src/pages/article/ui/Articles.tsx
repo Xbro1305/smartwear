@@ -11,7 +11,11 @@ const enver = import.meta.env.VITE_APP_API_URL
 
 const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
 
-const Articles = () => {
+interface Article {
+  category: 'news' | 'user'
+}
+
+const Articles: React.FC<Article> = ({ category }) => {
   const { name } = useParams<{ name: string }>()
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
 

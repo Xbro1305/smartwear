@@ -3,7 +3,6 @@
 import img from '@/assets/images/Rectangle 992.png'
 import styles from './articles.module.scss'
 import { FormEvent, useState } from 'react'
-import { AiOutlineLoading } from 'react-icons/ai'
 
 interface artcilesData {
   date: string
@@ -26,7 +25,6 @@ export const Articles = () => {
     'т.к. их нету нигде',
   ])
   const [tag, setTag] = useState<string>('Все')
-  const [isMoreArticles, setIsMoreArticles] = useState<boolean>(true)
   const [articlesCount, setArticlesCount] = useState<number>(allSections.length / data.length)
 
   const [getMoreButton, setGetMoreButton] = useState(
@@ -47,6 +45,10 @@ export const Articles = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    const d = data.filter(i => i.title.toLowerCase().includes(search))
+
+    setAllSections(d)
   }
 
   const searchByTags = (tag: string) => {
@@ -80,7 +82,7 @@ export const Articles = () => {
           <input
             type="text"
             placeholder="Название статьи"
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value.toLowerCase())}
             value={search}
           />
 
@@ -103,20 +105,26 @@ export const Articles = () => {
           ))}
         </div>
         <div className={styles.articles_list_items}>
-          {allSections.map((section, index) => (
-            <div className={styles.articles_list_item} key={index}>
-              <img src={section.imageUrl} alt="" />
-              <p className="p2">{section.date}</p>
-              <h5 className="h5">{section.title}</h5>
-              <p className="p2"> {section.content}</p>
-              <section className={styles.articles_list_item_tags}>
-                {section.tags?.map(tag => <span>{tag}</span>)}
-              </section>
-            </div>
-          ))}
+          {allSections.length != 0 ? (
+            allSections.map((section, index) => (
+              <div className={styles.articles_list_item} key={index}>
+                <img src={section.imageUrl} alt="" />
+                <p className="p2">{section.date}</p>
+                <h5 className="h5">{section.title}</h5>
+                <p className="p2"> {section.content}</p>
+                <section className={styles.articles_list_item_tags}>
+                  {section.tags?.map(tag => <span>{tag}</span>)}
+                </section>
+              </div>
+            ))
+          ) : (
+            <p className="p1" style={{ margin: '0 auto', gridColumn: '1 / span 3' }}>
+              Ничего не найдено
+            </p>
+          )}
         </div>
       </div>
-      <div className={styles.articles_getmore}>{getMoreButton}</div>
+      {allSections.length != 0 && <div className={styles.articles_getmore}>{getMoreButton}</div>}
     </div>
   )
 }
