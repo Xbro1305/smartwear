@@ -12,10 +12,20 @@ interface artcilesData {
   tags?: string[]
 }
 
+const obj = {
+  date: '20 января 2025',
+  title: 'Какие ткани используются',
+  imageUrl: img,
+  content:
+    'Мы хотим познакомить вас с правилами ухода за одеждой с климат-контролем, ведь от этого напрямую зависят ее свойства и ваш комфорт при ее использовании. Подробно об этом можно прочитать в нашей статье.',
+  tags: ['Полезное', 'Об одежде'],
+}
+
 export const Articles = () => {
   //   const { data: articles, isLoading } = useGetArticlesQuery()
   const [search, setSearch] = useState<string>('')
-  const [allSections, setAllSections] = useState<artcilesData[]>(data)
+  const [data, setData] = useState<artcilesData[]>(Array<artcilesData>(12).fill(obj))
+  const [sections, setSections] = useState<artcilesData[]>(data)
   const [tags, setTags] = useState<string[]>([
     'Все',
     'Полезное',
@@ -25,7 +35,7 @@ export const Articles = () => {
     'т.к. их нету нигде',
   ])
   const [tag, setTag] = useState<string>('Все')
-  const [articlesCount, setArticlesCount] = useState<number>(allSections.length / data.length)
+  const [articlesCount, setArticlesCount] = useState<number>(sections.length / data.length)
 
   const [getMoreButton, setGetMoreButton] = useState(
     <button onClick={getArticles}>Показать ещё</button>
@@ -48,21 +58,21 @@ export const Articles = () => {
 
     const d = data.filter(i => i.title.toLowerCase().includes(search))
 
-    setAllSections(d)
+    setSections(d)
   }
 
   const searchByTags = (tag: string) => {
     const d = data.filter(i => i.tags?.includes(tag))
     setTag(tag)
 
-    setAllSections(tag == 'Все' ? data : d)
+    setSections(tag == 'Все' ? data : d)
   }
 
   function getArticles() {
     setGetMoreButton(getMoreLoading)
 
-    const articles = [...allSections, ...data]
-    setAllSections(articles)
+    const articles = [...sections, ...data]
+    setSections(articles)
 
     setGetMoreButton(articlesCount <= 3 ? getMoreBtn : <></>)
   }
@@ -105,8 +115,8 @@ export const Articles = () => {
           ))}
         </div>
         <div className={styles.articles_list_items}>
-          {allSections.length != 0 ? (
-            allSections.map((section, index) => (
+          {sections.length != 0 ? (
+            sections.map((section, index) => (
               <div className={styles.articles_list_item} key={index}>
                 <img src={section.imageUrl} alt="" />
                 <p className="p2">{section.date}</p>
@@ -124,16 +134,7 @@ export const Articles = () => {
           )}
         </div>
       </div>
-      {allSections.length != 0 && <div className={styles.articles_getmore}>{getMoreButton}</div>}
+      {sections.length != 0 && <div className={styles.articles_getmore}>{getMoreButton}</div>}
     </div>
   )
 }
-
-const data = Array<artcilesData>(12).fill({
-  date: '20 января 2025',
-  title: 'Какие ткани используются',
-  imageUrl: img,
-  content:
-    'Мы хотим познакомить вас с правилами ухода за одеждой с климат-контролем, ведь от этого напрямую зависят ее свойства и ваш комфорт при ее использовании. Подробно об этом можно прочитать в нашей статье.',
-  tags: ['Полезное', 'Об одежде'],
-})

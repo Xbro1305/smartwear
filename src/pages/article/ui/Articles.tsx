@@ -86,8 +86,8 @@ const Articles: React.FC<Article> = ({ category }) => {
     return <div>Ошибка при загрузке статьи</div>
   }
 
-  if (!article) {
-    return <div>Статья не найдена</div>
+  if (!article || article.isDeleted) {
+    return <div>Статья не найдена или была удалена</div>
   }
 
   return (
