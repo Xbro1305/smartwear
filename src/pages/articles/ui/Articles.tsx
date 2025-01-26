@@ -1,24 +1,27 @@
+/* eslint-disable react/jsx-key */
 // import { useGetArticlesQuery } from '@/entities/article'
-// import { ArticleDto, SectionDto } from '@/entities/article/article.types'
-import img from '@/assets/images/Rectangle 992.png'
-import styles from './Articles.module.scss'
 import { FormEvent, useEffect, useState } from 'react'
 
+// import { ArticleDto, SectionDto } from '@/entities/article/article.types'
+import img from '@/assets/images/Rectangle 992.png'
+
+import styles from './Articles.module.scss'
+
 interface artcilesData {
-  date: string
-  title: string
-  imageUrl?: string
   content: string
+  date: string
+  imageUrl?: string
   tags?: string[]
+  title: string
 }
 
 const obj = {
-  date: '20 января 2025',
-  title: 'Какие ткани используются',
-  imageUrl: img,
   content:
     'Мы хотим познакомить вас с правилами ухода за одеждой с климат-контролем, ведь от этого напрямую зависят ее свойства и ваш комфорт при ее использовании. Подробно об этом можно прочитать в нашей статье.',
+  date: '20 января 2025',
+  imageUrl: img,
   tags: ['Полезное', 'Об одежде'],
+  title: 'Какие ткани используются',
 }
 
 export const Articles = () => {
@@ -70,6 +73,7 @@ export const Articles = () => {
 
   const searchByTags = (tag: string) => {
     const d = data.filter(i => i.tags?.includes(tag))
+
     setTag(tag)
 
     setSections(tag == 'Все' ? data : d)
@@ -79,6 +83,7 @@ export const Articles = () => {
     setGetMoreButton(getMoreLoading)
 
     const articles = [...sections, ...data]
+
     setSections(articles)
 
     setGetMoreButton(articlesCount <= 3 ? getMoreBtn : <></>)
@@ -92,18 +97,18 @@ export const Articles = () => {
     <div className={styles.articles}>
       <div className={styles.articles_top}>
         <h1 id={'h1'}>Статьи и полезная информация</h1>
-        <p className="p1" style={{ color: 'var(--service)' }}>
+        <p className={'p1'} style={{ color: 'var(--service)' }}>
           Найди нужную статью через поиск
         </p>
         <form className={styles.articles_top_bottom} onSubmit={e => handleSubmit(e)}>
           <input
-            type="text"
-            placeholder="Название статьи"
             onChange={e => setSearch(e.target.value.toLowerCase())}
+            placeholder={'Название статьи'}
+            type={'text'}
             value={search}
           />
 
-          <button className="button" type="submit">
+          <button className={'button'} type={'submit'}>
             Найти
           </button>
         </form>
@@ -113,9 +118,9 @@ export const Articles = () => {
         <div className={styles.articles_list_tags}>
           {tags.map(i => (
             <p
-              style={i != tag ? { color: 'var(--service)', background: 'var(--gray)' } : {}}
               className={'button'}
               onClick={() => searchByTags(i)}
+              style={i != tag ? { background: 'var(--gray)', color: 'var(--service)' } : {}}
             >
               {i}
             </p>
@@ -125,17 +130,17 @@ export const Articles = () => {
           {sections.length != 0 ? (
             sections.map((section, index) => (
               <div className={styles.articles_list_item} key={index}>
-                <img src={section.imageUrl} alt="" />
-                <p className="p2">{section.date}</p>
-                <h5 className="h5">{section.title}</h5>
-                <p className="p2"> {section.content}</p>
+                <img alt={''} src={section.imageUrl} />
+                <p className={'p2'}>{section.date}</p>
+                <h5 className={'h5'}>{section.title}</h5>
+                <p className={'p2'}> {section.content}</p>
                 <section className={styles.articles_list_item_tags}>
                   {section.tags?.map(tag => <span>{tag}</span>)}
                 </section>
               </div>
             ))
           ) : (
-            <p className="p1" style={{ margin: '0 auto', gridColumn: '1 / span 3' }}>
+            <p className={'p1'} style={{ gridColumn: '1 / span 3', margin: '0 auto' }}>
               Ничего не найдено
             </p>
           )}

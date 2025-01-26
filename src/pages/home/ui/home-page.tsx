@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable max-lines */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link } from 'react-router-dom'
 import Slider from 'react-slick'
 
-import arrow from '@/assets/images/Vector 46 (Stroke).svg'
+//import arrow from '@/assets/images/Vector 46 (Stroke).svg'
 import acs from '@/assets/images/homeAcs.png'
 import brands from '@/assets/images/homeBrands.png'
 import catalog from '@/assets/images/homeCatalog.jpeg'
@@ -14,7 +14,6 @@ import heart from '@/assets/images/homeHeart.svg'
 import info from '@/assets/images/homeInfo.png'
 import intro from '@/assets/images/homeIntro.png'
 import man from '@/assets/images/homeMan.jpeg'
-import news from '@/assets/images/homeNews.jpeg'
 import sales from '@/assets/images/homeSales.png'
 import star from '@/assets/images/homeStar.svg'
 import woman from '@/assets/images/homeWoman.jpeg'
@@ -22,17 +21,14 @@ import homeadv1 from '@/assets/images/homeadv (1).svg'
 import homeadv4 from '@/assets/images/homeadv (2).svg'
 import homeadv3 from '@/assets/images/homeadv (3).svg'
 import homeadv2 from '@/assets/images/homeadv (4).svg'
+import { useGetArticlesBySectionQuery } from '@/entities/article'
+import { Section } from '@/entities/article/article.types'
 
 import styles from '../home.module.scss'
 
 export const HomePage = () => {
+  const { data: newsData } = useGetArticlesBySectionQuery(Section.NEWS)
   const [checkedInfo, setCheckedInfo] = useState(0)
-  const [news, setNews] = useState(newsArr)
-  const [mobCheckedInfo, setMobCheckedInfo] = useState(-1)
-
-  useEffect(() => {
-    setNews(newsArr)
-  }, [])
 
   return (
     <div className={styles.home}>
@@ -173,36 +169,18 @@ export const HomePage = () => {
           <p className={'p1'}>{infoTexxt[checkedInfo].title}</p>
           <img alt={''} src={infoTexxt[checkedInfo].img} />
         </div>
-
-        <div className={styles.home_info_mob}>
-          {infoCategories.map((i, index) => (
-            <div
-              aria-active={index == mobCheckedInfo ? true : false}
-              className={styles.home_info_mob_item}
-              onClick={() => {
-                index == mobCheckedInfo ? setMobCheckedInfo(-1) : setMobCheckedInfo(index)
-              }}
-            >
-              <h5 className={'h5'}>
-                {i}
-                <img alt={''} src={arrow} />
-              </h5>
-              <p className={'p1'}>{infoTexxt[index].title}</p>
-            </div>
-          ))}
-        </div>
       </div>
       <div className={styles.home_news}>
         <h2 className={'h2'}>Новости</h2>
 
         <div className={styles.home_news_wrapper}>
-          {news.map(i => (
+          {newsData?.map(i => (
             <div className={styles.home_news_item}>
-              <img alt={''} src={i.img} />
+              <img alt={''} src={i.imageUrl} />
               <div className={styles.home_news_item_right}>
-                <span className={'p2'}>{i.date}</span>
+                <span className={'p2'}>{i.createdAt}</span>
                 <h5 className={'h5'}>{i.title}</h5>
-                <p className={'p2'}>{i.content}</p>
+                <p className={'p2'}>{i.description}</p>
               </div>
             </div>
           ))}
@@ -365,30 +343,6 @@ const infoTexxt = [
   { img: info, title: 'Как стирать' },
   { img: info, title: 'Материалы' },
   { img: info, title: 'Условия доставки' },
-]
-
-const newsArr = [
-  {
-    content:
-      'Уважаемые покупатели, команда магазина "Умная Одежда" поздравляет вас с Новым годом и Рождеством! Мы желаем вам как можно радостнее и благополучнее провести следующий год! Если вы хотите порадовать себя на праздниках и приобрести себе куртку или пальто с климат-контрлем в нашем магазине, то спешим вас обрадовать - мы работаем все выходные, кроме первого января. В наших розничных магазинах вы сможете купить себе любую понравившуюся вещь, начиная со второго января.',
-    date: '28.12.2022',
-    img: news,
-    title: 'Режим работы в праздничные дни',
-  },
-  {
-    content:
-      'Уважаемые покупатели, команда магазина "Умная Одежда" поздравляет вас с Новым годом и Рождеством! Мы желаем вам как можно радостнее и благополучнее провести следующий год! Если вы хотите порадовать себя на праздниках и приобрести себе куртку или пальто с климат-контрлем в нашем магазине, то спешим вас обрадовать - мы работаем все выходные, кроме первого января. В наших розничных магазинах вы сможете купить себе любую понравившуюся вещь, начиная со второго января.',
-    date: '28.12.2022',
-    img: news,
-    title: 'Режим работы в праздничные дни',
-  },
-  {
-    content:
-      'Уважаемые покупатели, команда магазина "Умная Одежда" поздравляет вас с Новым годом и Рождеством! Мы желаем вам как можно радостнее и благополучнее провести следующий год! Если вы хотите порадовать себя на праздниках и приобрести себе куртку или пальто с климат-контрлем в нашем магазине, то спешим вас обрадовать - мы работаем все выходные, кроме первого января. В наших розничных магазинах вы сможете купить себе любую понравившуюся вещь, начиная со второго января.',
-    date: '28.12.2022',
-    img: news,
-    title: 'Режим работы в праздничные дни',
-  },
 ]
 
 const advs = [

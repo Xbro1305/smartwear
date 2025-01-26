@@ -17,6 +17,7 @@ export enum Composition {
 
 export type ArticleDto = {
   composition: Composition
+  createdAt?: String
   description: string
   id: number
   imageUrl?: string

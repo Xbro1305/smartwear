@@ -1,7 +1,9 @@
 import type { RouteObject } from 'react-router-dom'
 
+import { Section } from '@/entities/article/article.types'
 import { AboutPage } from '@/pages/about'
 import { Article } from '@/pages/article'
+import { Articles } from '@/pages/articles/ui/Articles'
 import { CatalogPage } from '@/pages/catalog'
 import { CatalogCategory } from '@/pages/catalog-category'
 import { ContactPage } from '@/pages/contacts'
@@ -13,7 +15,6 @@ import { PoliticsPage } from '@/pages/politics'
 import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import { Articles } from '@/pages/articles/ui/Articles'
 
 const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN } = ROUTER_PATHS
 const { ACS, ARTICLES, MEN, NEWS, SIGN_UP, WOMEN } = ROUTER_PATHS
@@ -26,11 +27,11 @@ export const publicRoutes: RouteObject[] = [
         path: SIGN_IN,
       },
       {
-        element: <Article category="user" />,
+        element: <Article category={Section.USER} />,
         path: `${ARTICLES}/:name`,
       },
       {
-        element: <Article category="news" />,
+        element: <Article category={Section.NEWS} />,
         path: `${NEWS}/:name`,
       },
       {
