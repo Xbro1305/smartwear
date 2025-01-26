@@ -17,9 +17,10 @@ export const SignInPage: React.FC = () => {
   const location = useLocation()
 
   // Получение пути возврата из state или использование "/"
-  const from = location.state?.from?.pathname
+  const searchParams = new URLSearchParams(location.search)
+  const from = searchParams.get('redirectUrl') || ROUTER_PATHS.PROFILE
 
-  console.log(from, location)
+  console.log(from)
 
   const navigate = useNavigate()
 
