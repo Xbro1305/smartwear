@@ -207,15 +207,11 @@ export const Header: React.FC = () => {
                 ...{ display: 'flex', position: 'fixed', top: '76px', width: `${width}px` },
                 ...{ flexDirection: 'row', background: 'var(--white)', padding: '40px' },
                 ...{ flexWrap: 'wrap', justifyContent: 'center', transition: 'all 0.3s ease' },
-                zIndex: '-1',
+                ...{ zIndex: '-1', left: 0 },
               }
             : {
-                ...{
-                  position: 'fixed',
-                  transform: 'translateY(-100%)',
-                  transition: 'all 0.3s ease',
-                },
-                ...{ width: `${width}px`, zIndex: '-1' },
+                ...{ width: `${width}px`, zIndex: '-1', left: 0, transition: 'all 0.3s ease' },
+                ...{ position: 'fixed', transform: 'translateY(-100%)' },
               }
         }
       >
