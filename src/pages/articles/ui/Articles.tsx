@@ -1,7 +1,7 @@
 // import { useGetArticlesQuery } from '@/entities/article'
 // import { ArticleDto, SectionDto } from '@/entities/article/article.types'
 import img from '@/assets/images/Rectangle 992.png'
-import styles from './articles.module.scss'
+import styles from './Articles.module.scss'
 import { FormEvent, useEffect, useState } from 'react'
 
 interface artcilesData {
