@@ -19,6 +19,8 @@ const Articles: React.FC<Article> = ({ category }) => {
   const { name } = useParams<{ name: string }>()
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
 
+  console.log(category)
+
   const { data: articleImage, isLoading: isImageLoading } = useGetImageQuery({
     id: article?.id.toString() || '',
     type: 'articles',

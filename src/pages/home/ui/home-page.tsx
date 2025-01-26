@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable max-lines */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link } from 'react-router-dom'
 import Slider from 'react-slick'
@@ -29,6 +29,10 @@ export const HomePage = () => {
   const [checkedInfo, setCheckedInfo] = useState(0)
   const [news, setNews] = useState(newsArr)
   const [mobCheckedInfo, setMobCheckedInfo] = useState(-1)
+
+  useEffect(() => {
+    setNews(newsArr)
+  }, [])
 
   return (
     <div className={styles.home}>

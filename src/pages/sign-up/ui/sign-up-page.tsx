@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 
 import {
@@ -31,10 +31,8 @@ export const SignUpPage: React.FC = () => {
   const [phone, setPhone] = useState<null | string>(null)
   const [prefix, setPrefix] = useState<any>('+7')
   const navigate = useNavigate()
-  const location = useLocation()
 
   // Получение пути возврата из state или использование "/"
-  const from = location.state?.from?.pathname || ROUTER_PATHS.PROFILE
 
   const [register] = useRegisterMutation()
   const [confirmRegister] = useConfirmRegistrationMutation()

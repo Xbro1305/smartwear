@@ -14,7 +14,6 @@ import {
   CreateParagraphDto,
   CreateParagraphinArticleDto,
   ParagraphDto,
-  ParagraphinArticleDto,
   UpdateArticleDto,
   sectionMapping,
 } from '@/entities/article/article.types'

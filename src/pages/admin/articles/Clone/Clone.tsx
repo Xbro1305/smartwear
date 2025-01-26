@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import cat from '@/assets/images/Cat.png'
 import { useDeleteParagraphMutation } from '@/entities/article'
 import { useCreateArticleMutation, useGetArticleByIdQuery } from '@/entities/article'
-import { ParagraphDto, sectionMapping } from '@/entities/article/article.types'
+import { sectionMapping } from '@/entities/article/article.types'
 import {
   Composition,
   CreateArticleDto,

@@ -2,7 +2,7 @@
 // import { ArticleDto, SectionDto } from '@/entities/article/article.types'
 import img from '@/assets/images/Rectangle 992.png'
 import styles from './articles.module.scss'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 
 interface artcilesData {
   date: string
@@ -26,16 +26,23 @@ export const Articles = () => {
   const [search, setSearch] = useState<string>('')
   const [data, setData] = useState<artcilesData[]>(Array<artcilesData>(12).fill(obj))
   const [sections, setSections] = useState<artcilesData[]>(data)
-  const [tags, setTags] = useState<string[]>([
-    'Все',
-    'Полезное',
-    'Об одежде',
-    'Ничего не выйдет',
-    'с этими тэгами',
-    'т.к. их нету нигде',
-  ])
+  const [tags, setTags] = useState<string[]>([])
   const [tag, setTag] = useState<string>('Все')
   const [articlesCount, setArticlesCount] = useState<number>(sections.length / data.length)
+
+  useEffect(() => {
+    setData(Array<artcilesData>(12).fill(obj))
+    setTags([
+      'Все',
+      'Полезное',
+      'Об одежде',
+      'Ничего не выйдет',
+      'с этими тэгами',
+      'т.к. их нету нигде',
+    ])
+
+    setArticlesCount(sections.length / data.length)
+  }, [])
 
   const [getMoreButton, setGetMoreButton] = useState(
     <button onClick={getArticles}>Показать ещё</button>
