@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
@@ -45,6 +45,8 @@ export const Header: React.FC = () => {
   const [activeColumn, setActiveColumn] = useState(0)
   const closeMenuTimer = useRef<NodeJS.Timeout | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
+
+  const location = useLocation()
 
   const handleMouseLeave = () => {
     closeMenuTimer.current = setTimeout(() => setActiveColumn(0), 0)
@@ -186,7 +188,7 @@ export const Header: React.FC = () => {
         <Link to={ROUTER_PATHS.SEARCH}>
           <img alt="Search" src={search} />
         </Link>
-        <Link to={ROUTER_PATHS.PROFILE}>
+        <Link to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
           <img alt="Profile" src={profile} />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
@@ -249,7 +251,7 @@ export const Header: React.FC = () => {
           <IoBagOutline />
           Корзина
         </Link>
-        <Link className="p1" to={ROUTER_PATHS.PROFILE}>
+        <Link className="p1" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
           <CgProfile />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
