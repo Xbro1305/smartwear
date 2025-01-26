@@ -686,4 +686,8 @@
       line-height: 14.52px;
     }
   }
+
+  @media (max-width: 900px) {
+    bottom: 100px;
+  }
 }
