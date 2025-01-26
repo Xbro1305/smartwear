@@ -5,6 +5,7 @@ import {
   CreateArticleDto,
   CreateParagraphDto,
   ParagraphDto,
+  Section,
   UpdateArticleDto,
   UpdateParagraphDto,
 } from './article.types'
@@ -17,6 +18,15 @@ export const articleApi = baseApi.injectEndpoints({
         body,
         method: 'POST',
         url: '/articles',
+      }),
+    }),
+
+    createDraft: builder.mutation<ArticleDto, Partial<CreateArticleDto>>({
+      invalidatesTags: ['Articles'],
+      query: body => ({
+        body,
+        method: 'POST',
+        url: '/articles/draft',
       }),
     }),
 
@@ -64,6 +74,13 @@ export const articleApi = baseApi.injectEndpoints({
       }),
     }),
 
+    getArticlesBySection: builder.query<ArticleDto[], Section>({
+      query: section => ({
+        method: 'GET',
+        url: `/articles/section/${section}`,
+      }),
+    }),
+
     searchArticleByKeyword: builder.query<ArticleDto | null, string>({
       query: keyword => ({
         method: 'GET',
@@ -97,6 +114,7 @@ export const {
   useDeleteParagraphMutation,
   useGetArticleByIdQuery,
   useGetArticleDraftsQuery,
+  useGetArticlesBySectionQuery,
   useGetArticlesQuery,
   useSearchArticleByKeywordQuery,
   useUpdateArticleMutation,
