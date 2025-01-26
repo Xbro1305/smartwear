@@ -16,7 +16,7 @@ export const AuthGuard = () => {
   if (error) {
     console.error('Ошибка при загрузке данных пользователя:', error)
 
-    return <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
+    return <Navigate to={ROUTER_PATHS.SIGN_IN} />
   }
 
   const isAuthenticated = Boolean(userData)
@@ -26,5 +26,5 @@ export const AuthGuard = () => {
     console.log(`Данные пользователя:`, userData)
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.SIGN_IN} />
+  return isAuthenticated ? <Outlet /> : <Navigate to={ROUTER_PATHS.SIGN_IN} />
 }

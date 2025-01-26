@@ -253,7 +253,7 @@ export const Header: React.FC = () => {
           <IoBagOutline />
           Корзина
         </Link>
-        <Link className="p1" to={'/cart'}>
+        <Link className="p1" to={ROUTER_PATHS.PROFILE}>
           <CgProfile />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>

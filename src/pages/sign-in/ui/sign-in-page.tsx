@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 
 // import { useGetMeQuery } from '@/entities/auth'
@@ -14,6 +14,10 @@ export const SignInPage: React.FC = () => {
   const [timer, setTimer] = useState<number>(30)
   const [prefix, setPrefix] = useState<any>('+7')
   const [phone, setPhone] = useState<string>('')
+  const location = useLocation()
+
+  // Получение пути возврата из state или использование "/"
+  const from = location.state?.from?.pathname || ROUTER_PATHS.PROFILE
 
   const navigate = useNavigate()
 
@@ -79,7 +83,7 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
 
-        navigate('/profile')
+        navigate(from, { replace: true })
         window.location.reload()
       })
       .catch(error => {
