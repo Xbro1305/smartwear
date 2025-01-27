@@ -5,6 +5,8 @@ import { useGetArticlesBySectionQuery } from '@/entities/article/article.api'
 import { Section } from '@/entities/article/article.types'
 
 import styles from './Articles.module.scss'
+import { useNavigate } from 'react-router-dom'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const Articles = () => {
   const { data: articles, isLoading } = useGetArticlesBySectionQuery(Section.USER)
@@ -25,6 +27,8 @@ export const Articles = () => {
   const handleShowMore = () => {
     setVisibleArticles(prev => prev + 12)
   }
+
+  const navigate = useNavigate()
 
   return (
     <div className={styles.articles}>
@@ -70,7 +74,11 @@ export const Articles = () => {
         <div className={styles.articles_list_items}>
           {filteredArticles && filteredArticles.length > 0 ? (
             filteredArticles.slice(0, visibleArticles).map((article, index) => (
-              <div className={styles.articles_list_item} key={index}>
+              <div
+                onClick={() => navigate(`/${ROUTER_PATHS.ARTICLES}/${article.keyword}`)}
+                className={styles.articles_list_item}
+                key={index}
+              >
                 <img alt={''} src={article.imageUrl || img} />
                 <p className={'p2'}>{article.createdAt}</p>
                 <h5 className={'h5'}>{article.title}</h5>
@@ -81,7 +89,7 @@ export const Articles = () => {
               </div>
             ))
           ) : (
-            <p className={'p1'} style={{ gridColumn: '1 / span 3', margin: '0 auto' }}>
+            <p className={'p1'} style={{ gridColumn: '1 / span 4', margin: '0 auto' }}>
               Ничего не найдено
             </p>
           )}

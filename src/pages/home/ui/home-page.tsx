@@ -2,7 +2,7 @@
 /* eslint-disable max-lines */
 import { useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Slider from 'react-slick'
 
 //import arrow from '@/assets/images/Vector 46 (Stroke).svg'
@@ -25,10 +25,13 @@ import { useGetArticlesBySectionQuery } from '@/entities/article'
 import { Section } from '@/entities/article/article.types'
 
 import styles from '../home.module.scss'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const HomePage = () => {
   const { data: newsData } = useGetArticlesBySectionQuery(Section.NEWS)
   const [checkedInfo, setCheckedInfo] = useState(0)
+
+  const navigate = useNavigate()
 
   return (
     <div className={styles.home}>
@@ -176,7 +179,10 @@ export const HomePage = () => {
 
           <div className={styles.home_news_wrapper}>
             {newsData?.map(i => (
-              <div className={styles.home_news_item}>
+              <div
+                className={styles.home_news_item}
+                onClick={() => navigate(`/${ROUTER_PATHS.ARTICLES}/${i.keyword}`)}
+              >
                 <img alt={''} src={i.imageUrl} />
                 <div className={styles.home_news_item_right}>
                   <span className={'p2'}>{i.createdAt}</span>
