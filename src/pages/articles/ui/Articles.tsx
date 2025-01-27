@@ -13,6 +13,7 @@ export const Articles = () => {
   const [search, setSearch] = useState<string>('')
   const [tag, setTag] = useState<string>('Все')
   const [visibleArticles, setVisibleArticles] = useState<number>(12)
+  const navigate = useNavigate()
 
   if (isLoading) {
     return <div>Загрузка...</div>
@@ -27,8 +28,6 @@ export const Articles = () => {
   const handleShowMore = () => {
     setVisibleArticles(prev => prev + 12)
   }
-
-  const navigate = useNavigate()
 
   return (
     <div className={styles.articles}>

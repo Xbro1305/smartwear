@@ -2,6 +2,7 @@ export const ROUTER_PATHS = {
   ABOUT: '/about',
   ADMIN: '/admin',
   ARTICLES: '/articles',
+  USER_ARTICLE:"/article",
   ADMINLOGIN: '/admin/login',
   CREATEARTICLE: '/admin/create-article',
   EDITARTICLE: '/admin/edit-article',

@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { Fragment } from 'react'
 
 import { createRoot } from 'react-dom/client'
 
@@ -13,9 +13,9 @@ import { Providers } from './providers'
 import { SnackbarProvider } from 'notistack'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  <Fragment>
     <SnackbarProvider>
       <Providers />
     </SnackbarProvider>
-  </StrictMode>
+  </Fragment>
 )

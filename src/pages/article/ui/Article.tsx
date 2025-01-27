@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom'
 
 import { useSearchArticleByKeywordQuery } from '@/entities/article/article.api'
 //import { useGetArticlesBySectionQuery } from '@/entities/article/article.api'
-import { Section } from '@/entities/article/article.types'
 import { useGetImageQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
 
@@ -13,16 +12,10 @@ const enver = import.meta.env.VITE_APP_API_URL
 
 const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
 
-interface Article {
-  category: Section
-}
-
-const Article: React.FC<Article> = ({ category }) => {
-  const { name } = useParams<{ name: string }>()
+const Article: React.FC = () => {
+  const { keyword } = useParams<{ keyword: string }>()
   //const {data: articleData} = useGetArticlesBySectionQuery(category)
-  const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
-
-  console.log(category)
+  const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(keyword || '')
 
   const { data: articleImage, isLoading: isImageLoading } = useGetImageQuery({
     id: article?.id.toString() || '',

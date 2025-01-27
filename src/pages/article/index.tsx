@@ -1,1 +1,1 @@
-export { default as Article } from './ui/Articles'
+export { default as Article } from './ui/Article'

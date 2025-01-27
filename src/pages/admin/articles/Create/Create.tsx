@@ -31,7 +31,6 @@ export const CreateArticle = () => {
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [metaTitle, setMetaTitle] = useState<string>('')
-  const [draft, setDraft] = useState<boolean>(false)
   const [metaDescription, setMetaDescription] = useState<string>('')
   const [paragraphs, setParagraphs] = useState<CreateParagraphinArticleDto[]>([])
   const [file, setFile] = useState<any>(null)
@@ -337,10 +336,7 @@ export const CreateArticle = () => {
         <div className={styles.createArticle_top_buttons}>
           <button
             className={styles.createArticle_top_buttons_left}
-            onClick={e => {
-              setDraft(true)
-              handleSubmit(e, true)
-            }}
+            onClick={e => handleSubmit(e, true)}
             type={'button'}
           >
             <LuFilePen />
@@ -349,10 +345,7 @@ export const CreateArticle = () => {
           <button
             className={styles.createArticle_top_buttons_right}
             disabled={buttonValue === 'Опубликовано'}
-            onClick={e => {
-              setDraft(false)
-              handleSubmit(e, false)
-            }}
+            onClick={e => handleSubmit(e, false)}
             type={'button'}
           >
             {buttonValue}
