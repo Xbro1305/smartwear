@@ -23,9 +23,9 @@ import homeadv3 from '@/assets/images/homeadv (3).svg'
 import homeadv2 from '@/assets/images/homeadv (4).svg'
 import { useGetArticlesBySectionQuery } from '@/entities/article'
 import { Section } from '@/entities/article/article.types'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from '../home.module.scss'
-import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const HomePage = () => {
   const { data: newsData } = useGetArticlesBySectionQuery(Section.NEWS)

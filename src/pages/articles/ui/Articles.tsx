@@ -1,12 +1,12 @@
 import { FormEvent, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import img from '@/assets/images/Rectangle 992.png'
 import { useGetArticlesBySectionQuery } from '@/entities/article/article.api'
 import { Section } from '@/entities/article/article.types'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from './Articles.module.scss'
-import { useNavigate } from 'react-router-dom'
-import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const Articles = () => {
   const { data: articles, isLoading } = useGetArticlesBySectionQuery(Section.USER)
@@ -74,9 +74,9 @@ export const Articles = () => {
           {filteredArticles && filteredArticles.length > 0 ? (
             filteredArticles.slice(0, visibleArticles).map((article, index) => (
               <div
-                onClick={() => navigate(`/${ROUTER_PATHS.ARTICLES}/${article.keyword}`)}
                 className={styles.articles_list_item}
                 key={index}
+                onClick={() => navigate(`/${ROUTER_PATHS.ARTICLES}/${article.keyword}`)}
               >
                 <img alt={''} src={article.imageUrl || img} />
                 <p className={'p2'}>{article.createdAt}</p>
