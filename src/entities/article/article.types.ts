@@ -27,6 +27,7 @@ export type ArticleDto = {
   metaTitle: string
   paragraphs: ParagraphDto[]
   section: Section
+  tags?: string[]
   title: string
   userId: number
 }

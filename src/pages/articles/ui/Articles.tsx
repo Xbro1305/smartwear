@@ -1,97 +1,30 @@
-/* eslint-disable react/jsx-key */
-// import { useGetArticlesQuery } from '@/entities/article'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 
-// import { ArticleDto, SectionDto } from '@/entities/article/article.types'
 import img from '@/assets/images/Rectangle 992.png'
+import { useGetArticlesBySectionQuery } from '@/entities/article/article.api'
+import { Section } from '@/entities/article/article.types'
 
 import styles from './Articles.module.scss'
 
-interface artcilesData {
-  content: string
-  date: string
-  imageUrl?: string
-  tags?: string[]
-  title: string
-}
-
-const obj = {
-  content:
-    'Мы хотим познакомить вас с правилами ухода за одеждой с климат-контролем, ведь от этого напрямую зависят ее свойства и ваш комфорт при ее использовании. Подробно об этом можно прочитать в нашей статье.',
-  date: '20 января 2025',
-  imageUrl: img,
-  tags: ['Полезное', 'Об одежде'],
-  title: 'Какие ткани используются',
-}
-
 export const Articles = () => {
-  //   const { data: articles, isLoading } = useGetArticlesQuery()
+  const { data: articles, isLoading } = useGetArticlesBySectionQuery(Section.USER)
   const [search, setSearch] = useState<string>('')
-  const [data, setData] = useState<artcilesData[]>(Array<artcilesData>(12).fill(obj))
-  const [sections, setSections] = useState<artcilesData[]>(data)
-  const [tags, setTags] = useState<string[]>([])
   const [tag, setTag] = useState<string>('Все')
-  const [articlesCount, setArticlesCount] = useState<number>(sections.length / data.length)
+  const [visibleArticles, setVisibleArticles] = useState<number>(12)
 
-  useEffect(() => {
-    setData(Array<artcilesData>(12).fill(obj))
-    setTags([
-      'Все',
-      'Полезное',
-      'Об одежде',
-      'Ничего не выйдет',
-      'с этими тэгами',
-      'т.к. их нету нигде',
-    ])
-
-    setArticlesCount(sections.length / data.length)
-  }, [])
-
-  const [getMoreButton, setGetMoreButton] = useState(
-    <button onClick={getArticles}>Показать ещё</button>
-  )
-
-  //   const filtered = articles?.filter(article => !article.isDeleted)
-
-  //   const sectionMapping = {
-  //     NEWS: 'Новости',
-  //     SEO: 'Seo',
-  //     USER: 'Пользовательские',
-  //   }
-
-  //   if (isLoading) {
-  //     return <div>Загрузка...</div>
-  //   }
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const d = data.filter(i => i.title.toLowerCase().includes(search))
-
-    setSections(d)
+  if (isLoading) {
+    return <div>Загрузка...</div>
   }
 
-  const searchByTags = (tag: string) => {
-    const d = data.filter(i => i.tags?.includes(tag))
+  // Фильтрация по тегам и поиску
+  const filteredArticles = articles
+    ?.filter(article => tag === 'Все' || article.tags?.includes(tag))
+    .filter(article => article.title.toLowerCase().includes(search.toLowerCase()))
 
-    setTag(tag)
-
-    setSections(tag == 'Все' ? data : d)
+  // Показать больше статей
+  const handleShowMore = () => {
+    setVisibleArticles(prev => prev + 12)
   }
-
-  function getArticles() {
-    setGetMoreButton(getMoreLoading)
-
-    const articles = [...sections, ...data]
-
-    setSections(articles)
-
-    setGetMoreButton(articlesCount <= 3 ? getMoreBtn : <></>)
-  }
-
-  const getMoreBtn = <button onClick={getArticles}>Показать ещё</button>
-
-  const getMoreLoading = <div></div>
 
   return (
     <div className={styles.articles}>
@@ -100,14 +33,18 @@ export const Articles = () => {
         <p className={'p1'} style={{ color: 'var(--service)' }}>
           Найди нужную статью через поиск
         </p>
-        <form className={styles.articles_top_bottom} onSubmit={e => handleSubmit(e)}>
+        <form
+          className={styles.articles_top_bottom}
+          onSubmit={(e: FormEvent<HTMLFormElement>) => {
+            e.preventDefault()
+          }}
+        >
           <input
-            onChange={e => setSearch(e.target.value.toLowerCase())}
+            onChange={e => setSearch(e.target.value)}
             placeholder={'Название статьи'}
             type={'text'}
             value={search}
           />
-
           <button className={'button'} type={'submit'}>
             Найти
           </button>
@@ -116,26 +53,30 @@ export const Articles = () => {
 
       <div className={styles.articles_list}>
         <div className={styles.articles_list_tags}>
-          {tags.map(i => (
+          {['Все', 'Полезное', 'Об одежде'].map(tagOption => (
             <p
               className={'button'}
-              onClick={() => searchByTags(i)}
-              style={i != tag ? { background: 'var(--gray)', color: 'var(--service)' } : {}}
+              key={tagOption}
+              onClick={() => setTag(tagOption)}
+              style={
+                tagOption !== tag ? { background: 'var(--gray)', color: 'var(--service)' } : {}
+              }
             >
-              {i}
+              {tagOption}
             </p>
           ))}
         </div>
+
         <div className={styles.articles_list_items}>
-          {sections.length != 0 ? (
-            sections.map((section, index) => (
+          {filteredArticles && filteredArticles.length > 0 ? (
+            filteredArticles.slice(0, visibleArticles).map((article, index) => (
               <div className={styles.articles_list_item} key={index}>
-                <img alt={''} src={section.imageUrl} />
-                <p className={'p2'}>{section.date}</p>
-                <h5 className={'h5'}>{section.title}</h5>
-                <p className={'p2'}> {section.content}</p>
+                <img alt={''} src={article.imageUrl || img} />
+                <p className={'p2'}>{article.createdAt}</p>
+                <h5 className={'h5'}>{article.title}</h5>
+                <p className={'p2'}>{article.description}</p>
                 <section className={styles.articles_list_item_tags}>
-                  {section.tags?.map(tag => <span>{tag}</span>)}
+                  {article.tags?.map(tag => <span key={tag}>{tag}</span>)}
                 </section>
               </div>
             ))
@@ -146,7 +87,12 @@ export const Articles = () => {
           )}
         </div>
       </div>
-      {sections.length != 0 && <div className={styles.articles_getmore}>{getMoreButton}</div>}
+
+      {filteredArticles && filteredArticles.length > visibleArticles && (
+        <div className={styles.articles_getmore}>
+          <button onClick={handleShowMore}>Показать ещё</button>
+        </div>
+      )}
     </div>
   )
 }

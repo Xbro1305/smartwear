@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useSearchArticleByKeywordQuery } from '@/entities/article/article.api'
-import { useGetArticlesBySectionQuery } from '@/entities/article/article.api'
+//import { useGetArticlesBySectionQuery } from '@/entities/article/article.api'
 import { Section } from '@/entities/article/article.types'
 import { useGetImageQuery } from '@/entities/image/image.api'
 import { AiFillDislike, AiFillLike } from 'react-icons/ai'
@@ -19,7 +19,7 @@ interface Article {
 
 const Articles: React.FC<Article> = ({ category }) => {
   const { name } = useParams<{ name: string }>()
-  const {data: articleData} = useGetArticlesBySectionQuery(category)
+  //const {data: articleData} = useGetArticlesBySectionQuery(category)
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
 
   console.log(category)
