@@ -17,7 +17,7 @@ interface Article {
   category: Section
 }
 
-const Articles: React.FC<Article> = ({ category }) => {
+const Article: React.FC<Article> = ({ category }) => {
   const { name } = useParams<{ name: string }>()
   //const {data: articleData} = useGetArticlesBySectionQuery(category)
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(name || '')
@@ -153,4 +153,4 @@ const Articles: React.FC<Article> = ({ category }) => {
   )
 }
 
-export default Articles
+export default Article

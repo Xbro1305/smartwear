@@ -213,7 +213,7 @@ export const Header: React.FC = () => {
               }
             : {
                 ...{ width: `${width}px`, zIndex: '-1', left: 0, transition: 'all 0.3s ease' },
-                ...{ position: 'fixed', transform: 'translateY(-100%)' },
+                ...{ position: 'fixed', transform: 'translateY(-120%)' },
               }
         }
       >

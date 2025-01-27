@@ -339,7 +339,7 @@ export const CreateArticle = () => {
             className={styles.createArticle_top_buttons_left}
             onClick={e => {
               setDraft(true)
-              handleSubmit(e, draft)
+              handleSubmit(e, true)
             }}
             type={'button'}
           >
@@ -351,7 +351,7 @@ export const CreateArticle = () => {
             disabled={buttonValue === 'Опубликовано'}
             onClick={e => {
               setDraft(false)
-              handleSubmit(e, draft)
+              handleSubmit(e, false)
             }}
             type={'button'}
           >

@@ -31,10 +31,6 @@ export const publicRoutes: RouteObject[] = [
         path: `${ARTICLES}/:name`,
       },
       {
-        element: <Article category={Section.NEWS} />,
-        path: `${NEWS}/:name`,
-      },
-      {
         element: <Articles />,
         path: ARTICLES,
       },

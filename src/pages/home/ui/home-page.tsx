@@ -170,22 +170,24 @@ export const HomePage = () => {
           <img alt={''} src={infoTexxt[checkedInfo].img} />
         </div>
       </div>
-      <div className={styles.home_news}>
-        <h2 className={'h2'}>Новости</h2>
+      {newsData && (
+        <div className={styles.home_news}>
+          <h2 className={'h2'}>Новости</h2>
 
-        <div className={styles.home_news_wrapper}>
-          {newsData?.map(i => (
-            <div className={styles.home_news_item}>
-              <img alt={''} src={i.imageUrl} />
-              <div className={styles.home_news_item_right}>
-                <span className={'p2'}>{i.createdAt}</span>
-                <h5 className={'h5'}>{i.title}</h5>
-                <p className={'p2'}>{i.description}</p>
+          <div className={styles.home_news_wrapper}>
+            {newsData?.map(i => (
+              <div className={styles.home_news_item}>
+                <img alt={''} src={i.imageUrl} />
+                <div className={styles.home_news_item_right}>
+                  <span className={'p2'}>{i.createdAt}</span>
+                  <h5 className={'h5'}>{i.title}</h5>
+                  <p className={'p2'}>{i.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       <div className={styles.home_adv}>
         {advs.map(i => (
           <div className={styles.home_adv_item}>
