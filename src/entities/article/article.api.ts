@@ -75,9 +75,10 @@ export const articleApi = baseApi.injectEndpoints({
     }),
 
     getArticlesBySection: builder.query<ArticleDto[], Section>({
-      query: section => ({
+      query: category => ({
         method: 'GET',
-        url: `/articles/section/${section}`,
+        params: { category },
+        url: `/articles`,
       }),
     }),
 
