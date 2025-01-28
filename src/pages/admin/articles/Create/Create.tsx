@@ -46,6 +46,7 @@ export const CreateArticle = () => {
   const navigate = useNavigate()
   const { data: user } = useGetMeQuery()
   const { ADMINARTICLES } = ROUTER_PATHS
+
   const handleSubmit = async (e: any, draft: boolean) => {
     e.preventDefault()
 
@@ -60,6 +61,16 @@ export const CreateArticle = () => {
       section,
       title,
       userId: user?.id || 1,
+    }
+
+    if (!draft) {
+      const requiredFields = { description, title, metaTitle, metaDescription, url }
+
+      for (const [key, value] of Object.entries(requiredFields)) {
+        if (!value) {
+          return alert(`Заполните поле: ${key}`)
+        }
+      }
     }
 
     try {
@@ -154,7 +165,6 @@ export const CreateArticle = () => {
             <div className={styles.createArticle_top_title}>
               <input
                 id={'h2'}
-                required
                 onChange={e => {
                   setTitle(e.target.value)
                   setButtonValue('Опубликовать')
@@ -533,7 +543,6 @@ export const CreateArticle = () => {
                   setButtonValue('Опубликовать')
                 }}
                 placeholder={'Ссылка на статью'}
-                required
                 type={'text'}
                 value={url}
               />
@@ -548,7 +557,6 @@ export const CreateArticle = () => {
                   setButtonValue('Опубликовать')
                 }}
                 placeholder={'Seo-заголовок'}
-                required
                 value={metaTitle}
               ></textarea>
             </label>
@@ -562,7 +570,6 @@ export const CreateArticle = () => {
                   setButtonValue('Опубликовать')
                 }}
                 placeholder={'Seo-описание'}
-                required
                 value={metaDescription}
               ></textarea>
             </label>

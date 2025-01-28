@@ -87,7 +87,6 @@ export const New = () => {
         className={styles.articles_item}
         style={{
           flexDirection: article.composition === 'RIGHT' ? 'row-reverse' : 'row',
-          padding: 'var(--top-padding) var(--sides-padding)',
         }}
       >
         <div className={styles.articles_item_left}>

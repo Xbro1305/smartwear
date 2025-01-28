@@ -202,20 +202,9 @@ export const Header: React.FC = () => {
       <h1 className={styles.header_width}>{width}</h1>
 
       <div
-        className={styles.header_sect}
-        style={
-          width <= 900 && isOpen
-            ? {
-                ...{ display: 'flex', position: 'fixed', top: '76px', width: `${width}px` },
-                ...{ flexDirection: 'row', background: 'var(--white)', padding: '40px' },
-                ...{ flexWrap: 'wrap', justifyContent: 'center', transition: 'all 0.3s ease' },
-                ...{ zIndex: '-1', left: 0 },
-              }
-            : {
-                ...{ width: `${width}px`, zIndex: '-1', left: 0, transition: 'all 0.3s ease' },
-                ...{ position: 'fixed', transform: 'translateY(-120%)' },
-              }
-        }
+        className={styles.mob_header}
+        id="mob_header"
+        style={width <= 900 && isOpen ? {} : { top: '-100%' }}
       >
         <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to={ROUTER_PATHS.CATALOG}>
           Каталог
@@ -235,24 +224,24 @@ export const Header: React.FC = () => {
       </div>
 
       <div className={styles.mob_navigation}>
-        <Link className="p1" to={ROUTER_PATHS.HOME}>
-          <CiHome />
+        <Link className="p2" to={ROUTER_PATHS.HOME}>
+          <CiHome style={{ fontSize: '20px' }} />
           Главная
         </Link>
-        <Link className="p1" to={ROUTER_PATHS.CATALOG}>
-          <CiSearch />
+        <Link className="p2" to={ROUTER_PATHS.CATALOG}>
+          <CiSearch style={{ fontSize: '20px' }} />
           Каталог
         </Link>
-        <Link className="p1" to={'/cart'}>
-          <CiHeart />
+        <Link className="p2" to={'/cart'}>
+          <CiHeart style={{ fontSize: '20px' }} />
           Избранное
         </Link>
-        <Link className="p1" to={'/cart'}>
-          <IoBagOutline />
+        <Link className="p2" to={'/cart'}>
+          <IoBagOutline style={{ fontSize: '20px' }} />
           Корзина
         </Link>
-        <Link className="p1" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
-          <CgProfile />
+        <Link className="p2" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
+          <CgProfile style={{ fontSize: '20px' }} />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
       </div>

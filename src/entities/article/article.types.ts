@@ -53,6 +53,7 @@ export type UpdateArticleDto = {
   metaTitle?: string
   section?: Section
   title?: string
+  draft?: boolean
 }
 
 export type ParagraphDto = {

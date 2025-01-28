@@ -162,6 +162,16 @@ export const CloneArticle = () => {
       userId: user?.id || 1,
     }
 
+    if (!draft) {
+      const requiredFields = { description, title, metaTitle, metaDescription, url }
+
+      for (const [key, value] of Object.entries(requiredFields)) {
+        if (!value) {
+          return alert(`Заполните поле: ${key}`)
+        }
+      }
+    }
+
     try {
       const result = await createArticle(articleData).unwrap()
       const articleId = result.id

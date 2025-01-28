@@ -23,7 +23,6 @@ import homeadv3 from '@/assets/images/homeadv (3).svg'
 import homeadv2 from '@/assets/images/homeadv (4).svg'
 import { useGetArticlesBySectionQuery } from '@/entities/article'
 import { Section } from '@/entities/article/article.types'
-import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from '../home.module.scss'
 
@@ -179,15 +178,19 @@ export const HomePage = () => {
 
           <div className={styles.home_news_wrapper}>
             {newsData?.map(i => (
-              <div
-                className={styles.home_news_item}
-                onClick={() => navigate(`/${ROUTER_PATHS.ARTICLES}/${i.keyword}`)}
-              >
+              <div className={styles.home_news_item} onClick={() => navigate(`/news/${i.keyword}`)}>
                 <img alt={''} src={i.imageUrl} />
                 <div className={styles.home_news_item_right}>
-                  <span className={'p2'}>{i.createdAt}</span>
+                  <span className="p2">
+                    {i.createdAt &&
+                      new Date(i.createdAt.toString()).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                  </span>
                   <h5 className={'h5'}>{i.title}</h5>
-                  <p className={'p2'}>{i.description}</p>
+                  <div dangerouslySetInnerHTML={{ __html: i.description }} />
                 </div>
               </div>
             ))}

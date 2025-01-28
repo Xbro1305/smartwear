@@ -76,12 +76,19 @@ export const Articles = () => {
               <div
                 className={styles.articles_list_item}
                 key={index}
-                onClick={() => navigate(`/${ROUTER_PATHS.ARTICLES}/${article.keyword}`)}
+                onClick={() => navigate(`/article/${article.keyword}`)}
               >
                 <img alt={''} src={article.imageUrl || img} />
-                <p className={'p2'}>{article.createdAt}</p>
+                <span className="p2">
+                  {article.createdAt &&
+                    new Date(article.createdAt.toString()).toLocaleDateString('ru-RU', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                </span>
                 <h5 className={'h5'}>{article.title}</h5>
-                <p className={'p2'}>{article.description}</p>
+                <div dangerouslySetInnerHTML={{ __html: article.description }} />
                 <section className={styles.articles_list_item_tags}>
                   {article.tags?.map(tag => <span key={tag}>{tag}</span>)}
                 </section>

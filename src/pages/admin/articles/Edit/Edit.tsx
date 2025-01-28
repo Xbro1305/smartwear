@@ -144,6 +144,7 @@ export const EditArticle = () => {
       setMetaDescription(article.metaDescription)
       setComposition(article.composition)
       setSection(article.section)
+      setUrl(article.keyword)
 
       const updatedParagraphs = article.paragraphs.map(paragraph => ({
         ...paragraph,
@@ -165,7 +166,7 @@ export const EditArticle = () => {
 
   const { ADMINARTICLES } = ROUTER_PATHS
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: any, draft: any) => {
     e.preventDefault()
 
     const articleData: UpdateArticleDto = {
@@ -175,6 +176,17 @@ export const EditArticle = () => {
       metaTitle,
       section,
       title,
+      draft,
+    }
+
+    if (!draft) {
+      const requiredFields = { description, title, metaTitle, metaDescription, url }
+
+      for (const [key, value] of Object.entries(requiredFields)) {
+        if (!value) {
+          return alert(`Заполните поле: ${key}`)
+        }
+      }
     }
 
     try {
@@ -280,7 +292,7 @@ export const EditArticle = () => {
   }
 
   return (
-    <form className={styles.createArticle} onSubmit={e => handleSubmit(e)}>
+    <form className={styles.createArticle}>
       <div className={styles.createArticle_left}>
         <div className={styles.createArticle_top}>
           {editingTitle == true && (
@@ -458,11 +470,17 @@ export const EditArticle = () => {
 
       <div className={styles.createArticle_right}>
         <div className={styles.createArticle_top_buttons}>
-          <button className={styles.createArticle_top_buttons_left}>
+          <button
+            className={styles.createArticle_top_buttons_left}
+            onClick={e => handleSubmit(e, false)}
+          >
             <LuFilePen />
             Сохранить черновик
           </button>
-          <button className={styles.createArticle_top_buttons_right} onClick={handleSubmit}>
+          <button
+            className={styles.createArticle_top_buttons_right}
+            onClick={e => handleSubmit(e, false)}
+          >
             {buttonValue}
           </button>
         </div>
