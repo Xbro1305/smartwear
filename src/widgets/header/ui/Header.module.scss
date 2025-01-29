@@ -211,8 +211,8 @@
   flex-direction: row;
   background: var(--white);
   padding: 40px;
-  flex-wrap: wrap;
-  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   gap: 20px;
   padding: 20px;
   transition: all 0.3s ease;
