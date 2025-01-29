@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import img from '@/assets/images/Rectangle 992.png'
 import { useGetArticlesBySectionQuery } from '@/entities/article/article.api'
 import { Section } from '@/entities/article/article.types'
-import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from './Articles.module.scss'
 
