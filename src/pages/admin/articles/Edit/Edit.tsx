@@ -472,7 +472,7 @@ export const EditArticle = () => {
         <div className={styles.createArticle_top_buttons}>
           <button
             className={styles.createArticle_top_buttons_left}
-            onClick={e => handleSubmit(e, false)}
+            onClick={e => handleSubmit(e, true)}
           >
             <LuFilePen />
             Сохранить черновик

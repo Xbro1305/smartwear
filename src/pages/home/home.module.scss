@@ -482,7 +482,7 @@
           text-overflow: ellipsis;
         }
 
-        p {
+        &_content{
           overflow: hidden;
           display: -webkit-box;
           -webkit-line-clamp: 4;

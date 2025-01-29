@@ -190,7 +190,10 @@ export const HomePage = () => {
                       })}
                   </span>
                   <h5 className={'h5'}>{i.title}</h5>
-                  <div dangerouslySetInnerHTML={{ __html: i.description }} />
+                  <div
+                    className={styles.home_news_item_right_content}
+                    dangerouslySetInnerHTML={{ __html: i.description }}
+                  />
                 </div>
               </div>
             ))}

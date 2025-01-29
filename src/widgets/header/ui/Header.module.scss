@@ -194,6 +194,11 @@
       align-items: center;
       justify-content: center;
       gap: 5px;
+
+      @media (max-width: 900px) {
+        font-size: 10px !important;
+        line-height: 17px !important;
+      }
     }
   }
 }
