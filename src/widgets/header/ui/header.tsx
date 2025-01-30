@@ -46,6 +46,10 @@ export const Header: React.FC = () => {
   const closeMenuTimer = useRef<NodeJS.Timeout | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
+  const main = document?.querySelector('main')
+
+  isOpen && main && main.addEventListener('click', () => setIsOpen(false))
+
   const location = useLocation()
 
   const handleMouseLeave = () => {
@@ -206,19 +210,39 @@ export const Header: React.FC = () => {
         id="mob_header"
         style={width <= 900 && isOpen ? {} : { top: '-100%' }}
       >
-        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to={ROUTER_PATHS.CATALOG}>
+        <Link
+          onClick={() => setIsOpen(false)}
+          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
+          to={ROUTER_PATHS.CATALOG}
+        >
           Каталог
         </Link>
-        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to="/about">
+        <Link
+          onClick={() => setIsOpen(false)}
+          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
+          to="/about"
+        >
           О нас
         </Link>
-        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to="/contacts">
+        <Link
+          onClick={() => setIsOpen(false)}
+          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
+          to="/contacts"
+        >
           Контакты
         </Link>
-        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to={ROUTER_PATHS.ARTICLES}>
+        <Link
+          onClick={() => setIsOpen(false)}
+          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
+          to={ROUTER_PATHS.ARTICLES}
+        >
           Статьи
         </Link>
-        <Link style={width <= 900 && isOpen ? { display: 'flex' } : {}} to="/delivery">
+        <Link
+          onClick={() => setIsOpen(false)}
+          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
+          to="/delivery"
+        >
           Доставка
         </Link>
       </div>

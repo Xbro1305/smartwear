@@ -81,4 +81,19 @@
       grid-column: 1/1;
     }
   }
+
+  @media (max-width: 900px) {
+    padding-bottom: 70px;
+
+    &_sect {
+      display: none;
+    }
+
+    > :last-child {
+      display: flex;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+  }
 }
