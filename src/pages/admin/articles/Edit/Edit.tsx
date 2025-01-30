@@ -183,7 +183,7 @@ export const EditArticle = () => {
       const requiredFields = { description, title, metaTitle, metaDescription, url }
 
       for (const [key, value] of Object.entries(requiredFields)) {
-        if (!value) {
+        if (value == '' || !value) {
           return alert(`Заполните поле: ${key}`)
         }
       }
@@ -660,6 +660,7 @@ export const EditArticle = () => {
               <input
                 id={''}
                 name={'url'}
+                className="url"
                 onChange={e => {
                   setUrl(e.target.value)
                   setButtonValue('Опубликовать')

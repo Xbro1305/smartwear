@@ -166,7 +166,7 @@ export const CloneArticle = () => {
       const requiredFields = { description, title, metaTitle, metaDescription, url }
 
       for (const [key, value] of Object.entries(requiredFields)) {
-        if (!value) {
+        if (value == '' || !value) {
           return alert(`Заполните поле: ${key}`)
         }
       }
