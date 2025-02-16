@@ -41,9 +41,13 @@
 
     --red: #dc2a1f;
     --gray: #f2f2f2;
+    --light-gray: #fbfbfb;
+    --dark-gray: #70798e;
     --dark: #282b32;
     --white: #ffffff;
     --service: #b0b7bf;
+    --blue: #1e293b;
+    --green: #6fbd15;
     --sides-padding: 150px;
     --top-padding: 90px;
     --admin-dark: #292929;
@@ -139,7 +143,7 @@ input[type='search']::-webkit-search-results-decoration {
 .h3 {
   font-family: Inter;
   font-size: 32px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 38.4px;
   color: var(--dark);
 }
@@ -156,6 +160,13 @@ input[type='search']::-webkit-search-results-decoration {
   font-weight: 500;
   line-height: 27.6px;
   color: var(--dark);
+}
+
+.h6 {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 19.2px;
+  letter-spacing: 0%;
 }
 
 .p1 {
@@ -193,6 +204,14 @@ input[type='search']::-webkit-search-results-decoration {
   .h2 {
     font-size: 34px;
     line-height: 40.8px;
+  }
+
+  .h3 {
+    font-family: Inter;
+    font-weight: 500;
+    font-size: 23px;
+    line-height: 27.6px;
+    letter-spacing: 0px;
   }
 
   .h4 {
@@ -401,4 +420,71 @@ input[type='search']::-webkit-search-results-decoration {
 #adminSideBar_link.active svg {
   opacity: 1;
   fill: #1e293b;
+}
+
+.radio {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  appearance: none;
+  position: relative;
+}
+
+.radio::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--service);
+}
+
+.radio:checked::after {
+  content: url('@/assets/images/check.svg');
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px !important;
+  border-radius: 4px;
+  z-index: 1;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid var(--red);
+}
+
+.checkbox {
+  width: 24px !important;
+  height: 24px;
+  display: block;
+  appearance: none;
+  position: relative;
+}
+
+.checkbox::after {
+  border: 2px solid var(--service);
+  content: '';
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.checkbox:checked::after {
+  content: url('@/assets/images/check.svg');
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px !important;
+  border-radius: 4px;
+  z-index: 1;
+  background: var(--red);
+  border: 2px solid var(--red) !important;
 }

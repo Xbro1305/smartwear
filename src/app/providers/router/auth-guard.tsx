@@ -37,4 +37,6 @@ export const AuthGuard = () => {
   ) : (
     <Navigate to={`${ROUTER_PATHS.SIGN_IN}?redirectUrl=${from}`} />
   )
+
+  // return <Outlet />
 }
