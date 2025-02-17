@@ -1,85 +1,108 @@
-import sale from '../../../assets/images/sale.png'
+/* eslint-disable react/jsx-key */
+/* eslint-disable max-lines */
+import { useEffect, useState } from 'react'
 import { NumericFormat, PatternFormat } from 'react-number-format'
 import { Link } from 'react-router-dom'
-import styles from './Components.module.scss'
-import { useState } from 'react'
+
+import {
+  useConfirmEmailMutation,
+  useConfirmPhoneChangeMutation,
+  useGetMeQuery,
+  useRequestEmailConfirmationMutation,
+} from '@/entities/auth'
 import { FaCheck, FaPen } from 'react-icons/fa'
+//import { FaCheck, FaPen } from 'react-icons/fa'
 import { IoClose } from 'react-icons/io5'
 
+import styles from './Components.module.scss'
+
+import sale from '../../../assets/images/sale.png'
+
 export const Profile_profile = () => {
-  const getByKey = (key: string) => localStorage.getItem(key) || ''
+  const { data: userData, isLoading } = useGetMeQuery()
+  const [confirmEmail] = useRequestEmailConfirmationMutation()
+  const [confirmPhoneChange] = useConfirmPhoneChangeMutation()
 
   const current = 17200
   const next = 30000
   const percent = (current * 100) / next
-  const [surname, setSurname] = useState<string>(getByKey('usersurname'))
-  const [name, setName] = useState<string>(getByKey('username'))
-  const [middlename, setMiddlename] = useState<string>(getByKey('usermiddlename'))
-  const [birthday, setBirthday] = useState<string>(getByKey('userbirthday'))
-  const [email, setEmail] = useState<string>(getByKey('useremail'))
-  const [phone, setPhone] = useState<string>(getByKey('userphone'))
-  const [gender, setGender] = useState<string>(getByKey('usergender'))
-  const [city, setCity] = useState<string>(getByKey('usercity'))
+
+  const [surname, setSurname] = useState<string>('')
+  const [name, setName] = useState<string>('')
+  const [middlename, setMiddlename] = useState<string>('')
+  const [birthday, setBirthday] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [phone, setPhone] = useState<string>('')
+  const [gender, setGender] = useState<string>('')
+  const [city, setCity] = useState<string>('')
   const [isProfileEdited, setIsProfileEdited] = useState<boolean>(false)
-  const [isEmailConfirmed, setIsEmailConfirmed] = useState<any>(getByKey('useremailconfirmed'))
-  const [isPhoneComfirmed, setIsPhoneComfirmed] = useState<any>(getByKey('userphoneconfirmed'))
-  const [notifications, setNotifications] = useState<any>(getByKey('usernotifications'))
-  const [adresses, setAddresses] = useState<{ title: string }[]>(
-    JSON.parse(localStorage.getItem('useradresses') || '[]')
-  )
-  const [defaultAddress, setDefaultAddress] = useState<number>(
-    parseInt(localStorage.getItem('userdefaultaddress') || '0')
-  )
+  const [isEmailConfirmed, setIsEmailConfirmed] = useState<boolean>(false)
+  const [isPhoneConfirmed, setIsPhoneConfirmed] = useState<boolean>(false)
+  const [notifications, setNotifications] = useState<boolean>(false)
   const [deletingAddress, setDeletingAddress] = useState<{ index: number } | boolean>(false)
   const [emailConfirm, setEmailConfirm] = useState<boolean>(false)
   const [phoneConfirm, setPhoneConfirm] = useState<boolean>(false)
   const [timer, setTimer] = useState<number>(30)
-  const [code, setCode] = useState<string>()
+  const [code, setCode] = useState<string>('')
   const [editingAddress, setEditingAddress] = useState<{ index: number } | false>(false)
 
-  const initialData = {
-    surname: getByKey('usersurname'),
-    name: getByKey('username'),
-    middlename: getByKey('usermiddlename'),
-    birthday: getByKey('userbirthday'),
-    email: getByKey('useremail'),
-    phone: getByKey('userphone'),
-    gender: getByKey('usergender'),
-    city: getByKey('usercity'),
-    notifications: getByKey('usernotifications'),
-    isEmailConfirmed,
-    isPhoneComfirmed,
-  }
+  const [addresses, setAddresses] = useState(userData?.addresses || [])
+  const defaultAddress = userData?.addresses.find(addr => addr.isDefault) || null
 
-  const editDefaultAddress = (index: number) => {
-    setDefaultAddress(index)
-  }
+  useEffect(() => {
+    if (userData) {
+      setSurname(userData.surName || '')
+      setName(userData.name || '')
+      setMiddlename(userData.middleName || '')
+      setBirthday(userData.birthday || '')
+      setEmail(userData.email || '')
+      setPhone(userData.phone || '')
+      setGender(userData.gender || '')
+      setCity(userData?.defaultAddress?.city || '')
+      setIsEmailConfirmed(userData.isEmailConfirmed || false)
+      setIsPhoneConfirmed(userData.isPhoneConfirmed || false)
+      setNotifications(userData.notifications || false)
+    }
+  }, [userData])
 
-  const handleSubmit = () => {}
+  useEffect(() => {
+    if (!phoneConfirm) {
+      return
+    }
 
-  const handleConfirmEmail = () => {
-    !isEmailConfirmed && setIsEmailConfirmed(!isEmailConfirmed)
-    setEmailConfirm(true)
+    const interval = setInterval(() => {
+      setTimer(prev => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [phoneConfirm])
+
+  const handleConfirmEmail = async () => {
+    if (!isEmailConfirmed) {
+      try {
+        await confirmEmail({ userId: userData?.id as number }).unwrap()
+        setIsEmailConfirmed(true)
+        setEmailConfirm(true)
+      } catch (error) {
+        console.error('Ошибка подтверждения email:', error)
+      }
+    }
   }
 
   const getCode = () => {
     setTimer(30)
-
     setPhoneConfirm(true)
-
-    const interval = setInterval(() => {
-      setTimer(prev => prev - 1)
-    }, 1000)
-
-    setTimeout(() => {
-      clearInterval(interval)
-    }, 30000)
   }
 
-  const handleConfirmPhone = () => {
-    !isPhoneComfirmed && setIsPhoneComfirmed(!isPhoneComfirmed)
-
-    //code = введенный код в модалке
+  const handleConfirmPhone = async () => {
+    if (!isPhoneConfirmed) {
+      try {
+        await confirmPhoneChange({ code, userId: userData?.id as number }).unwrap()
+        setIsPhoneConfirmed(true)
+      } catch (error) {
+        console.error('Ошибка подтверждения телефона:', error)
+      }
+    }
   }
 
   const deleteAddress = (index: number) => {
@@ -88,16 +111,22 @@ export const Profile_profile = () => {
   }
 
   const cancelEditing = () => {
-    setSurname(initialData.surname)
-    setName(initialData.name)
-    setMiddlename(initialData.middlename)
-    setBirthday(initialData.birthday)
-    setEmail(initialData.email)
-    setPhone(initialData.phone)
-    setGender(initialData.gender)
-    setNotifications(initialData.notifications)
-    setCity(initialData.city)
+    if (userData) {
+      setSurname(userData.surName)
+      setName(userData.name)
+      setMiddlename(userData.middleName)
+      setBirthday(userData.birthday)
+      setEmail(userData.email)
+      setPhone(userData.phone)
+      setGender(userData.gender)
+      setNotifications(userData.notifications)
+      setCity(userData?.defaultAddress?.city as string)
+    }
     setIsProfileEdited(false)
+  }
+
+  if (isLoading) {
+    return <div>Загрузка...</div>
   }
 
   return (
@@ -108,12 +137,12 @@ export const Profile_profile = () => {
           <h5 className={`${styles.profile_top_title} h3`}>
             {surname} {name} {middlename}
           </h5>
-          <span style={{ color: 'var(--service)' }} className="p2">
+          <span className={'p2'} style={{ color: 'var(--service)' }}>
             Совершайте покупки и мы вернем вам от 3 до 15% стоимости заказа
           </span>
           <div className={styles.profile_top_sale}>
             <img alt={'sale'} src={sale} />
-            <h3 className="h3">Ваша скидка 5%</h3>
+            <h3 className={'h3'}>Ваша скидка 5%</h3>
             <div className={styles.profile_top_sale_bottom}>
               <div className={styles.profile_top_sale_bottom_process}>
                 <p>
@@ -123,54 +152,60 @@ export const Profile_profile = () => {
                   <div style={{ width: `${percent}%` }}></div>
                 </div>
               </div>
-              <Link to={'/discount-program'} style={{ color: 'var(--red)' }}>
+              <Link style={{ color: 'var(--red)' }} to={'/discount-program'}>
                 Подробнее
               </Link>
             </div>
           </div>
           <div className={styles.profile_top_orders_info}>
             <div className={styles.profile_top_orders_info_item}>
-              <p className="p2">Вы сэкономили</p>
+              <p className={'p2'}>Вы сэкономили</p>
               <NumericFormat
-                className="h5"
+                className={'h5'}
+                displayType={'text'}
+                suffix={' ₽'}
+                thousandSeparator={' '}
                 value={1322}
-                thousandSeparator=" "
-                suffix=" ₽"
-                displayType="text"
               />
             </div>
             <div className={styles.profile_top_orders_info_item}>
-              <p className="p2">Всего потратили</p>
+              <p className={'p2'}>Всего потратили</p>
               <NumericFormat
-                className="h5"
+                className={'h5'}
+                displayType={'text'}
+                suffix={' ₽'}
+                thousandSeparator={' '}
                 value={435}
-                thousandSeparator=" "
-                suffix=" ₽"
-                displayType="text"
               />
             </div>
             <div className={styles.profile_top_orders_info_item}>
-              <p className="p2">Заказали товаров</p>
-              <NumericFormat className="h5" value={15} thousandSeparator=" " displayType="text" />
+              <p className={'p2'}>Заказали товаров</p>
+              <NumericFormat
+                className={'h5'}
+                displayType={'text'}
+                thousandSeparator={' '}
+                value={15}
+              />
             </div>
           </div>
         </div>
         <div className={styles.profile_personality}>
-          <h5 className="h5">Контактные данные</h5>
+          <h5 className={'h5'}>Контактные данные</h5>
           <form className={styles.profile_form}>
             <label
               className={`${styles.profile_form_label} ${name.length ? styles.profile_form_label_active : ''}`}
             >
               <p>Имя</p>
               <input
-                value={name}
+                name={'name'}
                 onChange={e => {
                   const value = e.target.value
+
                   setName(value)
-                  initialData.name != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
+                  userData?.name != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
                 }}
-                name={'name'}
                 type={'text'}
+                value={name}
               />
             </label>
             <label
@@ -178,53 +213,50 @@ export const Profile_profile = () => {
             >
               <p>Фамилия</p>
               <input
-                value={surname}
+                name={'surname'}
                 onChange={e => {
                   const value = e.target.value
+
                   setSurname(value)
-                  initialData.surname != value
-                    ? setIsProfileEdited(true)
-                    : setIsProfileEdited(false)
+                  userData?.surName != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
                 }}
-                name={'surname'}
                 type={'text'}
+                value={surname}
               />
             </label>
             <div className={styles.profile_form_gender}>
-              <h6 className="h6">Пол</h6>
+              <h6 className={'h6'}>Пол</h6>
               <label className={styles.profile_form_gender_label}>
                 <input
-                  type="radio"
-                  value="male"
-                  name="gender"
                   checked={gender == 'male'}
+                  className={'radio'}
+                  name={'gender'}
                   onChange={e => {
                     const value = e.target.value
+
                     setGender(value)
-                    initialData.gender != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
+                    userData?.gender != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
                   }}
-                  className="radio"
+                  type={'radio'}
+                  value={'male'}
                 />
-                <p className="p2">Мужской</p>
+                <p className={'p2'}>Мужской</p>
               </label>
               <label className={styles.profile_form_gender_label}>
                 <input
-                  type="radio"
-                  value="female"
-                  name="gender"
                   checked={gender == 'female'}
+                  className={'radio'}
+                  name={'gender'}
                   onChange={e => {
                     const value = e.target.value
+
                     setGender(value)
-                    initialData.gender != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
+                    userData?.gender != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
                   }}
-                  className="radio"
+                  type={'radio'}
+                  value={'female'}
                 />
-                <p className="p2">Женский</p>
+                <p className={'p2'}>Женский</p>
               </label>
             </div>
             {/* <label
@@ -241,16 +273,15 @@ export const Profile_profile = () => {
             <label className={`${styles.profile_form_label} ${styles.profile_form_label_active}`}>
               <p>Дата рождения</p>
               <input
-                value={birthday}
+                name={'birthday'}
                 onChange={e => {
                   const value = e.target.value
+
                   setBirthday(value)
-                  initialData.birthday != value
-                    ? setIsProfileEdited(true)
-                    : setIsProfileEdited(false)
+                  userData?.birthday != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
                 }}
-                name={'birthday'}
                 type={'date'}
+                value={birthday}
               />
             </label>
             <label
@@ -258,35 +289,37 @@ export const Profile_profile = () => {
             >
               <p>Город</p>
               <input
-                value={city}
+                name={'city'}
                 onChange={e => {
                   const value = e.target.value
+
                   setCity(value)
-                  initialData.city != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
+                  userData?.defaultAddress?.city != value
+                    ? setIsProfileEdited(true)
+                    : setIsProfileEdited(false)
                 }}
-                name={'city'}
                 type={'text'}
+                value={city}
               />
             </label>
             <div className={styles.profile_form_email_label}>
               <label
+                className={`${styles.profile_form_label} ${email.length ? styles.profile_form_label_active : ''} ${isEmailConfirmed ? styles.profile_form_label_confirmed : styles.profile_form_label_not_confirmed}`}
                 style={{
                   border: `1px solid ${isEmailConfirmed ? 'var(--green)' : 'var(--red)'}`,
                 }}
-                className={`${styles.profile_form_label} ${email.length ? styles.profile_form_label_active : ''} ${isEmailConfirmed ? styles.profile_form_label_confirmed : styles.profile_form_label_not_confirmed}`}
               >
                 <p>E-mail</p>
                 <input
-                  value={email}
+                  name={'email'}
                   onChange={e => {
                     const value = e.target.value
+
                     setEmail(value)
-                    initialData.email != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
+                    userData?.email != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
                   }}
-                  name={'email'}
                   type={'email'}
+                  value={email}
                 />
                 <span
                   style={{
@@ -310,74 +343,74 @@ export const Profile_profile = () => {
             </div>
             <div className={styles.profile_form_email_label}>
               <label
+                className={`${styles.profile_form_label} ${email.length ? styles.profile_form_label_active : ''} ${isPhoneConfirmed ? styles.profile_form_label_confirmed : styles.profile_form_label_not_confirmed}`}
                 style={{
-                  border: `1px solid ${isPhoneComfirmed ? 'var(--green)' : 'var(--red)'}`,
+                  border: `1px solid ${isPhoneConfirmed ? 'var(--green)' : 'var(--red)'}`,
                 }}
-                className={`${styles.profile_form_label} ${email.length ? styles.profile_form_label_active : ''} ${isPhoneComfirmed ? styles.profile_form_label_confirmed : styles.profile_form_label_not_confirmed}`}
               >
                 <p>Номер телефона</p>
                 <PatternFormat
-                  placeholder=" "
-                  value={phone}
-                  onChange={(e: any) => {
-                    const value = e.target.value
-                    setPhone(value)
-                    initialData.phone != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
-                  }}
                   format={'+7 (###) ### ##-##'}
                   mask={'X'}
                   name={'phone'}
+                  onChange={(e: any) => {
+                    const value = e.target.value
+
+                    setPhone(value)
+                    userData?.phone != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
+                  }}
+                  placeholder={' '}
+                  value={phone}
                 />{' '}
                 <span
                   style={{
-                    border: `2px solid ${isPhoneComfirmed ? 'var(--green)' : 'var(--red)'}`,
+                    border: `2px solid ${isPhoneConfirmed ? 'var(--green)' : 'var(--red)'}`,
                     borderRadius: '50%',
-                    color: `${isPhoneComfirmed ? 'var(--green)' : 'var(--red)'}`,
+                    color: `${isPhoneConfirmed ? 'var(--green)' : 'var(--red)'}`,
                   }}
                 >
-                  {isPhoneComfirmed ? <FaCheck /> : <IoClose />}
+                  {isPhoneConfirmed ? <FaCheck /> : <IoClose />}
                 </span>
               </label>
               <p
                 onClick={getCode}
                 style={{
-                  color: isPhoneComfirmed ? 'var(--green)' : 'var(--red)',
-                  textDecoration: isPhoneComfirmed ? '' : 'underline',
+                  color: isPhoneConfirmed ? 'var(--green)' : 'var(--red)',
+                  textDecoration: isPhoneConfirmed ? '' : 'underline',
                 }}
               >
-                {isPhoneComfirmed ? 'Подтвержден' : 'Подтвердить'}
+                {isPhoneConfirmed ? 'Подтвержден' : 'Подтвердить'}
               </p>
             </div>
             <label className={styles.profile_form_confirmLabel}>
               <input
                 checked={notifications}
+                className={'checkbox'}
                 onChange={(e: any) => {
                   const value = e.target.checked
+
                   setNotifications(value)
-                  initialData.notifications != value
+                  userData?.notifications != value
                     ? setIsProfileEdited(true)
                     : setIsProfileEdited(false)
                 }}
-                className="checkbox"
                 type={'checkbox'}
               />
-              <p style={{ width: '100%' }} className="p2">
+              <p className={'p2'} style={{ width: '100%' }}>
                 Получать информацию о скидках, новинках и выгодных предложениях
               </p>
             </label>
 
             {isProfileEdited && (
               <div className={styles.profile_form_edited}>
-                <button className="button" type="button" onClick={handleSubmit}>
+                <button className={'button'} onClick={handleSubmit} type={'button'}>
                   Сохранить изменения
                 </button>
                 <button
-                  className="button"
-                  type="button"
-                  style={{ background: 'none', color: 'var(--dark-gray)' }}
+                  className={'button'}
                   onClick={cancelEditing}
+                  style={{ background: 'none', color: 'var(--dark-gray)' }}
+                  type={'button'}
                 >
                   Отмена
                 </button>
@@ -387,14 +420,14 @@ export const Profile_profile = () => {
         </div>
       </div>
       <div className={styles.profile_addresses}>
-        {adresses && adresses[defaultAddress] && (
+        {addresses && addresses[0] && (
           <>
-            <h5 className="h5">Адрес по умолчанию</h5>
+            <h5 className={'h5'}>Адрес по умолчанию</h5>
             <div className={styles.profile_addresses_item}>
-              <button onClick={() => setDeletingAddress({ index: defaultAddress })}>
+              <button onClick={() => setDeletingAddress({ index: defaultAddress?.id })}>
                 <IoClose />
               </button>
-              <p className="p2">{adresses[defaultAddress]?.title}</p>
+              <p className={'p2'}>{addresses[0]?.fullAddress}</p>
               <button onClick={() => setEditingAddress({ index: defaultAddress })}>
                 <FaPen />
               </button>
@@ -402,34 +435,34 @@ export const Profile_profile = () => {
           </>
         )}
 
-        <h5 className="h5">Список всех адресов</h5>
+        <h5 className={'h5'}>Список всех адресов</h5>
 
-        {adresses &&
-          adresses.map((adress, index) => (
+        {addresses &&
+          addresses.map((adress, index) => (
             <div className={styles.profile_addresses_item}>
               <button onClick={() => setDeletingAddress({ index })}>
                 <IoClose />
               </button>
-              <p className="p2">{adress?.title}</p>
+              <p className={'p2'}>{adress?.fullAddress}</p>
               <button onClick={() => setEditingAddress({ index })}>
                 <FaPen />
               </button>
             </div>
           ))}
 
-        <button className="p2"> + Добавить адрес доставки</button>
+        <button className={'p2'}> + Добавить адрес доставки</button>
       </div>
       <div
         className={`${styles.profile_modal} ${styles.profile_modal_deleteAddress}`}
         style={{ display: deletingAddress ? 'flex' : 'none' }}
       >
         <div className={styles.profile_modal_body}>
-          <h3 className="h3">Удаление адреса</h3>
-          <p className="p1">
+          <h3 className={'h3'}>Удаление адреса</h3>
+          <p className={'p1'}>
             Вы точно хотите удалить выбранный адрес? Отменить действие будет невозможно
           </p>
           <button
-            className="button"
+            className={'button'}
             onClick={() => {
               typeof deletingAddress === 'object' &&
                 deletingAddress !== null &&
@@ -451,11 +484,11 @@ export const Profile_profile = () => {
         style={{ display: emailConfirm ? 'flex' : 'none' }}
       >
         <div className={styles.profile_modal_body}>
-          <h3 className="h3">Подтверждение email</h3>
-          <p className="p1">
+          <h3 className={'h3'}>Подтверждение email</h3>
+          <p className={'p1'}>
             Мы отправили письмо с подтверждением на {email}. Перейдите по ссылке в письме.
           </p>
-          <button className="button" onClick={() => setEmailConfirm(false)}>
+          <button className={'button'} onClick={() => setEmailConfirm(false)}>
             Хорошо
           </button>
           <button
@@ -471,26 +504,26 @@ export const Profile_profile = () => {
         style={{ display: phoneConfirm ? 'flex' : 'none' }}
       >
         <div className={styles.profile_modal_body}>
-          <h3 className="h3">Подтверждение телефона</h3>
-          <p className="p1">
+          <h3 className={'h3'}>Подтверждение телефона</h3>
+          <p className={'p1'}>
             На ваш номер придёт сообщение с кодом. <br />
             <button onClick={() => timer == 0 && getCode()}>
               Отправить повторно {timer ? `через ${timer}` : ''}
             </button>
           </p>
           <label>
-            <p className="p2" style={{ color: 'var(--service)' }}>
+            <p className={'p2'} style={{ color: 'var(--service)' }}>
               Введите смс код
             </p>
             <PatternFormat
-              value={code}
-              onChange={(e: any) => setCode(e.target.value)}
-              format="#####"
-              mask={'_'}
               allowEmptyFormatting
+              format={'#####'}
+              mask={'_'}
+              onChange={(e: any) => setCode(e.target.value)}
+              value={code}
             />
           </label>
-          <button className="button" onClick={handleConfirmPhone}>
+          <button className={'button'} onClick={handleConfirmPhone}>
             Отправить
           </button>
           <button
@@ -506,30 +539,30 @@ export const Profile_profile = () => {
         style={{ display: editingAddress ? 'flex' : 'none' }}
       >
         <div className={styles.profile_modal_body}>
-          <h3 className="h3">Адрес доставки</h3>
+          <h3 className={'h3'}>Адрес доставки</h3>
           {editingAddress !== false && (
-            <p className="p1">{adresses[editingAddress.index]?.title}</p>
+            <p className={'p1'}>{addresses[editingAddress.index]?.fullAddress}</p>
           )}
 
           <label
-            style={{ cursor: 'pointer' }}
             onClick={() => editingAddress !== false && editDefaultAddress(editingAddress.index)}
+            style={{ cursor: 'pointer' }}
           >
-            <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <p style={{ alignItems: 'center', display: 'flex', gap: '10px' }}>
               <input
                 checked={editingAddress !== false && defaultAddress == editingAddress.index}
-                type="checkbox"
-                className="checkbox"
+                className={'checkbox'}
                 style={{ border: 'none' }}
+                type={'checkbox'}
               />
               Адрес по умолчанию
             </p>
           </label>
           <section>
-            <button className="button" onClick={() => setEditingAddress(false)}>
+            <button className={'button'} onClick={() => setEditingAddress(false)}>
               Сохранить
             </button>
-            <button style={{ background: 'var(--dark)', marginLeft: '20px' }} className="button">
+            <button className={'button'} style={{ background: 'var(--dark)', marginLeft: '20px' }}>
               Изменить адрес
             </button>
           </section>
