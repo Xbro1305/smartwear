@@ -4,11 +4,12 @@ import styles from './Profile.module.scss'
 import { FaCube, FaHeart, FaTag, FaUser } from 'react-icons/fa'
 // import itemImg from '../../../assets/images/image 139.png'
 import { Profile_profile } from '../Components/Profile'
+import { Orders } from '../Components/Orders'
 //import { RegisteredDto } from "@/entities/auth/auth.types";
 // import { useNavigate } from 'react-router-dom'
 
 export const ProfilePage = () => {
-  const [page, setPage] = useState('profile')
+  const [page, setPage] = useState('orders')
 
   return (
     <div className={styles.profile_page}>
@@ -42,7 +43,10 @@ export const ProfilePage = () => {
           Персональные предложения
         </button>
       </div>
-      <div className={styles.profile_page_right}>{page === 'profile' && <Profile_profile />}</div>
+      <div className={styles.profile_page_right}>
+        {page === 'profile' && <Profile_profile />}
+        {page === 'orders' && <Orders />}
+      </div>
     </div>
   )
 }
