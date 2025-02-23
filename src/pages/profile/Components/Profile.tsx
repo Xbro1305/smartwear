@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { FaCheck, FaPen } from 'react-icons/fa'
 import { IoClose } from 'react-icons/io5'
 import axios from 'axios'
+import PvzMapWidget from '@/pages/pvz/PvzMapWidget'
 
 interface InitialData {
   surname?: string
@@ -661,6 +662,8 @@ export const Profile_profile = () => {
             <IoClose />
           </button>
         </div>
+
+        <PvzMapWidget onSelect={pvz => console.log(pvz)} />
       </div>
     </>
   )
