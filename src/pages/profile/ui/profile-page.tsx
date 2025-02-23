@@ -9,7 +9,7 @@ import { Orders } from '../Components/Orders'
 // import { useNavigate } from 'react-router-dom'
 
 export const ProfilePage = () => {
-  const [page, setPage] = useState('orders')
+  const [page, setPage] = useState('profile')
 
   return (
     <div className={styles.profile_page}>
