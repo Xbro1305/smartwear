@@ -518,7 +518,7 @@ export const Profile_profile = () => {
               <button onClick={() => setDeletingAddress(defaultAddress)}>
                 <IoClose />
               </button>
-              <p className="p2">{defaultAddress?.title}</p>
+              <p className="p2">{defaultAddress?.fullAddress}</p>
               <button onClick={() => setEditingAddress(defaultAddress)}>
                 <FaPen />
               </button>
@@ -534,7 +534,7 @@ export const Profile_profile = () => {
               <button onClick={() => setDeletingAddress(adress)}>
                 <IoClose />
               </button>
-              <p className="p2">{adress?.title}</p>
+              <p className="p2">{adress?.fullAddress}</p>
               <button onClick={() => setEditingAddress(adress)}>
                 <FaPen />
               </button>
