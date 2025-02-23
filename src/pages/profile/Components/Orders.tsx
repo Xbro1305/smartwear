@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './Components.module.scss'
 import { NumericFormat } from 'react-number-format'
 import { IoEnter } from 'react-icons/io5'
@@ -21,6 +21,12 @@ export const Orders = () => {
   const [orders, setOrders] = useState<order[]>(data)
   const [ordersCount, setOrdersCount] = useState(20)
 
+  useEffect(() => {
+    setOrdersCount(20)
+    setOrders(data)
+  }, [])
+
+  
   const getMoreOrders = () => {}
 
   return (
