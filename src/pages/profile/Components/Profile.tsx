@@ -120,9 +120,9 @@ export const Profile_profile = () => {
         'Content-Type': 'application/json',
       },
       data: {
-        surname,
+        surName: surname,
         name,
-        middlename,
+        middleName: middlename,
         birthday,
         email,
         phone,
@@ -648,11 +648,11 @@ export const Profile_profile = () => {
 
           <label
             style={{ cursor: 'pointer' }}
-            onClick={() => editingAddress !== false && editDefaultAddress(editingAddress.index)}
+            onClick={() => editingAddress !== false && editDefaultAddress(editingAddress)}
           >
             <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <input
-                checked={editingAddress !== false && defaultAddress == editingAddress.index}
+                checked={editingAddress !== false && defaultAddress == editingAddress}
                 type="checkbox"
                 className="checkbox"
                 style={{ border: 'none' }}
