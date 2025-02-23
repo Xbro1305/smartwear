@@ -99,7 +99,7 @@ export const Profile_profile = () => {
   const editDefaultAddress = (adress: any) => {
     setDefaultAddress(adress)
 
-    axios(`${baseUrl}/api/users/set-default-address/${adress.id}`, {
+    axios(`${baseUrl}/users/set-default-address/${adress.id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export const Profile_profile = () => {
   }
 
   const handleSubmit = () => {
-    axios(`${baseUrl}/api/users/update/${initialData.id}`, {
+    axios(`${baseUrl}/users/update/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -138,7 +138,7 @@ export const Profile_profile = () => {
   const handleConfirmEmail = () => {
     !isEmailConfirmed && setIsEmailConfirmed(!isEmailConfirmed)
     setEmailConfirm(true)
-    axios(`${baseUrl}/api/users/confirm-email-request/${initialData.id}`, {
+    axios(`${baseUrl}/users/confirm-email-request/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -150,7 +150,7 @@ export const Profile_profile = () => {
   }
 
   const getCode = () => {
-    axios(`${baseUrl}/api/users/confirm-phone-change/${initialData.id}`, {
+    axios(`${baseUrl}/users/confirm-phone-change/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -178,7 +178,7 @@ export const Profile_profile = () => {
   const handleConfirmPhone = () => {
     !isPhoneComfirmed && setIsPhoneConfirmed(!isPhoneComfirmed)
 
-    axios(`${baseUrl}/api/users/confirm-phone-change/${initialData.id}`, {
+    axios(`${baseUrl}/users/confirm-phone-change/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -196,7 +196,7 @@ export const Profile_profile = () => {
     // setAddresses(prev => prev.filter((_, i) => i !== index))
     // setDeletingAddress(false)
 
-    axios(`${baseUrl}/api/users/remove-address/${adress.id}`, {
+    axios(`${baseUrl}/users/remove-address/${adress.id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -541,7 +541,20 @@ export const Profile_profile = () => {
             </div>
           ))}
 
-        <button className="p2"> + Добавить адрес доставки</button>
+        <PvzMapWidget
+          onSelect={pvz => {
+            axios(`${baseUrl}/users/add-address/${initialData.id}`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              data: pvz,
+            })
+              .then(res => console.log(res))
+              .catch(err => console.log(err))
+          }}
+        />
       </div>
       <div
         className={`${styles.profile_modal} ${styles.profile_modal_deleteAddress}`}
@@ -662,8 +675,6 @@ export const Profile_profile = () => {
             <IoClose />
           </button>
         </div>
-
-        <PvzMapWidget onSelect={pvz => console.log(pvz)} />
       </div>
     </>
   )

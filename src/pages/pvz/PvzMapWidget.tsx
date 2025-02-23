@@ -41,7 +41,7 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>Выбрать ПВЗ</Button>
+      <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
 
       <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={'Выберите пункт выдачи'}>
         <input
@@ -113,10 +113,7 @@ interface ButtonProps {
 
 function Button({ children, onClick }: ButtonProps) {
   return (
-    <button
-      className={'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition'}
-      onClick={onClick}
-    >
+    <button className={'p addAddressButton'} onClick={onClick}>
       {children}
     </button>
   )
