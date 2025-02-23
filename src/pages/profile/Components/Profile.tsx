@@ -17,6 +17,7 @@ interface InitialData {
   gender?: string
   city?: string
   isSubscribed?: boolean
+  id?: number
 }
 
 export const Profile_profile = () => {
@@ -37,34 +38,34 @@ export const Profile_profile = () => {
   const [isEmailConfirmed, setIsEmailConfirmed] = useState<any>('')
   const [isPhoneComfirmed, setIsPhoneConfirmed] = useState<any>('')
   const [isSubscribed, setIsSubscribed] = useState<any>('')
-  const [adresses, setAddresses] = useState<{ title: string }[]>([])
-  const [defaultAddress, setDefaultAddress] = useState<number>(0)
-  const [deletingAddress, setDeletingAddress] = useState<{ index: number } | boolean>(false)
+  const [adresses, setAddresses] = useState<any[]>([])
+  const [defaultAddress, setDefaultAddress] = useState<any>()
+  const [deletingAddress, setDeletingAddress] = useState<any>(false)
   const [emailConfirm, setEmailConfirm] = useState<boolean>(false)
   const [phoneConfirm, setPhoneConfirm] = useState<boolean>(false)
   const [timer, setTimer] = useState<number>(30)
   const [code, setCode] = useState<string>()
-  const [editingAddress, setEditingAddress] = useState<{ index: number } | false>(false)
+  const [editingAddress, setEditingAddress] = useState<any>(false)
   const [initialData, setInitialData] = useState<InitialData>({})
 
   const baseUrl = 'https://test.maxiscomfort.ru/api'
   const token = getByKey('token')
 
   //  {
-  //   surname: getByKey('usersurname'),
-  //   name: getByKey('username'),
-  //   middlename: getByKey('usermiddlename'),
-  //   birthday: getByKey('userbirthday'),
-  //   email: getByKey('useremail'),
-  //   phone: getByKey('userphone'),
-  //   gender: getByKey('usergender'),
-  //   city: getByKey('usercity'),
-  //   isSubscribed: getByKey('userisSubscribed'),
+  //   surname,
+  //   name,
+  //   middlename,
+  //   birthday,
+  //   email,
+  //   phone,
+  //   gender,
+  //   city,
+  //   isSubscribed,
   //   isEmailConfirmed,
   //   isPhoneComfirmed,
   // }
 
-  useEffect(() => {
+  const refresh = () => {
     axios(`${baseUrl}/users/me`, {
       method: 'GET',
       headers: {
@@ -84,46 +85,127 @@ export const Profile_profile = () => {
         setCity(response.city || '')
         setIsEmailConfirmed(response.isEmailConfirmed || '')
         setIsPhoneConfirmed(response.isPhoneConfirmed || '')
-        setAddresses(response.adresses || [])
+        setAddresses(response.addresses || [])
         setInitialData(response)
+        const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
+        setDefaultAddress(defaultAddr)
       })
       .catch(err => console.log(err))
-  }, [])
-
-  const editDefaultAddress = (index: number) => {
-    setDefaultAddress(index)
   }
 
-  const handleSubmit = () => {}
+  useEffect(refresh, [])
+
+  const editDefaultAddress = (adress: any) => {
+    setDefaultAddress(adress)
+
+    axios(`${baseUrl}/api/users/set-default-address/${adress.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(() => refresh())
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  const handleSubmit = () => {
+    axios(`${baseUrl}/api/users/update/${initialData.id}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        surname,
+        name,
+        middlename,
+        birthday,
+        email,
+        phone,
+        gender,
+        city,
+        isSubscribed,
+      },
+    })
+      .then(() => refresh())
+      .catch(err => console.log(err))
+  }
 
   const handleConfirmEmail = () => {
     !isEmailConfirmed && setIsEmailConfirmed(!isEmailConfirmed)
     setEmailConfirm(true)
+    axios(`${baseUrl}/api/users/confirm-email-request/${initialData.id}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => refresh())
+      .catch(err => console.log(err))
   }
 
   const getCode = () => {
-    setTimer(30)
+    axios(`${baseUrl}/api/users/confirm-phone-change/${initialData.id}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        setTimer(30)
 
-    setPhoneConfirm(true)
+        setPhoneConfirm(true)
 
-    const interval = setInterval(() => {
-      setTimer(prev => prev - 1)
-    }, 1000)
+        const interval = setInterval(() => {
+          setTimer(prev => prev - 1)
+        }, 1000)
 
-    setTimeout(() => {
-      clearInterval(interval)
-    }, 30000)
+        setTimeout(() => {
+          clearInterval(interval)
+        }, 30000)
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   const handleConfirmPhone = () => {
     !isPhoneComfirmed && setIsPhoneConfirmed(!isPhoneComfirmed)
 
-    //code = введенный код в модалке
+    axios(`${baseUrl}/api/users/confirm-phone-change/${initialData.id}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        code,
+      },
+    })
+      .then(() => refresh())
+      .catch(err => console.log(err))
   }
 
-  const deleteAddress = (index: number) => {
-    setAddresses(prev => prev.filter((_, i) => i !== index))
-    setDeletingAddress(false)
+  const deleteAddress = (adress: any) => {
+    // setAddresses(prev => prev.filter((_, i) => i !== index))
+    // setDeletingAddress(false)
+
+    axios(`${baseUrl}/api/users/remove-address/${adress.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(() => refresh())
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   const cancelEditing = () => {
@@ -428,15 +510,15 @@ export const Profile_profile = () => {
         </div>
       </div>
       <div className={styles.profile_addresses}>
-        {adresses && adresses[defaultAddress] && (
+        {adresses && defaultAddress && (
           <>
             <h5 className="h5">Адрес по умолчанию</h5>
             <div className={styles.profile_addresses_item}>
-              <button onClick={() => setDeletingAddress({ index: defaultAddress })}>
+              <button onClick={() => setDeletingAddress(defaultAddress)}>
                 <IoClose />
               </button>
-              <p className="p2">{adresses[defaultAddress]?.title}</p>
-              <button onClick={() => setEditingAddress({ index: defaultAddress })}>
+              <p className="p2">{defaultAddress?.title}</p>
+              <button onClick={() => setEditingAddress(defaultAddress)}>
                 <FaPen />
               </button>
             </div>
@@ -447,12 +529,12 @@ export const Profile_profile = () => {
 
         {adresses &&
           adresses.map((adress, index) => (
-            <div className={styles.profile_addresses_item}>
-              <button onClick={() => setDeletingAddress({ index })}>
+            <div key={index} className={styles.profile_addresses_item}>
+              <button onClick={() => setDeletingAddress(adress)}>
                 <IoClose />
               </button>
               <p className="p2">{adress?.title}</p>
-              <button onClick={() => setEditingAddress({ index })}>
+              <button onClick={() => setEditingAddress(adress)}>
                 <FaPen />
               </button>
             </div>
@@ -472,9 +554,7 @@ export const Profile_profile = () => {
           <button
             className="button"
             onClick={() => {
-              typeof deletingAddress === 'object' &&
-                deletingAddress !== null &&
-                deleteAddress(deletingAddress.index)
+              deletingAddress !== null && deleteAddress(deletingAddress)
             }}
           >
             Удалить
