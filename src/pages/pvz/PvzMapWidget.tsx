@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import axios from 'axios'
 import 'leaflet/dist/leaflet.css'
@@ -19,6 +19,8 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
+
+  const pvzRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
   useEffect(() => {
     getLocation()
@@ -97,19 +99,35 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
           value={city}
         />
 
-        <div className={'flex gap-4'}>
+        <div className={'flex gap-4 map-cont'}>
           <div className={'w-1/2 max-h-[400px] overflow-auto border p-2 rounded-lg'}>
             {pvzList.length === 0 ? (
               <p>Загрузка...</p>
             ) : (
               pvzList.map(pvz => (
                 <div
-                  className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
+                  ref={el => (pvzRefs.current[pvz.code] = el)}
+                  className={`p-2 cursor-pointer rounded-md ${
+                    selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''
+                  }`}
                   key={pvz.code}
                   onClick={() => setSelectedPvz(pvz)}
                 >
                   <p className={'font-semibold'}>{pvz.location.address}</p>
                   <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
+
+                  <Popup>
+                    <p className={'font-semibold'}>{pvz.location.address}</p>
+                    <p className={'text-sm'}>{pvz.work_time}</p>
+                    <Button
+                      onClick={() => {
+                        onSelect(pvz)
+                        setIsOpen(false)
+                      }}
+                    >
+                      Выбрать
+                    </Button>
+                  </Popup>
                 </div>
               ))
             )}
@@ -121,7 +139,15 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
               <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
               {pvzList.map(pvz => (
                 <Marker
-                  eventHandlers={{ click: () => setSelectedPvz(pvz) }}
+                  eventHandlers={{
+                    click: () => {
+                      setSelectedPvz(pvz)
+                      pvzRefs.current[pvz.code]?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                      })
+                    },
+                  }}
                   key={pvz.code}
                   position={[pvz.location.latitude, pvz.location.longitude]}
                 >
