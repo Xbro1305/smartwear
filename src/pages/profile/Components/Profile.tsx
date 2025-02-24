@@ -130,16 +130,17 @@ export const Profile_profile = () => {
   }
 
   const handleConfirmEmail = () => {
-    !isEmailConfirmed && setIsEmailConfirmed(!isEmailConfirmed)
-    setEmailConfirm(true)
-    axios(`${baseUrl}/users/confirm-email-request/${initialData.id}`, {
+    axios(`${baseUrl}/users/confirm-email${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     })
-      .then(() => refresh())
+      .then(() => {
+        refresh()
+        setEmailConfirm(true)
+      })
       .catch(err => console.log(err))
   }
 
@@ -637,7 +638,7 @@ export const Profile_profile = () => {
         <div className={styles.profile_modal_body}>
           <h3 className="h3">Адрес доставки</h3>
           {editingAddress !== false && (
-            <p className="p1">{adresses[editingAddress.index]?.title}</p>
+            <p className="p1">{adresses[editingAddress.index]?.fullAddress}</p>
           )}
 
           <label
@@ -646,7 +647,11 @@ export const Profile_profile = () => {
           >
             <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <input
-                checked={editingAddress !== false && defaultAddress == editingAddress}
+                checked={
+                  editingAddress !== false &&
+                  defaultAddress.fullAddress == editingAddress.fullAddress
+                }
+                onChange={() => editDefaultAddress(editingAddress.fullAddress)}
                 type="checkbox"
                 className="checkbox"
                 style={{ border: 'none' }}

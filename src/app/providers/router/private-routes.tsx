@@ -9,7 +9,10 @@ const { PROFILE } = ROUTER_PATHS
 
 export const privateRoutes: RouteObject[] = [
   {
-    children: [{ element: <ProfilePage />, path: PROFILE }],
+    children: [
+      { element: <ProfilePage />, path: PROFILE },
+      { element: <div></div>, path: '/confirm-email' },
+    ],
     element: <AuthGuard />,
   },
 ]

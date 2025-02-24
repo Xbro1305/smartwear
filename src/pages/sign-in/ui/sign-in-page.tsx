@@ -86,7 +86,7 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
 
-        navigate(from, { replace: true })
+        navigate(`/${from}`, { replace: true })
         window.location.reload()
       })
       .catch(error => {
