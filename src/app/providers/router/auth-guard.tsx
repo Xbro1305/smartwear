@@ -18,7 +18,7 @@ export const AuthGuard = () => {
     console.error('Ошибка при загрузке данных пользователя:', error)
 
     const location = useLocation()
-    const from = location?.state?.from || ROUTER_PATHS.PROFILE
+    // const from = location?.state?.from || ROUTER_PATHS.PROFILE
 
     return (
       <Navigate to={`${ROUTER_PATHS.SIGN_IN}?redirectUrl=${window.location.href.split('/')[3]}`} />
@@ -33,7 +33,7 @@ export const AuthGuard = () => {
   }
 
   const location = useLocation()
-  const from = location?.state?.from || ROUTER_PATHS.PROFILE
+  // const from = location?.state?.from || ROUTER_PATHS.PROFILE
 
   return isAuthenticated ? (
     <Outlet />
