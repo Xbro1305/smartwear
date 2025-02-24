@@ -20,7 +20,7 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
-  const cityTimeout = useRef<NodeJS.Timeout | null>(null)
+  const markerRefs = useRef<Map<string, L.Marker>>(new Map())
 
   useEffect(() => {
     getLocation()
@@ -32,7 +32,13 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
       return
     }
 
-    navigator.geolocation.getCurrentPosition(showPosition, showError)
+    const permission = await navigator.permissions.query({ name: 'geolocation' })
+
+    if (permission.state === 'granted' || permission.state === 'prompt') {
+      navigator.geolocation.getCurrentPosition(showPosition, showError)
+    } else {
+      alert('Вы отклонили доступ к геолокации. Разрешите его в настройках браузера.')
+    }
   }
 
   async function showPosition(position: GeolocationPosition) {
@@ -57,9 +63,7 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   useEffect(() => {
     if (!isOpen || !city) return
 
-    if (cityTimeout.current) clearTimeout(cityTimeout.current)
-
-    cityTimeout.current = setTimeout(() => {
+    const delay = setTimeout(() => {
       axios
         .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
         .then(res => {
@@ -70,13 +74,20 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
         })
         .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
     }, 2000)
+
+    return () => clearTimeout(delay)
   }, [isOpen, city])
 
   useEffect(() => {
-    if (selectedPvz) {
-      setMapCenter([selectedPvz.location.latitude, selectedPvz.location.longitude])
+    if (selectedPvz && listRef.current) {
       const selectedElement = document.getElementById(`pvz-${selectedPvz.code}`)
       selectedElement?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+      // Открытие попапа на карте
+      const marker = markerRefs.current.get(selectedPvz.code)
+      if (marker) {
+        marker.openPopup()
+      }
     }
   }, [selectedPvz])
 
@@ -103,7 +114,10 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
                   id={`pvz-${pvz.code}`}
                   className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
                   key={pvz.code}
-                  onClick={() => setSelectedPvz(pvz)}
+                  onClick={() => {
+                    setSelectedPvz(pvz)
+                    setMapCenter([pvz.location.latitude, pvz.location.longitude])
+                  }}
                 >
                   <p className={'font-semibold'}>{pvz.location.address}</p>
                   <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
@@ -121,6 +135,9 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
                   key={`marker-${pvz.code}`}
                   position={[pvz.location.latitude, pvz.location.longitude]}
                   eventHandlers={{ click: () => setSelectedPvz(pvz) }}
+                  ref={marker => {
+                    if (marker) markerRefs.current.set(pvz.code, marker)
+                  }}
                 >
                   <Popup>
                     <p className={'font-semibold'}>{pvz.location.address}</p>

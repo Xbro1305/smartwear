@@ -546,7 +546,7 @@ export const Profile_profile = () => {
               },
               data: { fullAddress: pvz.location?.address_full },
             })
-              .then(res => console.log(res))
+              .then(() => refresh())
               .catch(err => console.log(err))
           }}
         />
