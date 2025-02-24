@@ -63,7 +63,7 @@ export const Profile_profile = () => {
         setSurname(response.surName || '')
         setName(response.name || '')
         setMiddlename(response.middleName || '')
-        setBirthday(response.birthday || '')
+        setBirthday(response.birthday.split("T")[0] || '')
         setEmail(response.email || '')
         setPhone(response.phone || '')
         setGender(response.gender || '')
