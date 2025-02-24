@@ -20,6 +20,7 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
+  const cityTimeout = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     getLocation()
@@ -31,13 +32,7 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
       return
     }
 
-    const permission = await navigator.permissions.query({ name: 'geolocation' })
-
-    if (permission.state === 'granted' || permission.state === 'prompt') {
-      navigator.geolocation.getCurrentPosition(showPosition, showError)
-    } else {
-      alert('Вы отклонили доступ к геолокации. Разрешите его в настройках браузера.')
-    }
+    navigator.geolocation.getCurrentPosition(showPosition, showError)
   }
 
   async function showPosition(position: GeolocationPosition) {
@@ -62,19 +57,24 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   useEffect(() => {
     if (!isOpen || !city) return
 
-    axios
-      .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
-      .then(res => {
-        setPvzList(res.data)
-        if (res.data.length > 0) {
-          setMapCenter([res.data[0].location.latitude, res.data[0].location.longitude])
-        }
-      })
-      .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
+    if (cityTimeout.current) clearTimeout(cityTimeout.current)
+
+    cityTimeout.current = setTimeout(() => {
+      axios
+        .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
+        .then(res => {
+          setPvzList(res.data)
+          if (res.data.length > 0) {
+            setMapCenter([res.data[0].location.latitude, res.data[0].location.longitude])
+          }
+        })
+        .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
+    }, 2000)
   }, [isOpen, city])
 
   useEffect(() => {
-    if (selectedPvz && listRef.current) {
+    if (selectedPvz) {
+      setMapCenter([selectedPvz.location.latitude, selectedPvz.location.longitude])
       const selectedElement = document.getElementById(`pvz-${selectedPvz.code}`)
       selectedElement?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
