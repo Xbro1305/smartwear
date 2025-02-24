@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
-
 import axios from 'axios'
-
 import 'leaflet/dist/leaflet.css'
 
 function RecenterMap({ center }: { center: [number, number] }) {
@@ -20,18 +18,65 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   const [pvzList, setPvzList] = useState<Pvz[]>([])
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  // Изначально центр по Барнаулу
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
 
   useEffect(() => {
-    if (!isOpen || !city) {
+    getLocation()
+  }, [])
+
+  async function getLocation() {
+    if (!navigator.geolocation) {
+      alert('Геолокация не поддерживается вашим браузером.')
       return
     }
+
+    const permission = await navigator.permissions.query({ name: 'geolocation' })
+
+    if (permission.state === 'granted') {
+      navigator.geolocation.getCurrentPosition(showPosition, showError)
+    } else if (permission.state === 'prompt') {
+      navigator.geolocation.getCurrentPosition(showPosition, showError)
+    } else if (permission.state === 'denied') {
+      requestLocationPermission()
+    }
+  }
+
+  async function requestLocationPermission() {
+    alert('Вы отклонили доступ к геолокации. Чтобы включить, разрешите её в настройках браузера.')
+  }
+
+  async function showPosition(position: GeolocationPosition) {
+    const { latitude, longitude } = position.coords
+    setMapCenter([latitude, longitude])
+
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ru`
+
+    try {
+      const response = await fetch(url)
+      const data = await response.json()
+      const cityName =
+        data.address.city || data.address.town || data.address.village || 'Город не найден'
+      setCity(cityName)
+    } catch (error) {
+      console.error('Ошибка получения города:', error)
+    }
+  }
+
+  function showError(error: GeolocationPositionError) {
+    if (error.code === error.PERMISSION_DENIED) {
+      requestLocationPermission()
+    } else {
+      alert('Не удалось получить местоположение.')
+    }
+  }
+
+  useEffect(() => {
+    if (!isOpen || !city) return
+
     axios
       .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
       .then(res => {
         setPvzList(res.data)
-        // Если массив не пустой, устанавливаем центр по широте и долготе первого элемента
         if (res.data.length > 0) {
           setMapCenter([res.data[0].location.latitude, res.data[0].location.longitude])
         }
@@ -59,9 +104,7 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
             ) : (
               pvzList.map(pvz => (
                 <div
-                  className={`p-2 cursor-pointer rounded-md ${
-                    selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''
-                  }`}
+                  className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
                   key={pvz.code}
                   onClick={() => setSelectedPvz(pvz)}
                 >
@@ -74,7 +117,6 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
 
           <div className={'w-1/2 h-[400px] rounded-lg overflow-hidden border'}>
             <MapContainer center={mapCenter} className={'w-full h-full'} zoom={12}>
-              {/* Компонент, который меняет центр карты */}
               <RecenterMap center={mapCenter} />
               <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
               {pvzList.map(pvz => (
@@ -105,7 +147,6 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   )
 }
 
-// Типизация пропсов для компонента Button
 interface ButtonProps {
   children: React.ReactNode
   onClick: () => void
@@ -119,7 +160,6 @@ function Button({ children, onClick }: ButtonProps) {
   )
 }
 
-// Типизация пропсов для компонента Dialog
 interface DialogProps {
   children: React.ReactNode
   onClose: () => void
@@ -128,12 +168,13 @@ interface DialogProps {
 }
 
 function Dialog({ children, onClose, open, title }: DialogProps) {
-  if (!open) {
-    return null
-  }
+  if (!open) return null
 
   return (
-    <div className={'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'}>
+    <div
+      style={{ zIndex: '4' }}
+      className={'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'}
+    >
       <div className={'bg-white rounded-lg p-4 max-w-lg w-full'}>
         <h2 className={'text-lg font-semibold'}>{title}</h2>
         <div className={'mt-4'}>{children}</div>
@@ -150,6 +191,7 @@ function Dialog({ children, onClose, open, title }: DialogProps) {
   )
 }
 
+// Типизация интерфейсов
 interface Phone {
   number: string
 }
@@ -224,7 +266,6 @@ export interface Pvz {
   work_time_list: WorkTime[]
 }
 
-// Типизация пропсов для компонента PvzMapWidget
 interface PvzMapWidgetProps {
   onSelect: (pvz: Pvz) => void
 }

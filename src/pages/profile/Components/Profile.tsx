@@ -48,23 +48,8 @@ export const Profile_profile = () => {
   const [code, setCode] = useState<string>()
   const [editingAddress, setEditingAddress] = useState<any>(false)
   const [initialData, setInitialData] = useState<InitialData>({})
-
   const baseUrl = 'https://test.maxiscomfort.ru/api'
   const token = getByKey('token')
-
-  //  {
-  //   surname,
-  //   name,
-  //   middlename,
-  //   birthday,
-  //   email,
-  //   phone,
-  //   gender,
-  //   city,
-  //   isSubscribed,
-  //   isEmailConfirmed,
-  //   isPhoneComfirmed,
-  // }
 
   const refresh = () => {
     axios(`${baseUrl}/users/me`, {
@@ -113,23 +98,29 @@ export const Profile_profile = () => {
   }
 
   const handleSubmit = () => {
+    const data = {
+      surName: surname,
+      name,
+      middleName: middlename,
+      birthday,
+      email,
+      phone,
+      gender,
+      city,
+      isSubscribed,
+    }
+
     axios(`${baseUrl}/users/update/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      data: {
-        surName: surname,
-        name,
-        middleName: middlename,
-        birthday,
-        email,
-        phone,
-        gender,
-        city,
-        isSubscribed,
-      },
+      data: Object.fromEntries(
+        Object.entries(data).filter(
+          ([_, value]) => value !== undefined && value !== null && value !== ''
+        )
+      ),
     })
       .then(() => refresh())
       .catch(err => console.log(err))
@@ -549,7 +540,7 @@ export const Profile_profile = () => {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
               },
-              data: pvz,
+              data: { fullAdress: pvz.location?.address_full },
             })
               .then(res => console.log(res))
               .catch(err => console.log(err))
