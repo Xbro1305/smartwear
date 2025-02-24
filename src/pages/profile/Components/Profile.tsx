@@ -540,7 +540,7 @@ export const Profile_profile = () => {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
               },
-              data: { fullAdress: pvz.location?.address_full },
+              data: { fullAddress: pvz.location?.address_full },
             })
               .then(res => console.log(res))
               .catch(err => console.log(err))
