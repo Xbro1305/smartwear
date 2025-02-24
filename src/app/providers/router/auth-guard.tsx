@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { Navigate } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
@@ -17,7 +17,7 @@ export const AuthGuard = () => {
   if (error) {
     console.error('Ошибка при загрузке данных пользователя:', error)
 
-    const location = useLocation()
+    // const location = useLocation()
     // const from = location?.state?.from || ROUTER_PATHS.PROFILE
 
     return (
@@ -32,7 +32,7 @@ export const AuthGuard = () => {
     console.log(`Данные пользователя:`, userData)
   }
 
-  const location = useLocation()
+  // const location = useLocation()
   // const from = location?.state?.from || ROUTER_PATHS.PROFILE
 
   return isAuthenticated ? (
