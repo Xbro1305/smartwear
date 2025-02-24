@@ -122,7 +122,10 @@ export const Profile_profile = () => {
         )
       ),
     })
-      .then(() => refresh())
+      .then(() => {
+        refresh()
+        setIsProfileEdited(false)
+      })
       .catch(err => console.log(err))
   }
 
