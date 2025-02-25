@@ -19,71 +19,61 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
   const [pvzList, setPvzList] = useState<Pvz[]>([])
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [mapCenter, setMapCenter] = useState<[number, number]>(
-    lat && long ? [lat, long] : [53.35, 83.75]
-  )
+  const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    if (!lat || !long) {
+    if (lat && long) {
+      setMapCenter([lat, long])
+      reverseGeocode(lat, long)
+    } else {
       getLocation()
     }
   }, [])
 
-  async function getLocation() {
-    if (!navigator.geolocation) {
-      alert('Геолокация не поддерживается вашим браузером.')
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(showPosition, showError)
+  function getLocation() {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords
+        setMapCenter([latitude, longitude])
+        reverseGeocode(latitude, longitude)
+      },
+      () => alert('Не удалось получить местоположение.')
+    )
   }
 
-  async function showPosition(position: GeolocationPosition) {
-    const { latitude, longitude } = position.coords
-    setMapCenter([latitude, longitude])
-
+  async function reverseGeocode(latitude: number, longitude: number) {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ru`
       )
       const data = await response.json()
-      setCity(data.address.city || data.address.town || data.address.village || 'Город не найден')
+      const foundCity =
+        data.address.city || data.address.town || data.address.village || 'Город не найден'
+      setCity(foundCity)
     } catch (error) {
       console.error('Ошибка получения города:', error)
     }
   }
 
-  function showError() {
-    alert('Не удалось получить местоположение.')
-  }
-
   useEffect(() => {
     if (!isOpen || !city) return
 
-    axios
-      .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
-      .then(res => {
-        setPvzList(res.data)
-        if (res.data.length > 0) {
-          setMapCenter([res.data[0].location.latitude, res.data[0].location.longitude])
-        }
-      })
-      .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
-  }, [isOpen, city])
-
-  useEffect(() => {
-    if (lat && long) {
-      setMapCenter([lat, long])
-      const foundPvz = pvzList.find(
-        pvz => pvz.location.latitude === lat && pvz.location.longitude === long
-      )
-      if (foundPvz) {
-        setSelectedPvz(foundPvz)
-      }
-    }
-  }, [lat, long, pvzList])
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => {
+      axios
+        .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
+        .then(res => {
+          setPvzList(res.data)
+          if (res.data.length > 0) {
+            setMapCenter([res.data[0].location.latitude, res.data[0].location.longitude])
+          }
+        })
+        .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
+    }, 1000)
+  }, [city, isOpen])
 
   return (
     <>
@@ -115,6 +105,10 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                 onClick={() => {
                   setSelectedPvz(pvz)
                   setMapCenter([pvz.location.latitude, pvz.location.longitude])
+                  listRef.current?.scrollTo({
+                    top: listRef.current.scrollHeight,
+                    behavior: 'smooth',
+                  })
                 }}
               >
                 <p className={'font-semibold'}>{pvz.location.address}</p>
