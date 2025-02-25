@@ -63,7 +63,7 @@ export const Profile_profile = () => {
         setSurname(response.surName || '')
         setName(response.name || '')
         setMiddlename(response.middleName || '')
-        setBirthday(response.birthday.split("T")[0] || '')
+        setBirthday(response.birthday.split('T')[0] || '')
         setEmail(response.email || '')
         setPhone(response.phone || '')
         setGender(response.gender || '')
@@ -537,6 +537,7 @@ export const Profile_profile = () => {
           ))}
 
         <PvzMapWidget
+          isEditing={false}
           onSelect={pvz => {
             axios(`${baseUrl}/users/add-address/${initialData.id}`, {
               method: 'POST',
@@ -663,9 +664,21 @@ export const Profile_profile = () => {
             <button className="button" onClick={() => setEditingAddress(false)}>
               Сохранить
             </button>
-            <button style={{ background: 'var(--dark)', marginLeft: '20px' }} className="button">
-              Изменить адрес
-            </button>
+            <PvzMapWidget
+              isEditing={true}
+              onSelect={pvz => {
+                axios(`${baseUrl}/users/add-address/${initialData.id}`, {
+                  method: 'POST',
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                  data: { fullAddress: pvz.location?.address_full },
+                })
+                  .then(() => refresh())
+                  .catch(err => console.log(err))
+              }}
+            />
           </section>
           <button
             className={styles.profile_modal_body_closeButton}

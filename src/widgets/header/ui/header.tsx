@@ -51,6 +51,8 @@ export const Header: React.FC = () => {
   isOpen && main && main.addEventListener('click', () => setIsOpen(false))
 
   const location = useLocation()
+  const redirectUrl = location.pathname + location.search
+  const searchParams = new URLSearchParams(location.search)
 
   const handleMouseLeave = () => {
     closeMenuTimer.current = setTimeout(() => setActiveColumn(0), 0)
@@ -192,10 +194,18 @@ export const Header: React.FC = () => {
         <Link to={ROUTER_PATHS.SEARCH}>
           <img alt="Search" src={search} />
         </Link>
-        <Link to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
+        <Link
+          to={
+            localStorage.getItem('token')
+              ? ROUTER_PATHS.PROFILE
+              : `${ROUTER_PATHS.SIGN_IN}?redirectUrl=${searchParams.get('redirectUrl') || redirectUrl || ''}`
+          }
+          state={{ from: location.pathname }}
+        >
           <img alt="Profile" src={profile} />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
+
         <Link to={ROUTER_PATHS.CART} className={styles.header_button} onClick={handleLogout}>
           <img alt="Cart" src={cart} />
         </Link>

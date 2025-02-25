@@ -1,45 +1,26 @@
-import { Outlet } from 'react-router-dom'
-import { Navigate } from 'react-router-dom'
-
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useGetMeQuery } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-// import { Outlet } from 'react-router-dom'
 
 export const AuthGuard = () => {
   const { data: userData, error, isLoading } = useGetMeQuery()
+  const location = useLocation()
 
   if (isLoading) {
     console.log('Загрузка данных пользователя...')
-
     return <div>Загрузка...</div>
   }
 
-  if (error) {
+  if (error || !userData) {
     console.error('Ошибка при загрузке данных пользователя:', error)
-
-    // const location = useLocation()
-    // const from = location?.state?.from || ROUTER_PATHS.PROFILE
-
-    return (
-      <Navigate to={`${ROUTER_PATHS.SIGN_IN}?redirectUrl=${window.location.href.split('/')[3]}`} />
-    )
+    const redirectUrl = location.pathname + location.search
+    return <Navigate to={`${ROUTER_PATHS.SIGN_IN}?redirectUrl=${redirectUrl}`} replace />
   }
 
-  const isAuthenticated = Boolean(userData)
-
-  console.log(`Проверка аутентификации пользователя. Аутентифицирован: ${isAuthenticated}`)
+  console.log(`Проверка аутентификации пользователя. Аутентифицирован: ${!!userData}`)
   if (userData) {
     console.log(`Данные пользователя:`, userData)
   }
 
-  // const location = useLocation()
-  // const from = location?.state?.from || ROUTER_PATHS.PROFILE
-
-  return isAuthenticated ? (
-    <Outlet />
-  ) : (
-    <Navigate to={`${ROUTER_PATHS.SIGN_IN}?redirectUrl=${window.location.href.split('/')[3]}`} />
-  )
-
-  // return <Outlet />
+  return <Outlet />
 }

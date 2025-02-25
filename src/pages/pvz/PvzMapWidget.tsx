@@ -14,17 +14,21 @@ function RecenterMap({ center }: { center: [number, number] }) {
   return null
 }
 
-export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
+export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapWidgetProps) {
   const [city, setCity] = useState<string>('')
   const [pvzList, setPvzList] = useState<Pvz[]>([])
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
+  const [mapCenter, setMapCenter] = useState<[number, number]>(
+    lat && long ? [lat, long] : [53.35, 83.75]
+  )
   const listRef = useRef<HTMLDivElement | null>(null)
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
 
   useEffect(() => {
-    getLocation()
+    if (!lat || !long) {
+      getLocation()
+    }
   }, [])
 
   async function getLocation() {
@@ -33,13 +37,7 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
       return
     }
 
-    const permission = await navigator.permissions.query({ name: 'geolocation' })
-
-    if (permission.state === 'granted' || permission.state === 'prompt') {
-      navigator.geolocation.getCurrentPosition(showPosition, showError)
-    } else {
-      alert('Вы отклонили доступ к геолокации. Разрешите его в настройках браузера.')
-    }
+    navigator.geolocation.getCurrentPosition(showPosition, showError)
   }
 
   async function showPosition(position: GeolocationPosition) {
@@ -64,38 +62,42 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   useEffect(() => {
     if (!isOpen || !city) return
 
-    const delay = setTimeout(() => {
-      axios
-        .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
-        .then(res => {
-          setPvzList(res.data)
-          if (res.data.length > 0) {
-            setMapCenter([res.data[0].location.latitude, res.data[0].location.longitude])
-          }
-        })
-        .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
-    }, 2000)
-
-    return () => clearTimeout(delay)
+    axios
+      .get(`${import.meta.env.VITE_APP_API_URL}/cdek/widget?city=${encodeURIComponent(city)}`)
+      .then(res => {
+        setPvzList(res.data)
+        if (res.data.length > 0) {
+          setMapCenter([res.data[0].location.latitude, res.data[0].location.longitude])
+        }
+      })
+      .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
   }, [isOpen, city])
 
   useEffect(() => {
-    if (selectedPvz && listRef.current) {
-      const selectedElement = document.getElementById(`pvz-${selectedPvz.code}`)
-      selectedElement?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-
-      // Открытие попапа на карте
-      const marker = markerRefs.current.get(selectedPvz.code)
-      if (marker) {
-        marker.openPopup()
+    if (lat && long) {
+      setMapCenter([lat, long])
+      const foundPvz = pvzList.find(
+        pvz => pvz.location.latitude === lat && pvz.location.longitude === long
+      )
+      if (foundPvz) {
+        setSelectedPvz(foundPvz)
       }
     }
-  }, [selectedPvz])
+  }, [lat, long, pvzList])
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
-
+      {isEditing ? (
+        <button
+          onClick={() => setIsOpen(true)}
+          style={{ background: 'var(--dark)', marginLeft: '20px' }}
+          className="button"
+        >
+          Изменить адрес
+        </button>
+      ) : (
+        <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
+      )}
       <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={'Выберите пункт выдачи'}>
         <input
           className={'w-full px-3 py-2 border rounded mb-4'}
@@ -104,38 +106,30 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
           type={'text'}
           value={city}
         />
-
         <div className={'flex gap-4'}>
           <div ref={listRef} className={'w-1/2 max-h-[400px] overflow-auto border p-2 rounded-lg'}>
-            {pvzList.length === 0 ? (
-              <p>Загрузка...</p>
-            ) : (
-              pvzList.map(pvz => (
-                <div
-                  id={`pvz-${pvz.code}`}
-                  className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
-                  key={pvz.code}
-                  onClick={() => {
-                    setSelectedPvz(pvz)
-                    setMapCenter([pvz.location.latitude, pvz.location.longitude])
-                  }}
-                >
-                  <p className={'font-semibold'}>{pvz.location.address}</p>
-                  <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
-                </div>
-              ))
-            )}
+            {pvzList.map(pvz => (
+              <div
+                key={pvz.code}
+                className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
+                onClick={() => {
+                  setSelectedPvz(pvz)
+                  setMapCenter([pvz.location.latitude, pvz.location.longitude])
+                }}
+              >
+                <p className={'font-semibold'}>{pvz.location.address}</p>
+                <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
+              </div>
+            ))}
           </div>
-
           <div className={'w-1/2 h-[400px] rounded-lg overflow-hidden border'}>
             <MapContainer center={mapCenter} className={'w-full h-full'} zoom={12}>
               <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
               <RecenterMap center={mapCenter} />
               {pvzList.map(pvz => (
                 <Marker
-                  key={`marker-${pvz.code}`}
+                  key={pvz.code}
                   position={[pvz.location.latitude, pvz.location.longitude]}
-                  eventHandlers={{ click: () => setSelectedPvz(pvz) }}
                   ref={marker => {
                     if (marker) markerRefs.current.set(pvz.code, marker)
                   }}
@@ -184,7 +178,6 @@ interface DialogProps {
 
 function Dialog({ children, onClose, open, title }: DialogProps) {
   if (!open) return null
-
   return (
     <div className={'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50'}>
       <div className={'bg-white rounded-lg p-4 max-w-lg w-full'}>
@@ -196,6 +189,13 @@ function Dialog({ children, onClose, open, title }: DialogProps) {
       </div>
     </div>
   )
+}
+
+interface PvzMapWidgetProps {
+  onSelect: (pvz: Pvz) => void
+  lat?: number
+  isEditing?: boolean
+  long?: number
 }
 
 // Типизация интерфейсов
