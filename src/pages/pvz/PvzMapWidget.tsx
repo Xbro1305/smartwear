@@ -14,7 +14,7 @@ function RecenterMap({ center }: { center: [number, number] }) {
   return null
 }
 
-export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
+export default function PvzMapWidget({ onSelect, lat, long }: PvzMapWidgetProps) {
   const [city, setCity] = useState<string>('')
   const [pvzList, setPvzList] = useState<Pvz[]>([])
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
@@ -24,8 +24,27 @@ export default function PvzMapWidget({ onSelect }: PvzMapWidgetProps) {
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
 
   useEffect(() => {
-    getLocation()
+    if (lat && long) {
+      setMapCenter([lat, long])
+      reverseGeocode(lat, long)
+    } else {
+      getLocation()
+    }
   }, [])
+
+  async function reverseGeocode(latitude: number, longitude: number) {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ru`
+      )
+      const data = await response.json()
+      const foundCity =
+        data.address.city || data.address.town || data.address.village || 'Город не найден'
+      setCity(foundCity)
+    } catch (error) {
+      console.error('Ошибка получения города:', error)
+    }
+  }
 
   async function getLocation() {
     if (!navigator.geolocation) {
@@ -275,4 +294,6 @@ export interface Pvz {
 
 interface PvzMapWidgetProps {
   onSelect: (pvz: Pvz) => void
+  lat?: number
+  long?: number
 }
