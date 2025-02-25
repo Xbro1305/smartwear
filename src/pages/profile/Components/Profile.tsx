@@ -545,7 +545,11 @@ export const Profile_profile = () => {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
               },
-              data: { fullAddress: pvz.location?.address_full },
+              data: {
+                fullAddress: pvz.location?.address_full,
+                longitude: pvz.location.longitude,
+                latitude: pvz.location.latitude,
+              },
             })
               .then(() => refresh())
               .catch(err => console.log(err))
@@ -673,7 +677,11 @@ export const Profile_profile = () => {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                   },
-                  data: { fullAddress: pvz.location?.address_full },
+                  data: {
+                    fullAddress: pvz.location?.address_full,
+                    longitude: pvz.location.longitude,
+                    latitude: pvz.location.latitude,
+                  },
                 })
                   .then(() => refresh())
                   .catch(err => console.log(err))
