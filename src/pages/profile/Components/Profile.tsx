@@ -7,6 +7,7 @@ import { FaCheck, FaPen } from 'react-icons/fa'
 import { IoClose } from 'react-icons/io5'
 import axios from 'axios'
 import PvzMapWidget from '@/pages/pvz/PvzMapWidget'
+import { InputLabel } from '@/widgets/InputLabel/InputLabel'
 
 interface InitialData {
   surname?: string
@@ -277,38 +278,28 @@ export const Profile_profile = () => {
         <div className={styles.profile_personality}>
           <h5 className="h5">Контактные данные</h5>
           <form className={styles.profile_form}>
-            <label
-              className={`${styles.profile_form_label} ${name.length ? styles.profile_form_label_active : ''}`}
-            >
-              <p>Имя</p>
-              <input
-                value={name}
-                onChange={e => {
-                  const value = e.target.value
-                  setName(value)
-                  initialData.name != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
-                }}
-                name={'name'}
-                type={'text'}
-              />
-            </label>
-            <label
-              className={`${styles.profile_form_label} ${surname.length ? styles.profile_form_label_active : ''}`}
-            >
-              <p>Фамилия</p>
-              <input
-                value={surname}
-                onChange={e => {
-                  const value = e.target.value
-                  setSurname(value)
-                  initialData.surname != value
-                    ? setIsProfileEdited(true)
-                    : setIsProfileEdited(false)
-                }}
-                name={'surname'}
-                type={'text'}
-              />
-            </label>
+            <InputLabel
+              value={name}
+              onChange={e => {
+                const value = e.target.value
+                setName(value)
+                initialData.name != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
+              }}
+              title="Имя"
+              required={true}
+              name={'name'}
+            />
+            <InputLabel
+              value={surname}
+              onChange={e => {
+                const value = e.target.value
+                setSurname(value)
+                initialData.surname != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
+              }}
+              name={'surname'}
+              title="Фамилия"
+              required={true}
+            />
             <div className={styles.profile_form_gender}>
               <h6 className="h6">Пол</h6>
               <label className={styles.profile_form_gender_label}>
@@ -372,21 +363,16 @@ export const Profile_profile = () => {
                 type={'date'}
               />
             </label>
-            <label
-              className={`${styles.profile_form_label} ${city.length ? styles.profile_form_label_active : ''}`}
-            >
-              <p>Город</p>
-              <input
-                value={city}
-                onChange={e => {
-                  const value = e.target.value
-                  setCity(value)
-                  initialData.city != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
-                }}
-                name={'city'}
-                type={'text'}
-              />
-            </label>
+            <InputLabel
+              title={'Город'}
+              onChange={e => {
+                const value = e.target.value
+                setCity(value)
+                initialData.city != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
+              }}
+              value={city}
+              name={'city'}
+            />
             <div className={styles.profile_form_email_label}>
               <label
                 style={{
@@ -538,21 +524,33 @@ export const Profile_profile = () => {
 
         <PvzMapWidget
           isEditing={true}
-          lat={editingAddress.latitude}
-          long={editingAddress.longitude}
+          lat={Number(editingAddress.latitude)}
+          long={Number(editingAddress.longitude)}
           onSelect={pvz => {
+            const requestData = {
+              fullAddress: pvz.location?.address_full,
+              longitude: String(pvz.location.longitude),
+              latitude: String(pvz.location.latitude),
+              city: pvz.location.city,
+              apartment: pvz.apartment,
+              intercom: pvz.intercom,
+              floor: pvz.floor,
+              entrance: pvz.entrance,
+              comment: pvz.comment,
+            }
+
+            // Удаляем пустые поля
+            const filteredData = Object.fromEntries(
+              Object.entries(requestData).filter(([_, value]) => value)
+            )
+
             axios(`${baseUrl}/users/add-address/${initialData.id}`, {
               method: 'POST',
               headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
               },
-              data: {
-                fullAddress: pvz.location?.address_full,
-                longitude: pvz.location.longitude,
-                latitude: pvz.location.latitude,
-                city: pvz.location.city,
-              },
+              data: filteredData,
             })
               .then(() => refresh())
               .catch(err => console.log(err))
@@ -674,17 +672,30 @@ export const Profile_profile = () => {
             <PvzMapWidget
               isEditing={false}
               onSelect={pvz => {
+                const requestData = {
+                  fullAddress: pvz.location?.address_full,
+                  longitude: String(pvz.location.longitude),
+                  latitude: String(pvz.location.latitude),
+                  city: pvz.location.city,
+                  apartment: pvz.apartment,
+                  intercom: pvz.intercom,
+                  floor: pvz.floor,
+                  entrance: pvz.entrance,
+                  comment: pvz.comment,
+                }
+
+                // Удаляем пустые поля
+                const filteredData = Object.fromEntries(
+                  Object.entries(requestData).filter(([_, value]) => value)
+                )
+
                 axios(`${baseUrl}/users/add-address/${initialData.id}`, {
                   method: 'POST',
                   headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                   },
-                  data: {
-                    fullAddress: pvz.location?.address_full,
-                    longitude: pvz.location.longitude,
-                    latitude: pvz.location.latitude,
-                  },
+                  data: filteredData,
                 })
                   .then(() => refresh())
                   .catch(err => console.log(err))

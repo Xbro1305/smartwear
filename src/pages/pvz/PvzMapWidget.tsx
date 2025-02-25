@@ -3,6 +3,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import * as L from 'leaflet'
 import axios from 'axios'
 import 'leaflet/dist/leaflet.css'
+import { InputLabel } from '@/widgets/InputLabel/InputLabel'
 
 function RecenterMap({ center }: { center: [number, number] }) {
   const map = useMap()
@@ -22,6 +23,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
+  const [deliveryType, setDeliveryType] = useState<'pvz' | 'delivery'>('pvz')
 
   useEffect(() => {
     if (lat && long) {
@@ -113,7 +115,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
 
   return (
     <>
-      {isEditing ? (
+      {!isEditing ? (
         <button
           onClick={() => setIsOpen(true)}
           style={{ background: 'var(--dark)', marginLeft: '20px' }}
@@ -125,68 +127,258 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
         <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
       )}
       <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={'Выберите пункт выдачи'}>
-        <input
-          className={'w-full px-3 py-2 border rounded mb-4'}
-          onChange={e => setCity(e.target.value)}
-          placeholder={'Введите город'}
-          type={'text'}
-          value={city}
-        />
-
-        <div className={'flex gap-4'}>
-          <div ref={listRef} className={'w-1/2 max-h-[400px] overflow-auto border p-2 rounded-lg'}>
-            {pvzList.length === 0 ? (
-              <p>Загрузка...</p>
-            ) : (
-              pvzList.map(pvz => (
-                <div
-                  id={`pvz-${pvz.code}`}
-                  className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
-                  key={pvz.code}
-                  onClick={() => {
-                    setSelectedPvz(pvz)
-                    setMapCenter([pvz.location.latitude, pvz.location.longitude])
-                  }}
-                >
-                  <p className={'font-semibold'}>{pvz.location.address}</p>
-                  <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
-                </div>
-              ))
-            )}
+        <div className="pvzTypeSelector">
+          <div
+            className={`button ${deliveryType == 'pvz' && 'active'}`}
+            onClick={() => setDeliveryType('pvz')}
+          >
+            Пункт выдачи
           </div>
-
-          <div className={'w-1/2 h-[400px] rounded-lg overflow-hidden border'}>
-            <MapContainer center={mapCenter} className={'w-full h-full'} zoom={12}>
-              <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
-              <RecenterMap center={mapCenter} />
-              {pvzList.map(pvz => (
-                <Marker
-                  key={`marker-${pvz.code}`}
-                  position={[pvz.location.latitude, pvz.location.longitude]}
-                  eventHandlers={{ click: () => setSelectedPvz(pvz) }}
-                  ref={marker => {
-                    if (marker) markerRefs.current.set(pvz.code, marker)
-                  }}
-                >
-                  <Popup>
-                    <p className={'font-semibold'}>{pvz.location.address}</p>
-                    <p className={'text-sm'}>{pvz.work_time}</p>
-                    <Button
-                      onClick={() => {
-                        onSelect(pvz)
-                        setIsOpen(false)
-                      }}
-                    >
-                      Выбрать
-                    </Button>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+          <div
+            className={`button ${deliveryType == 'delivery' && 'active'}`}
+            onClick={() => setDeliveryType('delivery')}
+          >
+            Курьерская доставка
           </div>
         </div>
+        {deliveryType == 'pvz' && (
+          <>
+            <InputLabel
+              name="city"
+              title="Город"
+              onChange={e => setCity(e.target.value)}
+              value={city}
+            />
+
+            <div className={'flex gap-4 mt-5'}>
+              <div
+                ref={listRef}
+                className={'w-1/2 max-h-[400px] overflow-auto border p-2 rounded-lg'}
+              >
+                {pvzList.length === 0 ? (
+                  <p>Загрузка...</p>
+                ) : (
+                  pvzList.map(pvz => (
+                    <div
+                      id={`pvz-${pvz.code}`}
+                      className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
+                      key={pvz.code}
+                      onClick={() => {
+                        setSelectedPvz(pvz)
+                        setMapCenter([pvz.location.latitude, pvz.location.longitude])
+                      }}
+                    >
+                      <p className={'font-semibold'}>{pvz.location.address}</p>
+                      <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className={'w-1/2 h-[400px] rounded-lg overflow-hidden border'}>
+                <MapContainer center={mapCenter} className={'w-full h-full'} zoom={12}>
+                  <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
+                  <RecenterMap center={mapCenter} />
+                  {pvzList.map(pvz => (
+                    <Marker
+                      key={`marker-${pvz.code}`}
+                      position={[pvz.location.latitude, pvz.location.longitude]}
+                      eventHandlers={{ click: () => setSelectedPvz(pvz) }}
+                      ref={marker => {
+                        if (marker) markerRefs.current.set(pvz.code, marker)
+                      }}
+                    >
+                      <Popup>
+                        <p className={'font-semibold'}>{pvz.location.address}</p>
+                        <p className={'text-sm'}>{pvz.work_time}</p>
+                        <Button
+                          onClick={() => {
+                            onSelect({ ...pvz, type: 'pvz' })
+                            setIsOpen(false)
+                          }}
+                        >
+                          Выбрать
+                        </Button>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
+            </div>
+          </>
+        )}
+
+        {deliveryType == 'delivery' && (
+          <>
+            <AddressInput
+              onSelect={data => {
+                setIsOpen(false)
+                onSelect({
+                  code: 'custom',
+                  location: {
+                    address: data.fullAddress,
+                    address_full: data.fullAddress,
+                    city: data.city,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                  },
+                  work_time: '08:00-20:00',
+                  type: 'delivery',
+                  apartment: data?.apartment,
+                  comment: data?.comment,
+                  entrance: data?.entrance,
+                  floor: data?.floor,
+                  intercom: data?.intercom,
+                })
+              }}
+            />
+          </>
+        )}
       </Dialog>
     </>
+  )
+}
+
+interface deliveryData {
+  fullAddress: string
+  longitude: number
+  latitude: number
+  city: string
+  apartment?: string
+  intercom?: string
+  entrance?: string
+  floor?: string
+  comment?: string
+}
+
+function AddressInput({ onSelect }: { onSelect: (data: deliveryData) => void }) {
+  const [query, setQuery] = useState('')
+  const [suggestions, setSuggestions] = useState<any[]>([])
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [address, setAddress] = useState<deliveryData>({
+    fullAddress: '',
+    longitude: 1,
+    latitude: 1,
+    city: '',
+  })
+  const [apartment, setApartment] = useState<string>('')
+  const [entrance, setEntrance] = useState<string>('')
+  const [floor, setFloor] = useState<string>('')
+  const [intercom, setIntercom] = useState<string>('')
+  const [comment, setComment] = useState<string>('')
+
+  useEffect(() => {
+    if (query.length < 3) return
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ru`
+        )
+        const data = await response.json()
+        setSuggestions(data)
+      } catch (error) {
+        console.error('Ошибка поиска адреса:', error)
+      }
+    }, 500)
+  }, [query])
+
+  return (
+    <form
+      onSubmit={e => {
+        e.preventDefault()
+        onSelect({ ...address, apartment, comment, floor, entrance, intercom })
+      }}
+      className="relative flex-wrap flex gap-[10px]"
+    >
+      <InputLabel
+        className="w-full"
+        onChange={e => setQuery(e.target.value)}
+        value={query}
+        name="address"
+        title="Адрес"
+        required={true}
+      />
+      {suggestions.length > 0 && (
+        <ul className="absolute bg-white border rounded w-full shadow-md z-10 top-[70px]">
+          {suggestions.map(suggestion => (
+            <li
+              key={suggestion.place_id}
+              className="p-2 cursor-pointer hover:bg-gray-200"
+              onClick={async () => {
+                setQuery(suggestion.display_name)
+                setSuggestions([])
+                const fetchAddress = async (latitude: number, longitude: number) => {
+                  try {
+                    const response = await fetch(
+                      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ru`
+                    )
+                    const data = await response.json()
+
+                    return {
+                      city: data.address.city || '',
+                    }
+                  } catch (error) {
+                    console.error('Ошибка получения адреса:', error)
+                  }
+                }
+                setAddress({
+                  fullAddress: suggestion.display_name,
+                  longitude: suggestion.lon,
+                  latitude: suggestion.lat,
+                  city: (await fetchAddress(suggestion.lat, suggestion.lon))?.city || '',
+                })
+              }}
+            >
+              {suggestion.display_name}
+            </li>
+          ))}
+        </ul>
+      )}
+      <InputLabel
+        className="w-[calc(50%-5px)]"
+        value={apartment}
+        onChange={e => setApartment(e.target.value)}
+        title="Квартира"
+        name="apartment"
+      />
+      <InputLabel
+        className="w-[calc(50%-5px)]"
+        value={entrance}
+        onChange={e => setEntrance(e.target.value)}
+        title="Подъезд"
+        name="entrance"
+      />
+      <InputLabel
+        className="w-[calc(50%-5px)]"
+        value={floor}
+        onChange={e => setFloor(e.target.value)}
+        title="Этаж"
+        name="floor"
+      />
+      <InputLabel
+        className="w-[calc(50%-5px)]"
+        value={intercom}
+        onChange={e => setIntercom(e.target.value)}
+        title="Домофон"
+        name="intercom"
+      />
+      <InputLabel
+        className="w-full"
+        value={comment}
+        onChange={e => setComment(e.target.value)}
+        title="Комментарий курьеру"
+        name="comment"
+      />
+      <button
+        type="submit"
+        className={'mt-4 w-full px-4 py-2 text-white rounded-[8px]'}
+        style={{ background: 'var(--red)' }}
+      >
+        Готово{' '}
+      </button>
+    </form>
   )
 }
 
@@ -197,7 +389,7 @@ interface ButtonProps {
 
 function Button({ children, onClick }: ButtonProps) {
   return (
-    <button className={'p-2 bg-blue-500 text-white rounded'} onClick={onClick}>
+    <button className={'p-2 bg-blue-500 text-white rounded-[8px]'} onClick={onClick}>
       {children}
     </button>
   )
@@ -218,7 +410,11 @@ function Dialog({ children, onClose, open, title }: DialogProps) {
       <div className={'bg-white rounded-lg p-4 max-w-lg w-full'}>
         <h2 className={'text-lg font-semibold'}>{title}</h2>
         <div className={'mt-4'}>{children}</div>
-        <button className={'mt-4 w-full px-4 py-2 bg-red-500 text-white rounded'} onClick={onClose}>
+        <button
+          className={'mt-4 w-full px-4 py-2 text-white rounded-[8px]'}
+          style={{ background: 'var(--red)' }}
+          onClick={onClose}
+        >
           Закрыть
         </button>
       </div>
@@ -227,78 +423,84 @@ function Dialog({ children, onClose, open, title }: DialogProps) {
 }
 
 // Типизация интерфейсов
-interface Phone {
-  number: string
-}
+// interface Phone {
+//   number: string
+// }
 
-interface WorkTime {
-  day: number
-  time: string
-}
+// interface WorkTime {
+//   day: number
+//   time: string
+// }
 
-interface WorkTimeException {
-  date_end: string
-  date_start: string
-  is_working: boolean
-  time_end: string
-  time_start: string
-}
+// interface WorkTimeException {
+//   date_end: string
+//   date_start: string
+//   is_working: boolean
+//   time_end: string
+//   time_start: string
+// }
 
-interface WorkTimeExceptionAlt {
-  date: string
-  is_working: boolean
-  time: string
-}
+// interface WorkTimeExceptionAlt {
+//   date: string
+//   is_working: boolean
+//   time: string
+// }
 
-interface Dimension {
-  depth: number
-  height: number
-  width: number
-}
+// interface Dimension {
+//   depth: number
+//   height: number
+//   width: number
+// }
 
 interface Location {
   address: string
   address_full: string
   city: string
-  city_code: number
-  city_uuid: string
-  country_code: string
-  fias_guid: string
+  // city_code: number
+  // city_uuid: string
+  // country_code: string
+  // fias_guid: string
   latitude: number
   longitude: number
-  postal_code: string
-  region: string
-  region_code: number
+  // postal_code: string
+  // region: string
+  // region_code: number
 }
 
 export interface Pvz {
-  address_comment: string
-  allowed_cod: boolean
+  // address_comment: string
+  // allowed_cod: boolean
   code: string
-  dimensions: Dimension[]
-  fulfillment: boolean
-  have_cash: boolean
-  have_cashless: boolean
-  have_fast_payment_system: boolean
-  is_dressing_room: boolean
-  is_handout: boolean
-  is_ltl: boolean
-  is_reception: boolean
+  // dimensions: Dimension[]
+  // fulfillment: boolean
+  // have_cash: boolean
+  // have_cashless: boolean
+  // have_fast_payment_system: boolean
+  // is_dressing_room: boolean
+  // is_handout: boolean
+  // is_ltl: boolean
+  // is_reception: boolean
   location: Location
-  name: string
-  nearest_station: string
-  note: string
-  owner_code: string
-  phones: Phone[]
-  take_only: boolean
-  type: string
-  uuid: string
-  weight_max: number
-  weight_min: number
+  type: 'pvz' | 'delivery'
+  // name: string
+  // nearest_station: string
+  // note: string
+  // owner_code: string
+  // phones: Phone[]
+  // take_only: boolean
+  // type: string
+  // uuid: string
+  // weight_max: number
+  // weight_min: number
   work_time: string
-  work_time_exception_list: WorkTimeException[]
-  work_time_exceptions?: WorkTimeExceptionAlt[]
-  work_time_list: WorkTime[]
+  apartment?: string
+  floor?: string
+  entrance?: string
+  intercom?: string
+  comment?: string
+  // work_time_exception_list: WorkTimeException[]
+  // work_time_exceptions?: WorkTimeExceptionAlt[]
+  // work_time_list: WorkTime[]
 }
 
 interface PvzMapWidgetProps {
