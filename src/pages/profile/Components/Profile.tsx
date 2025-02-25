@@ -537,7 +537,6 @@ export const Profile_profile = () => {
           ))}
 
         <PvzMapWidget
-          isEditing={false}
           onSelect={pvz => {
             axios(`${baseUrl}/users/add-address/${initialData.id}`, {
               method: 'POST',
@@ -669,7 +668,6 @@ export const Profile_profile = () => {
               Сохранить
             </button>
             <PvzMapWidget
-              isEditing={true}
               onSelect={pvz => {
                 axios(`${baseUrl}/users/add-address/${initialData.id}`, {
                   method: 'POST',
