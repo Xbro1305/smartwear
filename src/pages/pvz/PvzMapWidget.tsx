@@ -14,7 +14,7 @@ function RecenterMap({ center }: { center: [number, number] }) {
   return null
 }
 
-export default function PvzMapWidget({ onSelect, lat, long }: PvzMapWidgetProps) {
+export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapWidgetProps) {
   const [city, setCity] = useState<string>('')
   const [pvzList, setPvzList] = useState<Pvz[]>([])
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
@@ -113,8 +113,17 @@ export default function PvzMapWidget({ onSelect, lat, long }: PvzMapWidgetProps)
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
-
+      {isEditing ? (
+        <button
+          onClick={() => setIsOpen(true)}
+          style={{ background: 'var(--dark)', marginLeft: '20px' }}
+          className="button"
+        >
+          Изменить адрес
+        </button>
+      ) : (
+        <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
+      )}
       <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={'Выберите пункт выдачи'}>
         <input
           className={'w-full px-3 py-2 border rounded mb-4'}
@@ -296,4 +305,5 @@ interface PvzMapWidgetProps {
   onSelect: (pvz: Pvz) => void
   lat?: number
   long?: number
+  isEditing?: boolean
 }

@@ -537,6 +537,9 @@ export const Profile_profile = () => {
           ))}
 
         <PvzMapWidget
+          isEditing={true}
+          lat={editingAddress.latitude}
+          long={editingAddress.longitude}
           onSelect={pvz => {
             axios(`${baseUrl}/users/add-address/${initialData.id}`, {
               method: 'POST',
@@ -548,6 +551,7 @@ export const Profile_profile = () => {
                 fullAddress: pvz.location?.address_full,
                 longitude: pvz.location.longitude,
                 latitude: pvz.location.latitude,
+                city: pvz.location.city,
               },
             })
               .then(() => refresh())
@@ -668,6 +672,7 @@ export const Profile_profile = () => {
               Сохранить
             </button>
             <PvzMapWidget
+              isEditing={false}
               onSelect={pvz => {
                 axios(`${baseUrl}/users/add-address/${initialData.id}`, {
                   method: 'POST',
