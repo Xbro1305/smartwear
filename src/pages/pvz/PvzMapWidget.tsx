@@ -183,7 +183,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                   {pvzList.map(pvz => {
                     const cdekIcon = new L.Icon({
                       iconUrl: cdekIconUrl,
-                      iconSize: [30, 30], // Размер иконки
+                      iconSize: [45, 38], // Размер иконки
                       iconAnchor: [15, 30], // Точка привязки
                       popupAnchor: [0, -30], // Смещение попапа
                     })
