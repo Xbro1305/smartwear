@@ -4,6 +4,7 @@ import * as L from 'leaflet'
 import axios from 'axios'
 import 'leaflet/dist/leaflet.css'
 import { InputLabel } from '@/widgets/InputLabel/InputLabel'
+import cdekIconUrl from '@/assets/images/marker.png' //
 
 function RecenterMap({ center }: { center: [number, number] }) {
   const map = useMap()
@@ -179,29 +180,39 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                 <MapContainer center={mapCenter} className={'w-full h-full'} zoom={12}>
                   <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
                   <RecenterMap center={mapCenter} />
-                  {pvzList.map(pvz => (
-                    <Marker
-                      key={`marker-${pvz.code}`}
-                      position={[pvz.location.latitude, pvz.location.longitude]}
-                      eventHandlers={{ click: () => setSelectedPvz(pvz) }}
-                      ref={marker => {
-                        if (marker) markerRefs.current.set(pvz.code, marker)
-                      }}
-                    >
-                      <Popup>
-                        <p className={'font-semibold'}>{pvz.location.address}</p>
-                        <p className={'text-sm'}>{pvz.work_time}</p>
-                        <Button
-                          onClick={() => {
-                            onSelect({ ...pvz, type: 'pvz' })
-                            setIsOpen(false)
-                          }}
-                        >
-                          Выбрать
-                        </Button>
-                      </Popup>
-                    </Marker>
-                  ))}
+                  {pvzList.map(pvz => {
+                    const cdekIcon = new L.Icon({
+                      iconUrl: cdekIconUrl,
+                      iconSize: [30, 30], // Размер иконки
+                      iconAnchor: [15, 30], // Точка привязки
+                      popupAnchor: [0, -30], // Смещение попапа
+                    })
+
+                    return (
+                      <Marker
+                        key={`marker-${pvz.code}`}
+                        position={[pvz.location.latitude, pvz.location.longitude]}
+                        eventHandlers={{ click: () => setSelectedPvz(pvz) }}
+                        icon={cdekIcon}
+                        ref={marker => {
+                          if (marker) markerRefs.current.set(pvz.code, marker)
+                        }}
+                      >
+                        <Popup>
+                          <p className={'font-semibold'}>{pvz.location.address}</p>
+                          <p className={'text-sm'}>{pvz.work_time}</p>
+                          <Button
+                            onClick={() => {
+                              onSelect({ ...pvz, type: 'pvz' })
+                              setIsOpen(false)
+                            }}
+                          >
+                            Выбрать
+                          </Button>
+                        </Popup>
+                      </Marker>
+                    )
+                  })}
                 </MapContainer>
               </div>
             </div>
