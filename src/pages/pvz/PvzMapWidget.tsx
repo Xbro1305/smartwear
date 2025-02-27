@@ -18,7 +18,20 @@ function RecenterMap({ center }: { center: [number, number] }) {
   return null
 }
 
-export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapWidgetProps) {
+export default function PvzMapWidget({
+  onSelect,
+  lat,
+  long,
+  isEditing,
+  apartment,
+  comment,
+  deliveryAddr: defalultDeliveryAddress,
+  deliveryCoords: defalultDeliveryCoords,
+  entrance,
+  floor,
+  intercom,
+  type,
+}: PvzMapWidgetProps) {
   const [city, setCity] = useState<string>('')
   const [pvzList, setPvzList] = useState<Pvz[]>([])
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
@@ -34,6 +47,17 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
   const menuRef = useRef<HTMLDivElement>(null)
 
   const isTinyScreen = window.innerWidth < 1000
+
+  useEffect(
+    () => defalultDeliveryCoords && setDeliveryCoords(defalultDeliveryCoords),
+    [defalultDeliveryCoords]
+  )
+
+  useEffect(() => {
+    defalultDeliveryAddress && setDeliveryAddr(defalultDeliveryAddress)
+  }, [defalultDeliveryAddress])
+
+  useEffect(() => type && setDeliveryType(type), [type])
 
   useEffect(() => {
     if (lat && long) {
@@ -122,7 +146,6 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
       const selectedElement = document.getElementById(`pvz-${selectedPvz.code}`)
       selectedElement?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
-      // Открытие попапа на карте
       const marker = markerRefs.current.get(selectedPvz.code)
       if (marker) {
         marker.openPopup()
@@ -132,9 +155,9 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
 
   const cdekIcon = new L.Icon({
     iconUrl: cdekIconUrl,
-    iconSize: deliveryType == 'PVZ' ? [45, 38] : [60, 50], // Размер иконки
-    iconAnchor: [15, 30], // Точка привязки
-    popupAnchor: [0, -30], // Смещение попапа
+    iconSize: deliveryType == 'PVZ' ? [45, 38] : [60, 50],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30],
   })
 
   function LiveMapCenterLogger({
@@ -199,7 +222,6 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
             animate={{ y: isMenuOpen ? 0 : 90 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             drag="y"
-            // dragConstraints={{ top: 0, bottom: 300 }}
             dragConstraints={
               isTinyScreen
                 ? { top: 0, bottom: deliveryType == 'PVZ' ? 250 : 460 }
@@ -269,6 +291,11 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                   coords={deliveryCoords}
                   changeAddr={setDeliveryAddr}
                   setMapCenter={setMapCenter}
+                  apartment={apartment}
+                  comment={comment}
+                  entrance={entrance}
+                  floor={floor}
+                  intercom={intercom}
                   onSelect={data => {
                     setIsOpen(false)
                     onSelect({
@@ -355,19 +382,7 @@ interface deliveryData {
   comment?: string
 }
 
-function AddressInput({
-  onSelect,
-  addr,
-  changeAddr,
-  setMapCenter,
-  coords,
-}: {
-  onSelect: (data: deliveryData) => void
-  addr: string
-  changeAddr: (addr: string) => void
-  setMapCenter: (center: [number, number]) => void
-  coords: [number, number]
-}) {
+function AddressInput({ onSelect, addr, changeAddr, setMapCenter, coords }: DeliveryProps) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<any[]>([])
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -554,85 +569,27 @@ function Dialog({ children, onClose, open, title }: DialogProps) {
   )
 }
 
-// Типизация интерфейсов
-// interface Phone {
-//   number: string
-// }
-
-// interface WorkTime {
-//   day: number
-//   time: string
-// }
-
-// interface WorkTimeException {
-//   date_end: string
-//   date_start: string
-//   is_working: boolean
-//   time_end: string
-//   time_start: string
-// }
-
-// interface WorkTimeExceptionAlt {
-//   date: string
-//   is_working: boolean
-//   time: string
-// }
-
-// interface Dimension {
-//   depth: number
-//   height: number
-//   width: number
-// }
-
 interface Location {
   address: string
   address_full: string
   city: string
-  // city_code: number
-  // city_uuid: string
-  // country_code: string
-  // fias_guid: string
+
   latitude: number
   longitude: number
-  // postal_code: string
-  // region: string
-  // region_code: number
 }
 
 export interface Pvz {
-  // address_comment: string
-  // allowed_cod: boolean
   code: string
-  // dimensions: Dimension[]
-  // fulfillment: boolean
-  // have_cash: boolean
-  // have_cashless: boolean
-  // have_fast_payment_system: boolean
-  // is_dressing_room: boolean
-  // is_handout: boolean
-  // is_ltl: boolean
-  // is_reception: boolean
+
   location: Location
   type: 'PVZ' | 'DELIVERY'
-  // name: string
-  // nearest_station: string
-  // note: string
-  // owner_code: string
-  // phones: Phone[]
-  // take_only: boolean
-  // type: string
-  // uuid: string
-  // weight_max: number
-  // weight_min: number
+
   work_time: string
   apartment?: string
   floor?: string
   entrance?: string
   intercom?: string
   comment?: string
-  // work_time_exception_list: WorkTimeException[]
-  // work_time_exceptions?: WorkTimeExceptionAlt[]
-  // work_time_list: WorkTime[]
 }
 
 interface PvzMapWidgetProps {
@@ -640,4 +597,25 @@ interface PvzMapWidgetProps {
   lat?: number
   long?: number
   isEditing?: boolean
+  type?: 'PVZ' | 'DELIVERY'
+  deliveryAddr?: string
+  deliveryCoords?: [number, number]
+  intercom?: string
+  entrance?: string
+  apartment?: string
+  comment?: string
+  floor?: string
+}
+
+interface DeliveryProps {
+  onSelect: (data: deliveryData) => void
+  addr: string
+  changeAddr: (addr: string) => void
+  setMapCenter: (center: [number, number]) => void
+  coords: [number, number]
+  intercom?: string
+  entrance?: string
+  apartment?: string
+  comment?: string
+  floor?: string
 }

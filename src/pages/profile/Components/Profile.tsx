@@ -77,6 +77,18 @@ export const Profile_profile = () => {
         setInitialData(response)
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
+
+        if (phone.startsWith('9')) {
+          setPhone('+7' + phone)
+          setPrefix('+')
+        } else if (phone.startsWith('8')) {
+          setPrefix('')
+        } else if (phone.startsWith('7')) {
+          setPrefix('+')
+        } else {
+          setPhone('+79' + phone)
+          setPrefix('+')
+        }
       })
       .catch(err => console.log(err))
   }
@@ -200,7 +212,10 @@ export const Profile_profile = () => {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then(() => refresh())
+      .then(() => {
+        refresh()
+        setDeletingAddress(false)
+      })
       .catch(err => {
         console.log(err)
       })
@@ -523,6 +538,14 @@ export const Profile_profile = () => {
           isEditing={true}
           lat={Number(editingAddress.latitude)}
           long={Number(editingAddress.longitude)}
+          type={editingAddress?.type}
+          comment={editingAddress?.comment}
+          intercom={editingAddress?.intercom}
+          apartment={editingAddress?.apartment}
+          floor={editingAddress?.floor}
+          deliveryAddr={editingAddress.fullAddress}
+          deliveryCoords={[editingAddress.lat, editingAddress.lon]}
+          entrance={editingAddress.entrance}
           onSelect={pvz => {
             const requestData = {
               fullAddress: pvz.location?.address_full,
@@ -601,7 +624,7 @@ export const Profile_profile = () => {
         </div>
       </div>
       <div
-        className={`${styles.profile_modal}`}
+        className={`${styles.profile_modal} ${styles.profile_phone_modal}`}
         style={{ display: phoneConfirm ? 'flex' : 'none' }}
       >
         <div className={styles.profile_modal_body}>
@@ -641,9 +664,7 @@ export const Profile_profile = () => {
       >
         <div className={styles.profile_modal_body}>
           <h3 className="h3">Адрес доставки</h3>
-          {editingAddress !== false && (
-            <p className="p1">{adresses[editingAddress.index]?.fullAddress}</p>
-          )}
+          {editingAddress !== false && <p className="p1">{editingAddress?.fullAddress}</p>}
 
           <label
             style={{ cursor: 'pointer' }}

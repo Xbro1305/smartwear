@@ -310,16 +310,18 @@
         display: flex;
         flex-direction: column;
         gap: 5px;
-
-        input {
-          width: 100%;
-          border-bottom: 2px solid var(--service);
-        }
       }
 
       @media (max-width: 1214px) {
         padding: 32px;
       }
+    }
+  }
+
+  &_phone_modal {
+    input {
+      width: 100%;
+      border-bottom: 2px solid var(--service);
     }
   }
 }
