@@ -189,9 +189,13 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             drag="y"
             // dragConstraints={{ top: 0, bottom: 300 }}
-            dragConstraints={{ top: 0, bottom: deliveryType == 'pvz' ? 250 : 460 }}
+            dragConstraints={
+              isTinyScreen
+                ? { top: 0, bottom: deliveryType == 'pvz' ? 250 : 460 }
+                : { top: 0, bottom: 0 }
+            }
             dragElastic={0.2}
-            onDrag={(_, info) => setDragY(info.point.y)}
+            onDrag={(_: any, info: any) => setDragY(info.point.y)}
             onDragEnd={() => {
               if (dragY > 50) {
                 setIsMenuOpen(false)
