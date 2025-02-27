@@ -26,7 +26,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
-  const [deliveryType, setDeliveryType] = useState<'pvz' | 'delivery'>('pvz')
+  const [deliveryType, setDeliveryType] = useState<'PVZ' | 'DELIVERY'>('PVZ')
   const [deliveryCoords, setDeliveryCoords] = useState<[number, number]>([53.35, 83.75])
   const [deliveryAddr, setDeliveryAddr] = useState<string>('')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -132,7 +132,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
 
   const cdekIcon = new L.Icon({
     iconUrl: cdekIconUrl,
-    iconSize: deliveryType == 'pvz' ? [45, 38] : [60, 50], // Размер иконки
+    iconSize: deliveryType == 'PVZ' ? [45, 38] : [60, 50], // Размер иконки
     iconAnchor: [15, 30], // Точка привязки
     popupAnchor: [0, -30], // Смещение попапа
   })
@@ -202,7 +202,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
             // dragConstraints={{ top: 0, bottom: 300 }}
             dragConstraints={
               isTinyScreen
-                ? { top: 0, bottom: deliveryType == 'pvz' ? 250 : 460 }
+                ? { top: 0, bottom: deliveryType == 'PVZ' ? 250 : 460 }
                 : { top: 0, bottom: 0 }
             }
             dragElastic={0.2}
@@ -217,19 +217,19 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
             <h2 className="h2">Способ доставки</h2>
             <div className="pvzTypeSelector">
               <div
-                className={`button ${deliveryType == 'pvz' && 'active'}`}
-                onClick={() => setDeliveryType('pvz')}
+                className={`button ${deliveryType == 'PVZ' && 'active'}`}
+                onClick={() => setDeliveryType('PVZ')}
               >
                 Самовывоз
               </div>
               <div
-                className={`button ${deliveryType == 'delivery' && 'active'}`}
-                onClick={() => setDeliveryType('delivery')}
+                className={`button ${deliveryType == 'DELIVERY' && 'active'}`}
+                onClick={() => setDeliveryType('DELIVERY')}
               >
                 Курьером
               </div>
             </div>
-            {deliveryType == 'pvz' && (
+            {deliveryType == 'PVZ' && (
               <>
                 <InputLabel
                   name="city"
@@ -262,7 +262,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                 </div>
               </>
             )}
-            {deliveryType == 'delivery' && (
+            {deliveryType == 'DELIVERY' && (
               <>
                 <AddressInput
                   addr={deliveryAddr}
@@ -281,7 +281,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                         longitude: data?.longitude,
                       },
                       work_time: '08:00-20:00',
-                      type: 'delivery',
+                      type: 'DELIVERY',
                       apartment: data?.apartment,
                       comment: data?.comment,
                       entrance: data?.entrance,
@@ -298,7 +298,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
               'w-full max-w[calc(100%-550px)] h-[calc(100vh-105px)] overflow-hidden border'
             }
           >
-            {deliveryType == 'pvz' && (
+            {deliveryType == 'PVZ' && (
               <MapContainer center={mapCenter} className={'w-full h-[calc(100vh-105px)]'} zoom={12}>
                 <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
                 <RecenterMap center={mapCenter} />
@@ -317,7 +317,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                       <p className={'text-sm'}>{pvz.work_time}</p>
                       <Button
                         onClick={() => {
-                          onSelect({ ...pvz, type: 'pvz' })
+                          onSelect({ ...pvz, type: 'PVZ' })
                           setIsOpen(false)
                         }}
                       >
@@ -328,7 +328,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                 ))}
               </MapContainer>
             )}
-            {deliveryType == 'delivery' && (
+            {deliveryType == 'DELIVERY' && (
               <MapContainer center={mapCenter} className={'w-full h-[calc(100vh-105px)]'} zoom={12}>
                 <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
                 <RecenterMap center={mapCenter} />
@@ -411,7 +411,16 @@ function AddressInput({
     <form
       onSubmit={e => {
         e.preventDefault()
-        onSelect({ ...address, apartment, comment, floor, entrance, intercom })
+        onSelect({
+          ...address,
+          latitude: coords[0],
+          longitude: coords[1],
+          apartment,
+          comment,
+          floor,
+          entrance,
+          intercom,
+        })
       }}
       className="relative flex-wrap flex gap-[10px]"
     >
@@ -613,7 +622,7 @@ export interface Pvz {
   // is_ltl: boolean
   // is_reception: boolean
   location: Location
-  type: 'pvz' | 'delivery'
+  type: 'PVZ' | 'DELIVERY'
   // name: string
   // nearest_station: string
   // note: string
