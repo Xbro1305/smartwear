@@ -108,7 +108,7 @@
         }
       }
 
-      @media (max-width: 1200px) {
+      @media (max-width: 768px) {
         flex-direction: column;
         display: flex;
       }
@@ -136,6 +136,22 @@
       display: flex;
       //   align-items: center;
       justify-content: center;
+    }
+
+    &_phonesect {
+      display: flex;
+      align-items: flex-end;
+      padding-left: 10px;
+
+      input {
+        margin: 0;
+        padding-left: 2px !important;
+      }
+
+      i {
+        font-style: normal;
+        padding-bottom: 1px;
+      }
     }
 
     &_gender {
@@ -301,14 +317,14 @@
         }
       }
 
-      @media (max-width: 1200px) {
+      @media (max-width: 1214px) {
         padding: 32px;
       }
     }
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1214px) {
   .profile {
     max-width: 100%;
     padding: 14px;
@@ -394,7 +410,7 @@
       outline: none;
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: 1214px) {
       margin-top: 20px;
       padding: 0 10px;
     }
@@ -482,7 +498,7 @@
     }
   }
 
-  @media (max-width: 1200px) {
+  @media (max-width: 1214px) {
     h2 {
       padding: 0 10px;
     }

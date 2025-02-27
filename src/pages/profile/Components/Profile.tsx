@@ -30,6 +30,7 @@ export const Profile_profile = () => {
   const percent = (current * 100) / next
   const [surname, setSurname] = useState<string>('')
   const [name, setName] = useState<string>('')
+  const [prefix, setPrefix] = useState<any>('+7')
   const [middlename, setMiddlename] = useState<string>('')
   const [birthday, setBirthday] = useState<string>('')
   const [email, setEmail] = useState<string>('')
@@ -105,7 +106,7 @@ export const Profile_profile = () => {
       middleName: middlename,
       birthday,
       email,
-      phone,
+      phone: `${prefix}${phone}`,
       gender,
       city,
       isSubscribed,
@@ -203,19 +204,6 @@ export const Profile_profile = () => {
       .catch(err => {
         console.log(err)
       })
-  }
-
-  const cancelEditing = () => {
-    setSurname(initialData.surname || '')
-    setName(initialData.name || '')
-    setMiddlename(initialData.middlename || '')
-    setBirthday(initialData.birthday || '')
-    setEmail(initialData.email || '')
-    setPhone(initialData.phone || '')
-    setGender(initialData.gender || '')
-    setIsSubscribed(initialData.isSubscribed || '')
-    setCity(initialData.city || '')
-    setIsProfileEdited(false)
   }
 
   // if (isLoading) return <div>Загрузка...</div>
@@ -418,23 +406,32 @@ export const Profile_profile = () => {
                 style={{
                   border: `1px solid ${isPhoneComfirmed ? 'var(--green)' : 'var(--red)'}`,
                 }}
-                className={`${styles.profile_form_label} ${email.length ? styles.profile_form_label_active : ''} ${isPhoneComfirmed ? styles.profile_form_label_confirmed : styles.profile_form_label_not_confirmed}`}
+                className={`${styles.profile_form_label} ${email.length ? styles.profile_form_label_active : styles.profile_form_label_active} ${isPhoneComfirmed ? styles.profile_form_label_confirmed : styles.profile_form_label_not_confirmed}`}
               >
                 <p>Номер телефона</p>
-                <PatternFormat
-                  placeholder=" "
-                  value={phone}
-                  onChange={(e: any) => {
-                    const value = e.target.value
-                    setPhone(value)
-                    initialData.phone != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
-                  }}
-                  format={'+7 (###) ### ##-##'}
-                  mask={'X'}
-                  name={'phone'}
-                />
+                <section className={styles.profile_form_phonesect}>
+                  <i>{prefix}</i>
+                  <PatternFormat
+                    format={'# (###) ### ##-##'}
+                    mask={'X'}
+                    name={'phone'}
+                    onChange={(e: any) => {
+                      if (e.target.value.split('')[0] == 9) {
+                        setPhone('+7' + e.target.value)
+                        setPrefix('+')
+                      } else if (e.target.value.split('')[0] == 8) {
+                        setPrefix('')
+                      } else if (e.target.value.split('')[0] == 7) {
+                        setPrefix('+')
+                      } else {
+                        setPhone('+79' + e.target.value)
+                        setPrefix('+')
+                      }
+                    }}
+                    value={phone}
+                    style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
+                  />
+                </section>
                 <span
                   style={{
                     border: `2px solid ${isPhoneComfirmed ? 'var(--green)' : 'var(--red)'}`,
@@ -482,7 +479,7 @@ export const Profile_profile = () => {
                   className="button"
                   type="button"
                   style={{ background: 'none', color: 'var(--dark-gray)' }}
-                  onClick={cancelEditing}
+                  onClick={refresh}
                 >
                   Отмена
                 </button>
@@ -531,6 +528,7 @@ export const Profile_profile = () => {
               fullAddress: pvz.location?.address_full,
               longitude: String(pvz.location.longitude),
               latitude: String(pvz.location.latitude),
+              type: pvz.type,
               city: pvz.location.city,
               apartment: pvz.apartment,
               intercom: pvz.intercom,
@@ -673,6 +671,7 @@ export const Profile_profile = () => {
               isEditing={false}
               onSelect={pvz => {
                 const requestData = {
+                  type: pvz.type,
                   fullAddress: pvz.location?.address_full,
                   longitude: String(pvz.location.longitude),
                   latitude: String(pvz.location.latitude),

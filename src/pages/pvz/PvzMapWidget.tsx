@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvent } from 'react-leaflet'
 import * as L from 'leaflet'
+import { motion } from 'framer-motion'
 import axios from 'axios'
 import 'leaflet/dist/leaflet.css'
 import { InputLabel } from '@/widgets/InputLabel/InputLabel'
 import cdekIconUrl from '@/assets/images/marker.png' //
+import { IoArrowBack } from 'react-icons/io5'
 
 function RecenterMap({ center }: { center: [number, number] }) {
   const map = useMap()
@@ -24,7 +26,13 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
-  const [deliveryType, setDeliveryType] = useState<'pvz' | 'delivery'>('pvz')
+  const [deliveryType, setDeliveryType] = useState<'pvz' | 'delivery'>('delivery')
+  const [deliveryAddr, setDeliveryAddr] = useState<string>('')
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [dragY, setDragY] = useState(0)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  const isTinyScreen = window.innerWidth < 1000
 
   useEffect(() => {
     if (lat && long) {
@@ -114,6 +122,51 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
     }
   }, [selectedPvz])
 
+  const cdekIcon = new L.Icon({
+    iconUrl: cdekIconUrl,
+    iconSize: deliveryType == 'pvz' ? [45, 38] : [60, 50], // Размер иконки
+    iconAnchor: [15, 30], // Точка привязки
+    popupAnchor: [0, -30], // Смещение попапа
+  })
+
+  function LiveMapCenterLogger({
+    onCenterChange,
+  }: {
+    onCenterChange: (center: [number, number]) => void
+  }) {
+    useMapEvent('moveend', async event => {
+      const map = event.target
+      const center = map.getCenter()
+      const fetchAddress = async (latitude: number, longitude: number) => {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ru`
+          )
+          const data = await response.json()
+
+          return {
+            city: data.address.city || '',
+            fullAddress: data.display_name,
+          }
+        } catch (error) {
+          console.error('Ошибка получения адреса:', error)
+        }
+      }
+
+      const address = await fetchAddress(center.lat, center.lng)
+
+      setDeliveryAddr(address?.fullAddress)
+    })
+
+    useMapEvent('move', event => {
+      const map = event.target
+      const center = map.getCenter()
+      onCenterChange([center.lat, center.lng])
+    })
+
+    return null
+  }
+
   return (
     <>
       {!isEditing ? (
@@ -127,124 +180,148 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
       ) : (
         <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
       )}
-      <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={'Выберите пункт выдачи'}>
-        <div className="pvzTypeSelector">
-          <div
-            className={`button ${deliveryType == 'pvz' && 'active'}`}
-            onClick={() => setDeliveryType('pvz')}
+      <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={''}>
+        <>
+          <motion.div
+            ref={menuRef}
+            initial={{ y: '100%' }}
+            animate={{ y: isMenuOpen ? 0 : 90 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            drag="y"
+            // dragConstraints={{ top: 0, bottom: 300 }}
+            dragConstraints={{ top: 0, bottom: deliveryType == 'pvz' ? 250 : 460 }}
+            dragElastic={0.2}
+            onDrag={(_, info) => setDragY(info.point.y)}
+            onDragEnd={() => {
+              if (dragY > 50) {
+                setIsMenuOpen(false)
+              }
+            }}
+            className={'flex inputs-label flex-col gap-4 mt-5 p-[30px] min-w-[350px] w-[40%]'}
           >
-            Пункт выдачи
-          </div>
-          <div
-            className={`button ${deliveryType == 'delivery' && 'active'}`}
-            onClick={() => setDeliveryType('delivery')}
-          >
-            Курьерская доставка
-          </div>
-        </div>
-        {deliveryType == 'pvz' && (
-          <>
-            <InputLabel
-              name="city"
-              title="Город"
-              onChange={e => setCity(e.target.value)}
-              value={city}
-            />
-
-            <div className={'flex gap-4 mt-5'}>
+            <h2 className="h2">Способ доставки</h2>
+            <div className="pvzTypeSelector">
               <div
-                ref={listRef}
-                className={'w-1/2 max-h-[400px] overflow-auto border p-2 rounded-lg'}
+                className={`button ${deliveryType == 'pvz' && 'active'}`}
+                onClick={() => setDeliveryType('pvz')}
               >
-                {pvzList.length === 0 ? (
-                  <p>Загрузка...</p>
-                ) : (
-                  pvzList.map(pvz => (
-                    <div
-                      id={`pvz-${pvz.code}`}
-                      className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
-                      key={pvz.code}
-                      onClick={() => {
-                        setSelectedPvz(pvz)
-                        setMapCenter([pvz.location.latitude, pvz.location.longitude])
-                      }}
-                    >
-                      <p className={'font-semibold'}>{pvz.location.address}</p>
-                      <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
-                    </div>
-                  ))
-                )}
+                Самовывоз
               </div>
-
-              <div className={'w-1/2 h-[400px] rounded-lg overflow-hidden border'}>
-                <MapContainer center={mapCenter} className={'w-full h-full'} zoom={12}>
-                  <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
-                  <RecenterMap center={mapCenter} />
-                  {pvzList.map(pvz => {
-                    const cdekIcon = new L.Icon({
-                      iconUrl: cdekIconUrl,
-                      iconSize: [45, 38], // Размер иконки
-                      iconAnchor: [15, 30], // Точка привязки
-                      popupAnchor: [0, -30], // Смещение попапа
-                    })
-
-                    return (
-                      <Marker
-                        key={`marker-${pvz.code}`}
-                        position={[pvz.location.latitude, pvz.location.longitude]}
-                        eventHandlers={{ click: () => setSelectedPvz(pvz) }}
-                        icon={cdekIcon}
-                        ref={marker => {
-                          if (marker) markerRefs.current.set(pvz.code, marker)
-                        }}
-                      >
-                        <Popup>
-                          <p className={'font-semibold'}>{pvz.location.address}</p>
-                          <p className={'text-sm'}>{pvz.work_time}</p>
-                          <Button
-                            onClick={() => {
-                              onSelect({ ...pvz, type: 'pvz' })
-                              setIsOpen(false)
-                            }}
-                          >
-                            Выбрать
-                          </Button>
-                        </Popup>
-                      </Marker>
-                    )
-                  })}
-                </MapContainer>
+              <div
+                className={`button ${deliveryType == 'delivery' && 'active'}`}
+                onClick={() => setDeliveryType('delivery')}
+              >
+                Курьером
               </div>
             </div>
-          </>
-        )}
-
-        {deliveryType == 'delivery' && (
-          <>
-            <AddressInput
-              onSelect={data => {
-                setIsOpen(false)
-                onSelect({
-                  code: 'custom',
-                  location: {
-                    address: data.fullAddress,
-                    address_full: data.fullAddress,
-                    city: data.city,
-                    latitude: data.latitude,
-                    longitude: data.longitude,
-                  },
-                  work_time: '08:00-20:00',
-                  type: 'delivery',
-                  apartment: data?.apartment,
-                  comment: data?.comment,
-                  entrance: data?.entrance,
-                  floor: data?.floor,
-                  intercom: data?.intercom,
-                })
-              }}
-            />
-          </>
-        )}
+            {deliveryType == 'pvz' && (
+              <>
+                <InputLabel
+                  name="city"
+                  title="Город"
+                  onChange={e => setCity(e.target.value)}
+                  value={city}
+                />
+                <div
+                  ref={listRef}
+                  className={'w-full max-h-[400px] overflow-auto border p-2 rounded-lg'}
+                >
+                  {pvzList.length === 0 ? (
+                    <p>Загрузка...</p>
+                  ) : (
+                    pvzList.map(pvz => (
+                      <div
+                        id={`pvz-${pvz.code}`}
+                        className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
+                        key={pvz.code}
+                        onClick={() => {
+                          setSelectedPvz(pvz)
+                          setMapCenter([pvz.location.latitude, pvz.location.longitude])
+                        }}
+                      >
+                        <p className={'font-semibold'}>{pvz.location.address}</p>
+                        <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
+            {deliveryType == 'delivery' && (
+              <>
+                <AddressInput
+                  addr={deliveryAddr}
+                  changeAddr={setDeliveryAddr}
+                  setMapCenter={setMapCenter}
+                  onSelect={data => {
+                    setIsOpen(false)
+                    onSelect({
+                      code: 'custom',
+                      location: {
+                        address: data.fullAddress,
+                        address_full: data.fullAddress,
+                        city: data.city,
+                        latitude: data.latitude,
+                        longitude: data.longitude,
+                      },
+                      work_time: '08:00-20:00',
+                      type: 'delivery',
+                      apartment: data?.apartment,
+                      comment: data?.comment,
+                      entrance: data?.entrance,
+                      floor: data?.floor,
+                      intercom: data?.intercom,
+                    })
+                  }}
+                />
+              </>
+            )}
+          </motion.div>
+          <div
+            className={
+              'w-full max-w[calc(100%-550px)] h-[calc(100vh-105px)] overflow-hidden border'
+            }
+          >
+            {deliveryType == 'pvz' && (
+              <MapContainer center={mapCenter} className={'w-full h-[calc(100vh-105px)]'} zoom={12}>
+                <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
+                <RecenterMap center={mapCenter} />
+                {pvzList.map(pvz => (
+                  <Marker
+                    key={`marker-${pvz.code}`}
+                    position={[pvz.location.latitude, pvz.location.longitude]}
+                    eventHandlers={{ click: () => setSelectedPvz(pvz) }}
+                    icon={cdekIcon}
+                    ref={marker => {
+                      if (marker) markerRefs.current.set(pvz.code, marker)
+                    }}
+                  >
+                    <Popup>
+                      <p className={'font-semibold'}>{pvz.location.address}</p>
+                      <p className={'text-sm'}>{pvz.work_time}</p>
+                      <Button
+                        onClick={() => {
+                          onSelect({ ...pvz, type: 'pvz' })
+                          setIsOpen(false)
+                        }}
+                      >
+                        Выбрать
+                      </Button>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            )}
+            {deliveryType == 'delivery' && (
+              <MapContainer center={mapCenter} className={'w-full h-[calc(100vh-105px)]'} zoom={12}>
+                <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
+                <RecenterMap center={mapCenter} />
+                <LiveMapCenterLogger onCenterChange={setMapCenter} />
+                <Marker position={[mapCenter[0], mapCenter[1]]} icon={cdekIcon} />
+              </MapContainer>
+            )}
+          </div>
+        </>
       </Dialog>
     </>
   )
@@ -262,12 +339,22 @@ interface deliveryData {
   comment?: string
 }
 
-function AddressInput({ onSelect }: { onSelect: (data: deliveryData) => void }) {
+function AddressInput({
+  onSelect,
+  addr,
+  changeAddr,
+  setMapCenter,
+}: {
+  onSelect: (data: deliveryData) => void
+  addr: string
+  changeAddr: (addr: string) => void
+  setMapCenter: (center: [number, number]) => void
+}) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<any[]>([])
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [address, setAddress] = useState<deliveryData>({
-    fullAddress: '',
+    fullAddress: addr,
     longitude: 1,
     latitude: 1,
     city: '',
@@ -278,8 +365,11 @@ function AddressInput({ onSelect }: { onSelect: (data: deliveryData) => void }) 
   const [intercom, setIntercom] = useState<string>('')
   const [comment, setComment] = useState<string>('')
 
+  useEffect(() => setQuery(addr), [addr])
+
   useEffect(() => {
     if (query.length < 3) return
+    if (query == addr) return
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(async () => {
@@ -334,6 +424,8 @@ function AddressInput({ onSelect }: { onSelect: (data: deliveryData) => void }) 
                     console.error('Ошибка получения адреса:', error)
                   }
                 }
+                setMapCenter([suggestion.lat, suggestion.lon])
+                changeAddr(suggestion.display_name)
                 setAddress({
                   fullAddress: suggestion.display_name,
                   longitude: suggestion.lon,
@@ -417,17 +509,24 @@ function Dialog({ children, onClose, open, title }: DialogProps) {
   if (!open) return null
 
   return (
-    <div className={'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50'}>
-      <div className={'bg-white rounded-lg p-4 max-w-lg w-full'}>
-        <h2 className={'text-lg font-semibold'}>{title}</h2>
-        <div className={'mt-4'}>{children}</div>
-        <button
-          className={'mt-4 w-full px-4 py-2 text-white rounded-[8px]'}
-          style={{ background: 'var(--red)' }}
-          onClick={onClose}
-        >
-          Закрыть
-        </button>
+    <div
+      className={
+        'fixed inset-0 flex flex-row items-center justify-center bg-black bg-opacity-50 z-50'
+      }
+    >
+      <div className={'bg-white w-full h-full'}>
+        <h2 className={'text-lg font-semibold p-[30px]'}>
+          {' '}
+          <button
+            className={'flex flex-row items-center gap-[10px] text-white'}
+            style={{ color: 'var(--red)' }}
+            onClick={onClose}
+          >
+            <IoArrowBack /> Назад
+          </button>
+          {title}
+        </h2>
+        <div className={'mt-4 flex gap-[20px] h-[calc(100vh-105px)]'}>{children}</div>
       </div>
     </div>
   )
