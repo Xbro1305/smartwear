@@ -26,7 +26,8 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
-  const [deliveryType, setDeliveryType] = useState<'pvz' | 'delivery'>('delivery')
+  const [deliveryType, setDeliveryType] = useState<'pvz' | 'delivery'>('pvz')
+  const [deliveryCoords, setDeliveryCoords] = useState<[number, number]>([53.35, 83.75])
   const [deliveryAddr, setDeliveryAddr] = useState<string>('')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [dragY, setDragY] = useState(0)
@@ -38,10 +39,15 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
     if (lat && long) {
       setMapCenter([lat, long])
       reverseGeocode(lat, long)
-    } else {
-      getLocation()
     }
   }, [])
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      await getLocation()
+    }
+    isOpen && fetchLocation()
+  }, [isOpen])
 
   async function reverseGeocode(latitude: number, longitude: number) {
     try {
@@ -52,6 +58,8 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
       const foundCity =
         data.address.city || data.address.town || data.address.village || 'Город не найден'
       setCity(foundCity)
+      setDeliveryAddr(data.display_name)
+      setDeliveryCoords([Number(data.lat), Number(data.lon)])
     } catch (error) {
       console.error('Ошибка получения города:', error)
     }
@@ -147,6 +155,8 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
           return {
             city: data.address.city || '',
             fullAddress: data.display_name,
+            lat: data.lat,
+            lon: data.lon,
           }
         } catch (error) {
           console.error('Ошибка получения адреса:', error)
@@ -156,6 +166,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
       const address = await fetchAddress(center.lat, center.lng)
 
       setDeliveryAddr(address?.fullAddress)
+      setDeliveryCoords([Number(address?.lat), Number(address?.lon)])
     })
 
     useMapEvent('move', event => {
@@ -255,6 +266,7 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
               <>
                 <AddressInput
                   addr={deliveryAddr}
+                  coords={deliveryCoords}
                   changeAddr={setDeliveryAddr}
                   setMapCenter={setMapCenter}
                   onSelect={data => {
@@ -265,8 +277,8 @@ export default function PvzMapWidget({ onSelect, lat, long, isEditing }: PvzMapW
                         address: data.fullAddress,
                         address_full: data.fullAddress,
                         city: data.city,
-                        latitude: data.latitude,
-                        longitude: data.longitude,
+                        latitude: data?.latitude,
+                        longitude: data?.longitude,
                       },
                       work_time: '08:00-20:00',
                       type: 'delivery',
@@ -348,28 +360,34 @@ function AddressInput({
   addr,
   changeAddr,
   setMapCenter,
+  coords,
 }: {
   onSelect: (data: deliveryData) => void
   addr: string
   changeAddr: (addr: string) => void
   setMapCenter: (center: [number, number]) => void
+  coords: [number, number]
 }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<any[]>([])
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const [address, setAddress] = useState<deliveryData>({
+  const [address, setAddress] = useState<any>({
     fullAddress: addr,
-    longitude: 1,
-    latitude: 1,
     city: '',
   })
+  const [latitude, setLatitude] = useState(55.625578)
+  const [longitude, setLongitude] = useState(37.6063916)
   const [apartment, setApartment] = useState<string>('')
   const [entrance, setEntrance] = useState<string>('')
   const [floor, setFloor] = useState<string>('')
   const [intercom, setIntercom] = useState<string>('')
   const [comment, setComment] = useState<string>('')
 
-  useEffect(() => setQuery(addr), [addr])
+  useEffect(() => {
+    setQuery(addr)
+    setLatitude(coords[0])
+    setLongitude(coords[1])
+  }, [addr, coords])
 
   useEffect(() => {
     if (query.length < 3) return
