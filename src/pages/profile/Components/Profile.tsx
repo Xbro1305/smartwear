@@ -83,7 +83,7 @@ export const Profile_profile = () => {
           setPrefix('+')
         } else if (phone.startsWith('8')) {
           setPrefix('')
-        } else if (phone.startsWith('7')) {
+        } else if (phone.startsWith('+7')) {
           setPrefix('+')
         }
       })
