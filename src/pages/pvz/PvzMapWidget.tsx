@@ -411,16 +411,7 @@ function AddressInput({
     <form
       onSubmit={e => {
         e.preventDefault()
-        onSelect({
-          ...address,
-          latitude: coords[0],
-          longitude: coords[1],
-          apartment,
-          comment,
-          floor,
-          entrance,
-          intercom,
-        })
+        onSelect({ ...address, latitude, longitude, apartment, comment, floor, entrance, intercom })
       }}
       className="relative flex-wrap flex gap-[10px]"
     >
