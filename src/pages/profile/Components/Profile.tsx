@@ -78,12 +78,9 @@ export const Profile_profile = () => {
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
 
-        if (phone.startsWith('9')) {
-          setPhone('7' + phone)
-          setPrefix('+')
-        } else if (phone.startsWith('8')) {
+        if (phone.startsWith('8')) {
           setPrefix('')
-        } else if (phone.startsWith('+7')) {
+        } else {
           setPrefix('+')
         }
       })
@@ -439,6 +436,11 @@ export const Profile_profile = () => {
                         setPhone('+79' + e.target.value)
                         setPrefix('+')
                       }
+
+                      const value = e.target.value
+                      initialData.phone != value
+                        ? setIsProfileEdited(true)
+                        : setIsProfileEdited(false)
                     }}
                     value={phone}
                     style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
@@ -541,7 +543,6 @@ export const Profile_profile = () => {
           apartment={editingAddress?.apartment}
           floor={editingAddress?.floor}
           deliveryAddr={editingAddress.fullAddress}
-          deliveryCoords={[editingAddress.lat, editingAddress.lon]}
           entrance={editingAddress.entrance}
           onSelect={pvz => {
             const requestData = {

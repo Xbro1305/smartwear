@@ -26,7 +26,6 @@ export default function PvzMapWidget({
   apartment,
   comment,
   deliveryAddr: defalultDeliveryAddress,
-  deliveryCoords: defalultDeliveryCoords,
   entrance,
   floor,
   intercom,
@@ -48,11 +47,6 @@ export default function PvzMapWidget({
 
   const isTinyScreen = window.innerWidth < 1000
 
-  useEffect(
-    () => defalultDeliveryCoords && setDeliveryCoords(defalultDeliveryCoords),
-    [defalultDeliveryCoords]
-  )
-
   useEffect(() => {
     defalultDeliveryAddress && setDeliveryAddr(defalultDeliveryAddress)
   }, [defalultDeliveryAddress])
@@ -62,16 +56,12 @@ export default function PvzMapWidget({
   useEffect(() => {
     if (lat && long) {
       setMapCenter([lat, long])
+      type == 'DELIVERY' && setDeliveryCoords([lat, long])
       reverseGeocode(lat, long)
     }
-  }, [])
 
-  useEffect(() => {
-    const fetchLocation = async () => {
-      await getLocation()
-    }
-    isOpen && fetchLocation()
-  }, [isOpen])
+    isEditing == false && getLocation()
+  }, [])
 
   async function reverseGeocode(latitude: number, longitude: number) {
     try {
