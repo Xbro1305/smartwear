@@ -79,14 +79,11 @@ export const Profile_profile = () => {
         setDefaultAddress(defaultAddr)
 
         if (phone.startsWith('9')) {
-          setPhone('+7' + phone)
+          setPhone('7' + phone)
           setPrefix('+')
         } else if (phone.startsWith('8')) {
           setPrefix('')
         } else if (phone.startsWith('7')) {
-          setPrefix('+')
-        } else {
-          setPhone('+79' + phone)
           setPrefix('+')
         }
       })
