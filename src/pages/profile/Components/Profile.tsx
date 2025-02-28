@@ -755,8 +755,8 @@ export const Profile_profile = () => {
                     Object.entries(requestData).filter(([_, value]) => value)
                   )
 
-                  axios(`${baseUrl}/users/add-address/${initialData.id}`, {
-                    method: 'POST',
+                  axios(`${baseUrl}/users/update-address/${initialData.id}/${editingAddress.id}`, {
+                    method: 'PUT',
                     headers: {
                       Authorization: `Bearer ${token}`,
                       'Content-Type': 'application/json',
