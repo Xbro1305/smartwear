@@ -218,41 +218,21 @@ export const Header: React.FC = () => {
       <div
         className={styles.mob_header}
         id="mob_header"
-        style={width <= 900 && isOpen ? {} : { top: '-100%' }}
+        style={width <= 1214 && isOpen ? {} : { top: '-100%' }}
       >
-        <Link
-          onClick={() => setIsOpen(false)}
-          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
-          to={ROUTER_PATHS.CATALOG}
-        >
+        <Link onClick={() => setIsOpen(false)} to={ROUTER_PATHS.CATALOG}>
           Каталог
         </Link>
-        <Link
-          onClick={() => setIsOpen(false)}
-          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
-          to="/about"
-        >
+        <Link onClick={() => setIsOpen(false)} to="/about">
           О нас
         </Link>
-        <Link
-          onClick={() => setIsOpen(false)}
-          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
-          to="/contacts"
-        >
+        <Link onClick={() => setIsOpen(false)} to="/contacts">
           Контакты
         </Link>
-        <Link
-          onClick={() => setIsOpen(false)}
-          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
-          to={ROUTER_PATHS.ARTICLES}
-        >
+        <Link onClick={() => setIsOpen(false)} to={ROUTER_PATHS.ARTICLES}>
           Статьи
         </Link>
-        <Link
-          onClick={() => setIsOpen(false)}
-          style={width <= 900 && isOpen ? { display: 'flex' } : {}}
-          to="/delivery"
-        >
+        <Link onClick={() => setIsOpen(false)} to="/delivery">
           Доставка
         </Link>
       </div>

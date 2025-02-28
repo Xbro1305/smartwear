@@ -62,7 +62,7 @@
     padding: 50px;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1214px) {
     grid-template-columns: repeat(2, calc(50%));
     padding: 20px;
     row-gap: 50px;
@@ -82,7 +82,7 @@
     }
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1214px) {
     padding-bottom: 70px;
 
     &_sect {

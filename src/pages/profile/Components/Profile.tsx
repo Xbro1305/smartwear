@@ -41,8 +41,53 @@ export const Profile_profile = () => {
   const [isEmailConfirmed, setIsEmailConfirmed] = useState<any>('')
   const [isPhoneComfirmed, setIsPhoneConfirmed] = useState<any>('')
   const [isSubscribed, setIsSubscribed] = useState<any>('')
-  const [adresses, setAddresses] = useState<any[]>([])
-  const [defaultAddress, setDefaultAddress] = useState<any>()
+  const [adresses, setAddresses] = useState<any[]>([
+    // {
+    //   id: 17,
+    //   userId: 34,
+    //   fullAddress: '119602, Россия, Москва, Москва, ул. Академика Анохина, 60, пом. № XIII',
+    //   longitude: '37.46912',
+    //   latitude: '55.649277',
+    //   city: 'Москва',
+    //   isDefault: false,
+    //   type: 'PVZ',
+    //   apartment: null,
+    //   floor: null,
+    //   entrance: null,
+    //   intercom: null,
+    //   comment: null,
+    // },
+    {
+      id: 18,
+      userId: 34,
+      fullAddress: 'Москва, Центральный федеральный округ, Россия',
+      longitude: '37.75009462358871',
+      latitude: '55.56430435',
+      city: 'Москва',
+      isDefault: true,
+      type: 'DELIVERY',
+      apartment: '2',
+      floor: '2',
+      entrance: '1',
+      intercom: '2',
+      comment: '2',
+    },
+  ])
+  const [defaultAddress, setDefaultAddress] = useState<any>({
+    id: 18,
+    userId: 34,
+    fullAddress: 'Москва, Центральный федеральный округ, Россия',
+    longitude: '37.75009462358871',
+    latitude: '55.56430435',
+    city: 'Москва',
+    isDefault: true,
+    type: 'DELIVERY',
+    apartment: '2',
+    floor: '2',
+    entrance: '1',
+    intercom: '2',
+    comment: '2',
+  })
   const [deletingAddress, setDeletingAddress] = useState<any>(false)
   const [emailConfirm, setEmailConfirm] = useState<boolean>(false)
   const [phoneConfirm, setPhoneConfirm] = useState<boolean>(false)
@@ -297,6 +342,44 @@ export const Profile_profile = () => {
               title="Фамилия"
               required={true}
             />
+            {/* <label
+              className={`${styles.profile_form_label} ${middlename.length ? styles.profile_form_label_active : ''}`}
+            >
+              <p>Отчество</p>
+              <input
+                value={middlename}
+                onChange={e => setMiddlename(e.target.value)}
+                name={'patronomic'}
+                type={'text'}
+              />
+            </label> */}
+            <InputLabel
+              title={'Отчество'}
+              onChange={e => {
+                const value = e.target.value
+                setMiddlename(value)
+                initialData.middlename != value
+                  ? setIsProfileEdited(true)
+                  : setIsProfileEdited(false)
+              }}
+              value={middlename}
+              name={'middlename'}
+            />
+            <label className={`${styles.profile_form_label} ${styles.profile_form_label_active}`}>
+              <p>Дата рождения</p>
+              <input
+                value={birthday}
+                onChange={e => {
+                  const value = e.target.value
+                  setBirthday(value)
+                  initialData.birthday != value
+                    ? setIsProfileEdited(true)
+                    : setIsProfileEdited(false)
+                }}
+                name={'birthday'}
+                type={'date'}
+              />
+            </label>
             <div className={styles.profile_form_gender}>
               <h6 className="h6">Пол</h6>
               <label className={styles.profile_form_gender_label}>
@@ -334,42 +417,6 @@ export const Profile_profile = () => {
                 <p className="p2">Женский</p>
               </label>
             </div>
-            {/* <label
-              className={`${styles.profile_form_label} ${middlename.length ? styles.profile_form_label_active : ''}`}
-            >
-              <p>Отчество</p>
-              <input
-                value={middlename}
-                onChange={e => setMiddlename(e.target.value)}
-                name={'patronomic'}
-                type={'text'}
-              />
-            </label> */}
-            <label className={`${styles.profile_form_label} ${styles.profile_form_label_active}`}>
-              <p>Дата рождения</p>
-              <input
-                value={birthday}
-                onChange={e => {
-                  const value = e.target.value
-                  setBirthday(value)
-                  initialData.birthday != value
-                    ? setIsProfileEdited(true)
-                    : setIsProfileEdited(false)
-                }}
-                name={'birthday'}
-                type={'date'}
-              />
-            </label>
-            <InputLabel
-              title={'Город'}
-              onChange={e => {
-                const value = e.target.value
-                setCity(value)
-                initialData.city != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
-              }}
-              value={city}
-              name={'city'}
-            />
             <div className={styles.profile_form_email_label}>
               <label
                 style={{
@@ -534,16 +581,7 @@ export const Profile_profile = () => {
           ))}
 
         <PvzMapWidget
-          isEditing={true}
-          lat={Number(editingAddress.latitude)}
-          long={Number(editingAddress.longitude)}
-          type={editingAddress?.type}
-          comment={editingAddress?.comment}
-          intercom={editingAddress?.intercom}
-          apartment={editingAddress?.apartment}
-          floor={editingAddress?.floor}
-          deliveryAddr={editingAddress.fullAddress}
-          entrance={editingAddress.entrance}
+          isEditing={false}
           onSelect={pvz => {
             const requestData = {
               fullAddress: pvz.location?.address_full,
@@ -672,9 +710,9 @@ export const Profile_profile = () => {
               <input
                 checked={
                   editingAddress !== false &&
-                  defaultAddress.fullAddress == editingAddress.fullAddress
+                  defaultAddress?.fullAddress == editingAddress?.fullAddress
                 }
-                onChange={() => editDefaultAddress(editingAddress.fullAddress)}
+                onChange={() => editDefaultAddress(editingAddress?.fullAddress)}
                 type="checkbox"
                 className="checkbox"
                 style={{ border: 'none' }}
@@ -686,39 +724,50 @@ export const Profile_profile = () => {
             <button className="button" onClick={() => setEditingAddress(false)}>
               Сохранить
             </button>
-            <PvzMapWidget
-              isEditing={false}
-              onSelect={pvz => {
-                const requestData = {
-                  type: pvz.type,
-                  fullAddress: pvz.location?.address_full,
-                  longitude: String(pvz.location.longitude),
-                  latitude: String(pvz.location.latitude),
-                  city: pvz.location.city,
-                  apartment: pvz.apartment,
-                  intercom: pvz.intercom,
-                  floor: pvz.floor,
-                  entrance: pvz.entrance,
-                  comment: pvz.comment,
-                }
+            {editingAddress && (
+              <PvzMapWidget
+                isEditing={true}
+                lat={Number(editingAddress.latitude)}
+                long={Number(editingAddress.longitude)}
+                type={editingAddress?.type}
+                comment={editingAddress?.comment}
+                intercom={editingAddress?.intercom}
+                apartment={editingAddress?.apartment}
+                floor={editingAddress?.floor}
+                deliveryAddr={editingAddress.fullAddress}
+                entrance={editingAddress.entrance}
+                onSelect={pvz => {
+                  const requestData = {
+                    type: pvz.type,
+                    fullAddress: pvz.location?.address_full,
+                    longitude: String(pvz.location.longitude),
+                    latitude: String(pvz.location.latitude),
+                    city: pvz.location.city,
+                    apartment: pvz.apartment,
+                    intercom: pvz.intercom,
+                    floor: pvz.floor,
+                    entrance: pvz.entrance,
+                    comment: pvz.comment,
+                  }
 
-                // Удаляем пустые поля
-                const filteredData = Object.fromEntries(
-                  Object.entries(requestData).filter(([_, value]) => value)
-                )
+                  // Удаляем пустые поля
+                  const filteredData = Object.fromEntries(
+                    Object.entries(requestData).filter(([_, value]) => value)
+                  )
 
-                axios(`${baseUrl}/users/add-address/${initialData.id}`, {
-                  method: 'POST',
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                  },
-                  data: filteredData,
-                })
-                  .then(() => refresh())
-                  .catch(err => console.log(err))
-              }}
-            />
+                  axios(`${baseUrl}/users/add-address/${initialData.id}`, {
+                    method: 'POST',
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                      'Content-Type': 'application/json',
+                    },
+                    data: filteredData,
+                  })
+                    .then(() => refresh())
+                    .catch(err => console.log(err))
+                }}
+              />
+            )}
           </section>
           <button
             className={styles.profile_modal_body_closeButton}

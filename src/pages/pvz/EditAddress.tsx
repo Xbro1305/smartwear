@@ -18,7 +18,7 @@ function RecenterMap({ center }: { center: [number, number] }) {
   return null
 }
 
-export default function PvzMapWidget({
+export default function EditAddress({
   onSelect,
   lat,
   long,
@@ -41,61 +41,57 @@ export default function PvzMapWidget({
   const [deliveryType, setDeliveryType] = useState<'PVZ' | 'DELIVERY'>('PVZ')
   const [deliveryCoords, setDeliveryCoords] = useState<[number, number]>([53.35, 83.75])
   const [deliveryAddr, setDeliveryAddr] = useState<string>('')
+  const [deliveryApartment, setDeliveryApartment] = useState<string>('')
+  const [deliveryComment, setDeliveryComment] = useState<string>('')
+  const [deliveryEntrance, setDeliveryEntrance] = useState<string>('')
+  const [deliveryFloor, setDeliveryFloor] = useState<string>('')
+  const [deliveryIntercom, setDeliveryIntercom] = useState<string>('')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [dragY, setDragY] = useState(0)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  console.log(apartment, comment, entrance, floor, intercom, type)
+  console.log(deliveryType)
+
+  apartment && setDeliveryApartment(apartment)
+  comment && setDeliveryComment(comment)
+  entrance && setDeliveryEntrance(entrance)
+  floor && setDeliveryFloor(floor)
+  intercom && setDeliveryIntercom(intercom)
+
+  console.log(deliveryApartment, deliveryComment, deliveryEntrance, deliveryIntercom, deliveryFloor)
 
   const isTinyScreen = window.innerWidth < 1000
 
   useEffect(() => {
     defalultDeliveryAddress && setDeliveryAddr(defalultDeliveryAddress)
-  }, [defalultDeliveryAddress])
+  }, [])
 
-  useEffect(() => type && setDeliveryType(type), [type])
+  useEffect(() => type && setDeliveryType(type), [])
 
   useEffect(() => {
     if (lat && long) {
       setMapCenter([lat, long])
       type == 'DELIVERY' && setDeliveryCoords([lat, long])
+      reverseGeocode(lat, long)
     }
 
-    isEditing == false && getLocation()
+    // isEditing == false && getLocation()
   }, [])
 
-  async function getLocation() {
-    if (!navigator.geolocation) {
-      alert('Геолокация не поддерживается вашим браузером.')
-      return
-    }
-
-    const permission = await navigator.permissions.query({ name: 'geolocation' })
-
-    if (permission.state === 'granted' || permission.state === 'prompt') {
-      navigator.geolocation.getCurrentPosition(showPosition, showError)
-    } else {
-      alert('Вы отклонили доступ к геолокации. Разрешите его в настройках браузера.')
-    }
-  }
-
-  async function showPosition(position: GeolocationPosition) {
-    const { latitude, longitude } = position.coords
-    setMapCenter([latitude, longitude])
-
+  async function reverseGeocode(latitude: number, longitude: number) {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ru`
       )
       const data = await response.json()
-      setCity(data.address.city || data.address.town || data.address.village || 'Город не найден')
+      const foundCity =
+        data.address.city || data.address.town || data.address.village || 'Город не найден'
+      setCity(foundCity)
+      setDeliveryAddr(data.display_name)
+      setDeliveryCoords([Number(data.lat), Number(data.lon)])
     } catch (error) {
       console.error('Ошибка получения города:', error)
     }
-  }
-
-  function showError() {
-    alert('Не удалось получить местоположение.')
   }
 
   useEffect(() => {
@@ -178,7 +174,7 @@ export default function PvzMapWidget({
 
   return (
     <>
-      {isEditing ? (
+      {!isEditing ? (
         <button
           onClick={() => setIsOpen(true)}
           style={{ background: 'var(--dark)', marginLeft: '20px' }}
@@ -266,11 +262,11 @@ export default function PvzMapWidget({
                   coords={deliveryCoords}
                   changeAddr={setDeliveryAddr}
                   setMapCenter={setMapCenter}
-                  deliveryApartment={apartment}
-                  deliveryComment={comment}
-                  deliveryEntrance={entrance}
-                  deliveryFloor={floor}
-                  deliveryIntercom={intercom}
+                  apartment={apartment}
+                  comment={comment}
+                  entrance={entrance}
+                  floor={floor}
+                  intercom={intercom}
                   onSelect={data => {
                     setIsOpen(false)
                     onSelect({
@@ -284,11 +280,11 @@ export default function PvzMapWidget({
                       },
                       work_time: '08:00-20:00',
                       type: 'DELIVERY',
-                      apartment: data?.deliveryApartment,
-                      comment: data?.deliveryComment,
-                      entrance: data?.deliveryEntrance,
-                      floor: data?.deliveryFloor,
-                      intercom: data?.deliveryIntercom,
+                      apartment: data?.apartment,
+                      comment: data?.comment,
+                      entrance: data?.entrance,
+                      floor: data?.floor,
+                      intercom: data?.intercom,
                     })
                   }}
                 />
@@ -345,30 +341,7 @@ export default function PvzMapWidget({
   )
 }
 
-interface deliveryData {
-  fullAddress: string
-  longitude: number
-  latitude: number
-  city: string
-  deliveryApartment?: string
-  deliveryIntercom?: string
-  deliveryEntrance?: string
-  deliveryFloor?: string
-  deliveryComment?: string
-}
-
-function AddressInput({
-  onSelect,
-  addr,
-  changeAddr,
-  setMapCenter,
-  coords,
-  deliveryApartment,
-  deliveryIntercom,
-  deliveryEntrance,
-  deliveryFloor,
-  deliveryComment,
-}: DeliveryProps) {
+function AddressInput({ onSelect, addr, changeAddr, setMapCenter, coords }: DeliveryProps) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<any[]>([])
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -388,12 +361,7 @@ function AddressInput({
     setQuery(addr)
     setLatitude(coords[0])
     setLongitude(coords[1])
-    deliveryApartment && setApartment(deliveryApartment)
-    deliveryEntrance && setEntrance(deliveryEntrance)
-    deliveryIntercom && setIntercom(deliveryIntercom)
-    deliveryFloor && setFloor(deliveryFloor)
-    deliveryComment && setComment(deliveryComment)
-  }, [addr, coords])
+  }, [])
 
   useEffect(() => {
     if (query.length < 3) return
@@ -417,16 +385,7 @@ function AddressInput({
     <form
       onSubmit={e => {
         e.preventDefault()
-        onSelect({
-          ...address,
-          latitude,
-          longitude,
-          deliveryApartment: apartment,
-          deliveryComment: comment,
-          deliveryFloor: floor,
-          deliveryEntrance: entrance,
-          deliveryIntercom: intercom,
-        })
+        onSelect({ ...address, latitude, longitude, apartment, comment, floor, entrance, intercom })
       }}
       className="relative flex-wrap flex gap-[10px]"
     >
@@ -439,7 +398,7 @@ function AddressInput({
         required={true}
       />
       {suggestions.length > 0 && (
-        <ul className="absolute max-h-[400px] overflow-auto bg-white border rounded w-full shadow-md z-10 top-[70px]">
+        <ul className="absolute bg-white border rounded w-full shadow-md z-10 top-[70px]">
           {suggestions.map(suggestion => (
             <li
               key={suggestion.place_id}
@@ -520,6 +479,18 @@ function AddressInput({
       </button>
     </form>
   )
+}
+
+interface deliveryData {
+  fullAddress: string
+  longitude: number
+  latitude: number
+  city: string
+  apartment?: string
+  intercom?: string
+  entrance?: string
+  floor?: string
+  comment?: string
 }
 
 interface ButtonProps {
@@ -613,9 +584,9 @@ interface DeliveryProps {
   changeAddr: (addr: string) => void
   setMapCenter: (center: [number, number]) => void
   coords: [number, number]
-  deliveryApartment?: string
-  deliveryIntercom?: string
-  deliveryEntrance?: string
-  deliveryFloor?: string
-  deliveryComment?: string
+  intercom?: string
+  entrance?: string
+  apartment?: string
+  comment?: string
+  floor?: string
 }

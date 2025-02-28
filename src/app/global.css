@@ -53,7 +53,7 @@
     --admin-dark: #292929;
   }
 
-  @media (max-width: 1215px) {
+  @media (max-width: 1440px) {
     :root {
       --sides-padding: 50px;
       --top-padding: 50px;

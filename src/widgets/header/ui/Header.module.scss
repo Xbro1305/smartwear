@@ -86,7 +86,7 @@
     margin-right: calc(56px - 32px);
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1214px) {
     a {
       display: none;
     }
@@ -175,7 +175,7 @@
 .mob_navigation {
   display: none;
 
-  @media (max-width: 900px) {
+  @media (max-width: 1214px) {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -195,7 +195,7 @@
       justify-content: center;
       gap: 5px;
 
-      @media (max-width: 900px) {
+      @media (max-width: 1214px) {
         font-size: 10px !important;
         line-height: 17px !important;
       }
@@ -236,7 +236,7 @@
     }
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 1214px) {
     display: none;
   }
 }

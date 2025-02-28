@@ -297,13 +297,15 @@
         position: absolute;
         top: 20px;
         right: 20px;
-        border-radius: 50% &_orders {
-          display: flex;
-        }
+        border-radius: 50%;
         font-size: 24px;
         padding: 5px;
         color: var(--dark);
         background: var(--gray);
+        
+        &_orders {
+          display: flex;
+        }
       }
 
       label {
