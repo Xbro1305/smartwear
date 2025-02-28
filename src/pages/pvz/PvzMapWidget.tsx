@@ -228,6 +228,10 @@ export default function PvzMapWidget({
             </div>
             {deliveryType == 'PVZ' && (
               <>
+                <h4 className="h4">Куда доставить заказ?</h4>
+                <span className="p2 mt-[-10px]" style={{ color: 'var(--service)' }}>
+                  Укажите адрес доставки
+                </span>
                 <InputLabel
                   name="city"
                   title="Город"

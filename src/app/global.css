@@ -551,3 +551,7 @@ input[type='search']::-webkit-search-results-decoration {
     border-top-right-radius: 12px;
   }
 }
+
+.leaflet-control-attribution.leaflet-control {
+  display: none !important;
+}
