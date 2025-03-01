@@ -132,13 +132,15 @@ export const Profile_profile = () => {
     })
       .then(() => {
         refresh()
+        !isEmailConfirmed && setEmailConfirm(true)
+        !isPhoneComfirmed && setPhoneConfirm(true)
         setIsProfileEdited(false)
       })
       .catch(err => console.log(err))
   }
 
   const handleConfirmEmail = () => {
-    axios(`${baseUrl}/users/confirm-email${initialData.id}`, {
+    axios(`${baseUrl}/users/confirm-email/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -323,6 +325,7 @@ export const Profile_profile = () => {
             <label className={`${styles.profile_form_label} ${styles.profile_form_label_active}`}>
               <p>Дата рождения</p>
               <input
+                type="text"
                 value={birthday}
                 onChange={e => {
                   const value = e.target.value
@@ -331,8 +334,9 @@ export const Profile_profile = () => {
                     ? setIsProfileEdited(true)
                     : setIsProfileEdited(false)
                 }}
-                name={'birthday'}
-                type={'date'}
+                placeholder="дд.мм.гггг"
+                onFocus={e => (e.target.type = 'date')}
+                onBlur={e => (e.target.type = 'text')}
               />
             </label>
             <div className={styles.profile_form_gender}>

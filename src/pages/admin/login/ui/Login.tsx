@@ -79,7 +79,11 @@ export const AdminLogin = () => {
     try {
       await requestAdminCode({ email, password })
         .unwrap()
-        .then(({ phone }) => setPhone(phone))
+        .then(({ phone }) => {
+          const formattedPhone = phone.replace(/^\++/, '+')
+
+          setPhone(formattedPhone)
+        })
       setStage(2)
       sendCode()
     } catch (err) {

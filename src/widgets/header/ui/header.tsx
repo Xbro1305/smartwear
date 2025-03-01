@@ -239,23 +239,23 @@ export const Header: React.FC = () => {
 
       <div className={styles.mob_navigation}>
         <Link className="p2" to={ROUTER_PATHS.HOME}>
-          <CiHome style={{ fontSize: '20px' }} />
+          <CiHome style={{ fontSize: '25px' }} />
           Главная
         </Link>
         <Link className="p2" to={ROUTER_PATHS.CATALOG}>
-          <CiSearch style={{ fontSize: '20px' }} />
+          <CiSearch style={{ fontSize: '25px' }} />
           Каталог
         </Link>
         <Link className="p2" to={'/cart'}>
-          <CiHeart style={{ fontSize: '20px' }} />
+          <CiHeart style={{ fontSize: '25px' }} />
           Избранное
         </Link>
         <Link className="p2" to={'/cart'}>
-          <IoBagOutline style={{ fontSize: '20px' }} />
+          <IoBagOutline style={{ fontSize: '25px' }} />
           Корзина
         </Link>
         <Link className="p2" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
-          <CgProfile style={{ fontSize: '20px' }} />
+          <CgProfile style={{ fontSize: '25px' }} />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
       </div>
