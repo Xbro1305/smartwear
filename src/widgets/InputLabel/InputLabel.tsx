@@ -1,4 +1,5 @@
 import styles from '@/pages/profile/Components/Components.module.scss'
+import { useState } from 'react'
 
 interface InputProps {
   value: string
@@ -21,15 +22,23 @@ export const InputLabel: React.FC<InputProps> = ({
   className,
   required,
 }) => {
+  const [isActive, setIsactive] = useState(false)
   return (
     <label
-      className={`${styles.profile_form_label} ${value.length ? styles.profile_form_label_active : ''} ${className}`}
+      style={{ borderColor: isActive ? 'var(--red)' : 'var(--service)' }}
+      className={` ${styles.profile_form_label} ${value.length ? styles.profile_form_label_active : ''} ${className}`}
     >
       <p>{title}</p>
       <input
         required={required}
-        onBlur={onBlur}
-        onFocus={onFocus}
+        onBlur={() => {
+          onBlur
+          setIsactive(false)
+        }}
+        onFocus={() => {
+          onFocus
+          setIsactive(true)
+        }}
         value={value}
         onChange={e => onChange(e)}
         name={name}

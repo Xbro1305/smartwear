@@ -41,53 +41,8 @@ export const Profile_profile = () => {
   const [isEmailConfirmed, setIsEmailConfirmed] = useState<any>('')
   const [isPhoneComfirmed, setIsPhoneConfirmed] = useState<any>('')
   const [isSubscribed, setIsSubscribed] = useState<any>('')
-  const [adresses, setAddresses] = useState<any[]>([
-    // {
-    //   id: 17,
-    //   userId: 34,
-    //   fullAddress: '119602, Россия, Москва, Москва, ул. Академика Анохина, 60, пом. № XIII',
-    //   longitude: '37.46912',
-    //   latitude: '55.649277',
-    //   city: 'Москва',
-    //   isDefault: false,
-    //   type: 'PVZ',
-    //   apartment: null,
-    //   floor: null,
-    //   entrance: null,
-    //   intercom: null,
-    //   comment: null,
-    // },
-    {
-      id: 18,
-      userId: 34,
-      fullAddress: 'Москва, Центральный федеральный округ, Россия',
-      longitude: '37.75009462358871',
-      latitude: '55.56430435',
-      city: 'Москва',
-      isDefault: true,
-      type: 'DELIVERY',
-      apartment: '2',
-      floor: '2',
-      entrance: '1',
-      intercom: '2',
-      comment: '2',
-    },
-  ])
-  const [defaultAddress, setDefaultAddress] = useState<any>({
-    id: 18,
-    userId: 34,
-    fullAddress: 'Москва, Центральный федеральный округ, Россия',
-    longitude: '37.75009462358871',
-    latitude: '55.56430435',
-    city: 'Москва',
-    isDefault: true,
-    type: 'DELIVERY',
-    apartment: '2',
-    floor: '2',
-    entrance: '1',
-    intercom: '2',
-    comment: '2',
-  })
+  const [adresses, setAddresses] = useState<any[]>([])
+  const [defaultAddress, setDefaultAddress] = useState<any>()
   const [deletingAddress, setDeletingAddress] = useState<any>(false)
   const [emailConfirm, setEmailConfirm] = useState<boolean>(false)
   const [phoneConfirm, setPhoneConfirm] = useState<boolean>(false)
@@ -540,7 +495,10 @@ export const Profile_profile = () => {
                   className="button"
                   type="button"
                   style={{ background: 'none', color: 'var(--dark-gray)' }}
-                  onClick={refresh}
+                  onClick={() => {
+                    refresh()
+                    setIsProfileEdited(false)
+                  }}
                 >
                   Отмена
                 </button>
@@ -609,7 +567,10 @@ export const Profile_profile = () => {
               },
               data: filteredData,
             })
-              .then(() => refresh())
+              .then(async res => {
+                refresh()
+                setEditingAddress(res.data)
+              })
               .catch(err => console.log(err))
           }}
         />

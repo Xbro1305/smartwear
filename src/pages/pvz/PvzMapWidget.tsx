@@ -99,7 +99,7 @@ export default function PvzMapWidget({
   }
 
   useEffect(() => {
-    if (!isOpen || !city) return
+    if (!isOpen) return
 
     const delay = setTimeout(() => {
       axios
@@ -111,7 +111,7 @@ export default function PvzMapWidget({
           }
         })
         .catch(err => console.error('Ошибка загрузки ПВЗ:', err))
-    }, 2000)
+    }, 500)
 
     return () => clearTimeout(delay)
   }, [isOpen, city])
@@ -194,15 +194,16 @@ export default function PvzMapWidget({
           <motion.div
             ref={menuRef}
             initial={{ y: '100%' }}
-            animate={{ y: isMenuOpen ? 0 : 0 }}
+            animate={{ y: isMenuOpen ? 0 : isTinyScreen ? 90 : 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             drag="y"
             dragConstraints={
               isTinyScreen
-                ? { top: 0, bottom: deliveryType == 'PVZ' ? 250 : 460 }
+                ? { top: 0, bottom: deliveryType == 'PVZ' ? 320 : 460 }
                 : { top: 0, bottom: 0 }
             }
             dragElastic={0.2}
+            style={{ touchAction: 'none' }}
             onDrag={(_: any, info: any) => setDragY(info.point.y)}
             onDragEnd={() => {
               if (dragY > 50) {
@@ -243,7 +244,7 @@ export default function PvzMapWidget({
                   className={'w-full max-h-[400px] overflow-auto border p-2 rounded-lg'}
                 >
                   {pvzList.length === 0 ? (
-                    <p>Загрузка...</p>
+                    <p>{city ? 'Загрузка...' : 'Введите город для поиска ПВЗ'}</p>
                   ) : (
                     pvzList.map(pvz => (
                       <div
