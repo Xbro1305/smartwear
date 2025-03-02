@@ -77,7 +77,6 @@ export const Profile_profile = () => {
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
 
-        
         let value = phone.replace(/\D/g, '') // Оставляем только цифры
         let formattedPhone = value
 
@@ -138,7 +137,7 @@ export const Profile_profile = () => {
       middleName: middlename,
       birthday,
       email,
-      phone: `${prefix}${phone}`,
+      phone: `${phone}`,
       gender,
       city,
       isSubscribed,
