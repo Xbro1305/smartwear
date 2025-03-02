@@ -77,20 +77,20 @@ export const Profile_profile = () => {
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
 
-        let value = phone.replace(/\D/g, '') // Оставляем только цифры
-        let formattedPhone = value
+        let value = phone.replace(/\D/g, '')
+        let formatted = value
 
         if (value.startsWith('9')) {
-          formattedPhone = '+7' + value
+          formatted = '+7' + value
           setPrefix('+7')
         } else if (value.startsWith('8')) {
-          formattedPhone = '8' + value.slice(1) // Оставляем без +
+          formatted = '8' + value.slice(1)
           setPrefix('')
         } else if (value.startsWith('7')) {
-          formattedPhone = '+7' + value.slice(1)
+          formatted = '+7' + value.slice(1)
           setPrefix('+7')
         } else {
-          formattedPhone = '+79' + value // Добавляем "+79" для других случаев
+          formatted = '+79' + value
           setPrefix('+7')
         }
 
