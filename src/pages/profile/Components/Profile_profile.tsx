@@ -8,6 +8,7 @@ import { IoClose } from 'react-icons/io5'
 import axios from 'axios'
 import PvzMapWidget from '@/pages/pvz/PvzMapWidget'
 import { InputLabel } from '@/widgets/InputLabel/InputLabel'
+import { toast } from 'react-toastify'
 
 interface InitialData {
   surname?: string
@@ -235,11 +236,11 @@ export const Profile_profile = () => {
         'Content-Type': 'application/json',
       },
       data: {
-        code,
+        code: (code ?? '').replace(/\s+$/, ''),
       },
     })
       .then(() => refresh())
-      .catch(err => console.log(err))
+      .catch(() => toast.error('Неправильный код или что-то пошло не так'))
   }
 
   const deleteAddress = (adress: any) => {
