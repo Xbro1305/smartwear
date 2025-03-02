@@ -91,7 +91,7 @@ export const Profile_profile = () => {
   useEffect(refresh, [])
 
   const editDefaultAddress = async (adress: any) => {
-    if (adress.id == defaultAddress.id)
+    if (defaultAddress && adress.id == defaultAddress?.id)
       return axios(`${baseUrl}/users/update-address/${initialData.id}/${editingAddress.id}`, {
         method: 'PUT',
         headers: {
