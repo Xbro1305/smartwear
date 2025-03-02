@@ -91,18 +91,21 @@ export const Profile_profile = () => {
   useEffect(refresh, [])
 
   const editDefaultAddress = async (adress: any) => {
-    if (defaultAddress && adress.id == defaultAddress?.id)
-      return axios(`${baseUrl}/users/update-address/${initialData.id}/${editingAddress.id}`, {
-        method: 'PUT',
+    if (defaultAddress && adress.id == defaultAddress?.id) {
+      const newDefaultAddr = adresses.find(i => i.id != adress.id)
+      axios(`${baseUrl}/users/set-default-address/${newDefaultAddr.id}`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        data: { isDefault: false },
       })
         .then(() => refresh())
-        .catch(err => console.log(err))
-
+        .catch(err => {
+          console.log(err)
+        })
+      return
+    }
     axios(`${baseUrl}/users/set-default-address/${adress.id}`, {
       method: 'POST',
       headers: {
