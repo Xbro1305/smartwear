@@ -141,12 +141,13 @@ export const Profile_profile = () => {
   }
 
   const handleConfirmEmail = () => {
-    axios(`${baseUrl}/users/confirm-email/${initialData.id}`, {
+    axios(`${baseUrl}/users/request-confirm-email/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      data: { email },
     })
       .then(() => {
         refresh()
@@ -156,12 +157,40 @@ export const Profile_profile = () => {
   }
 
   const getCode = () => {
-    axios(`${baseUrl}/users/confirm-phone-change/${initialData.id}`, {
+    axios(`${baseUrl}/users/request-confirm-phone/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      data: { phone },
+    })
+      .then(() => {
+        setTimer(30)
+
+        setPhoneConfirm(true)
+
+        const interval = setInterval(() => {
+          setTimer(prev => prev - 1)
+        }, 1000)
+
+        setTimeout(() => {
+          clearInterval(interval)
+        }, 30000)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  const getCodeAgain = () => {
+    axios(`${baseUrl}/users/resend-phone-code/${initialData.id}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: { phone },
     })
       .then(() => {
         setTimer(30)
@@ -464,7 +493,7 @@ export const Profile_profile = () => {
                 </span>
               </label>
               <p
-                onClick={getCode}
+                onClick={() => (!isPhoneComfirmed ? getCode() : '')}
                 style={{
                   color: isPhoneComfirmed ? 'var(--green)' : 'var(--red)',
                   textDecoration: isPhoneComfirmed ? '' : 'underline',
@@ -633,7 +662,7 @@ export const Profile_profile = () => {
           <h3 className="h3">Подтверждение телефона</h3>
           <p className="p1">
             На ваш номер придёт сообщение с кодом. <br />
-            <button onClick={() => timer == 0 && getCode()}>
+            <button onClick={() => timer == 0 && getCodeAgain()}>
               Отправить повторно {timer ? `через ${timer}` : ''}
             </button>
           </p>
