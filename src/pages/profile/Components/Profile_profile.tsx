@@ -229,7 +229,7 @@ export const Profile_profile = () => {
   const handleConfirmPhone = () => {
     !isPhoneComfirmed && setIsPhoneConfirmed(!isPhoneComfirmed)
 
-    axios(`${baseUrl}/users/confirm-phone-change/${initialData.id}`, {
+    axios(`${baseUrl}/users/confirm-phone/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
