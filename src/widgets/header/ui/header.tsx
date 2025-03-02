@@ -9,9 +9,7 @@ import profile from '../../../assets/images/svg (1).svg'
 import cart from '../../../assets/images/svg (2).svg'
 import search from '../../../assets/images/svg.svg'
 import { useEffect, useRef, useState } from 'react'
-import { CiHeart, CiHome, CiSearch } from 'react-icons/ci'
-import { CgProfile } from 'react-icons/cg'
-import { IoBagOutline } from 'react-icons/io5'
+import { FaHeart, FaHome, FaSearch, FaShoppingBag, FaUser } from 'react-icons/fa'
 
 interface MenuItem {
   title: string
@@ -239,23 +237,23 @@ export const Header: React.FC = () => {
 
       <div className={styles.mob_navigation}>
         <Link className="p2" to={ROUTER_PATHS.HOME}>
-          <CiHome style={{ fontSize: '25px' }} />
+          <FaHome style={{ fontSize: '20px' }} />
           Главная
         </Link>
         <Link className="p2" to={ROUTER_PATHS.CATALOG}>
-          <CiSearch style={{ fontSize: '25px' }} />
+          <FaSearch style={{ fontSize: '20px' }} />
           Каталог
         </Link>
         <Link className="p2" to={'/cart'}>
-          <CiHeart style={{ fontSize: '25px' }} />
+          <FaHeart style={{ fontSize: '20px' }} />
           Избранное
         </Link>
         <Link className="p2" to={'/cart'}>
-          <IoBagOutline style={{ fontSize: '25px' }} />
+          <FaShoppingBag style={{ fontSize: '20px' }} />
           Корзина
         </Link>
         <Link className="p2" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
-          <CgProfile style={{ fontSize: '25px' }} />
+          <FaUser style={{ fontSize: '20px' }} />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
       </div>
