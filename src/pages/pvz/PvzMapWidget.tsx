@@ -45,7 +45,6 @@ export default function PvzMapWidget({
   const [dragY, setDragY] = useState(0)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  console.log(apartment, comment, entrance, floor, intercom, type)
 
   const isTinyScreen = window.innerWidth < 1000
 

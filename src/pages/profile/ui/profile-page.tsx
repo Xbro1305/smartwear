@@ -3,7 +3,7 @@ import { useState } from 'react'
 import styles from './Profile.module.scss'
 import { FaCube, FaHeart, FaTag, FaUser } from 'react-icons/fa'
 // import itemImg from '../../../assets/images/image 139.png'
-import { Profile_profile } from '../Components/Profile'
+import { Profile_profile } from '../Components/Profile_profile'
 import { Orders } from '../Components/Orders'
 //import { RegisteredDto } from "@/entities/auth/auth.types";
 // import { useNavigate } from 'react-router-dom'
