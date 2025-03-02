@@ -65,7 +65,6 @@ export const Profile_profile = () => {
         setSurname(response.surName || '')
         setName(response.name || '')
         setMiddlename(response.middleName || '')
-        setBirthday(response.birthday.split('T')[0] || '')
         setEmail(response.email || '')
         setPhone(response.phone || '')
         setGender(response.gender || '')
@@ -83,6 +82,8 @@ export const Profile_profile = () => {
         } else {
           setPrefix('+')
         }
+
+        setBirthday(response?.birthday?.split('T')[0] || '')
       })
       .catch(err => console.log(err))
   }
