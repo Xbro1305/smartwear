@@ -476,17 +476,14 @@ export const Profile_profile = () => {
                     mask={'X'}
                     name={'phone'}
                     onChange={(e: any) => {
-                      if (e.target.value.split('')[0] == 9) {
-                        setPhone('+7' + e.target.value)
+                      if (e.target.value.startsWith(9)) {
                         setPrefix('+')
-                      } else if (e.target.value.split('')[0] == 8) {
+                      } else if (e.target.value.startsWith(8)) {
                         setPrefix('')
-                      } else if (e.target.value.split('')[0] == 7) {
-                        setPrefix('+')
                       } else {
-                        setPhone('+79' + e.target.value)
                         setPrefix('+')
                       }
+                      setPhone(e.target.value)
 
                       const value = e.target.value
                       initialData.phone != value
