@@ -707,8 +707,8 @@ export const Profile_profile = () => {
             <PatternFormat
               value={code}
               onChange={(e: any) => setCode(e.target.value)}
-              format="#####№"
-              mask={'_'}
+              format="######"
+              mask={' '}
               allowEmptyFormatting
             />
           </label>
