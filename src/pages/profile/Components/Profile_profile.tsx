@@ -78,7 +78,7 @@ export const Profile_profile = () => {
         setDefaultAddress(defaultAddr)
 
         let value = phone.replace(/\D/g, '') // Оставляем только цифры
-        let formattedPhone = value
+        let formattedPhone = value 
 
         if (value.startsWith('9')) {
           formattedPhone = '+7' + value
