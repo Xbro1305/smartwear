@@ -105,6 +105,8 @@ export const Profile_profile = () => {
       })
   }
 
+  console.log(initialData)
+
   const handleSubmit = () => {
     const data = {
       surName: surname,
