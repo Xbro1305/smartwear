@@ -602,8 +602,28 @@ export const Profile_profile = () => {
               data: filteredData,
             })
               .then(async res => {
-                refresh()
-                setEditingAddress(res.data)
+                const data = res
+                axios(`${baseUrl}/users/me`, {
+                  method: 'GET',
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                })
+                  .then(res => {
+                    const response = res.data
+                    setCity(response.city || '')
+                    setAddresses(response.addresses || [])
+                    setInitialData(response)
+                    const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
+                    setDefaultAddress(defaultAddr)
+
+                    const editing = response.addresses.find(
+                      (i: any) => i.fullAdress == data.data.fullAddress
+                    )
+
+                    setEditingAddress(editing)
+                  })
+                  .catch(err => console.log(err))
               })
               .catch(err => console.log(err))
           }}
