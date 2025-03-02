@@ -729,14 +729,14 @@ export const Profile_profile = () => {
           <h3 className="h3">Адрес доставки</h3>
           {editingAddress !== false && <p className="p1">{editingAddress?.fullAddress}</p>}
 
-          <label style={{ cursor: 'pointer' }}>
+          <label onClick={() => editDefaultAddress(editingAddress)} style={{ cursor: 'pointer' }}>
             <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <input
                 checked={
                   editingAddress !== false &&
                   defaultAddress?.fullAddress == editingAddress?.fullAddress
                 }
-                onChange={() => editDefaultAddress(editingAddress)}
+                onChange={() => console.log('ok')}
                 type="checkbox"
                 className="checkbox"
                 style={{ border: 'none' }}
