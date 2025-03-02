@@ -77,10 +77,22 @@ export const Profile_profile = () => {
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
 
-        if (phone.startsWith('8')) {
+        
+        let value = phone.replace(/\D/g, '') // Оставляем только цифры
+        let formattedPhone = value
+
+        if (value.startsWith('9')) {
+          formattedPhone = '+7' + value
+          setPrefix('+7')
+        } else if (value.startsWith('8')) {
+          formattedPhone = '8' + value.slice(1) // Оставляем без +
           setPrefix('')
+        } else if (value.startsWith('7')) {
+          formattedPhone = '+7' + value.slice(1)
+          setPrefix('+7')
         } else {
-          setPrefix('+')
+          formattedPhone = '+79' + value // Добавляем "+79" для других случаев
+          setPrefix('+7')
         }
 
         setBirthday(response?.birthday?.split('T')[0] || '')
@@ -261,6 +273,29 @@ export const Profile_profile = () => {
   }
 
   // if (isLoading) return <div>Загрузка...</div>
+
+  const handlePhoneChange = (e: any) => {
+    let value = e.target.value.replace(/\D/g, '') // Оставляем только цифры
+    let formattedPhone = value
+
+    if (value.startsWith('9')) {
+      formattedPhone = '+7' + value
+      setPrefix('+7')
+    } else if (value.startsWith('8')) {
+      formattedPhone = '8' + value.slice(1) // Оставляем без +
+      setPrefix('')
+    } else if (value.startsWith('7')) {
+      formattedPhone = '+7' + value.slice(1)
+      setPrefix('+7')
+    } else {
+      formattedPhone = '+79' + value // Добавляем "+79" для других случаев
+      setPrefix('+7')
+    }
+
+    setPhone(formattedPhone)
+
+    initialData.phone !== formattedPhone ? setIsProfileEdited(true) : setIsProfileEdited(false)
+  }
 
   return (
     <>
@@ -473,24 +508,7 @@ export const Profile_profile = () => {
                     format={'# (###) ### ##-##'}
                     mask={'X'}
                     name={'phone'}
-                    onChange={(e: any) => {
-                      if (e.target.value.split('')[0] == 9) {
-                        setPhone('+7' + e.target.value)
-                        setPrefix('+')
-                      } else if (e.target.value.split('')[0] == 8) {
-                        setPrefix('')
-                      } else if (e.target.value.split('')[0] == 7) {
-                        setPrefix('+')
-                      } else {
-                        setPhone('+79' + e.target.value)
-                        setPrefix('+')
-                      }
-
-                      const value = e.target.value
-                      initialData.phone != value
-                        ? setIsProfileEdited(true)
-                        : setIsProfileEdited(false)
-                    }}
+                    onChange={handlePhoneChange}
                     value={phone}
                     style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
                   />
