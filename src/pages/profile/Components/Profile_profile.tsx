@@ -148,8 +148,8 @@ export const Profile_profile = () => {
     })
       .then(() => {
         refresh()
-        !isEmailConfirmed && setEmailConfirm(true)
-        !isPhoneComfirmed && setPhoneConfirm(true)
+        !isEmailConfirmed && handleConfirmEmail()
+        !isPhoneComfirmed && getCode()
         setIsProfileEdited(false)
       })
       .catch(err => console.log(err))
@@ -707,7 +707,7 @@ export const Profile_profile = () => {
             <PatternFormat
               value={code}
               onChange={(e: any) => setCode(e.target.value)}
-              format="#####"
+              format="#####№"
               mask={'_'}
               allowEmptyFormatting
             />
