@@ -239,7 +239,11 @@ export const Profile_profile = () => {
         code: (code ?? '').replace(/\s+$/, ''),
       },
     })
-      .then(() => refresh())
+      .then(() => {
+        refresh()
+        setPhoneConfirm(false)
+        toast.success("Номер телефона подтвержден успешно!")
+      })
       .catch(() => toast.error('Неправильный код или что-то пошло не так'))
   }
 
