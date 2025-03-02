@@ -618,7 +618,7 @@ export const Profile_profile = () => {
                     setDefaultAddress(defaultAddr)
 
                     const editing = response.addresses.find(
-                      (i: any) => i.fullAdress == data.data.fullAddress
+                      (i: any) => i.fullAddress == data.data.fullAddress
                     )
 
                     console.log(response.addresses, data)
