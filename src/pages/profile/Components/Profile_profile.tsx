@@ -621,6 +621,8 @@ export const Profile_profile = () => {
                       (i: any) => i.fullAdress == data.data.fullAddress
                     )
 
+                    console.log(response.addresses, data)
+
                     setEditingAddress(editing)
                   })
                   .catch(err => console.log(err))
