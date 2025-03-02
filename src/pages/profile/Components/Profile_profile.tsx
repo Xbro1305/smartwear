@@ -76,9 +76,8 @@ export const Profile_profile = () => {
         setInitialData(response)
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
-
+        let formatted = phone.replace(/\D/g, '')
         let value = phone.replace(/\D/g, '')
-        let formatted = value
 
         if (value.startsWith('9')) {
           formatted = '+7' + value
@@ -93,6 +92,8 @@ export const Profile_profile = () => {
           formatted = '+79' + value
           setPrefix('+7')
         }
+
+        setPhone(formatted)
 
         setBirthday(response?.birthday?.split('T')[0] || '')
       })
