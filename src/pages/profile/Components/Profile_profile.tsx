@@ -90,29 +90,30 @@ export const Profile_profile = () => {
 
   useEffect(refresh, [])
 
-  const editDefaultAddress = (adress: any) => {
-    adress.id == defaultAddress.id
-      ? axios(`${baseUrl}/users/update-address/${initialData.id}/${editingAddress.id}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          data: { isDefault: false },
-        })
-          .then(() => refresh())
-          .catch(err => console.log(err))
-      : axios(`${baseUrl}/users/set-default-address/${adress.id}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        })
-          .then(() => refresh())
-          .catch(err => {
-            console.log(err)
-          })
+  const editDefaultAddress = async (adress: any) => {
+    if (adress.id == defaultAddress.id)
+      return axios(`${baseUrl}/users/update-address/${initialData.id}/${editingAddress.id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: { isDefault: false },
+      })
+        .then(() => refresh())
+        .catch(err => console.log(err))
+
+    axios(`${baseUrl}/users/set-default-address/${adress.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(() => refresh())
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   const handleSubmit = () => {
