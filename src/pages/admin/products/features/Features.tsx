@@ -29,21 +29,21 @@ export const ProductFeatures = () => {
   const [isCreating, setIsCreating] = useState<false | Feature>(false)
   const [deleting, setDeleting] = useState<false | Feature>(false)
 
-  useEffect(() => {
-    axios(`${import.meta.env.VITE_API_URL}/features`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then(res => {
-        setFeatures(res.data)
-      })
-      .catch(err => {
-        console.log(err)
-      })
-  }, [])
+//   useEffect(() => {
+//     axios(`${import.meta.env.VITE_API_URL}/features`, {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: `Bearer ${localStorage.getItem('token')}`,
+//       },
+//     })
+//       .then(res => {
+//         setFeatures(res.data)
+//       })
+//       .catch(err => {
+//         console.log(err)
+//       })
+//   }, [])
 
   const handleEdit = () => {
     if (!editing) return
