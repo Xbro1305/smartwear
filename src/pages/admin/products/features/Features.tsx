@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styles from './Features.module.scss'
 import { LuPencil, LuTrash2 } from 'react-icons/lu'
 import { Editor } from '../../articles/Create/editor'
