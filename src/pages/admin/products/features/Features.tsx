@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './Features.module.scss'
 import { LuPencil, LuTrash2 } from 'react-icons/lu'
 import { Editor } from '../../articles/Create/editor'
@@ -25,29 +25,31 @@ export const ProductFeatures = () => {
     },
   ])
 
+  const apiUrl = 'https://test.maxiscomfort.ru/api'
+
   const [editing, setEditing] = useState<false | Feature>(false)
   const [isCreating, setIsCreating] = useState<false | Feature>(false)
   const [deleting, setDeleting] = useState<false | Feature>(false)
 
-  //   useEffect(() => {
-  //     axios(`${import.meta.env.VITE_API_URL}/features`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //       },
-  //     })
-  //       .then(res => {
-  //         setFeatures(res.data)
-  //       })
-  //       .catch(err => {
-  //         console.log(err)
-  //       })
-  //   }, [])
+  useEffect(() => {
+    axios(`${apiUrl}/features`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setFeatures(res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }, [])
 
   const handleEdit = () => {
     if (!editing) return
-    axios(`${import.meta.env.VITE_API_URL}/features/${editing?.id}`, {
+    axios(`${apiUrl}/features/${editing?.id}`, {
       method: 'PUT',
       data: {
         name: editing?.name,
@@ -77,7 +79,7 @@ export const ProductFeatures = () => {
 
   const handleSubmit = () => {
     if (!isCreating) return
-    axios(`${import.meta.env.VITE_API_URL}/features`, {
+    axios(`${apiUrl}/features`, {
       method: 'POST',
       data: {
         name: isCreating?.name,
@@ -107,7 +109,7 @@ export const ProductFeatures = () => {
 
   const handleDelete = () => {
     if (!deleting) return
-    axios(`${import.meta.env.VITE_API_URL}/features/${deleting?.id}`, {
+    axios(`${apiUrl}/features/${deleting?.id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
