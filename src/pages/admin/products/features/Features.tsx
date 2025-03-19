@@ -62,9 +62,9 @@ export const ProductFeatures = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     })
-      .then(() => {
+      .then(res => {
         closeModal()
-        setFeatures(features.map(feature => (feature.id === editing?.id ? editing : feature)))
+        setFeatures(features.map(feature => (feature.id === editing?.id ? res.data : feature)))
         toast.success('Успешно обновлено', {
           position: 'top-right',
           autoClose: 3000,
@@ -92,9 +92,9 @@ export const ProductFeatures = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     })
-      .then(() => {
+      .then(res => {
         closeModal()
-        setFeatures([...features, { ...isCreating, id: features.length + 1 }])
+        setFeatures([...features, res.data])
         toast.success('Успешно добавлено', {
           position: 'top-right',
           autoClose: 3000,
