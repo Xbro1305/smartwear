@@ -1,0 +1,110 @@
+.features {
+  display: flex;
+  flex-direction: column;
+  padding: 60px 30px;
+  padding-right: 80px;
+  gap: 48px;
+
+  > button {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  &_button {
+    display: flex;
+    align-items: center;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+    justify-content: center;
+    border: 1px solid var(--admin-light-gray);
+  }
+
+  &_list {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  &_item {
+    box-shadow: 0px 4px 6.5px 0px #c8c8c81a;
+    display: flex;
+    align-items: center;
+    padding: 32px;
+    gap: 12px;
+    border-radius: 12px;
+
+    h2 {
+      flex: 1;
+      font-family: Nunito Sans;
+      font-weight: 600;
+      font-size: 20px;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+  }
+
+  &_modal {
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background: #8484844d;
+    z-index: 2;
+
+    &_body {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 32px;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0px 4px 6.5px 0px #c8c8c81a;
+      width: 100%;
+      max-width: 700px;
+      border-radius: 12px;
+
+      &_label {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        p {
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 24px;
+          letter-spacing: 0%;
+          vertical-align: middle;
+        }
+
+        input {
+          height: 40px;
+          padding: 5px 12px;
+          border-radius: 12px;
+          border: 1px solid #bdbfc7;
+
+          &::placeholder {
+            background: linear-gradient(0deg, #202224, #202224),
+              linear-gradient(0deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6));
+            background-clip: text;
+            font-family: Nunito Sans;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 100%;
+            letter-spacing: 0px;
+            vertical-align: middle;
+          }
+        }
+      }
+    }
+  }
+}

@@ -40,7 +40,10 @@
     --radius: 0.5rem;
 
     --red: #dc2a1f;
+    --red-ugrent: #cd0832;
+    --light-red: #e02844;
     --gray: #f2f2f2;
+    --admin-light-gray: #dadada;
     --light-gray: #fbfbfb;
     --dark-gray: #70798e;
     --dark: #282b32;
@@ -326,6 +329,28 @@ input[type='search']::-webkit-search-results-decoration {
   font-family: Nunito Sans;
 }
 
+#b2 {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0px;
+}
+
+#admin-button {
+  height: 40px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 1px 2px 0px #1018280d;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0px;
+  background: var(--red-ugrent);
+}
+
 #button {
   font-size: 22px;
   font-weight: 500;
@@ -333,7 +358,7 @@ input[type='search']::-webkit-search-results-decoration {
   background: var(--red);
   color: var(--white);
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 12px;
   text-decoration: none;
 }
 
@@ -423,7 +448,7 @@ input[type='search']::-webkit-search-results-decoration {
 }
 
 .radio {
-  width: 20px;
+  min-width: 20px;
   height: 20px;
   cursor: pointer;
   appearance: none;
@@ -455,7 +480,7 @@ input[type='search']::-webkit-search-results-decoration {
 }
 
 .checkbox {
-  width: 24px !important;
+  min-width: 24px !important;
   height: 24px;
   display: block;
   appearance: none;
@@ -487,6 +512,40 @@ input[type='search']::-webkit-search-results-decoration {
   z-index: 1;
   background: var(--red);
   border: 2px solid var(--red) !important;
+}
+
+#checkbox {
+  min-width: 24px !important;
+  height: 24px;
+  display: block;
+  appearance: none;
+  position: relative;
+}
+
+#checkbox::after {
+  border: 2px solid var(--service);
+  content: '';
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+#checkbox:checked::after {
+  content: url('@/assets/images/checkmark.svg');
+  color: var(--light-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px !important;
+  border-radius: 6px;
+  z-index: 1;
+  border: 2px solid var(--light-red) !important;
 }
 
 .addAddressButton {
@@ -554,4 +613,11 @@ input[type='search']::-webkit-search-results-decoration {
 
 .leaflet-control-attribution.leaflet-control {
   display: none !important;
+}
+
+.adminHeader_link.active {
+  background: #fff;
+  padding: 0;
+  margin: 0 20px;
+  border-bottom: 1px solid var(--red);
 }

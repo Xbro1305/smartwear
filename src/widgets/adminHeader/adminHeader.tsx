@@ -3,18 +3,18 @@ import styles from './adminHader.module.scss'
 import { FaSearch } from 'react-icons/fa'
 
 import { ROUTER_PATHS } from '@/shared/config/routes'
-const { ADMINARTICLES, ADMIN } = ROUTER_PATHS
+const { ADMIN } = ROUTER_PATHS
 
 export const AdminHeader = () => {
   const menuItems = [
-    { name: 'Главная', path: ADMIN, end: true },
-    { name: 'Статистика', path: '/admin/statistics', end: false },
-    // { name: 'Сотрудники', path: '/admin/employees', end: false },
-    { name: 'Клиенты', path: '/admin/clients', end: false },
-    { name: 'Новости', path: '/admin/news', end: false },
-    { name: 'Статьи', path: ADMINARTICLES, end: false },
+    { name: 'Главная', path: ADMIN, end: false },
+    { name: 'Товары', path: '/admin/products', end: false },
     { name: 'Заказы', path: '/admin/orders', end: false },
-    { name: 'Товары', path: '/products', end: false },
+    { name: 'Магазины', path: '/admin/shops', end: false },
+    { name: 'Сотрудники', path: '/admin/employees', end: false },
+    // { name: 'Клиенты', path: '/admin/clients', end: false },
+    // { name: 'Новости', path: '/admin/news', end: false },
+    // { name: 'Статьи', path: ADMINARTICLES, end: false },
   ]
 
   return (

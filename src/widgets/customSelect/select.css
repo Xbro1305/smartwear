@@ -65,10 +65,3 @@
 .select-item:not(.select-selected):hover {
   background-color: #f0f0f0;
 }
-
-.adminHeader_link.active {
-  background: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  border-style: dashed;
-}

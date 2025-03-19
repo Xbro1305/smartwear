@@ -1,5 +1,6 @@
 .adminHeader {
-  background: #ececec;
+  background: #fff;
+  border-bottom: 1px solid #ececec;
   padding: 0 30px;
   height: 100px;
   display: flex;
@@ -38,6 +39,7 @@
       padding-right: 13px;
       gap: 16px;
       border-radius: 12px;
+      background: #f4f4f4;
       opacity: 0px;
       outline: none;
     }

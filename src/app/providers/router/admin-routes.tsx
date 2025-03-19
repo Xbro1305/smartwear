@@ -10,9 +10,11 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import { AdminGuard } from './admin-guard'
 import { CloneArticle } from '@/pages/admin/articles/Clone/Clone'
+import { ProductFeatures, ProductsList } from '@/pages/admin/products'
 
-const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS } = ROUTER_PATHS
-const { EDITARTICLE, CLONEARTICLE } = ROUTER_PATHS
+const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS, EDIT_PRODUCT } = ROUTER_PATHS
+const { EDITARTICLE, CLONEARTICLE, ADMINPRODUCTS, ADMINSETTINGS, CREATE_PRODUCT } = ROUTER_PATHS
+const { ADMINPRODUCTS_FEATURES } = ROUTER_PATHS
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -22,6 +24,11 @@ export const adminRoutes: RouteObject[] = [
   {
     children: [
       { element: <MainPage />, path: ADMIN },
+      { element: <MainPage />, path: ADMINSETTINGS },
+      { element: <ProductsList />, path: ADMINPRODUCTS },
+      { element: <ProductFeatures />, path: ADMINPRODUCTS_FEATURES },
+      { element: <div>Cоздать продукт</div>, path: CREATE_PRODUCT },
+      { element: <div>Редактировать продукт</div>, path: `${EDIT_PRODUCT}/:id` },
       { element: <RestorePass />, path: RESTOREPASS },
       { element: <ArticlesList />, path: ADMINARTICLES },
       { element: <CreateArticle />, path: CREATEARTICLE },
