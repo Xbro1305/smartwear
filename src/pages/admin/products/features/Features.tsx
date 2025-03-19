@@ -30,6 +30,8 @@ export const ProductFeatures = () => {
   const [editing, setEditing] = useState<false | Feature>(false)
   const [isCreating, setIsCreating] = useState<false | Feature>(false)
   const [deleting, setDeleting] = useState<false | Feature>(false)
+  const [name, setName] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
 
   useEffect(() => {
     axios(`${apiUrl}/features`, {
@@ -52,8 +54,8 @@ export const ProductFeatures = () => {
     axios(`${apiUrl}/features/${editing?.id}`, {
       method: 'PUT',
       data: {
-        name: editing?.name,
-        description: editing?.description.replace('<p>', '').replace('</p>', ''),
+        name: name,
+        description: description.replace('<p>', '').replace('</p>', ''),
       },
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +63,7 @@ export const ProductFeatures = () => {
       },
     })
       .then(() => {
-        setEditing(false)
+        closeModal()
         setFeatures(features.map(feature => (feature.id === editing?.id ? editing : feature)))
         toast.success('Успешно обновлено', {
           position: 'top-right',
@@ -82,8 +84,8 @@ export const ProductFeatures = () => {
     axios(`${apiUrl}/features`, {
       method: 'POST',
       data: {
-        name: isCreating?.name,
-        description: isCreating?.description.replace('<p>', '').replace('</p>', ''),
+        name: name,
+        description: description.replace('<p>', '').replace('</p>', ''),
       },
       headers: {
         'Content-Type': 'application/json',
@@ -91,7 +93,7 @@ export const ProductFeatures = () => {
       },
     })
       .then(() => {
-        setIsCreating(false)
+        closeModal()
         setFeatures([...features, { ...isCreating, id: features.length + 1 }])
         toast.success('Успешно добавлено', {
           position: 'top-right',
@@ -117,12 +119,12 @@ export const ProductFeatures = () => {
       },
     })
       .then(() => {
-        setDeleting(false)
         setFeatures(features.filter(feature => feature.id !== deleting?.id))
         toast.success('Успешно удалено', {
           position: 'top-right',
           autoClose: 3000,
         })
+        closeModal()
       })
       .catch(err => {
         toast.error('Ошибка', {
@@ -131,6 +133,14 @@ export const ProductFeatures = () => {
         })
         console.log(err)
       })
+  }
+
+  const closeModal = () => {
+    setEditing(false)
+    setIsCreating(false)
+    setDeleting(false)
+    setName('')
+    setDescription('')
   }
 
   return (
@@ -143,7 +153,14 @@ export const ProductFeatures = () => {
         {features.map(feature => (
           <div key={feature.id} className={styles.features_item}>
             <h2>{feature.name}</h2>
-            <button onClick={() => setEditing(feature)} className={styles.features_button}>
+            <button
+              onClick={() => {
+                setEditing(feature)
+                setName(feature.name)
+                setDescription(feature.description)
+              }}
+              className={styles.features_button}
+            >
               <LuPencil />
             </button>
             <button onClick={() => setDeleting(feature)} className={styles.features_button}>
@@ -161,17 +178,13 @@ export const ProductFeatures = () => {
               <input
                 type="text"
                 placeholder="Название особенности"
-                value={editing ? editing.name : ''}
-                onChange={e => setEditing({ ...editing, name: e.target.value })}
+                value={name}
+                onChange={e => setName(e.target.value)}
               />
             </label>
             <label className={styles.features_modal_body_label}>
               <p>Описание</p>
-              <Editor
-                isimg={true}
-                value={editing ? editing.description : ''}
-                onChange={value => setEditing({ ...editing, description: value })}
-              />
+              <Editor isimg={true} value={description} onChange={value => setDescription(value)} />
             </label>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
@@ -196,17 +209,13 @@ export const ProductFeatures = () => {
               <input
                 type="text"
                 placeholder="Название особенности"
-                value={isCreating ? isCreating.name : ''}
-                onChange={e => setIsCreating({ ...isCreating, name: e.target.value })}
+                value={name}
+                onChange={e => setName(e.target.value)}
               />
             </label>
             <label className={styles.features_modal_body_label}>
               <p>Описание</p>
-              <Editor
-                isimg={true}
-                value={isCreating ? isCreating.description : ''}
-                onChange={value => setIsCreating({ ...isCreating, description: value })}
-              />
+              <Editor isimg={true} value={description} onChange={value => setDescription(value)} />
             </label>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
