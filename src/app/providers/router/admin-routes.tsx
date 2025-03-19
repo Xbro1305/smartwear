@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router-dom'
+import { Navigate, type RouteObject } from 'react-router-dom'
 
 import { ArticlesList } from '@/pages/admin/articles'
 import { CreateArticle } from '@/pages/admin/articles/Create/Create'
@@ -24,6 +24,7 @@ export const adminRoutes: RouteObject[] = [
   {
     children: [
       { element: <MainPage />, path: ADMIN },
+      { element: <Navigate to={ADMIN} />, path: '/admin' },
       { element: <MainPage />, path: ADMINSETTINGS },
       { element: <ProductsList />, path: ADMINPRODUCTS },
       { element: <ProductFeatures />, path: ADMINPRODUCTS_FEATURES },

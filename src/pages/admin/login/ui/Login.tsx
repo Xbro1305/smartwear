@@ -42,7 +42,7 @@ export const AdminLogin = () => {
         localStorage.setItem('userphone', user.phone)
 
         setTimeout(() => {
-          navigate('/admin')
+          navigate(ROUTER_PATHS.ADMIN)
           window.location.reload()
           setLoading(false)
         }, 4000)
@@ -117,7 +117,7 @@ export const AdminLogin = () => {
             localStorage.setItem('userphone', user.phone)
 
             setTimeout(() => {
-              navigate('/admin')
+              navigate(ROUTER_PATHS.ADMIN)
               window.location.reload()
               setLoading(false)
             }, 4000)
