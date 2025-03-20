@@ -25,7 +25,7 @@ export const ProductFeatures = () => {
     },
   ])
 
-  const apiUrl = 'https://test.maxiscomfort.ru/api'
+  const apiUrl = import.meta.env.VITE_APP_API_URL
 
   const [editing, setEditing] = useState<false | Feature>(false)
   const [isCreating, setIsCreating] = useState<false | Feature>(false)

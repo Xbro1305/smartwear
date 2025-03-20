@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './List.module.scss'
 import { CiSearch } from 'react-icons/ci'
 import { FaChevronDown, FaChevronUp, FaFilter } from 'react-icons/fa'
@@ -7,6 +7,8 @@ import { FilterSelector } from '../Components/FilterSelector/Selector'
 import productImg from '@/assets/images/Ellipse 170.png'
 import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 interface Filters {
   gender?: { title: '' } | { title: 'Женский'; key: 'female' } | { title: 'Мужской'; key: 'male' }
@@ -25,6 +27,36 @@ interface Filters {
   warehouse?: { title: '' } | { title: string; key: string }
 }
 
+interface Category {
+  id: number
+  name: string
+}
+
+interface Product {
+  id: number
+  name: string
+  description: string
+  price: string | number
+  articul: string
+  imageUrl: null | string
+  categoryId: number
+  quantity: number
+  status: boolean
+  createdAt: string
+  updatedAt: string
+  category: Category
+  features: {
+    id: number
+    productId: number
+    featureId: number
+    feature: {
+      id: number
+      name: string
+      description: string
+    }
+  }[]
+}
+
 // {
 //     "name": "Женская зимняя куртка LimoLady 3007",
 //     "description": "Теплая куртка с водонепроницаемым покрытием",
@@ -41,55 +73,8 @@ interface Filters {
 
 const { CREATE_PRODUCT, EDIT_PRODUCT, PRODUCT } = ROUTER_PATHS
 
-const items = [
-  {
-    name: 'Женская зимняя куртка LimoLady 3007',
-    description: 'Теплая куртка с водонепроницаемым покрытием',
-    article: String(Math.floor(Math.random() * 1000000)),
-    id: String(Math.floor(Math.random() * 1000000)),
-    status: Math.floor(Math.random() * 2),
-    price: Math.floor(Math.random() * 10000),
-    quantity: Math.floor(Math.random() * 100),
-  },
-  {
-    name: 'Женская зимняя куртка LimoLady 3007',
-    description: 'Теплая куртка с водонепроницаемым покрытием',
-    article: String(Math.floor(Math.random() * 1000000)),
-    id: String(Math.floor(Math.random() * 1000000)),
-    status: Math.floor(Math.random() * 2),
-    price: Math.floor(Math.random() * 10000),
-    quantity: Math.floor(Math.random() * 100),
-  },
-  {
-    name: 'Женская зимняя куртка LimoLady 3007',
-    description: 'Теплая куртка с водонепроницаемым покрытием',
-    article: String(Math.floor(Math.random() * 1000000)),
-    id: String(Math.floor(Math.random() * 1000000)),
-    status: 0,
-    price: Math.floor(Math.random() * 10000),
-    quantity: Math.floor(Math.random() * 100),
-  },
-  {
-    name: 'Женская зимняя куртка LimoLady 3007',
-    description: 'Теплая куртка с водонепроницаемым покрытием',
-    article: String(Math.floor(Math.random() * 1000000)),
-    id: String(Math.floor(Math.random() * 1000000)),
-    status: Math.floor(Math.random() * 2),
-    price: Math.floor(Math.random() * 10000),
-    quantity: 5,
-  },
-  {
-    name: 'Женская зимняя куртка LimoLady 3007',
-    description: 'Теплая куртка с водонепроницаемым покрытием',
-    article: String(Math.floor(Math.random() * 1000000)),
-    id: String(Math.floor(Math.random() * 1000000)),
-    status: 1,
-    price: Math.floor(Math.random() * 10000),
-    quantity: Math.floor(Math.random() * 100),
-  },
-]
-
 export const ProductsList = () => {
+  const [items, setItems] = useState<Product[]>([])
   const [products, setProducts] = useState(items)
   const [searching, setSearching] = useState('')
   const [checked, setChecked] = useState<string[]>([])
@@ -128,6 +113,23 @@ export const ProductsList = () => {
 
     setProducts(sortedProducts)
   }
+
+  useEffect(() => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/products?categoryName=Одежда&page=1&limit=10`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setItems(res.data)
+        setProducts(res.data)
+      })
+      .catch(err => {
+        toast.error('Ошибка при загрузке товаров')
+      })
+  }, [])
 
   return (
     <div className={styles.productsList}>
@@ -240,64 +242,65 @@ export const ProductsList = () => {
             <p></p>
           </div>
           <div className={styles.productsList_wrapper_bottom}>
-            {products.map((i, index) => (
-              <div key={index} className={styles.productsList_wrapper_item}>
-                <label>
-                  <input
-                    onChange={e => {
-                      if (e.target.checked == true) {
-                        const newChecked = [...checked, i.article]
-                        setChecked(newChecked)
-                      } else {
-                        const newChecked = checked.filter(item => item != i.article)
-                        setChecked(newChecked)
-                      }
-                    }}
-                    checked={checked.includes(i.article)}
-                    type="checkbox"
-                    name="item"
-                    id="checkbox"
-                  />
-                  <img src={productImg} alt="" />
-                  <p>{i.name}</p>
-                </label>
-                <label>{i.article}</label>
-                <label style={{ color: i.status == 1 ? 'var(--green)' : '' }}>
-                  {i.status == 1 ? 'Включено' : 'Отключено'}
-                </label>
-                <label>{i.price}</label>
-                <label style={i.quantity < 10 ? { color: '#e02844', background: '#FFEFEF' } : {}}>
-                  {i.quantity}
-                </label>
-                <section>
-                  <button
-                    style={{
-                      background: '#FFF3F3',
-                      color: 'var(--light-red)',
-                      borderColor: 'var(--light-red)',
-                    }}
-                    className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
-                  >
-                    <LuTrash2 />
-                    <i>Удалить товар</i>
-                  </button>
-                  <Link
-                    to={`${EDIT_PRODUCT}/${i.id}`}
-                    className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
-                  >
-                    <LuPencil />
-                    <i>Редактировать</i>
-                  </Link>
-                  <Link
-                    to={`${PRODUCT}/${i.article}`}
-                    className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
-                  >
-                    <LuEye />
-                    <i>Товар на сайте</i>
-                  </Link>
-                </section>
-              </div>
-            ))}
+            {products &&
+              products?.map((i, index) => (
+                <div key={index} className={styles.productsList_wrapper_item}>
+                  <label>
+                    <input
+                      onChange={e => {
+                        if (e.target.checked == true) {
+                          const newChecked = [...checked, i.articul]
+                          setChecked(newChecked)
+                        } else {
+                          const newChecked = checked.filter(item => item != i.articul)
+                          setChecked(newChecked)
+                        }
+                      }}
+                      checked={checked.includes(i.articul)}
+                      type="checkbox"
+                      name="item"
+                      id="checkbox"
+                    />
+                    <img src={productImg} alt="" />
+                    <p>{i.name}</p>
+                  </label>
+                  <label>{i.articul}</label>
+                  <label style={{ color: i.status == true ? 'var(--green)' : '' }}>
+                    {i.status == true ? 'Включено' : 'Отключено'}
+                  </label>
+                  <label>{i.price}</label>
+                  <label style={i.quantity < 10 ? { color: '#e02844', background: '#FFEFEF' } : {}}>
+                    {i.quantity}
+                  </label>
+                  <section>
+                    <button
+                      style={{
+                        background: '#FFF3F3',
+                        color: 'var(--light-red)',
+                        borderColor: 'var(--light-red)',
+                      }}
+                      className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
+                    >
+                      <LuTrash2 />
+                      <i>Удалить товар</i>
+                    </button>
+                    <Link
+                      to={`${EDIT_PRODUCT}/${i.id}`}
+                      className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
+                    >
+                      <LuPencil />
+                      <i>Редактировать</i>
+                    </Link>
+                    <Link
+                      to={`${PRODUCT}/${i.articul}`}
+                      className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
+                    >
+                      <LuEye />
+                      <i>Товар на сайте</i>
+                    </Link>
+                  </section>
+                </div>
+              ))}
           </div>
         </div>
       </div>
