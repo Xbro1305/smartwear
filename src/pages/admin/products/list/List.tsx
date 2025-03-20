@@ -245,20 +245,9 @@ export const ProductsList = () => {
         <div className={styles.productsList_wrapper}>
           <div className={styles.productsList_wrapper_top}>
             <p>Название товара и фото</p>
-            <p onClick={() => handleSort('article')}>
-              Артикул{' '}
-              {sortConfig.key === 'article' ? (
-                sortConfig.direction === 'asc' ? (
-                  <FaChevronUp />
-                ) : (
-                  <FaChevronDown />
-                )
-              ) : (
-                <FaChevronDown />
-              )}
-            </p>
+            <p>Артикул</p>
             <p onClick={() => handleSort('status')}>
-              Статус{' '}
+              Статус
               {sortConfig.key === 'status' ? (
                 sortConfig.direction === 'asc' ? (
                   <FaChevronUp />
