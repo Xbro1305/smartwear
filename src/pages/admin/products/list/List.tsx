@@ -106,8 +106,33 @@ export const ProductsList = () => {
     setSortConfig({ key, direction })
 
     const sortedProducts = [...products].sort((a: any, b: any) => {
-      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1
-      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1
+      let valA = a[key]
+      let valB = b[key]
+
+      // Проверяем, что значения не null и не undefined
+      if (valA == null) valA = ''
+      if (valB == null) valB = ''
+
+      // Преобразуем boolean в числа
+      if (typeof valA === 'boolean') {
+        valA = valA ? 1 : 0
+        valB = valB ? 1 : 0
+      }
+
+      // Преобразуем строковые значения (для артикулов, названий и т. д.)
+      if (typeof valA === 'string') {
+        valA = valA.toLowerCase()
+        valB = valB.toLowerCase()
+      }
+
+      // Преобразуем цену в число, если она строка
+      if (key === 'price') {
+        valA = Number(valA)
+        valB = Number(valB)
+      }
+
+      if (valA < valB) return direction === 'asc' ? -1 : 1
+      if (valA > valB) return direction === 'asc' ? 1 : -1
       return 0
     })
 
