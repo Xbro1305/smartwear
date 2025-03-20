@@ -32,6 +32,17 @@ interface Category {
   name: string
 }
 
+interface Feature {
+  id: number
+  productId: number
+  featureId: number
+  feature: {
+    id: number
+    name: string
+    description: string
+  }
+}
+
 interface Product {
   id: number
   name: string
@@ -45,16 +56,7 @@ interface Product {
   createdAt: string
   updatedAt: string
   category: Category
-  features: {
-    id: number
-    productId: number
-    featureId: number
-    feature: {
-      id: number
-      name: string
-      description: string
-    }
-  }[]
+  features: Feature[]
 }
 
 // {
