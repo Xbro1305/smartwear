@@ -126,7 +126,7 @@ export const ProductsList = () => {
         setItems(res.data)
         setProducts(res.data)
       })
-      .catch(err => {
+      .catch(() => {
         toast.error('Ошибка при загрузке товаров')
       })
   }, [])
