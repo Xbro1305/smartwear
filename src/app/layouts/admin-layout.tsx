@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
@@ -100,7 +100,16 @@ export const AdminLayout = () => {
           }}
         >
           <AdminHeader page={page} setPage={setPage} />
-          <Outlet />
+          <div
+            onClick={() => {
+              const path = location.pathname.split('/admin/')[1]?.split('/')[0] || 'home'
+              if (path && path != page) {
+                setPage(path)
+              }
+            }}
+          >
+            <Outlet />
+          </div>
         </main>
       </div>
     )
