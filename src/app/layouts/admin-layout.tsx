@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
@@ -8,7 +8,12 @@ import { SideBar } from '@/widgets/adminSidebar/sidebar'
 export const AdminLayout = () => {
   const [page, setPage] = useState<string>('Главная')
 
-  console.log(page)
+  const location = useLocation()
+
+  useEffect(() => {
+    const path = location.pathname.split('/admin/')[1]?.split('/')[0] || 'home'
+    setPage(path)
+  }, [location.pathname])
 
   const { data } = useGetMeQuery()
 

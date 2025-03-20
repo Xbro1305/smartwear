@@ -27,8 +27,8 @@ export const AdminHeader = ({
       <section className={styles.adminHeader_links}>
         {menuItems.map(i => (
           <button
-            className={`adminHeader_link ${page == i.name && 'active'}`}
-            onClick={() => setPage(i.name)}
+            className={`adminHeader_link ${page == i.path.split('/')[2] && 'active'}`}
+            onClick={() => setPage(i.path.split('/')[2])}
           >
             {i.name}
           </button>

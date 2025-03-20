@@ -91,16 +91,4 @@ const menuItems: MenuItems = {
     { name: 'Особенности', icon: <FaQuestion />, path: rp.ADMINPRODUCTS_FEATURES, end: false },
     { name: 'Цены', icon: <IoCard />, path: rp.ADMINPRODUCTS_PRICES, end: false },
   ],
-  Товары: [
-    { name: 'Список товаров', icon: <FaList />, path: rp.ADMINPRODUCTS, end: true },
-    { name: 'Категории', icon: <LuBlocks />, path: rp.ADMINPRODUCTS_CATEGORIES, end: false },
-    {
-      name: 'Атрибуты',
-      icon: <img src={atributesImg} />,
-      path: rp.ADMINPRODUCTS_ATRIBUTES,
-      end: false,
-    },
-    { name: 'Особенности', icon: <FaQuestion />, path: rp.ADMINPRODUCTS_FEATURES, end: false },
-    { name: 'Цены', icon: <IoCard />, path: rp.ADMINPRODUCTS_PRICES, end: false },
-  ],
 }
