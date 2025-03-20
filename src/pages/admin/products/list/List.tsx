@@ -88,6 +88,8 @@ export const ProductsList = () => {
   })
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
 
   const handleFilterChange = (filter: keyof Filters, value: any) => {
     const newFilters = { ...filters }
@@ -156,6 +158,35 @@ export const ProductsList = () => {
       })
   }, [])
 
+  const deleteProduct = (id: number) => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        setProducts(products.filter(product => product.id !== id))
+        toast.success('Товар успешно удален')
+      })
+      .catch(() => {
+        toast.error('Ошибка при удалении товара')
+      })
+  }
+
+  const handleDeleteSelected = () => {
+    if (checked.length) {
+      checked.forEach(id => {
+        deleteProduct(Number(id))
+        setIsDeleting(false)
+        setChecked([])
+      })
+    } else {
+      toast.error('Выберите товары для удаления')
+    }
+  }
+
   return (
     <div className={styles.productsList}>
       <h1 id="h1">Товары</h1>
@@ -197,6 +228,7 @@ export const ProductsList = () => {
               />
             </button>
             <button
+              onClick={() => checked.length && setIsDeleting(true)}
               style={
                 checked.length
                   ? {
@@ -274,14 +306,14 @@ export const ProductsList = () => {
                     <input
                       onChange={e => {
                         if (e.target.checked == true) {
-                          const newChecked = [...checked, i.articul]
+                          const newChecked = [...checked, i.id.toString()]
                           setChecked(newChecked)
                         } else {
-                          const newChecked = checked.filter(item => item != i.articul)
+                          const newChecked = checked.filter(item => item != i.id.toString())
                           setChecked(newChecked)
                         }
                       }}
-                      checked={checked.includes(i.articul)}
+                      checked={checked.includes(i.id.toString())}
                       type="checkbox"
                       name="item"
                       id="checkbox"
@@ -304,6 +336,7 @@ export const ProductsList = () => {
                         color: 'var(--light-red)',
                         borderColor: 'var(--light-red)',
                       }}
+                      onClick={() => setDeletingId(i.id)}
                       className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
                     >
                       <LuTrash2 />
@@ -327,6 +360,42 @@ export const ProductsList = () => {
                 </div>
               ))}
           </div>
+        </div>
+      </div>
+
+      <div className={`${styles.deleteModal} ${isDeleting ? 'flex' : 'hidden'}`}>
+        <div className={styles.deleteModal_body}>
+          <h2 id="h2">Удалить выбранные товары?</h2>
+          <p id="b2">Вы уверены, что хотите удалить выбранные товары?</p>
+          <section className="ml-auto flex gap-[10px] mt-[20px]">
+            <button
+              onClick={() => setIsDeleting(false)}
+              className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+            >
+              Отмена
+            </button>
+            <button onClick={handleDeleteSelected} id="admin-button">
+              Удалить
+            </button>
+          </section>
+        </div>
+      </div>
+
+      <div className={`${styles.deleteModal} ${deletingId ? 'flex' : 'hidden'}`}>
+        <div className={styles.deleteModal_body}>
+          <h2 id="h2">Удалить товар?</h2>
+          <p>Вы уверены, что хотите удалить товар?</p>
+          <section className="ml-auto flex gap-[10px] mt-[20px]">
+            <button
+              onClick={() => setDeletingId(null)}
+              className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+            >
+              Отмена
+            </button>
+            <button onClick={() => deleteProduct(deletingId as number)} id="admin-button">
+              Удалить
+            </button>
+          </section>
         </div>
       </div>
     </div>

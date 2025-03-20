@@ -244,7 +244,7 @@ export const ProductFeatures = () => {
                 Отмена
               </button>
               <button onClick={handleDelete} id="admin-button">
-                Сохранить
+                Удалить
               </button>
             </section>
           </div>
