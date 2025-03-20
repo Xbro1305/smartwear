@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import styles from './Features.module.scss'
 import { LuPencil, LuTrash2 } from 'react-icons/lu'
-import { Editor } from '../../articles/Create/editor'
+import { FeatureEditor as Editor } from '../Components/FeatureEditor/editor'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
@@ -55,7 +55,7 @@ export const ProductFeatures = () => {
       method: 'PUT',
       data: {
         name: name,
-        description: description.replace('<p>', '').replace('</p>', ''),
+        description: description,
       },
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export const ProductFeatures = () => {
       method: 'POST',
       data: {
         name: name,
-        description: description.replace('<p>', '').replace('</p>', ''),
+        description: description,
       },
       headers: {
         'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export const ProductFeatures = () => {
             </label>
             <label className={styles.features_modal_body_label}>
               <p>Описание</p>
-              <Editor isimg={true} value={description} onChange={value => setDescription(value)} />
+              <Editor value={description} onChange={value => setDescription(value)} />
             </label>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
@@ -203,7 +203,7 @@ export const ProductFeatures = () => {
       {isCreating && (
         <div className={`${styles.features_modal} flex`}>
           <div className={styles.features_modal_body}>
-            <h2 id="h2">Редактирование особенности</h2>
+            <h2 id="h2">Создание особенности</h2>
             <label className={styles.features_modal_body_label}>
               <p>Название</p>
               <input
@@ -215,7 +215,7 @@ export const ProductFeatures = () => {
             </label>
             <label className={styles.features_modal_body_label}>
               <p>Описание</p>
-              <Editor isimg={true} value={description} onChange={value => setDescription(value)} />
+              <Editor value={description} onChange={value => setDescription(value)} />
             </label>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button

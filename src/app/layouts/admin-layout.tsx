@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
@@ -6,6 +6,10 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 import { AdminHeader } from '@/widgets/adminHeader/adminHeader'
 import { SideBar } from '@/widgets/adminSidebar/sidebar'
 export const AdminLayout = () => {
+  const [page, setPage] = useState<string>('Главная')
+
+  console.log(page)
+
   const { data } = useGetMeQuery()
 
   useEffect(() => {
@@ -83,14 +87,14 @@ export const AdminLayout = () => {
       <div
         style={{ display: 'grid', gridTemplateColumns: '300px calc(100% - 300px)', width: '100%' }}
       >
-        <SideBar />
+        <SideBar redirectingPage={page} />
         <main
           style={{
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          <AdminHeader />
+          <AdminHeader page={page} setPage={setPage} />
           <Outlet />
         </main>
       </div>

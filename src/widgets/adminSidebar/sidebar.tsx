@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react'
 const { ADMINARTICLES, ADMIN, HOME, ADMINSETTINGS } = ROUTER_PATHS
 const rp = { ...ROUTER_PATHS }
 
-export const SideBar = () => {
+export const SideBar = ({ redirectingPage }: { redirectingPage: string }) => {
   const { data: user } = useGetMeQuery()
   const location = useLocation()
   const [page, setPage] = useState(() => {
@@ -22,10 +22,9 @@ export const SideBar = () => {
   const [items, setItems] = useState<MenuItem[]>(menuItems[page] || menuItems.home)
 
   useEffect(() => {
-    const currentPage = location.pathname.split('/admin/')[1]?.split('/')[0] || 'home'
-    setPage(currentPage)
-    setItems(menuItems[currentPage] || menuItems.home)
-  }, [location.pathname])
+    setPage(redirectingPage)
+    setItems(menuItems[redirectingPage] || menuItems.home)
+  }, [location.pathname, redirectingPage])
 
   return (
     <div className={styles.sidebar}>
@@ -81,6 +80,18 @@ const menuItems: MenuItems = {
     { name: 'Настройки', icon: <FaCog />, path: ADMINSETTINGS, end: false },
   ],
   products: [
+    { name: 'Список товаров', icon: <FaList />, path: rp.ADMINPRODUCTS, end: true },
+    { name: 'Категории', icon: <LuBlocks />, path: rp.ADMINPRODUCTS_CATEGORIES, end: false },
+    {
+      name: 'Атрибуты',
+      icon: <img src={atributesImg} />,
+      path: rp.ADMINPRODUCTS_ATRIBUTES,
+      end: false,
+    },
+    { name: 'Особенности', icon: <FaQuestion />, path: rp.ADMINPRODUCTS_FEATURES, end: false },
+    { name: 'Цены', icon: <IoCard />, path: rp.ADMINPRODUCTS_PRICES, end: false },
+  ],
+  Товары: [
     { name: 'Список товаров', icon: <FaList />, path: rp.ADMINPRODUCTS, end: true },
     { name: 'Категории', icon: <LuBlocks />, path: rp.ADMINPRODUCTS_CATEGORIES, end: false },
     {

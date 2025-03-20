@@ -5,7 +5,13 @@ import { FaSearch } from 'react-icons/fa'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 const { ADMIN } = ROUTER_PATHS
 
-export const AdminHeader = () => {
+export const AdminHeader = ({
+  setPage,
+  page,
+}: {
+  setPage: (item: string) => void
+  page: string
+}) => {
   const menuItems = [
     { name: 'Главная', path: ADMIN, end: false },
     { name: 'Товары', path: '/admin/products', end: false },
@@ -21,9 +27,12 @@ export const AdminHeader = () => {
     <header className={styles.adminHeader}>
       <section className={styles.adminHeader_links}>
         {menuItems.map(i => (
-          <NavLink className="adminHeader_link" to={i.path} end={i.end}>
+          <button
+            className={`adminHeader_link ${page == i.name && 'active'}`}
+            onClick={() => setPage(i.name)}
+          >
             {i.name}
-          </NavLink>
+          </button>
         ))}
       </section>
       <label>
