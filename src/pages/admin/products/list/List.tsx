@@ -111,23 +111,20 @@ export const ProductsList = () => {
       let valA = a[key]
       let valB = b[key]
 
-      // Проверяем, что значения не null и не undefined
       if (valA == null) valA = ''
       if (valB == null) valB = ''
 
-      // Преобразуем boolean в числа
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        valA = valA.trim().toLowerCase()
+        valB = valB.trim().toLowerCase()
+        return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA)
+      }
+
       if (typeof valA === 'boolean') {
         valA = valA ? 1 : 0
         valB = valB ? 1 : 0
       }
 
-      // Преобразуем строковые значения (для артикулов, названий и т. д.)
-      if (typeof valA === 'string') {
-        valA = valA.toLowerCase()
-        valB = valB.toLowerCase()
-      }
-
-      // Преобразуем цену в число, если она строка
       if (key === 'price') {
         valA = Number(valA)
         valB = Number(valB)
