@@ -182,10 +182,10 @@ export const ProductFeatures = () => {
                 onChange={e => setName(e.target.value)}
               />
             </label>
-            <label className={styles.features_modal_body_label}>
+            <div className={styles.features_modal_body_label}>
               <p>Описание</p>
               <Editor value={description} onChange={value => setDescription(value)} />
-            </label>
+            </div>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
                 onClick={() => setEditing(false)}
@@ -213,10 +213,10 @@ export const ProductFeatures = () => {
                 onChange={e => setName(e.target.value)}
               />
             </label>
-            <label className={styles.features_modal_body_label}>
+            <div className={styles.features_modal_body_label}>
               <p>Описание</p>
               <Editor value={description} onChange={value => setDescription(value)} />
-            </label>
+            </div>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
                 onClick={() => setIsCreating(false)}
