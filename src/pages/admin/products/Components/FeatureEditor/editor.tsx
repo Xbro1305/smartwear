@@ -6,10 +6,8 @@ import './editor.css'
 import 'quill/dist/quill.snow.css'
 
 type EditorProps = {
-  isimg?: boolean
-  onChange?: (content: string) => void
-  setimg?: any
-  value?: string
+  onChange: (content: string) => void
+  value: string
 }
 
 export const FeatureEditor: React.FC<EditorProps> = ({ onChange, value }) => {

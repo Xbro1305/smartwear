@@ -1,0 +1,708 @@
+import { FormEvent, useState } from 'react'
+import styles from './Atributes.module.scss'
+import { LuPencil, LuTrash2 } from 'react-icons/lu'
+import autojackLogo from '@/assets/images/autojcak.png'
+import limoladyLogo from '@/assets/images/limolady.png'
+import nordwindLogo from '@/assets/images/nordwind.png'
+import { Link } from 'react-router-dom'
+import { FeatureEditor } from '../Components/FeatureEditor/editor'
+
+export const Types = () => {
+  const [deleting, setDeleting] = useState<{ title: string; id: number } | null>(null)
+  const [creating, setCreating] = useState<null | { title: string }>(null)
+
+  const handleDelete = () => {
+    setDeleting(null)
+    alert('Вы удалили ' + deleting?.title)
+  }
+
+  const handleCreate = (e: FormEvent) => {
+    e.preventDefault()
+    setCreating(null)
+    alert('Вы создали ' + creating?.title)
+  }
+
+  const items = {
+    title: 'Виды изделий',
+    id: 1,
+    items: [
+      { title: 'Куртка', id: 1 },
+      { title: 'Кепка', id: 2 },
+      { title: 'Шапка', id: 3 },
+    ],
+  }
+
+  return (
+    <>
+      <button onClick={() => setCreating({ title: '' })} className="ml-auto" id="admin-button">
+        Добавить вид изделия
+      </button>
+      <div className={styles.atributes_list}>
+        <h3 id="h3">{items.title}</h3>
+        <div className={styles.atributes_list_items}>
+          {items.items?.map((item, index) => (
+            <div key={index} className={styles.atributes_list_item}>
+              <label>{item.title}</label>
+              <button onClick={() => items.items && setDeleting(items.items[index])}>
+                &times;
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {deleting && (
+        <div className={`${styles.modal} flex`}>
+          <div className={styles.modal_body}>
+            <h2 id="h2">Вы точно хотите удалить вид товара {deleting.title}?</h2>
+            <section className="flex gap-[10px] mt-[20px] ml-auto">
+              <button
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                onClick={() => setDeleting(null)}
+              >
+                Отмена
+              </button>
+              <button id="admin-button" onClick={handleDelete}>
+                Удалить
+              </button>
+            </section>
+          </div>
+        </div>
+      )}
+
+      {creating && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
+            <h2 id="h2">Добавление вида товара</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                value={creating.title}
+                onChange={e => setCreating({ title: e.target.value })}
+                type="text"
+                placeholder={`Название вида товара`}
+              />
+            </label>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setCreating(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button type="submit" id="admin-button">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
+
+export const SeasonAttrCase = () => {
+  const items = {
+    title: 'Сезоны',
+    id: 2,
+    items: [
+      { title: 'Лето', id: 1, startDate: '2023-06-01' },
+      { title: 'Зима', id: 2, startDate: '2023-12-01' },
+      { title: 'Весна', id: 3, startDate: '2023-03-01' },
+    ],
+  }
+  const [deleting, setDeleting] = useState<null | { title: string; startDate: string }>(null)
+  const [creating, setCreating] = useState<null | { title: string; startDate: string }>(null)
+  const [editing, setEditing] = useState<null | { title: string; startDate: string }>(null)
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+    alert('Вы удалили ' + deleting?.title)
+    setDeleting(null)
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    alert('Вы создали ' + creating?.title)
+    setCreating(null)
+  }
+
+  const handleUpdate = (e: FormEvent) => {
+    e.preventDefault()
+    alert('Вы изменили ' + editing?.title)
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setCreating({ title: '', startDate: '' })}
+        className="ml-auto"
+        id="admin-button"
+      >
+        Добавить сезон
+      </button>
+      <div className={styles.seasonAtributes_list}>
+        <div className={styles.seasonAtributes_list_top}>
+          <p>Сезон</p>
+          <p>Дата начала сезoна</p>
+          <p></p>
+        </div>
+        {items.items?.map((item, index) => (
+          <div key={index} className={styles.seasonAtributes_list_item}>
+            <label>{item.title}</label>
+            <label>{item.startDate.replace('-', '.').replace('-', '.')}</label>
+            <section>
+              <button onClick={() => setDeleting(item)}>
+                <LuTrash2 />
+              </button>
+              <button onClick={() => setEditing(item)}>
+                <LuPencil />
+              </button>
+            </section>
+          </div>
+        ))}
+        <div style={{ transform: 'rotate(180deg)' }} className={styles.seasonAtributes_list_top}>
+          <p>&nbsp;</p>
+          <p></p>
+          <p></p>
+        </div>
+      </div>
+
+      {deleting && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
+            <h2 id="h2">Вы точно хотите удалить сезон {deleting.title}?</h2>
+            <section className="flex gap-[10px] mt-[20px] ml-auto">
+              <button
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                onClick={() => setDeleting(null)}
+                type="button"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+
+      {creating && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleSubmit(e)} className={styles.modal_body}>
+            <h2 id="h2">Добавление сезона</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                type="text"
+                required
+                value={creating.title}
+                onChange={e => setCreating({ ...creating, title: e.target.value })}
+                placeholder={`Название сезона`}
+              />
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Дата начала сезона</p>
+              <input
+                required
+                value={creating.startDate}
+                onChange={e => setCreating({ ...creating, startDate: e.target.value })}
+                type="date"
+                placeholder={`Дата начала сезона`}
+              />
+            </label>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setCreating(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {editing && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleUpdate(e)} className={styles.modal_body}>
+            <h2 id="h2">Редактирование сезона</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                required
+                type="text"
+                value={editing?.title}
+                onChange={e =>
+                  setEditing({
+                    ...editing,
+                    title: e.target.value,
+                  })
+                }
+                placeholder={`Название сезона`}
+              />
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Дата начала сезона</p>
+              <input
+                required
+                type="date"
+                value={editing?.startDate}
+                onChange={e =>
+                  setEditing({
+                    ...editing,
+                    startDate: e.target.value,
+                  })
+                }
+              />
+            </label>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button type="submit" id="admin-button">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
+
+export const TargetGroups = () => {
+  const [deleting, setDeleting] = useState<{ title: string; id: number } | null>(null)
+  const [creating, setCreating] = useState<null | { title: string }>(null)
+
+  const handleDelete = () => {
+    setDeleting(null)
+    alert('Вы удалили ' + deleting?.title)
+  }
+
+  const handleCreate = (e: FormEvent) => {
+    e.preventDefault()
+    setCreating(null)
+    alert('Вы создали ' + creating?.title)
+  }
+
+  const items = {
+    title: 'Целевые группы',
+    id: 1,
+    items: [
+      { title: 'Женщинам', id: 1 },
+      { title: 'Мужчинам', id: 2 },
+      { title: 'Унисекс', id: 3 },
+    ],
+  }
+
+  return (
+    <>
+      <button onClick={() => setCreating({ title: '' })} className="ml-auto" id="admin-button">
+        Добавить целевую группу
+      </button>
+      <div className={styles.atributes_list}>
+        <h3 id="h3">{items.title}</h3>
+        <div className={styles.atributes_list_items}>
+          {items.items?.map((item, index) => (
+            <div key={index} className={styles.atributes_list_item}>
+              <label>{item.title}</label>
+              <button onClick={() => items.items && setDeleting(items.items[index])}>
+                &times;
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {deleting && (
+        <div className={`${styles.modal} flex`}>
+          <div className={styles.modal_body}>
+            <h2 id="h2">Вы точно хотите удалить целевую группу {deleting.title}?</h2>
+            <section className="flex gap-[10px] mt-[20px] ml-auto">
+              <button
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                onClick={() => setDeleting(null)}
+              >
+                Отмена
+              </button>
+              <button id="admin-button" onClick={handleDelete}>
+                Удалить
+              </button>
+            </section>
+          </div>
+        </div>
+      )}
+
+      {creating && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
+            <h2 id="h2">Добавление целевой группы</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                value={creating.title}
+                onChange={e => setCreating({ title: e.target.value })}
+                type="text"
+                placeholder={`Название целевой группы`}
+              />
+            </label>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setCreating(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button type="submit" id="admin-button">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
+
+interface Brand {
+  title: string
+  description: string
+  logo: string
+  url: string
+  metaTitle: string
+  metaDescription: string
+}
+
+const data: Brand[] = [
+  {
+    title: 'AutoJack',
+    description:
+      'AutoJack & LimoLady — российско-немецкий бренд по производству высокотехнологичной верхней одежды. Компания выпускает мужскую и женскую одежду, а также толстовки, брюки и аксессуары.',
+    logo: autojackLogo,
+    url: 'autojack',
+    metaTitle: 'Мета заголовок 1',
+    metaDescription: 'Мета описание 1',
+  },
+  {
+    title: 'LimoLady',
+    description:
+      'LimoLady — немецко-российская компания по производству верхней одежды. Бренд выпускает моделидля мобильного горожанина, который проводит минимум 2–3 часа в день за рулём. ',
+    logo: limoladyLogo,
+    url: 'limolady',
+    metaTitle: 'Мета заголовок 2',
+    metaDescription: 'Мета описание 2',
+  },
+  {
+    title: 'Nordwind',
+    description:
+      'Nordwind Airlines (юридическое название — ООО «Северный ветер») — российская авиакомпания, образованная в 2008 году. Является дочерней компанией «Пегас Туристик»',
+    logo: nordwindLogo,
+    url: 'nordwind',
+    metaTitle: 'Мета заголовок 3',
+    metaDescription: 'Мета описание 3',
+  },
+]
+
+export const Brands = () => {
+  const [description, setDescription] = useState('')
+  const [creating, setCreating] = useState<null | Brand>(null)
+  const [editing, setEditing] = useState<null | Brand>(null)
+  const [deleting, setDeleting] = useState<null | Brand>(null)
+  const [items, setItems] = useState<Brand[]>(data)
+
+  const handleCreate = (e: FormEvent) => {
+    e.preventDefault()
+    const item = { ...(creating as Brand), description }
+    console.log(item)
+    setItems([...items, item])
+    alert('Вы создали ' + creating?.title)
+    setDescription('')
+    setCreating(null)
+  }
+
+  const handleUpdate = (e: FormEvent) => {
+    e.preventDefault()
+    const item = { ...(editing as Brand), description }
+    console.log(item)
+    setItems(items.map(i => (i.title === item.title ? item : i)))
+    alert('Вы изменили ' + editing?.title)
+    setDescription('')
+    setEditing(null)
+  }
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+    setItems(items.filter(i => i.title !== deleting?.title))
+    alert('Вы удалили ' + deleting?.title)
+    setDeleting(null)
+  }
+
+  return (
+    <>
+      <div className={styles.brands}>
+        <button
+          onClick={() =>
+            setCreating({
+              title: '',
+              description: '',
+              logo: '',
+              url: '',
+              metaTitle: '',
+              metaDescription: '',
+            })
+          }
+          className="ml-auto"
+          id="admin-button"
+        >
+          Добавить бренд
+        </button>
+
+        <div className={styles.brands_list}>
+          {items.map((item, index) => (
+            <div key={index} className={styles.brands_list_item}>
+              <section className={styles.brands_list_item_top}>
+                <img src={item.logo} alt={item.title} />
+                <h3 id="h3">{item.title}</h3>
+              </section>
+              <div className="flex flex-col gap-[5px]">
+                <p style={{ color: 'var(--dark-gray)' }} id="p2">
+                  Описание
+                </p>
+                <p dangerouslySetInnerHTML={{ __html: item.description }} id="p2"></p>
+              </div>
+              <div className="flex flex-1 flex-col gap-[5px]">
+                <p style={{ color: 'var(--dark-gray)' }} id="p2">
+                  Ссылка
+                </p>
+                <Link
+                  className="border-b-[1px] border-b-solid border-b-[var(--dark-gray)] w-[fit-content]"
+                  to={`https://test.maxiscomfort.ru/${item.url}`}
+                  id="p2"
+                >
+                  {`https://test.maxiscomfort.ru/${item.url}`}
+                </Link>
+              </div>
+
+              <section className="flex gap-[10px] mt-[20px] ml-auto">
+                <button
+                  id="admin-button"
+                  onClick={() => {
+                    setEditing(item)
+                    setDescription(item.description)
+                  }}
+                >
+                  Редактировать
+                </button>
+                <button
+                  onClick={() => setDeleting(item)}
+                  className="w-[40px] h-[40px] flex justify-center rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center"
+                >
+                  <LuTrash2 />
+                </button>
+              </section>
+            </div>
+          ))}
+        </div>
+      </div>
+      {creating && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
+            <h2 id="h2">Добавление бренда</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                type="text"
+                value={creating.title}
+                onChange={e => setCreating({ ...creating, title: e.target.value })}
+                placeholder={`Название бренда`}
+              />
+            </label>
+            <section className={styles.modal_body_label}>
+              <p>Описание</p>
+              <FeatureEditor value={description} onChange={value => setDescription(value)} />
+            </section>
+            <label className={styles.modal_body_label}>
+              <p>Логотип</p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => {
+                  if (e.target.files) {
+                    const file = e.target.files[0]
+                    const reader = new FileReader()
+                    reader.onloadend = () => {
+                      setCreating({ ...creating, logo: reader.result as string })
+                    }
+                    reader.readAsDataURL(file)
+                  }
+                }}
+              />
+
+              {creating.logo && (
+                <img
+                  className="w-[100px] h-[100px] object-cover rounded-[12px] mt-[10px]"
+                  src={creating.logo}
+                  alt={creating.title}
+                />
+              )}
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Ссылка на бренд</p>
+              <input
+                type="text"
+                value={creating.url}
+                onChange={e => setCreating({ ...creating, url: e.target.value })}
+                placeholder={`Ссылка`}
+              />
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Мета заголовок</p>
+              <input
+                type="text"
+                value={creating.metaTitle}
+                onChange={e => setCreating({ ...creating, metaTitle: e.target.value })}
+                placeholder={`Мета заголовок`}
+              />
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Мета описание</p>
+              <textarea
+                value={creating.metaDescription}
+                onChange={e => setCreating({ ...creating, metaDescription: e.target.value })}
+                placeholder={`Мета описание`}
+              />
+            </label>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setCreating(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+
+      {editing && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleUpdate(e)} className={styles.modal_body}>
+            <h2 id="h2">Редактирование бренда</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                type="text"
+                value={editing.title}
+                onChange={e => setEditing({ ...editing, title: e.target.value })}
+                placeholder={`Название бренда`}
+              />
+            </label>
+            <section className={styles.modal_body_label}>
+              <p>Описание</p>
+              <FeatureEditor value={description} onChange={value => setDescription(value)} />
+            </section>
+            <label className={styles.modal_body_label}>
+              <p>Логотип</p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => {
+                  if (e.target.files) {
+                    const file = e.target.files[0]
+                    const reader = new FileReader()
+                    reader.onloadend = () => {
+                      setEditing({ ...editing, logo: reader.result as string })
+                    }
+                    reader.readAsDataURL(file)
+                  }
+                }}
+              />
+
+              {editing.logo && (
+                <img
+                  className="w-[100px] h-[100px] object-cover rounded-[12px] mt-[10px]"
+                  src={editing.logo}
+                  alt={editing.title}
+                />
+              )}
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Ссылка на бренд</p>
+              <input
+                type="text"
+                value={editing.url}
+                onChange={e => setEditing({ ...editing, url: e.target.value })}
+                placeholder={`Ссылка`}
+              />
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Мета заголовок</p>
+              <input
+                type="text"
+                value={editing.metaTitle}
+                onChange={e => setEditing({ ...editing, metaTitle: e.target.value })}
+                placeholder={`Мета заголовок`}
+              />
+            </label>
+            <label className={styles.modal_body_label}>
+              <p>Мета описание</p>
+              <textarea
+                value={editing.metaDescription}
+                onChange={e => setEditing({ ...editing, metaDescription: e.target.value })}
+                placeholder={`Мета описание`}
+              />
+            </label>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+
+      {deleting && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
+            <h2 id="h2">Вы точно хотите удалить бренд {deleting.title}?</h2>
+            <section className="flex gap-[10px] mt-[20px] ml-auto">
+              <button
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                onClick={() => setDeleting(null)}
+                type="button"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
