@@ -795,7 +795,7 @@ export const Brands = ({ id }: { id: number }) => {
         </div>
       </div>
       {creating && (
-        <div className={`${styles.modal} flex`}>
+        <div className={`${styles.modal} flex p-[10px] `}>
           <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
             <h2 id="h2">Добавление бренда</h2>
             <label className={styles.modal_body_label}>
@@ -889,7 +889,7 @@ export const Brands = ({ id }: { id: number }) => {
       )}
 
       {editing && (
-        <div className={`${styles.modal} flex`}>
+        <div className={`${styles.modal} flex p-[10px] `}>
           <form onSubmit={e => handleUpdate(e)} className={styles.modal_body}>
             <h2 id="h2">Редактирование бренда</h2>
             <label className={styles.modal_body_label}>
