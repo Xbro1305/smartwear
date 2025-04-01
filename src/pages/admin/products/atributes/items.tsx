@@ -231,7 +231,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
       data: {
         value: creating?.value,
-        startDate: creating?.startDate,
+        startDate: `${creating?.startDate}T00:00:00.000Z`,
       },
     })
       .then(res => {
@@ -259,7 +259,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       data: {
         attributeId: editing?.attributeId,
         value: editing?.value,
-        startDate: editing?.startDate,
+        startDate: `${editing?.startDate}T00:00:00.000Z`,
       },
     })
       .then(res => {
