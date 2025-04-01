@@ -484,9 +484,9 @@ export const Brands = ({ id }: { id: number }) => {
     })
       .then(res => {
         const data: Brand[] = res.data.values.map((item: any) => ({
-          title: item.name,
+          title: item.value,
           metaDescription: item.description,
-          logo: item.logo,
+          logo: item.imageUrl,
           url: item.seoSlug,
           description: item.description || '',
           metaTitle: 'Мета заголовок 3',
