@@ -160,25 +160,21 @@ export const Types = ({ id }: { id: number }) => {
 }
 
 export const SeasonAttrCase = ({ id }: { id: number }) => {
-  const [items, setItems] = useState({
-    name: 'Сезоны',
-    id: 2,
-    values: [
-      { value: 'Лето', attributeId: 1, startDate: '2023-06-01' },
-      { value: 'Зима', attributeId: 2, startDate: '2023-12-01' },
-      { value: 'Весна', attributeId: 3, startDate: '2023-03-01' },
-    ],
-  })
+  const [items, setItems] = useState<null | {
+    name: string
+    id: number
+    values: { value: string; id: number; startDate: string }[]
+  }>(null)
   const [deleting, setDeleting] = useState<null | {
     value: string
     startDate: string
-    attributeId: number
+    id: number
   }>(null)
   const [creating, setCreating] = useState<null | { value: string; startDate: string }>(null)
   const [editing, setEditing] = useState<null | {
     value: string
     startDate: string
-    attributeId: number
+    id: number
   }>(null)
 
   useEffect(() => {
@@ -200,7 +196,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.attributeId}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -208,10 +204,13 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(() => {
-        setItems(prev => ({
-          ...prev,
-          values: prev.values.filter(i => i.value !== deleting?.value),
-        }))
+        setItems(prev => {
+          if (!prev) return null
+          return {
+            ...prev,
+            values: prev.values.filter(i => i.value !== deleting?.value),
+          }
+        })
         toast.success('Успешно удалено')
       })
       .catch(err => {
@@ -235,10 +234,13 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
-        setItems(prev => ({
-          ...prev,
-          values: [...prev.values, res.data],
-        }))
+        setItems(prev => {
+          if (!prev) return prev // Return null if prev is null
+          return {
+            ...prev,
+            values: [...prev.values, res.data],
+          }
+        })
         toast.success('Успешно добавлено')
       })
       .catch(err => {
@@ -250,23 +252,26 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
 
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault()
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${id}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       data: {
-        attributeId: editing?.attributeId,
+        attributeId: editing?.id,
         value: editing?.value,
         startDate: `${editing?.startDate}T00:00:00.000Z`,
       },
     })
       .then(res => {
-        setItems(prev => ({
-          ...prev,
-          values: prev.values.map(i => (i.value === editing?.value ? res.data : i)),
-        }))
+        setItems(prev => {
+          if (!prev) return null
+          return {
+            ...prev,
+            values: prev.values.map(i => (i.id === editing?.id ? res.data : i)),
+          }
+        })
         toast.success('Успешно обновлено')
       })
       .catch(err => {
@@ -291,7 +296,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
           <p>Дата начала сезoна</p>
           <p></p>
         </div>
-        {items.values?.map((item, index) => (
+        {items?.values?.map((item, index) => (
           <div key={index} className={styles.seasonAtributes_list_item}>
             <label>{item.value}</label>
             <label>{item.startDate.replace('-', '.').replace('-', '.').split('T')[0]}</label>
@@ -302,7 +307,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
               <button
                 onClick={() =>
                   setEditing({
-                    attributeId: item.attributeId,
+                    id: item.id,
                     value: item.value,
                     startDate: item.startDate.split('T')[0],
                   })
@@ -435,15 +440,11 @@ export const TargetGroups = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
   const [creating, setCreating] = useState<null | { value: string }>(null)
 
-  const [items, setItems] = useState({
-    name: 'Целевые группы',
-    id: 3,
-    values: [
-      { value: 'Мужчины', id: 1 },
-      { value: 'Женщины', id: 2 },
-      { value: 'Дети', id: 3 },
-    ],
-  })
+  const [items, setItems] = useState<null | {
+    name: string
+    id: number
+    values: { value: string; id: number }[]
+  }>(null)
 
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
@@ -479,9 +480,9 @@ export const TargetGroups = ({ id }: { id: number }) => {
         Добавить целевую группу
       </button>
       <div className={styles.atributes_list}>
-        <h3 id="h3">{items.name}</h3>
+        <h3 id="h3">{items?.name}</h3>
         <div className={styles.atributes_list_items}>
-          {items.values?.map((item, index) => (
+          {items?.values?.map((item, index) => (
             <div key={index} className={styles.atributes_list_item}>
               <label>{item.value}</label>
               <button onClick={() => items.values && setDeleting(items.values[index])}>
