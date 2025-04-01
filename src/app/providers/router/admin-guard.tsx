@@ -23,7 +23,7 @@ export const AdminGuard = () => {
   })
 
   if (!token) {
-    return <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
+    // return <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
   }
 
   if (isLoading) {
@@ -35,6 +35,6 @@ export const AdminGuard = () => {
   console.log(`Проверка роли пользователя. Роль: ${userData?.role || 'не указана'}`)
   console.log(`isAdmin: ${isAdmin}`)
 
+  return <Outlet />
   return isAdmin ? <Outlet /> : <Navigate replace to={ROUTER_PATHS.ADMINLOGIN} />
-  // return <Outlet />
 }

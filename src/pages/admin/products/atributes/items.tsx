@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { FeatureEditor } from '../Components/FeatureEditor/editor'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { AiOutlinePicture } from 'react-icons/ai'
 
 export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
@@ -810,11 +811,12 @@ export const Brands = ({ id }: { id: number }) => {
               <p>Описание</p>
               <FeatureEditor value={description} onChange={value => setDescription(value)} />
             </section>
-            <label className={styles.modal_body_label}>
+            <label className={`${styles.modal_body_label}`}>
               <p>Логотип</p>
               <input
                 type="file"
                 accept="image/*"
+                className="hidden"
                 onChange={e => {
                   if (e.target.files) {
                     const file = e.target.files[0]
@@ -827,13 +829,21 @@ export const Brands = ({ id }: { id: number }) => {
                 }}
               />
 
-              {creating.logo && (
-                <img
-                  className="w-[100px] h-[100px] object-cover rounded-[12px] mt-[10px]"
-                  src={creating.logo}
-                  alt={creating.title}
-                />
-              )}
+              <section className=" bg-[#F2F3F5] flex w-[185px] h-[185px] rounded-[12px] align-center justify-center flex-col gap-[10px] cursor-pointer">
+                {creating.logo && (
+                  <img
+                    className="w-full h-full object-cover rounded-[12px]"
+                    src={creating.logo}
+                    alt={creating.title}
+                  />
+                )}
+                {!creating.logo && (
+                  <>
+                    <AiOutlinePicture className="flex align-center mx-[auto]" />
+                    <p className="mx-[auto]">Нажми, чтобы загрузить</p>
+                  </>
+                )}
+              </section>
             </label>
             <label className={styles.modal_body_label}>
               <p>Ссылка на бренд</p>
