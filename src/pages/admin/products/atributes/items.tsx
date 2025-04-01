@@ -169,9 +169,17 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       { value: 'Весна', attributeId: 3, startDate: '2023-03-01' },
     ],
   })
-  const [deleting, setDeleting] = useState<null | { value: string; startDate: string }>(null)
+  const [deleting, setDeleting] = useState<null | {
+    value: string
+    startDate: string
+    attributeId: number
+  }>(null)
   const [creating, setCreating] = useState<null | { value: string; startDate: string }>(null)
-  const [editing, setEditing] = useState<null | { value: string; startDate: string }>(null)
+  const [editing, setEditing] = useState<null | {
+    value: string
+    startDate: string
+    attributeId: number
+  }>(null)
 
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
@@ -192,14 +200,11 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.value}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.attributeId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      data: {
-        id: deleting?.value,
       },
     })
       .then(() => {
@@ -225,7 +230,6 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       data: {
-        attributeId: id,
         value: creating?.value,
         startDate: creating?.startDate,
       },
@@ -253,7 +257,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       data: {
-        attributeId: id,
+        attributeId: editing?.attributeId,
         value: editing?.value,
         startDate: editing?.startDate,
       },
