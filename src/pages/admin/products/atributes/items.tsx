@@ -1,9 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react'
 import styles from './Atributes.module.scss'
 import { LuPencil, LuTrash2 } from 'react-icons/lu'
-import autojackLogo from '@/assets/images/autojcak.png'
-import limoladyLogo from '@/assets/images/limolady.png'
-import nordwindLogo from '@/assets/images/nordwind.png'
 import { Link } from 'react-router-dom'
 import { FeatureEditor } from '../Components/FeatureEditor/editor'
 import axios from 'axios'
@@ -52,7 +49,7 @@ export const Types = ({ id }: { id: number }) => {
           ...prev!,
           values: prev!.values.filter(i => i.id !== deleting?.id),
         }))
-        alert('Вы удалили ' + deleting?.value)
+        toast.success('Успешно удалено')
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -79,7 +76,7 @@ export const Types = ({ id }: { id: number }) => {
           ...prev!,
           values: [...prev!.values, res.data],
         }))
-        alert('Вы создали ' + creating?.value)
+        toast.success('Успешно добавлено')
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -588,44 +585,15 @@ interface Brand {
   url: string
   metaTitle: string
   metaDescription: string
+  id: number
 }
-
-const data: Brand[] = [
-  {
-    title: 'AutoJack',
-    description:
-      'AutoJack & LimoLady — российско-немецкий бренд по производству высокотехнологичной верхней одежды. Компания выпускает мужскую и женскую одежду, а также толстовки, брюки и аксессуары.',
-    logo: autojackLogo,
-    url: 'autojack',
-    metaTitle: 'Мета заголовок 1',
-    metaDescription: 'Мета описание 1',
-  },
-  {
-    title: 'LimoLady',
-    description:
-      'LimoLady — немецко-российская компания по производству верхней одежды. Бренд выпускает моделидля мобильного горожанина, который проводит минимум 2–3 часа в день за рулём. ',
-    logo: limoladyLogo,
-    url: 'limolady',
-    metaTitle: 'Мета заголовок 2',
-    metaDescription: 'Мета описание 2',
-  },
-  {
-    title: 'Nordwind',
-    description:
-      'Nordwind Airlines (юридическое название — ООО «Северный ветер») — российская авиакомпания, образованная в 2008 году. Является дочерней компанией «Пегас Туристик»',
-    logo: nordwindLogo,
-    url: 'nordwind',
-    metaTitle: 'Мета заголовок 3',
-    metaDescription: 'Мета описание 3',
-  },
-]
 
 export const Brands = ({ id }: { id: number }) => {
   const [description, setDescription] = useState('')
   const [creating, setCreating] = useState<null | Brand>(null)
   const [editing, setEditing] = useState<null | Brand>(null)
   const [deleting, setDeleting] = useState<null | Brand>(null)
-  const [items, setItems] = useState<Brand[]>(data)
+  const [items, setItems] = useState<Brand[] | null>(null)
 
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
@@ -654,28 +622,86 @@ export const Brands = ({ id }: { id: number }) => {
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
-    const item = { ...(creating as Brand), description }
-    console.log(item)
-    setItems([...items, item])
-    alert('Вы создали ' + creating?.title)
-    setDescription('')
-    setCreating(null)
+    const item = {
+      value: creating?.title,
+      description: description,
+      imageUrl: creating?.logo,
+      seoSlug: creating?.url,
+      metaTitle: creating?.metaTitle,
+      metaDescription: creating?.metaDescription,
+    }
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: item,
+    })
+      .then(res => {
+        setItems(prev => (prev ? [...prev, res.data] : [res.data]))
+        alert('Вы создали ' + creating?.title)
+        setDescription('')
+        setEditing(null)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
   }
 
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault()
-    const item = { ...(editing as Brand), description }
-    console.log(item)
-    setItems(items.map(i => (i.title === item.title ? item : i)))
-    alert('Вы изменили ' + editing?.title)
-    setDescription('')
-    setEditing(null)
+
+    const item = {
+      value: editing?.title,
+      description: description,
+      imageUrl: editing?.logo,
+      seoSlug: editing?.url,
+      metaTitle: editing?.metaTitle,
+      metaDescription: editing?.metaDescription,
+      id: editing?.id,
+    }
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: item,
+    })
+      .then(res => {
+        setItems(prev => (prev ? prev.map(i => (i.id === res.data.id ? res.data : i)) : []))
+        alert('Вы обновили ' + editing?.title)
+        setDescription('')
+        setEditing(null)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
   }
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
-    setItems(items.filter(i => i.title !== deleting?.title))
-    alert('Вы удалили ' + deleting?.title)
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        setItems(items!.filter(i => i.title !== deleting?.title))
+        alert('Вы удалили ' + deleting?.title)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+
     setDeleting(null)
   }
 
@@ -691,6 +717,7 @@ export const Brands = ({ id }: { id: number }) => {
               url: '',
               metaTitle: '',
               metaDescription: '',
+              id: 0,
             })
           }
           className="ml-auto"
@@ -700,7 +727,7 @@ export const Brands = ({ id }: { id: number }) => {
         </button>
 
         <div className={styles.brands_list}>
-          {items.map((item, index) => (
+          {items?.map((item, index) => (
             <div key={index} className={styles.brands_list_item}>
               <section className={styles.brands_list_item_top}>
                 <img src={item.logo} alt={item.title} />
