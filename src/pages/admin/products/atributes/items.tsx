@@ -464,14 +464,51 @@ export const TargetGroups = ({ id }: { id: number }) => {
   }, [])
 
   const handleDelete = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        setItems(prev => ({
+          ...prev!,
+          values: prev!.values.filter(i => i.id !== deleting?.id),
+        }))
+        alert('Вы удалили ' + deleting?.value)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
     setDeleting(null)
-    alert('Вы удалили ' + deleting?.value)
   }
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        value: creating?.value,
+      },
+    })
+      .then(res => {
+        setItems(prev => ({
+          ...prev!,
+          values: [...prev!.values, res.data],
+        }))
+        alert('Вы создали ' + creating?.value)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
     setCreating(null)
-    alert('Вы создали ' + creating?.value)
   }
 
   return (
