@@ -688,6 +688,7 @@ export const Brands = ({ id }: { id: number }) => {
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
+    console.log(deleting)
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
       method: 'DELETE',
       headers: {
@@ -756,14 +757,32 @@ export const Brands = ({ id }: { id: number }) => {
                 <button
                   id="admin-button"
                   onClick={() => {
-                    setEditing(item)
+                    setEditing({
+                      title: item.title,
+                      description: item.description,
+                      logo: item.logo,
+                      url: item.url,
+                      metaTitle: item.metaTitle,
+                      metaDescription: item.metaDescription,
+                      id: item.id,
+                    })
                     setDescription(item.description)
                   }}
                 >
                   Редактировать
                 </button>
                 <button
-                  onClick={() => setDeleting(item)}
+                  onClick={() =>
+                    setDeleting({
+                      title: item.title,
+                      description: item.description,
+                      logo: item.logo,
+                      url: item.url,
+                      metaTitle: item.metaTitle,
+                      metaDescription: item.metaDescription,
+                      id: item.id,
+                    })
+                  }
                   className="w-[40px] h-[40px] flex justify-center rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center"
                 >
                   <LuTrash2 />
