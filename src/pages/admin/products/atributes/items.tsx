@@ -192,19 +192,84 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
-    alert('Вы удалили ' + deleting?.value)
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.value}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        id: deleting?.value,
+      },
+    })
+      .then(() => {
+        setItems(prev => ({
+          ...prev,
+          values: prev.values.filter(i => i.value !== deleting?.value),
+        }))
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
     setDeleting(null)
   }
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    alert('Вы создали ' + creating?.value)
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        attributeId: id,
+        value: creating?.value,
+        startDate: creating?.startDate,
+      },
+    })
+      .then(res => {
+        setItems(prev => ({
+          ...prev,
+          values: [...prev.values, res.data],
+        }))
+        toast.success('Успешно добавлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
     setCreating(null)
   }
 
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault()
-    alert('Вы изменили ' + editing?.value)
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        attributeId: id,
+        value: editing?.value,
+        startDate: editing?.startDate,
+      },
+    })
+      .then(res => {
+        setItems(prev => ({
+          ...prev,
+          values: prev.values.map(i => (i.value === editing?.value ? res.data : i)),
+        }))
+        toast.success('Успешно обновлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setEditing(null)
   }
 
   return (
@@ -225,7 +290,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         {items.values?.map((item, index) => (
           <div key={index} className={styles.seasonAtributes_list_item}>
             <label>{item.value}</label>
-            <label>{item.startDate.replace('-', '.').replace('-', '.')}</label>
+            <label>{item.startDate.replace('-', '.').replace('-', '.').split('T')[0]}</label>
             <section>
               <button onClick={() => setDeleting(item)}>
                 <LuTrash2 />
