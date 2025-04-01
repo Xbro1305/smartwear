@@ -13,15 +13,11 @@ export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
   const [creating, setCreating] = useState<null | { value: string }>(null)
 
-  const [items, setItems] = useState({
-    name: 'Виды изделий',
-    id: 1,
-    values: [
-      { value: 'Куртка', id: 1 },
-      { value: 'Кепка', id: 2 },
-      { value: 'Шапка', id: 3 },
-    ],
-  })
+  const [items, setItems] = useState<null | {
+    name: string
+    id: number | string
+    values: { value: string; id: number }[]
+  }>(null)
 
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
@@ -41,14 +37,55 @@ export const Types = ({ id }: { id: number }) => {
   }, [])
 
   const handleDelete = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        id: deleting?.id,
+      },
+    })
+      .then(() => {
+        setItems(prev => ({
+          ...prev!,
+          values: prev!.values.filter(i => i.id !== deleting?.id),
+        }))
+        alert('Вы удалили ' + deleting?.value)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
     setDeleting(null)
-    alert('Вы удалили ' + deleting?.value)
   }
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        attributeId: id,
+        value: creating?.value,
+      },
+    })
+      .then(res => {
+        setItems(prev => ({
+          ...prev!,
+          values: [...prev!.values, res.data],
+        }))
+        alert('Вы создали ' + creating?.value)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
     setCreating(null)
-    alert('Вы создали ' + creating?.value)
   }
 
   return (
@@ -57,16 +94,17 @@ export const Types = ({ id }: { id: number }) => {
         Добавить вид изделия
       </button>
       <div className={styles.atributes_list}>
-        <h3 id="h3">{items.name}</h3>
+        <h3 id="h3">{items?.name}</h3>
         <div className={styles.atributes_list_items}>
-          {items.values?.map((item, index) => (
-            <div key={index} className={styles.atributes_list_item}>
-              <label>{item.value}</label>
-              <button onClick={() => items.values && setDeleting(items.values[index])}>
-                &times;
-              </button>
-            </div>
-          ))}
+          {items &&
+            items.values?.map((item, index) => (
+              <div key={index} className={styles.atributes_list_item}>
+                <label>{item.value}</label>
+                <button onClick={() => items.values && setDeleting(items.values[index])}>
+                  &times;
+                </button>
+              </div>
+            ))}
         </div>
       </div>
 
