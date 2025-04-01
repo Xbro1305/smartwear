@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import styles from './Atributes.module.scss'
 import { LuPencil, LuTrash2 } from 'react-icons/lu'
 import autojackLogo from '@/assets/images/autojcak.png'
@@ -6,10 +6,39 @@ import limoladyLogo from '@/assets/images/limolady.png'
 import nordwindLogo from '@/assets/images/nordwind.png'
 import { Link } from 'react-router-dom'
 import { FeatureEditor } from '../Components/FeatureEditor/editor'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
-export const Types = () => {
+export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ title: string; id: number } | null>(null)
   const [creating, setCreating] = useState<null | { title: string }>(null)
+
+  const [items, setItems] = useState({
+    name: 'Виды изделий',
+    id: 1,
+    values: [
+      { title: 'Куртка', id: 1 },
+      { title: 'Кепка', id: 2 },
+      { title: 'Шапка', id: 3 },
+    ],
+  })
+
+  useEffect(() => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setItems(res.data)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }, [])
 
   const handleDelete = () => {
     setDeleting(null)
@@ -22,28 +51,18 @@ export const Types = () => {
     alert('Вы создали ' + creating?.title)
   }
 
-  const items = {
-    title: 'Виды изделий',
-    id: 1,
-    items: [
-      { title: 'Куртка', id: 1 },
-      { title: 'Кепка', id: 2 },
-      { title: 'Шапка', id: 3 },
-    ],
-  }
-
   return (
     <>
       <button onClick={() => setCreating({ title: '' })} className="ml-auto" id="admin-button">
         Добавить вид изделия
       </button>
       <div className={styles.atributes_list}>
-        <h3 id="h3">{items.title}</h3>
+        <h3 id="h3">{items.name}</h3>
         <div className={styles.atributes_list_items}>
-          {items.items?.map((item, index) => (
+          {items.values?.map((item, index) => (
             <div key={index} className={styles.atributes_list_item}>
               <label>{item.title}</label>
-              <button onClick={() => items.items && setDeleting(items.items[index])}>
+              <button onClick={() => items.values && setDeleting(items.values[index])}>
                 &times;
               </button>
             </div>
@@ -102,41 +121,58 @@ export const Types = () => {
   )
 }
 
-export const SeasonAttrCase = () => {
-  const items = {
-    title: 'Сезоны',
+export const SeasonAttrCase = ({ id }: { id: number }) => {
+  const [items, setItems] = useState({
+    name: 'Сезоны',
     id: 2,
-    items: [
-      { title: 'Лето', id: 1, startDate: '2023-06-01' },
-      { title: 'Зима', id: 2, startDate: '2023-12-01' },
-      { title: 'Весна', id: 3, startDate: '2023-03-01' },
+    values: [
+      { value: 'Лето', attributeId: 1, startDate: '2023-06-01' },
+      { value: 'Зима', attributeId: 2, startDate: '2023-12-01' },
+      { value: 'Весна', attributeId: 3, startDate: '2023-03-01' },
     ],
-  }
-  const [deleting, setDeleting] = useState<null | { title: string; startDate: string }>(null)
-  const [creating, setCreating] = useState<null | { title: string; startDate: string }>(null)
-  const [editing, setEditing] = useState<null | { title: string; startDate: string }>(null)
+  })
+  const [deleting, setDeleting] = useState<null | { value: string; startDate: string }>(null)
+  const [creating, setCreating] = useState<null | { value: string; startDate: string }>(null)
+  const [editing, setEditing] = useState<null | { value: string; startDate: string }>(null)
+
+  useEffect(() => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setItems(res.data)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }, [])
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
-    alert('Вы удалили ' + deleting?.title)
+    alert('Вы удалили ' + deleting?.value)
     setDeleting(null)
   }
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    alert('Вы создали ' + creating?.title)
+    alert('Вы создали ' + creating?.value)
     setCreating(null)
   }
 
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault()
-    alert('Вы изменили ' + editing?.title)
+    alert('Вы изменили ' + editing?.value)
   }
 
   return (
     <>
       <button
-        onClick={() => setCreating({ title: '', startDate: '' })}
+        onClick={() => setCreating({ value: '', startDate: '' })}
         className="ml-auto"
         id="admin-button"
       >
@@ -148,9 +184,9 @@ export const SeasonAttrCase = () => {
           <p>Дата начала сезoна</p>
           <p></p>
         </div>
-        {items.items?.map((item, index) => (
+        {items.values?.map((item, index) => (
           <div key={index} className={styles.seasonAtributes_list_item}>
-            <label>{item.title}</label>
+            <label>{item.value}</label>
             <label>{item.startDate.replace('-', '.').replace('-', '.')}</label>
             <section>
               <button onClick={() => setDeleting(item)}>
@@ -172,7 +208,7 @@ export const SeasonAttrCase = () => {
       {deleting && (
         <div className={`${styles.modal} flex`}>
           <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
-            <h2 id="h2">Вы точно хотите удалить сезон {deleting.title}?</h2>
+            <h2 id="h2">Вы точно хотите удалить сезон {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
                 className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
@@ -198,8 +234,8 @@ export const SeasonAttrCase = () => {
               <input
                 type="text"
                 required
-                value={creating.title}
-                onChange={e => setCreating({ ...creating, title: e.target.value })}
+                value={creating.value}
+                onChange={e => setCreating({ ...creating, value: e.target.value })}
                 placeholder={`Название сезона`}
               />
             </label>
@@ -237,11 +273,11 @@ export const SeasonAttrCase = () => {
               <input
                 required
                 type="text"
-                value={editing?.title}
+                value={editing?.value}
                 onChange={e =>
                   setEditing({
                     ...editing,
-                    title: e.target.value,
+                    value: e.target.value,
                   })
                 }
                 placeholder={`Название сезона`}
@@ -280,43 +316,60 @@ export const SeasonAttrCase = () => {
   )
 }
 
-export const TargetGroups = () => {
-  const [deleting, setDeleting] = useState<{ title: string; id: number } | null>(null)
-  const [creating, setCreating] = useState<null | { title: string }>(null)
+export const TargetGroups = ({ id }: { id: number }) => {
+  const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
+  const [creating, setCreating] = useState<null | { value: string }>(null)
+
+  const [items, setItems] = useState({
+    name: 'Целевые группы',
+    id: 3,
+    values: [
+      { value: 'Мужчины', id: 1 },
+      { value: 'Женщины', id: 2 },
+      { value: 'Дети', id: 3 },
+    ],
+  })
+
+  useEffect(() => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setItems(res.data)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }, [])
 
   const handleDelete = () => {
     setDeleting(null)
-    alert('Вы удалили ' + deleting?.title)
+    alert('Вы удалили ' + deleting?.value)
   }
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
     setCreating(null)
-    alert('Вы создали ' + creating?.title)
-  }
-
-  const items = {
-    title: 'Целевые группы',
-    id: 1,
-    items: [
-      { title: 'Женщинам', id: 1 },
-      { title: 'Мужчинам', id: 2 },
-      { title: 'Унисекс', id: 3 },
-    ],
+    alert('Вы создали ' + creating?.value)
   }
 
   return (
     <>
-      <button onClick={() => setCreating({ title: '' })} className="ml-auto" id="admin-button">
+      <button onClick={() => setCreating({ value: '' })} className="ml-auto" id="admin-button">
         Добавить целевую группу
       </button>
       <div className={styles.atributes_list}>
-        <h3 id="h3">{items.title}</h3>
+        <h3 id="h3">{items.name}</h3>
         <div className={styles.atributes_list_items}>
-          {items.items?.map((item, index) => (
+          {items.values?.map((item, index) => (
             <div key={index} className={styles.atributes_list_item}>
-              <label>{item.title}</label>
-              <button onClick={() => items.items && setDeleting(items.items[index])}>
+              <label>{item.value}</label>
+              <button onClick={() => items.values && setDeleting(items.values[index])}>
                 &times;
               </button>
             </div>
@@ -327,7 +380,7 @@ export const TargetGroups = () => {
       {deleting && (
         <div className={`${styles.modal} flex`}>
           <div className={styles.modal_body}>
-            <h2 id="h2">Вы точно хотите удалить целевую группу {deleting.title}?</h2>
+            <h2 id="h2">Вы точно хотите удалить целевую группу {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
                 className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
@@ -350,8 +403,8 @@ export const TargetGroups = () => {
             <label className={styles.modal_body_label}>
               <p>Название</p>
               <input
-                value={creating.title}
-                onChange={e => setCreating({ title: e.target.value })}
+                value={creating.value}
+                onChange={e => setCreating({ value: e.target.value })}
                 type="text"
                 placeholder={`Название целевой группы`}
               />
@@ -414,12 +467,37 @@ const data: Brand[] = [
   },
 ]
 
-export const Brands = () => {
+export const Brands = ({ id }: { id: number }) => {
   const [description, setDescription] = useState('')
   const [creating, setCreating] = useState<null | Brand>(null)
   const [editing, setEditing] = useState<null | Brand>(null)
   const [deleting, setDeleting] = useState<null | Brand>(null)
   const [items, setItems] = useState<Brand[]>(data)
+
+  useEffect(() => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        const data: Brand[] = res.data.values.map((item: any) => ({
+          title: item.name,
+          metaDescription: item.description,
+          logo: item.logo,
+          url: item.seoSlug,
+          description: item.description || '',
+          metaTitle: 'Мета заголовок 3',
+        }))
+        setItems(data)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }, [])
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()

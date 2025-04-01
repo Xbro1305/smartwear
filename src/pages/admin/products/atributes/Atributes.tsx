@@ -1,30 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styles from './Atributes.module.scss'
 import { SeasonAttrCase, TargetGroups, Types, Brands } from './items'
 
 export const Atributes = () => {
-  const [active, setActive] = useState<string>('')
-  const [checkedItem, setCheckedItem] = useState(menuItems[0])
-
-  useEffect(() => {
-    const items = menuItems.find(item => item.key === active) || menuItems[0]
-    setCheckedItem(items)
-  }, [active])
+  const [active, setActive] = useState<keyof typeof menuItems>('Вид изделия')
 
   return (
     <div className={styles.atributes}>
       <h1 id="h1">Характеристики товара</h1>
       <div className={styles.atributes_top}>
         <div className={styles.atributes_menu}>
-          {menuItems.map(item => (
-            <div
-              key={item.id}
-              onClick={() => setActive(item.key)}
-              className={`${styles.atributes_menu_item} ${active == item.key ? styles.atributes_menu_item_active : ''}`}
-            >
-              <h2>{item.title}</h2>
-            </div>
-          ))}
+          {atributes
+            .filter(i => i.isSystem)
+            .map(item => (
+              <div
+                key={item.id}
+                onClick={() => setActive(item.name)}
+                className={`${styles.atributes_menu_item} ${active == item.name ? styles.atributes_menu_item_active : ''}`}
+              >
+                <h2>{item.name}</h2>
+              </div>
+            ))}
         </div>
         <div className={styles.atributes_menu}>
           <p style={{ width: '100%', height: '38px' }} className={`${styles.atributes_menu_item}`}>
@@ -32,54 +28,61 @@ export const Atributes = () => {
           </p>
         </div>
       </div>
-      {checkedItem?.component}
+      {menuItems[active]}
     </div>
   )
 }
 
-const menuItems = [
+const atributes = [
   {
-    title: 'Виды изделий',
-    key: '',
     id: 1,
-    component: <Types />,
+    name: 'Вид изделия',
+    isSystem: true,
   },
   {
-    title: 'Сезоны',
-    key: 'seasons',
     id: 2,
-    component: <SeasonAttrCase />,
+    name: 'Сезон',
+    isSystem: true,
   },
   {
-    title: 'Целевые группы',
-    key: 'targetGroups',
     id: 3,
-    component: <TargetGroups />,
+    name: 'Целевая группа',
+    isSystem: true,
   },
   {
-    title: 'Бренды',
-    key: 'brands',
     id: 4,
-    component: <Brands />,
+    name: 'Бренд',
+    isSystem: true,
   },
-  // {
-  //   title: 'Цвета',
-  //   key: 'colors',
-  //   id: 5,
-  // },
-  // {
-  //   title: 'Размеры',
-  //   key: 'sizes',
-  //   id: 6,
-  // },
-  // {
-  //   title: 'Длины изделий',
-  //   key: 'lengths',
-  //   id: 7,
-  // },
-  // {
-  //   title: 'Коллекции',
-  //   key: 'collections',
-  //   id: 8,
-  // },
+  {
+    id: 5,
+    name: 'Цвет',
+    isSystem: true,
+  },
+  {
+    id: 6,
+    name: 'Размер',
+    isSystem: true,
+  },
+  {
+    id: 7,
+    name: 'Длина изделия',
+    isSystem: true,
+  },
+  {
+    id: 8,
+    name: 'Коллекция',
+    isSystem: true,
+  },
 ]
+
+const menuItems: Record<string, JSX.Element> = {
+  'Вид изделия': <Types id={1} />,
+  Сезон: <SeasonAttrCase id={2} />,
+  'Целевая группа': <TargetGroups id={3} />,
+  Бренд: <Brands id={4} />,
+  Цвет: <Types id={1} />,
+  Размер: <Types id={1} />,
+  'Длина изделия': <Types id={1} />,
+  Коллекция: <Types id={1} />,
+}
