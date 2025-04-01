@@ -299,7 +299,15 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
               <button onClick={() => setDeleting(item)}>
                 <LuTrash2 />
               </button>
-              <button onClick={() => setEditing(item)}>
+              <button
+                onClick={() =>
+                  setEditing({
+                    attributeId: item.attributeId,
+                    value: item.value,
+                    startDate: item.startDate.split('T')[0],
+                  })
+                }
+              >
                 <LuPencil />
               </button>
             </section>
