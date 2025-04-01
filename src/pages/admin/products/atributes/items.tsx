@@ -684,6 +684,8 @@ export const Brands = ({ id }: { id: number }) => {
       })
   }
 
+  console.log(deleting, editing)
+
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
