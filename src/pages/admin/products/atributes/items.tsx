@@ -697,14 +697,12 @@ export const Brands = ({ id }: { id: number }) => {
     })
       .then(() => {
         setItems(items!.filter(i => i.title !== deleting?.title))
-        alert('Вы удалили ' + deleting?.title)
+        setDeleting(null)
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
         toast.error(errorText)
       })
-
-    setDeleting(null)
   }
 
   return (
