@@ -611,6 +611,7 @@ export const Brands = ({ id }: { id: number }) => {
           url: item.seoSlug,
           description: item.description || '',
           metaTitle: 'Мета заголовок 3',
+          id: item.id,
         }))
         setItems(data)
       })
