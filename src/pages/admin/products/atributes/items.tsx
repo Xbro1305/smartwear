@@ -10,16 +10,16 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 
 export const Types = ({ id }: { id: number }) => {
-  const [deleting, setDeleting] = useState<{ title: string; id: number } | null>(null)
-  const [creating, setCreating] = useState<null | { title: string }>(null)
+  const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
+  const [creating, setCreating] = useState<null | { value: string }>(null)
 
   const [items, setItems] = useState({
     name: 'Виды изделий',
     id: 1,
     values: [
-      { title: 'Куртка', id: 1 },
-      { title: 'Кепка', id: 2 },
-      { title: 'Шапка', id: 3 },
+      { value: 'Куртка', id: 1 },
+      { value: 'Кепка', id: 2 },
+      { value: 'Шапка', id: 3 },
     ],
   })
 
@@ -42,18 +42,18 @@ export const Types = ({ id }: { id: number }) => {
 
   const handleDelete = () => {
     setDeleting(null)
-    alert('Вы удалили ' + deleting?.title)
+    alert('Вы удалили ' + deleting?.value)
   }
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
     setCreating(null)
-    alert('Вы создали ' + creating?.title)
+    alert('Вы создали ' + creating?.value)
   }
 
   return (
     <>
-      <button onClick={() => setCreating({ title: '' })} className="ml-auto" id="admin-button">
+      <button onClick={() => setCreating({ value: '' })} className="ml-auto" id="admin-button">
         Добавить вид изделия
       </button>
       <div className={styles.atributes_list}>
@@ -61,7 +61,7 @@ export const Types = ({ id }: { id: number }) => {
         <div className={styles.atributes_list_items}>
           {items.values?.map((item, index) => (
             <div key={index} className={styles.atributes_list_item}>
-              <label>{item.title}</label>
+              <label>{item.value}</label>
               <button onClick={() => items.values && setDeleting(items.values[index])}>
                 &times;
               </button>
@@ -73,7 +73,7 @@ export const Types = ({ id }: { id: number }) => {
       {deleting && (
         <div className={`${styles.modal} flex`}>
           <div className={styles.modal_body}>
-            <h2 id="h2">Вы точно хотите удалить вид товара {deleting.title}?</h2>
+            <h2 id="h2">Вы точно хотите удалить вид товара {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
                 className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
@@ -96,8 +96,8 @@ export const Types = ({ id }: { id: number }) => {
             <label className={styles.modal_body_label}>
               <p>Название</p>
               <input
-                value={creating.title}
-                onChange={e => setCreating({ title: e.target.value })}
+                value={creating.value}
+                onChange={e => setCreating({ value: e.target.value })}
                 type="text"
                 placeholder={`Название вида товара`}
               />
