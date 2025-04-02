@@ -30,7 +30,7 @@ export const Types = ({ id }: { id: number }) => {
         const sortedValues = res.data.values.sort((a: any, b: any) =>
           a.value.localeCompare(b.value)
         )
-        setItems(sortedValues)
+        setItems({ ...res.data, values: sortedValues })
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -103,7 +103,7 @@ export const Types = ({ id }: { id: number }) => {
         <h3 id="h3">{items?.name}</h3>
         <div className={styles.atributes_list_items}>
           {items &&
-            items.values?.map((item, index) => (
+            items?.values?.map((item, index) => (
               <div key={index} className={styles.atributes_list_item}>
                 <label>{item.value}</label>
                 <button onClick={() => items.values && setDeleting(items.values[index])}>
