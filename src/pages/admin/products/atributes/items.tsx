@@ -132,6 +132,7 @@ export const Types = ({ id }: { id: number }) => {
             <label className={styles.modal_body_label}>
               <p>Название</p>
               <input
+                autoFocus
                 value={creating.value}
                 onChange={e => setCreating({ value: e.target.value })}
                 type="text"
@@ -351,6 +352,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
               <p>Название</p>
               <input
                 type="text"
+                autoFocus
                 required
                 value={creating.value}
                 onChange={e => setCreating({ ...creating, value: e.target.value })}
@@ -390,6 +392,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
               <p>Название</p>
               <input
                 required
+                autoFocus
                 type="text"
                 value={editing?.value}
                 onChange={e =>
@@ -554,6 +557,7 @@ export const TargetGroups = ({ id }: { id: number }) => {
             <label className={styles.modal_body_label}>
               <p>Название</p>
               <input
+                autoFocus
                 value={creating.value}
                 onChange={e => setCreating({ value: e.target.value })}
                 type="text"
@@ -801,6 +805,7 @@ export const Brands = ({ id }: { id: number }) => {
             <label className={styles.modal_body_label}>
               <p>Название</p>
               <input
+                autoFocus
                 type="text"
                 value={creating.title}
                 onChange={e => setCreating({ ...creating, title: e.target.value })}
@@ -895,6 +900,7 @@ export const Brands = ({ id }: { id: number }) => {
             <label className={styles.modal_body_label}>
               <p>Название</p>
               <input
+                autoFocus
                 type="text"
                 value={editing.title}
                 onChange={e => setEditing({ ...editing, title: e.target.value })}
