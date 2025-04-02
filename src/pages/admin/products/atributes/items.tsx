@@ -646,7 +646,23 @@ export const Brands = ({ id }: { id: number }) => {
       data: item,
     })
       .then(res => {
-        setItems(prev => (prev ? [...prev, res.data] : [res.data]))
+        const data = res.data
+        setItems(prev =>
+          prev
+            ? [
+                ...prev,
+                {
+                  id: data.id,
+                  title: data.value,
+                  description: data.description,
+                  logo: data.imageUrl,
+                  url: data.seoSlug,
+                  metaTitle: data.metaTitle,
+                  metaDescription: data.metaDescription,
+                },
+              ]
+            : [res.data]
+        )
         alert('Вы создали ' + creating?.title)
         setDescription('')
         setEditing(null)
@@ -679,7 +695,24 @@ export const Brands = ({ id }: { id: number }) => {
       data: item,
     })
       .then(res => {
-        setItems(prev => (prev ? prev.map(i => (i.id === res.data.id ? res.data : i)) : []))
+        const data = res.data
+        setItems(prev =>
+          prev
+            ? prev.map(i =>
+                i.id === res.data.id
+                  ? {
+                      id: data.id,
+                      title: data.value,
+                      description: data.description,
+                      logo: data.imageUrl,
+                      url: data.seoSlug,
+                      metaTitle: data.metaTitle,
+                      metaDescription: data.metaDescription,
+                    }
+                  : i
+              )
+            : []
+        )
         alert('Вы обновили ' + editing?.title)
         setDescription('')
         setEditing(null)
@@ -703,7 +736,7 @@ export const Brands = ({ id }: { id: number }) => {
       },
     })
       .then(() => {
-        setItems(items!.filter(i => i.title !== deleting?.title))
+        setItems(items!.filter(i => i.id !== deleting?.id))
         setDeleting(null)
       })
       .catch(err => {
