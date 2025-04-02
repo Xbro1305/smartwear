@@ -26,7 +26,11 @@ export const Types = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
-        setItems(res.data)
+        //отсортируй по алфавиту
+        const sortedValues = res.data.values.sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
+        setItems(sortedValues)
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -46,9 +50,10 @@ export const Types = ({ id }: { id: number }) => {
       },
     })
       .then(() => {
+        const sortedValues = items?.values.sort((a: any, b: any) => a.value.localeCompare(b.value))
         setItems(prev => ({
           ...prev!,
-          values: prev!.values.filter(i => i.id !== deleting?.id),
+          values: sortedValues || [],
         }))
         toast.success('Успешно удалено')
       })
@@ -73,9 +78,12 @@ export const Types = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
+        const sortedValues = [...(items?.values || []), res.data].sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
         setItems(prev => ({
           ...prev!,
-          values: [...prev!.values, res.data],
+          values: sortedValues,
         }))
         toast.success('Успешно добавлено')
       })
@@ -185,7 +193,11 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
-        setItems(res.data)
+        //отсортируй по алфавиту
+        const sortedValues = res.data.values.sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
+        setItems(sortedValues)
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -203,13 +215,11 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(() => {
-        setItems(prev => {
-          if (!prev) return null
-          return {
-            ...prev,
-            values: prev.values.filter(i => i.value !== deleting?.value),
-          }
-        })
+        const sortedValues = items?.values.sort((a: any, b: any) => a.value.localeCompare(b.value))
+        setItems(prev => ({
+          ...prev!,
+          values: sortedValues || [],
+        }))
         toast.success('Успешно удалено')
       })
       .catch(err => {
@@ -233,13 +243,13 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
-        setItems(prev => {
-          if (!prev) return prev // Return null if prev is null
-          return {
-            ...prev,
-            values: [...prev.values, res.data],
-          }
-        })
+        const sortedValues = [...(items?.values || []), res.data].sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
+        setItems(prev => ({
+          ...prev!,
+          values: sortedValues,
+        }))
         toast.success('Успешно добавлено')
       })
       .catch(err => {
@@ -264,13 +274,13 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
-        setItems(prev => {
-          if (!prev) return null
-          return {
-            ...prev,
-            values: prev.values.map(i => (i.id === editing?.id ? res.data : i)),
-          }
-        })
+        const sortedValues = [...(items?.values || []), res.data].sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
+        setItems(prev => ({
+          ...prev!,
+          values: sortedValues,
+        }))
         toast.success('Успешно обновлено')
       })
       .catch(err => {
@@ -456,7 +466,11 @@ export const TargetGroups = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
-        setItems(res.data)
+        //отсортируй по алфавиту
+        const sortedValues = res.data.values.sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
+        setItems(sortedValues)
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -473,11 +487,12 @@ export const TargetGroups = ({ id }: { id: number }) => {
       },
     })
       .then(() => {
+        const sortedValues = items?.values.sort((a: any, b: any) => a.value.localeCompare(b.value))
         setItems(prev => ({
           ...prev!,
-          values: prev!.values.filter(i => i.id !== deleting?.id),
+          values: sortedValues || [],
         }))
-        alert('Вы удалили ' + deleting?.value)
+        toast.success('Успешно удалено')
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -499,11 +514,14 @@ export const TargetGroups = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
+        const sortedValues = [...(items?.values || []), res.data].sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
         setItems(prev => ({
           ...prev!,
-          values: [...prev!.values, res.data],
+          values: sortedValues,
         }))
-        alert('Вы создали ' + creating?.value)
+        toast.success('Успешно добавлено')
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -611,11 +629,11 @@ export const Brands = ({ id }: { id: number }) => {
       .then(res => {
         const data: Brand[] = res.data.values.map((item: any) => ({
           title: item.value,
-          metaDescription: item.description,
+          metaDescription: item.metaDescription,
           logo: item.imageUrl,
           url: item.seoSlug,
           description: item.description || '',
-          metaTitle: 'Мета заголовок 3',
+          metaTitle: item.metaTitle,
           id: item.id,
         }))
         setItems(data)
@@ -665,7 +683,7 @@ export const Brands = ({ id }: { id: number }) => {
         )
         alert('Вы создали ' + creating?.title)
         setDescription('')
-        setEditing(null)
+        setCreating(null)
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -777,7 +795,17 @@ export const Brands = ({ id }: { id: number }) => {
                 <p style={{ color: 'var(--dark-gray)' }} id="p2">
                   Описание
                 </p>
-                <p dangerouslySetInnerHTML={{ __html: item.description }} id="p2"></p>
+                <p
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 6,
+                  }}
+                  dangerouslySetInnerHTML={{ __html: item.description }}
+                  id="p2"
+                ></p>
               </div>
               <div className="flex flex-1 flex-col gap-[5px]">
                 <p style={{ color: 'var(--dark-gray)' }} id="p2">
