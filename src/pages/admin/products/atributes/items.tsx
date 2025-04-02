@@ -53,7 +53,10 @@ export const Types = ({ id }: { id: number }) => {
         const sortedValues = items?.values.sort((a: any, b: any) => a.value.localeCompare(b.value))
         setItems(prev => ({
           ...prev!,
-          values: sortedValues || [],
+          values:
+            sortedValues?.filter(
+              (item: { id: number }) => item.id !== deleting?.id && item.id !== undefined
+            ) || [],
         }))
         toast.success('Успешно удалено')
       })
@@ -197,7 +200,10 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         const sortedValues = res.data.values.sort((a: any, b: any) =>
           a.value.localeCompare(b.value)
         )
-        setItems(sortedValues)
+        setItems({
+          ...res.data,
+          values: sortedValues,
+        })
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -215,7 +221,9 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(() => {
-        const sortedValues = items?.values.sort((a: any, b: any) => a.value.localeCompare(b.value))
+        const sortedValues = items?.values
+          .sort((a: any, b: any) => a.value.localeCompare(b.value))
+          .filter((item: { id: number }) => item.id !== deleting?.id && item.id !== undefined)
         setItems(prev => ({
           ...prev!,
           values: sortedValues || [],
@@ -470,7 +478,10 @@ export const TargetGroups = ({ id }: { id: number }) => {
         const sortedValues = res.data.values.sort((a: any, b: any) =>
           a.value.localeCompare(b.value)
         )
-        setItems(sortedValues)
+        setItems({
+          ...res.data,
+          values: sortedValues,
+        })
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
@@ -487,7 +498,9 @@ export const TargetGroups = ({ id }: { id: number }) => {
       },
     })
       .then(() => {
-        const sortedValues = items?.values.sort((a: any, b: any) => a.value.localeCompare(b.value))
+        const sortedValues = items?.values
+          .sort((a: any, b: any) => a.value.localeCompare(b.value))
+          .filter((item: { id: number }) => item.id !== deleting?.id && item.id !== undefined)
         setItems(prev => ({
           ...prev!,
           values: sortedValues || [],
