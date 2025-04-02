@@ -911,11 +911,12 @@ export const Brands = ({ id }: { id: number }) => {
               <p>Описание</p>
               <FeatureEditor value={description} onChange={value => setDescription(value)} />
             </section>
-            <label className={styles.modal_body_label}>
+            <label className={`${styles.modal_body_label}`}>
               <p>Логотип</p>
               <input
                 type="file"
                 accept="image/*"
+                className="hidden"
                 onChange={e => {
                   if (e.target.files) {
                     const file = e.target.files[0]
@@ -928,13 +929,21 @@ export const Brands = ({ id }: { id: number }) => {
                 }}
               />
 
-              {editing.logo && (
-                <img
-                  className="w-[100px] h-[100px] object-cover rounded-[12px] mt-[10px]"
-                  src={editing.logo}
-                  alt={editing.title}
-                />
-              )}
+              <section className=" bg-[#F2F3F5] flex w-[185px] h-[185px] rounded-[12px] align-center justify-center flex-col gap-[10px] cursor-pointer">
+                {editing.logo && (
+                  <img
+                    className="w-full h-full object-cover rounded-[12px]"
+                    src={editing.logo}
+                    alt={editing.title}
+                  />
+                )}
+                {!editing.logo && (
+                  <>
+                    <AiOutlinePicture className="flex align-center mx-[auto]" />
+                    <p className="mx-[auto]">Нажми, чтобы загрузить</p>
+                  </>
+                )}
+              </section>
             </label>
             <label className={styles.modal_body_label}>
               <p>Ссылка на бренд</p>
