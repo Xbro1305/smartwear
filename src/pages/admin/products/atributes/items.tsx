@@ -276,7 +276,6 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       data: {
-        attributeId: editing?.id,
         value: editing?.value,
         startDate: `${editing?.startDate}T00:00:00.000Z`,
       },
