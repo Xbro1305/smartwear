@@ -880,7 +880,7 @@ export const Brands = ({ id }: { id: number }) => {
               <FeatureEditor value={description} onChange={value => setDescription(value)} />
             </section>
             <label className={`${styles.modal_body_label}`}>
-              <p>Логотип</p>
+              <p>Логотип (размеп 1:1)</p>
               <input
                 type="file"
                 accept="image/*"
@@ -975,7 +975,7 @@ export const Brands = ({ id }: { id: number }) => {
               <FeatureEditor value={description} onChange={value => setDescription(value)} />
             </section>
             <label className={`${styles.modal_body_label}`}>
-              <p>Логотип</p>
+              <p>Логотип (размеп 1:1)</p>
               <input
                 type="file"
                 accept="image/*"
