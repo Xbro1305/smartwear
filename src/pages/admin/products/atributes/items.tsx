@@ -276,14 +276,8 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         startDate: `${editing?.startDate}T00:00:00.000Z`,
       },
     })
-      .then(res => {
-        const sortedValues = [...(items?.values || []), res.data].sort((a: any, b: any) =>
-          a.value.localeCompare(b.value)
-        )
-        setItems(prev => ({
-          ...prev!,
-          values: sortedValues,
-        }))
+      .then(() => {
+       refresh()
         toast.success('Успешно обновлено')
       })
       .catch(err => {
