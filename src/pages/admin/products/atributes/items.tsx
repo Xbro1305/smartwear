@@ -252,7 +252,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         startDate: `${creating?.startDate}T00:00:00.000Z`,
       },
     })
-      .then(res => {
+      .then(() => {
         refresh()
         toast.success('Успешно добавлено')
       })
