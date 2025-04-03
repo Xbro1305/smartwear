@@ -187,7 +187,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
     id: number
   }>(null)
 
-  useEffect(() => {
+  const refresh = () => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
       method: 'GET',
       headers: {
@@ -209,7 +209,9 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
         toast.error(errorText)
       })
-  }, [])
+  }
+
+  useEffect(() => refresh(), [])
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
@@ -251,13 +253,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
     })
       .then(res => {
-        const sortedValues = [...(items?.values || []), res.data].sort((a: any, b: any) =>
-          a.value.localeCompare(b.value)
-        )
-        setItems(prev => ({
-          ...prev!,
-          values: sortedValues,
-        }))
+        refresh()
         toast.success('Успешно добавлено')
       })
       .catch(err => {
