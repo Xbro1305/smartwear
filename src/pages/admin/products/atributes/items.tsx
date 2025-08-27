@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom'
 import { FeatureEditor } from '../Components/FeatureEditor/editor'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { AiOutlinePicture } from 'react-icons/ai'
+import { AiOutlineClose, AiOutlinePicture, AiOutlinePlus } from 'react-icons/ai'
+import { FaCheck } from 'react-icons/fa'
 
 export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
@@ -169,23 +170,21 @@ export const Types = ({ id }: { id: number }) => {
   )
 }
 
+interface Season {
+  value: string
+  id: number
+  meta: { startDate: string }
+}
+
 export const SeasonAttrCase = ({ id }: { id: number }) => {
   const [items, setItems] = useState<null | {
     name: string
     id: number
-    values: { value: string; id: number; startDate: string }[]
+    values: Season[]
   }>(null)
-  const [deleting, setDeleting] = useState<null | {
-    value: string
-    startDate: string
-    id: number
-  }>(null)
+  const [deleting, setDeleting] = useState<null | Season>(null)
   const [creating, setCreating] = useState<null | { value: string; startDate: string }>(null)
-  const [editing, setEditing] = useState<null | {
-    value: string
-    startDate: string
-    id: number
-  }>(null)
+  const [editing, setEditing] = useState<null | Season>(null)
 
   const refresh = () => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
@@ -273,11 +272,11 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
       data: {
         value: editing?.value,
-        startDate: `${editing?.startDate}T00:00:00.000Z`,
+        startDate: `${editing?.meta?.startDate}T00:00:00.000Z`,
       },
     })
       .then(() => {
-       refresh()
+        refresh()
         toast.success('Успешно обновлено')
       })
       .catch(err => {
@@ -305,7 +304,9 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
         {items?.values?.map((item, index) => (
           <div key={index} className={styles.seasonAtributes_list_item}>
             <label>{item.value}</label>
-            <label>{item.startDate.replace('-', '.').replace('-', '.').split('T')[0]}</label>
+            <label>
+              {item?.meta.startDate?.replace('-', '.')?.replace('-', '.')?.split('T')[0]}
+            </label>
             <section>
               <button onClick={() => setDeleting(item)}>
                 <LuTrash2 />
@@ -315,7 +316,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
                   setEditing({
                     id: item.id,
                     value: item.value,
-                    startDate: item.startDate.split('T')[0],
+                    meta: { startDate: item?.meta?.startDate?.split('T')[0] },
                   })
                 }
               >
@@ -416,11 +417,11 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
               <input
                 required
                 type="date"
-                value={editing?.startDate}
+                value={editing?.meta.startDate}
                 onChange={e =>
                   setEditing({
                     ...editing,
-                    startDate: e.target.value,
+                    meta: { startDate: e.target.value },
                   })
                 }
               />
@@ -604,13 +605,15 @@ export const TargetGroups = ({ id }: { id: number }) => {
 }
 
 interface Brand {
-  title: string
-  description: string
-  logo: string
-  url: string
-  metaTitle: string
-  metaDescription: string
-  id: number
+  id?: number
+  value: string
+  meta: {
+    description: string
+    imageUrl: string
+    seoSlug: string
+    metaTitle: string
+    metaDescription: string
+  }
 }
 
 export const Brands = ({ id }: { id: number }) => {
@@ -620,7 +623,7 @@ export const Brands = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<null | Brand>(null)
   const [items, setItems] = useState<Brand[] | null>(null)
 
-  useEffect(() => {
+  const refresh = () => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
       method: 'GET',
       headers: {
@@ -630,12 +633,14 @@ export const Brands = ({ id }: { id: number }) => {
     })
       .then(res => {
         const data: Brand[] = res.data.values.map((item: any) => ({
-          title: item.value,
-          metaDescription: item.metaDescription,
-          logo: item.imageUrl,
-          url: item.seoSlug,
-          description: item.description || '',
-          metaTitle: item.metaTitle,
+          value: item.value,
+          meta: {
+            metaDescription: item.meta.metaDescription,
+            imageUrl: item.meta.imageUrl,
+            seoSlug: item.meta.seoSlug,
+            description: item.meta.description || '',
+            metaTitle: item.meta.metaTitle,
+          },
           id: item.id,
         }))
         setItems(data)
@@ -644,17 +649,21 @@ export const Brands = ({ id }: { id: number }) => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
         toast.error(errorText)
       })
-  }, [])
+  }
+
+  useEffect(() => refresh(), [])
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
     const item = {
-      value: creating?.title,
-      description: description,
-      imageUrl: creating?.logo,
-      seoSlug: creating?.url,
-      metaTitle: creating?.metaTitle,
-      metaDescription: creating?.metaDescription,
+      value: creating?.value,
+      meta: {
+        description: description,
+        imageUrl: creating?.meta.imageUrl!,
+        seoSlug: creating?.meta.seoSlug!,
+        metaTitle: creating?.meta.metaTitle!,
+        metaDescription: creating?.meta.metaDescription!,
+      },
     }
 
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
@@ -665,25 +674,8 @@ export const Brands = ({ id }: { id: number }) => {
       },
       data: item,
     })
-      .then(res => {
-        const data = res.data
-        setItems(prev =>
-          prev
-            ? [
-                ...prev,
-                {
-                  id: data.id,
-                  title: data.value,
-                  description: data.description,
-                  logo: data.imageUrl,
-                  url: data.seoSlug,
-                  metaTitle: data.metaTitle,
-                  metaDescription: data.metaDescription,
-                },
-              ]
-            : [res.data]
-        )
-        alert('Вы создали ' + creating?.title)
+      .then(() => {
+        refresh()
         setDescription('')
         setCreating(null)
       })
@@ -696,15 +688,9 @@ export const Brands = ({ id }: { id: number }) => {
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault()
 
-    const item = {
-      value: editing?.title,
-      description: description,
-      imageUrl: editing?.logo,
-      seoSlug: editing?.url,
-      metaTitle: editing?.metaTitle,
-      metaDescription: editing?.metaDescription,
-      id: editing?.id,
-    }
+    const item = editing
+
+    console.log(item)
 
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
       method: 'PUT',
@@ -714,26 +700,8 @@ export const Brands = ({ id }: { id: number }) => {
       },
       data: item,
     })
-      .then(res => {
-        const data = res.data
-        setItems(prev =>
-          prev
-            ? prev.map(i =>
-                i.id === res.data.id
-                  ? {
-                      id: data.id,
-                      title: data.value,
-                      description: data.description,
-                      logo: data.imageUrl,
-                      url: data.seoSlug,
-                      metaTitle: data.metaTitle,
-                      metaDescription: data.metaDescription,
-                    }
-                  : i
-              )
-            : []
-        )
-        alert('Вы обновили ' + editing?.title)
+      .then(() => {
+        refresh()
         setDescription('')
         setEditing(null)
       })
@@ -743,11 +711,8 @@ export const Brands = ({ id }: { id: number }) => {
       })
   }
 
-  console.log(deleting, editing)
-
   const handleDelete = (e: FormEvent) => {
     e.preventDefault()
-    console.log(deleting)
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
       method: 'DELETE',
       headers: {
@@ -771,12 +736,14 @@ export const Brands = ({ id }: { id: number }) => {
         <button
           onClick={() =>
             setCreating({
-              title: '',
-              description: '',
-              logo: '',
-              url: '',
-              metaTitle: '',
-              metaDescription: '',
+              value: '',
+              meta: {
+                description: '',
+                imageUrl: '',
+                seoSlug: '',
+                metaTitle: '',
+                metaDescription: '',
+              },
               id: 0,
             })
           }
@@ -790,8 +757,8 @@ export const Brands = ({ id }: { id: number }) => {
           {items?.map((item, index) => (
             <div key={index} className={styles.brands_list_item}>
               <section className={styles.brands_list_item_top}>
-                <img src={item.logo} alt={item.title} />
-                <h3 id="h3">{item.title}</h3>
+                <img src={item.meta.imageUrl} alt={item.value} />
+                <h3 id="h3">{item.value}</h3>
               </section>
               <div className="flex flex-col gap-[5px]">
                 <p style={{ color: 'var(--dark-gray)' }} id="p2">
@@ -805,7 +772,7 @@ export const Brands = ({ id }: { id: number }) => {
                     WebkitBoxOrient: 'vertical',
                     WebkitLineClamp: 6,
                   }}
-                  dangerouslySetInnerHTML={{ __html: item.description }}
+                  dangerouslySetInnerHTML={{ __html: item.meta.description }}
                   id="p2"
                 ></p>
               </div>
@@ -815,10 +782,12 @@ export const Brands = ({ id }: { id: number }) => {
                 </p>
                 <Link
                   className="border-b-[1px] border-b-solid border-b-[var(--dark-gray)] w-[fit-content]"
-                  to={`https://test.maxiscomfort.ru/${item.url}`}
+                  to={`https://test.maxiscomfort.ru/${item.meta.seoSlug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   id="p2"
                 >
-                  {`https://test.maxiscomfort.ru/${item.url}`}
+                  {`https://test.maxiscomfort.ru/${item.meta.seoSlug}`}
                 </Link>
               </div>
 
@@ -827,15 +796,17 @@ export const Brands = ({ id }: { id: number }) => {
                   id="admin-button"
                   onClick={() => {
                     setEditing({
-                      title: item.title,
-                      description: item.description,
-                      logo: item.logo,
-                      url: item.url,
-                      metaTitle: item.metaTitle,
-                      metaDescription: item.metaDescription,
                       id: item.id,
+                      value: item?.value || '',
+                      meta: {
+                        description: item?.meta?.description || '',
+                        imageUrl: item?.meta?.imageUrl || '',
+                        seoSlug: item?.meta?.seoSlug || '',
+                        metaTitle: item?.meta?.metaTitle || '',
+                        metaDescription: item?.meta?.metaDescription || '',
+                      },
                     })
-                    setDescription(item.description)
+                    setDescription(item?.meta?.description)
                   }}
                 >
                   Редактировать
@@ -843,13 +814,15 @@ export const Brands = ({ id }: { id: number }) => {
                 <button
                   onClick={() =>
                     setDeleting({
-                      title: item.title,
-                      description: item.description,
-                      logo: item.logo,
-                      url: item.url,
-                      metaTitle: item.metaTitle,
-                      metaDescription: item.metaDescription,
                       id: item.id,
+                      value: item.value,
+                      meta: {
+                        description: item.meta.description,
+                        imageUrl: item.meta.imageUrl,
+                        seoSlug: item.meta.seoSlug,
+                        metaTitle: item.meta.metaTitle,
+                        metaDescription: item.meta.metaDescription,
+                      },
                     })
                   }
                   className="w-[40px] h-[40px] flex justify-center rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center"
@@ -870,8 +843,8 @@ export const Brands = ({ id }: { id: number }) => {
               <input
                 autoFocus
                 type="text"
-                value={creating.title}
-                onChange={e => setCreating({ ...creating, title: e.target.value })}
+                value={creating.value}
+                onChange={e => setCreating({ ...creating, value: e.target.value })}
                 placeholder={`Название бренда`}
               />
             </label>
@@ -890,7 +863,14 @@ export const Brands = ({ id }: { id: number }) => {
                     const file = e.target.files[0]
                     const reader = new FileReader()
                     reader.onloadend = () => {
-                      setCreating({ ...creating, logo: reader.result as string })
+                      setCreating(
+                        !creating
+                          ? null
+                          : {
+                              ...creating,
+                              meta: { ...creating.meta, imageUrl: reader.result as string },
+                            }
+                      )
                     }
                     reader.readAsDataURL(file)
                   }
@@ -898,14 +878,14 @@ export const Brands = ({ id }: { id: number }) => {
               />
 
               <section className=" bg-[#F2F3F5] flex w-[185px] h-[185px] rounded-[12px] align-center justify-center flex-col gap-[10px] cursor-pointer">
-                {creating.logo && (
+                {creating.meta.imageUrl && (
                   <img
                     className="w-full h-full object-cover rounded-[12px]"
-                    src={creating.logo}
-                    alt={creating.title}
+                    src={creating.meta.imageUrl}
+                    alt={creating.value}
                   />
                 )}
-                {!creating.logo && (
+                {!creating.meta.imageUrl && (
                   <>
                     <AiOutlinePicture className="flex align-center mx-[auto]" />
                     <p className="mx-[auto]">Нажми, чтобы загрузить</p>
@@ -917,8 +897,14 @@ export const Brands = ({ id }: { id: number }) => {
               <p>Ссылка на бренд</p>
               <input
                 type="text"
-                value={creating.url}
-                onChange={e => setCreating({ ...creating, url: e.target.value })}
+                value={creating.meta.seoSlug}
+                onChange={e =>
+                  setCreating(
+                    !creating
+                      ? null
+                      : { ...creating, meta: { ...creating.meta, seoSlug: e.target.value } }
+                  )
+                }
                 placeholder={`Ссылка`}
               />
             </label>
@@ -926,16 +912,28 @@ export const Brands = ({ id }: { id: number }) => {
               <p>Мета заголовок</p>
               <input
                 type="text"
-                value={creating.metaTitle}
-                onChange={e => setCreating({ ...creating, metaTitle: e.target.value })}
+                value={creating.meta.metaTitle}
+                onChange={e =>
+                  setCreating(
+                    !creating
+                      ? null
+                      : { ...creating, meta: { ...creating.meta, metaTitle: e.target.value } }
+                  )
+                }
                 placeholder={`Мета заголовок`}
               />
             </label>
             <label className={styles.modal_body_label}>
               <p>Мета описание</p>
               <textarea
-                value={creating.metaDescription}
-                onChange={e => setCreating({ ...creating, metaDescription: e.target.value })}
+                value={creating.meta.metaDescription}
+                onChange={e =>
+                  setCreating(
+                    !creating
+                      ? null
+                      : { ...creating, meta: { ...creating.meta, metaDescription: e.target.value } }
+                  )
+                }
                 placeholder={`Мета описание`}
               />
             </label>
@@ -965,8 +963,8 @@ export const Brands = ({ id }: { id: number }) => {
               <input
                 autoFocus
                 type="text"
-                value={editing.title}
-                onChange={e => setEditing({ ...editing, title: e.target.value })}
+                value={editing.value}
+                onChange={e => setEditing({ ...editing, value: e.target.value })}
                 placeholder={`Название бренда`}
               />
             </label>
@@ -985,7 +983,13 @@ export const Brands = ({ id }: { id: number }) => {
                     const file = e.target.files[0]
                     const reader = new FileReader()
                     reader.onloadend = () => {
-                      setEditing({ ...editing, logo: reader.result as string })
+                      setEditing({
+                        ...editing,
+                        meta: {
+                          ...editing.meta,
+                          imageUrl: reader.result as string,
+                        },
+                      })
                     }
                     reader.readAsDataURL(file)
                   }
@@ -993,14 +997,14 @@ export const Brands = ({ id }: { id: number }) => {
               />
 
               <section className=" bg-[#F2F3F5] flex w-[185px] h-[185px] rounded-[12px] align-center justify-center flex-col gap-[10px] cursor-pointer">
-                {editing.logo && (
+                {editing.meta.imageUrl && (
                   <img
                     className="w-full h-full object-cover rounded-[12px]"
-                    src={editing.logo}
-                    alt={editing.title}
+                    src={editing.meta.imageUrl}
+                    alt={editing.value}
                   />
                 )}
-                {!editing.logo && (
+                {!editing.meta.imageUrl && (
                   <>
                     <AiOutlinePicture className="flex align-center mx-[auto]" />
                     <p className="mx-[auto]">Нажми, чтобы загрузить</p>
@@ -1012,8 +1016,10 @@ export const Brands = ({ id }: { id: number }) => {
               <p>Ссылка на бренд</p>
               <input
                 type="text"
-                value={editing.url}
-                onChange={e => setEditing({ ...editing, url: e.target.value })}
+                value={editing.meta.seoSlug}
+                onChange={e =>
+                  setEditing({ ...editing, meta: { ...editing.meta, seoSlug: e.target.value } })
+                }
                 placeholder={`Ссылка`}
               />
             </label>
@@ -1021,16 +1027,23 @@ export const Brands = ({ id }: { id: number }) => {
               <p>Мета заголовок</p>
               <input
                 type="text"
-                value={editing.metaTitle}
-                onChange={e => setEditing({ ...editing, metaTitle: e.target.value })}
+                value={editing.meta.metaTitle}
+                onChange={e =>
+                  setEditing({ ...editing, meta: { ...editing.meta, metaTitle: e.target.value } })
+                }
                 placeholder={`Мета заголовок`}
               />
             </label>
             <label className={styles.modal_body_label}>
               <p>Мета описание</p>
               <textarea
-                value={editing.metaDescription}
-                onChange={e => setEditing({ ...editing, metaDescription: e.target.value })}
+                value={editing.meta.metaDescription}
+                onChange={e =>
+                  setEditing({
+                    ...editing,
+                    meta: { ...editing.meta, metaDescription: e.target.value },
+                  })
+                }
                 placeholder={`Мета описание`}
               />
             </label>
@@ -1053,7 +1066,7 @@ export const Brands = ({ id }: { id: number }) => {
       {deleting && (
         <div className={`${styles.modal} flex`}>
           <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
-            <h2 id="h2">Вы точно хотите удалить бренд {deleting.title}?</h2>
+            <h2 id="h2">Вы точно хотите удалить бренд {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
                 className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
@@ -1069,6 +1082,548 @@ export const Brands = ({ id }: { id: number }) => {
           </form>
         </div>
       )}
+    </>
+  )
+}
+
+interface Color {
+  id?: number
+  value: string
+  meta: {
+    colorCode: string
+    aliases: string[]
+  }
+}
+
+export const Colors = ({ id }: { id: number }) => {
+  const [items, setItems] = useState<null | { name: string; id: number; values: Color[] }>(null)
+  const [deleting, setDeleting] = useState<null | Color>(null)
+  const [creating, setCreating] = useState<null | Color>(null)
+  const [editing, setEditing] = useState<null | Color>(null)
+  const [adding, setAdding] = useState<null | string>(null)
+
+  const refresh = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        //отсортируй по алфавиту
+        const sortedValues = res.data.values.sort((a: any, b: any) =>
+          a.value.localeCompare(b.value)
+        )
+        setItems({
+          ...res.data,
+          values: sortedValues,
+        })
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
+  useEffect(() => refresh(), [])
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setDeleting(null)
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+
+    if (creating?.value.trim() === '') {
+      toast.error('Название группы не может быть пустым')
+      return
+    }
+    if (creating?.meta.aliases.length === 0) {
+      toast.error('Добавьте хотя бы один вариант атрибута')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        value: creating?.value,
+        meta: creating?.meta,
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно добавлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setCreating(null)
+  }
+
+  const handleUpdate = (e: FormEvent) => {
+    e.preventDefault()
+
+    if (editing?.value.trim() === '') {
+      toast.error('Название группы не может быть пустым')
+      return
+    }
+    if (editing?.meta.aliases.length === 0) {
+      toast.error('Добавьте хотя бы один вариант атрибута')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        value: editing?.value,
+        meta: editing?.meta,
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно обновлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setEditing(null)
+  }
+
+  return (
+    <>
+      <button
+        className="ml-auto"
+        id="admin-button"
+        onClick={() =>
+          setCreating({
+            value: '',
+            meta: {
+              colorCode: '#000000',
+              aliases: [],
+            },
+          })
+        }
+      >
+        Добавить группу цветов
+      </button>
+      <div className={styles.colors}>
+        <div className={styles.colorAtributes_list}>
+          <div className={styles.colorAtributes_list_top}>
+            <p>Название</p>
+            <p>Цветовое обозначение</p>
+            <p>Количество цветов в группе</p>
+          </div>
+          {items?.values?.map((item, index) => (
+            <div key={index} className={styles.colorAtributes_list_item}>
+              <label>{item.value}</label>
+              <label className="flex items-center gap-[10px]">
+                <div
+                  style={{ backgroundColor: item.meta.colorCode }}
+                  className="w-[30px] h-[30px] rounded-[50%] border-[1px] border-solid border-[var(--admin-light-gray)]"
+                ></div>
+              </label>
+              <label>{item.meta.aliases?.length || 0}</label>
+              <section>
+                <button onClick={() => setDeleting(item)}>
+                  <LuTrash2 />
+                </button>
+                <button onClick={() => setEditing(item)}>
+                  <LuPencil />
+                </button>
+              </section>
+            </div>
+          ))}
+          <div style={{ transform: 'rotate(180deg)' }} className={styles.colorAtributes_list_top}>
+            <p>&nbsp;</p>
+            <p></p>
+            <p></p>
+          </div>
+        </div>
+
+        {creating && (
+          <div className={`${styles.modal} flex`}>
+            <form onSubmit={handleSubmit} className={styles.modal_body}>
+              <h2 id="h2">Добавление группы цветов</h2>
+              <label className={styles.modal_body_label}>
+                <p>Название</p>
+                <input
+                  autoFocus
+                  type="text"
+                  value={creating.value}
+                  onChange={e => setCreating({ ...creating, value: e.target.value })}
+                  placeholder={`Название группы цветов`}
+                />
+              </label>
+              <label className={`${styles.modal_body_label} relative`}>
+                <p>Цветовое обозначение</p>
+                <input
+                  className="w-[100px]"
+                  style={{ width: '100px' }}
+                  value={creating.meta.colorCode}
+                  onChange={e =>
+                    setCreating(
+                      !creating
+                        ? null
+                        : { ...creating, meta: { ...creating.meta, colorCode: e.target.value } }
+                    )
+                  }
+                />{' '}
+                <div
+                  style={{ backgroundColor: creating.meta.colorCode }}
+                  className="w-[40px] h-[40px] rounded-[50%] border-[1px] border-solid border-[var(--admin-light-gray)] absolute left-[110px] bottom-[0px]"
+                ></div>
+              </label>
+
+              <div className={`${styles.modal_body_label} max-h-[400px] overflow-y-auto`}>
+                <p>Варианты атрибутов</p>
+                {creating.meta.aliases.length > 0 ? (
+                  <div className="flex flex-wrap gap-[10px] mb-[10px]">
+                    {creating.meta.aliases.map((alias, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-[5px] bg-[#F2F3F5] w-fit h-[40px] px-[16px] rounded-[12px]"
+                      >
+                        <span>{alias}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCreating(
+                              !creating
+                                ? null
+                                : {
+                                    ...creating,
+                                    meta: {
+                                      ...creating.meta,
+                                      aliases: creating.meta.aliases.filter((_, i) => i !== index),
+                                    },
+                                  }
+                            )
+                          }
+                          className="flex items-center justify-center"
+                        >
+                          <AiOutlineClose />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--dark-gray)' }} id="p2">
+                    Варианты не добавлены
+                  </p>
+                )}
+                {adding != null ? (
+                  <section className="flex items-center gap-[10px] mb-[10px]">
+                    <input
+                      autoFocus
+                      value={adding}
+                      onChange={e => setAdding(e.target.value)}
+                      type="text"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          if (adding.trim() === '') {
+                            toast.error('Название варианта не может быть пустым')
+                            return
+                          }
+                          if (creating?.meta.aliases.includes(adding.trim())) {
+                            toast.error('Такой вариант уже существует')
+                            return
+                          }
+                          setCreating(
+                            !creating
+                              ? null
+                              : {
+                                  ...creating,
+                                  meta: {
+                                    ...creating.meta,
+                                    aliases: [...creating.meta.aliases, adding.trim()],
+                                  },
+                                }
+                          )
+                          setAdding(null)
+                          setAdding('')
+                        }
+                      }}
+                      style={{ width: '150px' }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (adding.trim() === '') {
+                          toast.error('Название варианта не может быть пустым')
+                          return
+                        }
+                        if (creating?.meta.aliases.includes(adding.trim())) {
+                          toast.error('Такой вариант уже существует')
+                          return
+                        }
+                        setCreating(
+                          !creating
+                            ? null
+                            : {
+                                ...creating,
+                                meta: {
+                                  ...creating.meta,
+                                  aliases: [...creating.meta.aliases, adding.trim()],
+                                },
+                              }
+                        )
+                        setAdding(null)
+                      }}
+                      type="button"
+                      className="text-[#449A41] w-[56px] h-[40px] flex items-center justify-center rounded-[12px] border-[1px] bg-[#CDFFCD] border-solid border-[#449A41] gap-[5px]"
+                    >
+                      <FaCheck />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdding(null)}
+                      className="text-[#D23F31] w-[56px] h-[40px] flex items-center justify-center rounded-[12px] border-[1px] bg-[#FFD2CF] border-solid border-[#D23F31] gap-[5px]"
+                    >
+                      <AiOutlineClose />
+                    </button>
+                  </section>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAdding('')}
+                    className="mb-[10px] flex items-center gap-[5px] text-[var(--admin-blue)] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid border-[#bdbfc7] w-fit"
+                  >
+                    <AiOutlinePlus />
+                    Добавить вариант
+                  </button>
+                )}
+              </div>
+
+              <section className="ml-auto flex gap-[10px] mt-[20px]">
+                <button
+                  type="button"
+                  onClick={() => setCreating(null)}
+                  className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                >
+                  Отмена
+                </button>
+                <button id="admin-button" type="submit">
+                  Сохранить
+                </button>
+              </section>
+            </form>
+          </div>
+        )}
+        {editing && (
+          <div className={`${styles.modal} flex`}>
+            <form onSubmit={handleUpdate} className={styles.modal_body}>
+              <h2 id="h2">Редактирование группы цветов</h2>
+              <label className={styles.modal_body_label}>
+                <p>Название</p>
+                <input
+                  autoFocus
+                  type="text"
+                  value={editing.value}
+                  onChange={e => setEditing({ ...editing, value: e.target.value })}
+                  placeholder={`Название группы цветов`}
+                />
+              </label>
+              <label className={`${styles.modal_body_label} relative`}>
+                <p>Цветовое обозначение</p>
+                <input
+                  className="w-[100px]"
+                  style={{ width: '100px' }}
+                  value={editing.meta.colorCode}
+                  onChange={e =>
+                    setEditing(
+                      !editing
+                        ? null
+                        : { ...editing, meta: { ...editing.meta, colorCode: e.target.value } }
+                    )
+                  }
+                />{' '}
+                <div
+                  style={{ backgroundColor: editing.meta.colorCode }}
+                  className="w-[40px] h-[40px] rounded-[50%] border-[1px] border-solid border-[var(--admin-light-gray)] absolute left-[110px] bottom-[0px]"
+                ></div>
+              </label>
+
+              <div className={`${styles.modal_body_label} max-h-[400px] overflow-y-auto`}>
+                <p>Варианты атрибутов</p>
+                {editing.meta.aliases?.length > 0 ? (
+                  <div className="flex flex-wrap gap-[10px] mb-[10px]">
+                    {editing.meta.aliases.map((alias, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-[5px] bg-[#F2F3F5] w-fit h-[40px] px-[16px] rounded-[12px]"
+                      >
+                        <span>{alias}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditing(
+                              !editing
+                                ? null
+                                : {
+                                    ...editing,
+                                    meta: {
+                                      ...editing.meta,
+                                      aliases: editing.meta.aliases.filter((_, i) => i !== index),
+                                    },
+                                  }
+                            )
+                          }
+                          className="flex items-center justify-center"
+                        >
+                          <AiOutlineClose />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--dark-gray)' }} id="p2">
+                    Варианты не добавлены
+                  </p>
+                )}
+                {adding != null ? (
+                  <section className="flex items-center gap-[10px] mb-[10px]">
+                    <input
+                      autoFocus
+                      value={adding}
+                      onChange={e => setAdding(e.target.value)}
+                      type="text"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          if (adding.trim() === '') {
+                            toast.error('Название варианта не может быть пустым')
+                            return
+                          }
+                          if (creating?.meta.aliases.includes(adding.trim())) {
+                            toast.error('Такой вариант уже существует')
+                            return
+                          }
+                          setCreating(
+                            !creating
+                              ? null
+                              : {
+                                  ...creating,
+                                  meta: {
+                                    ...creating.meta,
+                                    aliases: [...creating.meta.aliases, adding.trim()],
+                                  },
+                                }
+                          )
+                          setAdding(null)
+                          setAdding('')
+                        }
+                      }}
+                      style={{ width: '150px' }}
+                    />
+                    <button
+                      onClick={() => {
+                        console.log(adding)
+                        if (adding.trim() === '') {
+                          toast.error('Название варианта не может быть пустым')
+                          return
+                        }
+                        if (editing?.meta.aliases?.includes(adding.trim())) {
+                          toast.error('Такой вариант уже существует')
+                          return
+                        }
+                        setEditing(
+                          !editing
+                            ? null
+                            : {
+                                ...editing,
+                                meta: {
+                                  ...editing.meta,
+                                  aliases: [...editing.meta.aliases, adding.trim()],
+                                },
+                              }
+                        )
+                        setAdding(null)
+                      }}
+                      type="button"
+                      className="text-[#449A41] w-[56px] h-[40px] flex items-center justify-center rounded-[12px] border-[1px] bg-[#CDFFCD] border-solid border-[#449A41] gap-[5px]"
+                    >
+                      <FaCheck />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdding(null)}
+                      className="text-[#D23F31] w-[56px] h-[40px] flex items-center justify-center rounded-[12px] border-[1px] bg-[#FFD2CF] border-solid border-[#D23F31] gap-[5px]"
+                    >
+                      <AiOutlineClose />
+                    </button>
+                  </section>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAdding('')}
+                    className="mb-[10px] flex items-center gap-[5px] text-[var(--admin-blue)] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid border-[#bdbfc7] w-fit"
+                  >
+                    <AiOutlinePlus />
+                    Добавить вариант
+                  </button>
+                )}
+              </div>
+
+              <section className="ml-auto flex gap-[10px] mt-[20px]">
+                <button
+                  type="button"
+                  onClick={() => setEditing(null)}
+                  className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                >
+                  Отмена
+                </button>
+                <button id="admin-button" type="submit">
+                  Сохранить
+                </button>
+              </section>
+            </form>
+          </div>
+        )}
+        {deleting && (
+          <div className={`${styles.modal} flex`}>
+            <form onSubmit={handleDelete} className={styles.modal_body}>
+              <h2 id="h2">Вы точно хотите удалить группу цветов {deleting.value}?</h2>
+              <section className="flex gap-[10px] mt-[20px] ml-auto">
+                <button
+                  className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                  onClick={() => setDeleting(null)}
+                  type="button"
+                >
+                  Отмена
+                </button>
+                <button id="admin-button" type="submit">
+                  Удалить
+                </button>
+              </section>
+            </form>
+          </div>
+        )}
+      </div>
     </>
   )
 }
