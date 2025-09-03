@@ -10,7 +10,8 @@
     align-items: center;
   }
 
-  &_menu {
+  &_menu,
+  &_menu_sizes {
     display: flex;
     background: var(--gray);
     border-radius: 16px;
@@ -38,6 +39,12 @@
         color: var(--dark);
       }
     }
+  }
+
+  &_menu_sizes {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   &_list {
@@ -114,8 +121,10 @@
       }
 
       input,
+      select,
       textarea {
         padding: 7px 12px;
+        outline: none;
         height: 40px;
         width: 100%;
         border: 1px solid #bdbfc7;
@@ -234,7 +243,8 @@
   }
 }
 
-.colorAtributes {
+.colorAtributes,
+.sizeTypes {
   display: flex;
   flex-direction: column;
 
@@ -302,6 +312,22 @@
           background: #f8f8f8;
           color: var(--dark-gray);
         }
+      }
+    }
+  }
+}
+
+.sizeTypes {
+  &_list {
+    &_item {
+      grid-template-columns: 220px 1fr 220px;
+
+      > :nth-child(2) {
+        text-align: left;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }

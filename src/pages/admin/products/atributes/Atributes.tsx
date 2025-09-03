@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import styles from './Atributes.module.scss'
-import { SeasonAttrCase, TargetGroups, Types, Brands, Colors } from './items'
+import { SeasonAttrCase, TargetGroups, Types, Brands, Colors, Sizes } from './items'
 
 export const Atributes = () => {
   const [active, setActive] = useState<keyof typeof menuItems>('Вид изделия')
@@ -82,7 +82,7 @@ const menuItems: Record<string, JSX.Element> = {
   'Целевая группа': <TargetGroups id={3} />,
   Бренд: <Brands id={4} />,
   Цвет: <Colors id={5} />,
-  Размер: <Types id={6} />,
+  Размер: <Sizes />,
   'Длина изделия': <Types id={7} />,
   Коллекция: <Types id={8} />,
 }

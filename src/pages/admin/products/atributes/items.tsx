@@ -7,6 +7,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { AiOutlineClose, AiOutlinePicture, AiOutlinePlus } from 'react-icons/ai'
 import { FaCheck } from 'react-icons/fa'
+import { NumericFormat } from 'react-number-format'
 
 export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
@@ -1624,6 +1625,1280 @@ export const Colors = ({ id }: { id: number }) => {
           </div>
         )}
       </div>
+    </>
+  )
+}
+
+export const Sizes = () => {
+  const [active, setActive] = useState('Виды размеров')
+
+  return (
+    <>
+      <div className={styles.atributes_top}>
+        <div className={styles.atributes_menu_sizes}>
+          <div
+            onClick={() => setActive('Виды размеров')}
+            className={`${styles.atributes_menu_item} ${active == 'Виды размеров' ? styles.atributes_menu_item_active : ''}`}
+          >
+            Виды размеров
+          </div>{' '}
+          <div
+            onClick={() => setActive('Таблица размеров')}
+            className={`${styles.atributes_menu_item} ${active == 'Таблица размеров' ? styles.atributes_menu_item_active : ''}`}
+          >
+            Таблица размеров
+          </div>
+        </div>
+      </div>
+      {active == 'Виды размеров' && <SizeTypes />}
+      {active == 'Таблица размеров' && <SizeTables />}
+
+      {/* {active == 'Таблица размеров' && <SizeCharts />} */}
+    </>
+  )
+}
+
+interface SizeType {
+  id?: number
+  name: string
+  values: SizeTypeValue[]
+}
+
+interface SizeTypeValue {
+  id?: number
+  typeId?: number
+  name: string
+  orderNum?: number
+}
+
+const SizeTypes = () => {
+  const [items, setItems] = useState<null | SizeType[]>(null)
+  const [deleting, setDeleting] = useState<null | { id: number; name: string }>(null)
+  const [creating, setCreating] = useState<null | SizeType>(null)
+  const [editing, setEditing] = useState<null | SizeType>(null)
+  const [adding, setAdding] = useState<null | { name: string; orderNum: number }>(null)
+
+  ///api/sizes/types
+
+  const refresh = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/types`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        //отсортируй по алфавиту
+
+        setItems(res.data)
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
+  useEffect(() => refresh(), [])
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/types/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setDeleting(null)
+  }
+
+  const handleCreate = (e: FormEvent) => {
+    e.preventDefault()
+
+    if (!creating) return toast.error('Нету данных для создания')
+
+    if (creating.name.trim() === '') {
+      toast.error('Название вида размера не может быть пустым')
+      return
+    }
+    if (creating.values.length === 0) {
+      toast.error('Добавьте хотя бы одно значение')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/types`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { name: creating.name, sizes: creating.values },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно добавлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setCreating(null)
+  }
+
+  const handleUpdate = (e: FormEvent) => {
+    e.preventDefault()
+    if (!editing) return toast.error('Нету данных для редактирования')
+    //редактировать
+    if (editing.name.trim() === '') {
+      toast.error('Название вида размера не может быть пустым')
+      return
+    }
+    if (editing.values.length === 0) {
+      toast.error('Добавьте хотя бы одно значение')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/types/${editing.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { name: editing.name, sizes: editing.values, id: editing.id },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно обновлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setEditing(null)
+  }
+
+  return (
+    <>
+      <button
+        className="ml-auto"
+        id="admin-button"
+        onClick={() =>
+          setCreating({
+            name: '',
+            values: [],
+          })
+        }
+      >
+        Добавить вид размера
+      </button>
+      <div className={styles.sizeTypes}>
+        <div className={styles.sizeTypes_list}>
+          <div className={styles.sizeTypes_list_top}>
+            <p>Название</p>
+            <p>Значения</p>
+          </div>
+          {items?.map((item, index) => (
+            <div key={index} className={styles.sizeTypes_list_item}>
+              <label>{item.name}</label>
+              <label className="flex items-center gap-[10px]">
+                <div className="flex flex-wrap gap-[10px]">
+                  {item.values.map((value, idx) => (
+                    <span key={idx}>{value.name}</span>
+                  ))}
+                </div>
+              </label>
+              <section>
+                <button onClick={() => setDeleting({ id: item.id!, name: item.name })}>
+                  <LuTrash2 />
+                </button>
+                <button onClick={() => setEditing(item)}>
+                  <LuPencil />
+                </button>
+              </section>
+            </div>
+          ))}
+          <div style={{ transform: 'rotate(180deg)' }} className={styles.colorAtributes_list_top}>
+            <p>&nbsp;</p>
+            <p></p>
+          </div>
+        </div>
+      </div>
+      {deleting && (
+        <div className={`${styles.modal} flex`}>
+          <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
+            <h2 id="h2">Вы точно хотите удалить вид размера {deleting.name}?</h2>
+            <section className="flex gap-[10px] mt-[20px] ml-auto">
+              <button
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                onClick={() => setDeleting(null)}
+                type="button"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {creating && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form onSubmit={handleCreate} className={styles.modal_body}>
+            <h2 id="h2">Добавление вида размера</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                autoFocus
+                type="text"
+                value={creating.name}
+                onChange={e => setCreating({ ...creating, name: e.target.value })}
+                placeholder={`Название вида размера`}
+              />
+            </label>
+
+            <div className={`${styles.modal_body_label} max-h-[400px] overflow-y-auto`}>
+              <p>Размеры</p>
+              {creating.values.length > 0 ? (
+                <div className="flex flex-wrap gap-[10px] mb-[10px]">
+                  {creating.values.map((value, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-[5px] bg-[#F2F3F5] w-fit h-[40px] px-[16px] rounded-[12px]"
+                    >
+                      <span>{value.name}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCreating(
+                            !creating
+                              ? null
+                              : {
+                                  ...creating,
+                                  values: creating.values.filter((_, i) => i !== index),
+                                }
+                          )
+                        }
+                        className="flex items-center justify-center"
+                      >
+                        <AiOutlineClose />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : adding != null ? null : (
+                <p style={{ color: 'var(--dark-gray)' }} id="p2">
+                  Значения не добавлены
+                </p>
+              )}
+              {adding != null ? (
+                <section className="flex items-center gap-[10px] mb-[10px] border-[#BDBFC7] border-solid border-[1px] p-[32px] rounded-[12px]">
+                  <div
+                    onSubmit={e => e.preventDefault()}
+                    className="gap-[24px] flex flex-col w-full"
+                  >
+                    <h3>Добавление размера</h3>
+                    <div className=" grid grid-cols-2 w-100 flex-row gap-[24px]">
+                      <label>
+                        <p>Название</p>
+                        <input
+                          autoFocus
+                          value={adding.name}
+                          onChange={e => setAdding({ ...adding, name: e.target.value })}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              if (adding?.name?.trim() === '') {
+                                toast.error('Название варианта не может быть пустым')
+                                return
+                              }
+                              if (creating?.values.find(i => i.name === adding.name.trim())) {
+                                toast.error('Такой вариант уже существует')
+                                return
+                              }
+                              setCreating(
+                                !creating
+                                  ? null
+                                  : {
+                                      ...creating,
+                                      values: [
+                                        ...creating.values,
+                                        {
+                                          name: adding.name.trim(),
+                                          orderNum: adding.orderNum,
+                                        },
+                                      ],
+                                    }
+                              )
+                              const temp = adding.orderNum
+                              setAdding(null)
+                              setAdding({ name: '', orderNum: temp + 1 })
+                            }
+                          }}
+                          type="text"
+                        />
+                      </label>
+                      <label>
+                        <p>Сортировочное значение</p>
+                        <input
+                          value={adding.orderNum}
+                          onChange={e => setAdding({ ...adding, orderNum: Number(e.target.value) })}
+                          type="text"
+                        />
+                      </label>
+                    </div>
+                    <div className="flex gap-[10px] ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => setAdding(null)}
+                        className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                      >
+                        Отмена
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (adding?.name?.trim() === '') {
+                            toast.error('Название варианта не может быть пустым')
+                            return
+                          }
+                          if (creating?.values.find(i => i.name === adding.name.trim())) {
+                            toast.error('Такой вариант уже существует')
+                            return
+                          }
+                          setCreating(
+                            !creating
+                              ? null
+                              : {
+                                  ...creating,
+                                  values: [
+                                    ...creating.values,
+                                    {
+                                      name: adding.name.trim(),
+                                      orderNum: adding.orderNum,
+                                    },
+                                  ],
+                                }
+                          )
+                          const temp = adding.orderNum
+                          setAdding(null)
+                          setAdding({ name: '', orderNum: temp + 1 })
+                        }}
+                        type="button"
+                        id="admin-button"
+                      >
+                        Добавить
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAdding({ name: '', orderNum: creating.values.length + 1 })}
+                  className="mb-[10px] flex items-center gap-[5px] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid text-[#bdbfc7] border-[#bdbfc7] w-[56px] h-[40px] justify-center text-[22px]"
+                >
+                  <AiOutlinePlus />
+                </button>
+              )}
+            </div>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setCreating(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {editing && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form onSubmit={handleUpdate} className={styles.modal_body}>
+            <h2 id="h2">Редактирование вида размера</h2>
+            <label className={styles.modal_body_label}>
+              <p>Название</p>
+              <input
+                autoFocus
+                type="text"
+                value={editing.name}
+                onChange={e => setEditing({ ...editing, name: e.target.value })}
+                placeholder={`Название вида размера`}
+              />
+            </label>
+
+            <div className={`${styles.modal_body_label} max-h-[400px] overflow-y-auto`}>
+              <p>Размеры</p>
+              {editing.values.length > 0 ? (
+                <div className="flex flex-wrap gap-[10px] mb-[10px]">
+                  {editing.values.map((value, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-[5px] bg-[#F2F3F5] w-fit h-[40px] px-[16px] rounded-[12px]"
+                    >
+                      <span>{value.name}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditing(
+                            !editing
+                              ? null
+                              : {
+                                  ...editing,
+                                  values: editing.values.filter((_, i) => i !== index),
+                                }
+                          )
+                        }
+                        className="flex items-center justify-center"
+                      >
+                        <AiOutlineClose />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : adding != null ? null : (
+                <p style={{ color: 'var(--dark-gray)' }} id="p2">
+                  Значения не добавлены
+                </p>
+              )}
+              {adding != null ? (
+                <section className="flex items-center gap-[10px] mb-[10px] border-[#BDBFC7] border-solid border-[1px] p-[32px] rounded-[12px]">
+                  <div
+                    onSubmit={e => e.preventDefault()}
+                    className="gap-[24px] flex flex-col w-full"
+                  >
+                    <h3>Добавление размера</h3>
+                    <div className=" grid grid-cols-2 w-100 flex-row gap-[24px]">
+                      <label>
+                        <p>Название</p>
+                        <input
+                          autoFocus
+                          value={adding.name}
+                          type="text"
+                          onChange={e => setAdding({ ...adding, name: e.target.value })}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              if (adding?.name?.trim() === '') {
+                                toast.error('Название варианта не может быть пустым')
+                                return
+                              }
+                              if (editing?.values.find(i => i.name === adding.name.trim())) {
+                                toast.error('Такой вариант уже существует')
+                                return
+                              }
+                              setEditing(
+                                !editing
+                                  ? null
+                                  : {
+                                      ...editing,
+                                      values: [
+                                        ...editing.values,
+                                        {
+                                          name: adding.name.trim(),
+                                          orderNum: adding.orderNum,
+                                        },
+                                      ],
+                                    }
+                              )
+                              const temp = adding.orderNum
+                              setAdding(null)
+                              setAdding({ name: '', orderNum: temp + 1 })
+                            }
+                          }}
+                        />
+                      </label>
+                      <label>
+                        <p>Сортировочное значение</p>
+                        <input
+                          value={adding.orderNum}
+                          onChange={e => setAdding({ ...adding, orderNum: Number(e.target.value) })}
+                          type="text"
+                        />
+                      </label>
+                    </div>
+                    <div className="flex gap-[10px] ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => setAdding(null)}
+                        className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                      >
+                        Отмена
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (adding?.name?.trim() === '') {
+                            toast.error('Название варианта не может быть пустым')
+                            return
+                          }
+                          if (editing?.values.find(i => i.name === adding.name.trim())) {
+                            toast.error('Такой вариант уже существует')
+                            return
+                          }
+                          setEditing(
+                            !editing
+                              ? null
+                              : {
+                                  ...editing,
+                                  values: [
+                                    ...editing.values,
+                                    {
+                                      name: adding.name.trim(),
+                                      orderNum: adding.orderNum,
+                                    },
+                                  ],
+                                }
+                          )
+                          const temp = adding.orderNum
+                          setAdding(null)
+                          setAdding({ name: '', orderNum: temp + 1 })
+                        }}
+                        type="button"
+                        id="admin-button"
+                      >
+                        Добавить
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAdding({ name: '', orderNum: editing.values.length + 1 })}
+                  className="mb-[10px] flex items-center gap-[5px] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid text-[#bdbfc7] border-[#bdbfc7] w-[56px] h-[40px] justify-center text-[22px]"
+                >
+                  <AiOutlinePlus />
+                </button>
+              )}
+            </div>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
+
+interface SizeTable {
+  id?: number
+  brand: { id: number; value: string }
+  gender: { id: number; value: string }
+  type: { id: number; value: string }
+  rows: SizeTableRow[]
+}
+
+interface SizeTableRow {
+  id?: number
+  tableId?: number
+  sizeValueId: number
+  orderNum: number
+  sizeValue: { id: number; typeId: number; name: string; orderNum: number }
+  chest: number
+  waist: number
+  hips: number
+  height: number
+}
+
+interface Genders {
+  id: number
+  value: string
+}
+
+const SizeTables = () => {
+  const [items, setItems] = useState<null | SizeTable[]>(null)
+  const [editing, setEditing] = useState<null | SizeTable>(null)
+  const [creating, setCreating] = useState<null | SizeTable>(null)
+  const [deleting, setDeleting] = useState<null | SizeTable>(null)
+  const [brands, setBrands] = useState<null | Brand[]>(null)
+  const [genders, setGenders] = useState<null | Genders[]>(null)
+  const [sizeTypes, setSizeTypes] = useState<null | SizeType[]>(null)
+
+  const refresh = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/tables`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setItems(res.data)
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/types`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setSizeTypes(res.data)
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        const genders = res.data.find((i: { id: number }) => i.id === 3)
+        const brands = res.data.find((i: { id: number }) => i.id === 4)
+        setGenders(genders.values)
+        setBrands(brands.values)
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
+  useEffect(() => refresh(), [])
+  const handleCreate = (e: FormEvent) => {
+    e.preventDefault()
+    if (!creating) return toast.error('Нету данных для создания')
+    if (creating.brand.id === 0) {
+      toast.error('Выберите бренд')
+      return
+    }
+    if (creating.gender.id === 0) {
+      toast.error('Выберите пол')
+      return
+    }
+    if (creating.type.id === 0) {
+      toast.error('Выберите вид размера')
+      return
+    }
+    if (creating.rows.length === 0) {
+      toast.error('Добавьте хотя бы один размер')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/tables`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        brandId: creating.brand.id,
+        genderId: creating.gender.id,
+        typeId: creating.type.id,
+        rows: creating.rows.map(i => ({
+          sizeValueId: i.sizeValueId,
+          chest: i.chest,
+          waist: i.waist,
+          hips: i.hips,
+          height: i.height,
+          orderNum: i.orderNum,
+        })),
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно добавлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setCreating(null)
+  }
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/tables/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setDeleting(null)
+  }
+  const handleUpdate = (e: FormEvent) => {
+    e.preventDefault()
+    if (!editing) return toast.error('Нету данных для редактирования')
+    if (editing.brand.id === 0) {
+      toast.error('Выберите бренд')
+      return
+    }
+
+    if (editing.gender.id === 0) {
+      toast.error('Выберите пол')
+      return
+    }
+    if (editing.type.id === 0) {
+      toast.error('Выберите вид размера')
+      return
+    }
+    if (editing.rows.length === 0) {
+      toast.error('Добавьте хотя бы один размер')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/tables/${editing.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        id: editing.id,
+        brandId: editing.brand.id,
+        genderId: editing.gender.id,
+        typeId: editing.type.id,
+        rows: editing.rows.map(i => ({
+          id: i.id,
+          sizeValueId: i.sizeValueId,
+          chest: i.chest,
+          waist: i.waist,
+          hips: i.hips,
+          height: i.height,
+          orderNum: i.orderNum,
+        })),
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно обновлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setEditing(null)
+  }
+
+  return (
+    <>
+      <button
+        onClick={() =>
+          setCreating({
+            brand: { id: 0, value: '' },
+            gender: { id: 0, value: '' },
+            type: { id: 0, value: '' },
+            rows: [],
+          })
+        }
+        className="ml-auto"
+        id="admin-button"
+      >
+        Добавить таблицу размеров
+      </button>
+      <div className={styles.sizeTypes}>
+        <div className={styles.seasonAtributes_list}>
+          <div className={styles.seasonAtributes_list_top}>
+            <p>Название таблицы</p>
+            <p>Пол</p>
+          </div>
+          {items?.map((item, index) => (
+            <div key={index} className={styles.seasonAtributes_list_item}>
+              <label>{item.brand.value}</label>
+              <label> {item.gender.value}</label>
+              <section>
+                <button onClick={() => setDeleting(item)}>
+                  <LuTrash2 />
+                </button>
+                <button onClick={() => setEditing(item)}>
+                  <LuPencil />
+                </button>
+              </section>
+            </div>
+          ))}
+        </div>
+      </div>
+      {creating && (
+        <div className={`${styles.modal}`}>
+          <form
+            className={` w-[1100px]  ${styles.modal_body}`}
+            style={{ maxWidth: '825px' }}
+            onSubmit={handleCreate}
+          >
+            <h2 id="h2">Добавление таблицы размеров</h2>
+            <label className={`w-[370px] ${styles.modal_body_label}`}>
+              <p>Название таблицы</p>
+              <select
+                autoFocus
+                value={creating.brand.id}
+                onChange={e =>
+                  setCreating({
+                    ...creating,
+                    brand: {
+                      id: Number(e.target.value),
+                      value: brands?.find(i => i.id === Number(e.target.value))?.value || '',
+                    },
+                  })
+                }
+              >
+                <option value={0}>Выберите бренд</option>
+                {brands?.map((brand, index) => (
+                  <option key={index} value={brand.id}>
+                    {brand.value}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={`w-[370px] ${styles.modal_body_label}`}>
+              <p>Пол</p>
+              <select
+                value={creating.gender.id}
+                onChange={e =>
+                  setCreating({
+                    ...creating,
+                    gender: {
+                      id: Number(e.target.value),
+                      value: genders?.find(i => i.id === Number(e.target.value))?.value || '',
+                    },
+                  })
+                }
+              >
+                <option value={0}>Выберите пол</option>
+                {genders?.map((gender, index) => (
+                  <option key={index} value={gender.id}>
+                    {gender.value}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={`w-[370px] ${styles.modal_body_label}`}>
+              <p>Вид размера</p>
+              <select
+                value={creating.type.id}
+                onChange={e =>
+                  setCreating({
+                    ...creating,
+                    type: {
+                      id: Number(e.target.value),
+                      value: sizeTypes?.find(i => i.id === Number(e.target.value))?.name || '',
+                    },
+                  })
+                }
+              >
+                <option value={0}>Выберите вид размера</option>
+                {sizeTypes?.map((type, index) => (
+                  <option key={index} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {creating.type.id != 0 && sizeTypes?.find(i => i.id === creating.type.id) && (
+              <div className={`${styles.modal_body_label}`}>
+                <p>Размеры</p>
+                <div className={styles.sizeTypes_list}>
+                  <div
+                    className={`pl-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] gap-[10px] ${styles.sizeTypes_list_top}`}
+                  >
+                    <p>Размер</p>
+                    <p>Рост</p>
+                    <p>Обхват груди</p>
+                    <p>Обхват талии</p>
+                    <p>Обхват бедер</p>
+                    <p></p>
+                  </div>
+                  {sizeTypes
+                    .find(i => i.id === creating.type.id)!
+                    .values.sort((a, b) => a?.orderNum! - b.orderNum!)
+                    .map((value, index) => (
+                      <div
+                        key={index}
+                        className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
+                      >
+                        <input type="text" value={value.name} readOnly name="" id="" />
+                        <NumericFormat
+                          value={creating.rows.find(i => i.sizeValueId === value.id)?.height || ''}
+                          onChange={(e: { target: { value: string } }) => {
+                            const height = e.target.value === '' ? 0 : Number(e.target.value)
+                            if (creating.rows.find(i => i.sizeValueId === value.id)) {
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map(i =>
+                                  i.sizeValueId === value.id ? { ...i, height } : i
+                                ),
+                              })
+                            } else {
+                              setCreating({
+                                ...creating,
+                                rows: [
+                                  ...creating?.rows,
+                                  {
+                                    sizeValueId: value.id ?? 0,
+                                    orderNum: value.orderNum ?? 0,
+                                    sizeValue: {
+                                      ...value,
+                                      id: value.id ?? 0,
+                                      typeId: value.typeId ?? 0,
+                                      orderNum: value.orderNum ?? 0,
+                                    },
+                                    chest: 0,
+                                    waist: 0,
+                                    hips: 0,
+                                    height,
+                                  },
+                                ],
+                              })
+                            }
+                          }}
+                          placeholder="Рост"
+                        />
+                        <NumericFormat
+                          value={creating.rows.find(i => i.sizeValueId === value.id)?.chest || ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const chest: number = e.target.value === '' ? 0 : Number(e.target.value)
+                            if (
+                              creating.rows.find((i: SizeTableRow) => i.sizeValueId === value.id)
+                            ) {
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map((i: SizeTableRow) =>
+                                  i.sizeValueId === value.id ? { ...i, chest } : i
+                                ),
+                              })
+                            } else {
+                              setCreating({
+                                ...creating,
+                                rows: [
+                                  ...creating.rows,
+                                  {
+                                    sizeValueId: value.id ?? 0,
+                                    orderNum: value.orderNum ?? 0,
+                                    sizeValue: {
+                                      ...value,
+                                      id: value.id ?? 0,
+                                      orderNum: value.orderNum ?? 0,
+                                    },
+                                    chest,
+                                    waist: 0,
+                                    hips: 0,
+                                    height: 0,
+                                  } as SizeTableRow,
+                                ],
+                              })
+                            }
+                          }}
+                          placeholder="Обхват груди"
+                        />
+                        <NumericFormat
+                          value={
+                            creating.rows.find((i: SizeTableRow) => i.sizeValueId === value.id)
+                              ?.waist || ''
+                          }
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const waist = e.target.value === '' ? 0 : Number(e.target.value)
+                            if (creating.rows.find(i => i.sizeValueId === value.id)) {
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map(i =>
+                                  i.sizeValueId === value.id ? { ...i, waist } : i
+                                ),
+                              })
+                            } else {
+                              setCreating({
+                                ...creating,
+                                rows: [
+                                  ...creating.rows,
+                                  {
+                                    sizeValueId: value.id ?? 0,
+                                    orderNum: value.orderNum ?? 0,
+                                    sizeValue: {
+                                      ...value,
+                                      id: value.id ?? 0,
+                                      orderNum: value.orderNum ?? 0,
+                                    },
+                                    chest: 0,
+                                    waist,
+                                    hips: 0,
+                                    height: 0,
+                                  } as SizeTableRow,
+                                ],
+                              })
+                            }
+                          }}
+                          placeholder="Обхват талии"
+                        />
+                        <NumericFormat
+                          value={creating.rows.find(i => i.sizeValueId === value.id)?.hips || ''}
+                          onChange={(e: { target: { value: string } }) => {
+                            const hips = e.target.value === '' ? 0 : Number(e.target.value)
+                            if (creating.rows.find(i => i.sizeValueId === value.id)) {
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map(i =>
+                                  i.sizeValueId === value.id ? { ...i, hips } : i
+                                ),
+                              })
+                            } else {
+                              setCreating({
+                                ...creating,
+                                rows: [
+                                  ...creating.rows,
+                                  {
+                                    sizeValueId: value.id ?? 0,
+                                    orderNum: value.orderNum ?? 0,
+                                    sizeValue: {
+                                      ...value,
+                                      id: value.id ?? 0,
+                                      orderNum: value.orderNum ?? 0,
+                                    },
+                                    chest: 0,
+                                    waist: 0,
+                                    hips,
+                                    height: 0,
+                                  } as SizeTableRow,
+                                ],
+                              })
+                            }
+                          }}
+                          placeholder="Обхват бедер"
+                        />
+                        <div></div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setCreating(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {deleting && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form onSubmit={handleDelete} className={styles.modal_body}>
+            <h2 id="h2">Удаление таблицы размеров</h2>
+            <p id="p2">Вы уверены, что хотите удалить эту таблицу размеров?</p>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setDeleting(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {editing && (
+        <div className={`${styles.modal} `}>
+          <form
+            className={` w-[1100px]  ${styles.modal_body}`}
+            style={{ maxWidth: '825px' }}
+            onSubmit={handleUpdate}
+          >
+            <h2 id="h2">Редактирование таблицы размеров</h2>
+            <label className={`w-[370px] ${styles.modal_body_label}`}>
+              <p>Название таблицы</p>
+              <select
+                autoFocus
+                value={editing.brand.id}
+                onChange={e =>
+                  setEditing({
+                    ...editing,
+                    brand: {
+                      id: Number(e.target.value),
+                      value: brands?.find(i => i.id === Number(e.target.value))?.value || '',
+                    },
+                  })
+                }
+              >
+                <option value={0}>Выберите бренд</option>
+                {brands?.map((brand, index) => (
+                  <option key={index} value={brand.id}>
+                    {brand.value}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={`w-[370px] ${styles.modal_body_label}`}>
+              <p>Пол</p>
+              <select
+                value={editing.gender.id}
+                onChange={e =>
+                  setEditing({
+                    ...editing,
+                    gender: {
+                      id: Number(e.target.value),
+                      value: genders?.find(i => i.id === Number(e.target.value))?.value || '',
+                    },
+                  })
+                }
+              >
+                <option value={0}>Выберите пол</option>
+                {genders?.map((gender, index) => (
+                  <option key={index} value={gender.id}>
+                    {gender.value}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={`w-[370px] ${styles.modal_body_label}`}>
+              <p>Тип</p>
+              <select
+                value={editing.type.id}
+                onChange={e =>
+                  setEditing({
+                    ...editing,
+                    type: {
+                      id: Number(e.target.value),
+                      value: sizeTypes?.find(i => i.id === Number(e.target.value))?.name || '',
+                    },
+                  })
+                }
+              >
+                <option value={0}>Выберите вид размера</option>
+                {sizeTypes?.map((type, index) => (
+                  <option key={index} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className={`${styles.modal_body_label}`}>
+              <p>Размеры</p>
+              <div className={styles.sizeTypes_list}>
+                <div
+                  className={`pl-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] gap-[10px] ${styles.sizeTypes_list_top}`}
+                >
+                  <p>Размер</p>
+                  <p>Рост</p>
+                  <p>Обхват груди</p>
+                  <p>Обхват талии</p>
+                  <p>Обхват бедер</p>
+                  <p></p>
+                </div>
+                {editing.rows.map((row, index) => (
+                  <div
+                    key={index}
+                    className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
+                  >
+                    <input type="text" value={row.sizeValue.name} readOnly name="" id="" />
+                    <NumericFormat
+                      value={row.height || ''}
+                      onChange={(e: { target: { value: string } }) => {
+                        const height = e.target.value === '' ? 0 : Number(e.target.value)
+                        setEditing({
+                          ...editing,
+                          rows: editing.rows.map(i =>
+                            i.sizeValueId === row.sizeValueId ? { ...i, height } : i
+                          ),
+                        })
+                      }}
+                      placeholder="Рост"
+                    />
+                    <NumericFormat
+                      value={row.chest || ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const chest: number = e.target.value === '' ? 0 : Number(e.target.value)
+                        setEditing({
+                          ...editing,
+                          rows: editing.rows.map(i =>
+                            i.sizeValueId === row.sizeValueId ? { ...i, chest } : i
+                          ),
+                        })
+                      }}
+                      placeholder="Обхват груди"
+                    />
+                    <NumericFormat
+                      value={row.waist || ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const waist = e.target.value === '' ? 0 : Number(e.target.value)
+                        setEditing({
+                          ...editing,
+                          rows: editing.rows.map(i =>
+                            i.sizeValueId === row.sizeValueId ? { ...i, waist } : i
+                          ),
+                        })
+                      }}
+                      placeholder="Обхват талии"
+                    />
+                    <NumericFormat
+                      value={row.hips || ''}
+                      onChange={(e: { target: { value: string } }) => {
+                        const hips = e.target.value === '' ? 0 : Number(e.target.value)
+                        setEditing({
+                          ...editing,
+                          rows: editing.rows.map(i =>
+                            i.sizeValueId === row.sizeValueId ? { ...i, hips } : i
+                          ),
+                        })
+                      }}
+                      placeholder="Обхват бедер"
+                    />
+                    <div></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
     </>
   )
 }
