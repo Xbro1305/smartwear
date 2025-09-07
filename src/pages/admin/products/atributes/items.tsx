@@ -2502,7 +2502,7 @@ const SizeTables = () => {
                     },
                     rows: [
                       {
-                        sizeValueId: 0,
+                        sizeValueId: size?.values[0].id || 0,
                         orderNum: 0,
                         sizeValue: size?.values[0] || { id: 0, typeId: 0, name: '', orderNum: 0 },
                         chest: 0,
