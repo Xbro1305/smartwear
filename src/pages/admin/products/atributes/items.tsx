@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react'
 import styles from './Atributes.module.scss'
-import { LuPencil, LuTrash2 } from 'react-icons/lu'
+import { LuPencil, LuPlus, LuTrash2 } from 'react-icons/lu'
 import { Link } from 'react-router-dom'
 import { FeatureEditor } from '../Components/FeatureEditor/editor'
 import axios from 'axios'
@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import { AiOutlineClose, AiOutlinePicture, AiOutlinePlus } from 'react-icons/ai'
 import { FaCheck } from 'react-icons/fa'
 import { NumericFormat } from 'react-number-format'
+import { CustomSelect } from '../Components/CustomSelect/CustomSelect'
 
 export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
@@ -690,8 +691,6 @@ export const Brands = ({ id }: { id: number }) => {
     e.preventDefault()
 
     const item = editing
-
-    console.log(item)
 
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
       method: 'PUT',
@@ -1543,7 +1542,6 @@ export const Colors = ({ id }: { id: number }) => {
                     />
                     <button
                       onClick={() => {
-                        console.log(adding)
                         if (adding.trim() === '') {
                           toast.error('Название варианта не может быть пустым')
                           return
@@ -2216,7 +2214,7 @@ interface SizeTableRow {
   tableId?: number
   sizeValueId: number
   orderNum: number
-  sizeValue: { id: number; typeId: number; name: string; orderNum: number }
+  sizeValue: { id?: number; typeId?: number; name: string; orderNum?: number }
   chest: number
   waist: number
   hips: number
@@ -2426,6 +2424,7 @@ const SizeTables = () => {
       >
         Добавить таблицу размеров
       </button>
+
       <div className={styles.sizeTypes}>
         <div className={styles.seasonAtributes_list}>
           <div className={styles.seasonAtributes_list_top}>
@@ -2451,253 +2450,238 @@ const SizeTables = () => {
       {creating && (
         <div className={`${styles.modal}`}>
           <form
-            className={` w-[1100px]  ${styles.modal_body}`}
-            style={{ maxWidth: '825px' }}
-            onSubmit={handleCreate}
+            className={`w-[1100px] max-w-[1100px_!important]  ${styles.modal_body}`}
+            onSubmit={e => e.preventDefault()}
           >
             <h2 id="h2">Добавление таблицы размеров</h2>
-            <label className={`w-[370px] ${styles.modal_body_label}`}>
+            <div className={`w-[370px] ${styles.modal_body_label}`}>
               <p>Название таблицы</p>
-              <select
-                autoFocus
-                value={creating.brand.id}
-                onChange={e =>
+              <CustomSelect
+                data={brands?.map(brand => ({ id: brand.id!, value: brand.value! })!) || []}
+                value={creating.brand}
+                placeholder="Бренд"
+                onChange={id => {
                   setCreating({
                     ...creating,
                     brand: {
-                      id: Number(e.target.value),
-                      value: brands?.find(i => i.id === Number(e.target.value))?.value || '',
+                      id: Number(id),
+                      value: brands?.find(i => i.id === Number(id))?.value || '',
                     },
                   })
-                }
-              >
-                <option value={0}>Выберите бренд</option>
-                {brands?.map((brand, index) => (
-                  <option key={index} value={brand.id}>
-                    {brand.value}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={`w-[370px] ${styles.modal_body_label}`}>
+                }}
+              />
+            </div>
+            <div className={`w-[370px] ${styles.modal_body_label}`}>
               <p>Пол</p>
-              <select
-                value={creating.gender.id}
-                onChange={e =>
+              <CustomSelect
+                value={creating.gender}
+                onChange={id =>
                   setCreating({
                     ...creating,
                     gender: {
-                      id: Number(e.target.value),
-                      value: genders?.find(i => i.id === Number(e.target.value))?.value || '',
+                      id: Number(id),
+                      value: genders?.find(i => i.id === Number(id))?.value || '',
                     },
                   })
                 }
-              >
-                <option value={0}>Выберите пол</option>
-                {genders?.map((gender, index) => (
-                  <option key={index} value={gender.id}>
-                    {gender.value}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={`w-[370px] ${styles.modal_body_label}`}>
+                data={genders?.map(gender => ({ id: gender.id, value: gender.value })) || []}
+                placeholder="Пол"
+              />
+            </div>
+            <div className={`w-[370px] ${styles.modal_body_label}`}>
               <p>Вид размера</p>
-              <select
-                value={creating.type.id}
-                onChange={e =>
+              <CustomSelect
+                value={creating.type}
+                onChange={id => {
+                  const size = sizeTypes?.find(i => i.id === Number(id))
                   setCreating({
                     ...creating,
                     type: {
-                      id: Number(e.target.value),
-                      value: sizeTypes?.find(i => i.id === Number(e.target.value))?.name || '',
+                      id: Number(id),
+                      value: size?.name || '',
                     },
+                    rows: [
+                      {
+                        sizeValueId: 0,
+                        orderNum: 0,
+                        sizeValue: size?.values[0] || { id: 0, typeId: 0, name: '', orderNum: 0 },
+                        chest: 0,
+                        waist: 0,
+                        hips: 0,
+                        height: 0,
+                      },
+                    ],
                   })
-                }
-              >
-                <option value={0}>Выберите вид размера</option>
-                {sizeTypes?.map((type, index) => (
-                  <option key={index} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {creating.type.id != 0 && sizeTypes?.find(i => i.id === creating.type.id) && (
-              <div className={`${styles.modal_body_label}`}>
-                <p>Размеры</p>
-                <div className={styles.sizeTypes_list}>
-                  <div
-                    className={`pl-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] gap-[10px] ${styles.sizeTypes_list_top}`}
-                  >
-                    <p>Размер</p>
-                    <p>Рост</p>
-                    <p>Обхват груди</p>
-                    <p>Обхват талии</p>
-                    <p>Обхват бедер</p>
-                    <p></p>
+                }}
+                data={sizeTypes?.map(type => ({ id: type.id!, value: type.name! })!) || []}
+                placeholder="Вид размеров"
+              ></CustomSelect>
+            </div>
+            {creating.type.id != 0 &&
+              creating.brand.id != 0 &&
+              creating.gender.id != 0 &&
+              sizeTypes?.find(i => i.id === creating.type.id) && (
+                <div className={`${styles.modal_body_label}`}>
+                  <div className="flex items-center justify-between mb-[10px]">
+                    <p>Общее колличество: {creating.rows.length}</p>
+                    <button
+                      onClick={() =>
+                        setCreating(
+                          !creating
+                            ? null
+                            : {
+                                ...creating,
+                                rows: [
+                                  ...creating.rows,
+                                  {
+                                    sizeValueId: 0,
+                                    orderNum: creating.rows.length + 1,
+                                    sizeValue: { id: 0, typeId: 0, name: '', orderNum: 0 },
+                                    chest: 0,
+                                    waist: 0,
+                                    hips: 0,
+                                    height: 0,
+                                  },
+                                ],
+                              }
+                        )
+                      }
+                      type="button"
+                      className="rounded-[12px] h-[40px] flex gap-[5px] items-center justify-center border-solid border-[1px] border-[#DADADA] p-[15px]"
+                    >
+                      <LuPlus /> Добавить строчку
+                    </button>
                   </div>
-                  {sizeTypes
-                    .find(i => i.id === creating.type.id)!
-                    .values.sort((a, b) => a?.orderNum! - b.orderNum!)
-                    .map((value, index) => (
+                  <div className={styles.sizeTypes_list}>
+                    <div
+                      className={`pl-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] gap-[10px] ${styles.sizeTypes_list_top}`}
+                    >
+                      <p>Размер</p>
+                      <p>Рост</p>
+                      <p>Обхват груди</p>
+                      <p>Обхват талии</p>
+                      <p>Обхват бедер</p>
+                      <p></p>
+                    </div>
+                    {creating.rows.map((value, index) => (
                       <div
                         key={index}
                         className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
                       >
-                        <input type="text" value={value.name} readOnly name="" id="" />
+                        <select
+                          value={value.sizeValue.id}
+                          onChange={e => {
+                            if (e.target.value === '0') {
+                              toast.error('Выберите размер')
+                              return
+                            }
+                            const size = sizeTypes
+                              ?.find(i => i.id === creating.type.id)
+                              ?.values.find(i => i.id === Number(e.target.value))
+                            setCreating({
+                              ...creating,
+                              rows: creating.rows.map((i, idx) =>
+                                idx === index
+                                  ? {
+                                      ...i,
+                                      sizeValueId: Number(e.target.value),
+                                      sizeValue: size!,
+                                    }
+                                  : i
+                              ),
+                            })
+                          }}
+                        >
+                          <option value={0}>Выберите размер</option>
+                          {sizeTypes
+                            ?.find(i => i.id === creating.type.id)
+                            ?.values.filter(
+                              size =>
+                                !creating.rows
+                                  .filter(r => r.sizeValue.id !== value.sizeValue.id) // исключаем текущий редактируемый элемент
+                                  .map(r => r.sizeValue.id)
+                                  .includes(size.id)
+                            ) // фильтруем
+                            .map((size, idx) => (
+                              <option key={idx} value={size.id}>
+                                {size.name}
+                              </option>
+                            ))}
+                        </select>
                         <NumericFormat
-                          value={creating.rows.find(i => i.sizeValueId === value.id)?.height || ''}
+                          value={value.height || ''}
                           onChange={(e: { target: { value: string } }) => {
                             const height = e.target.value === '' ? 0 : Number(e.target.value)
-                            if (creating.rows.find(i => i.sizeValueId === value.id)) {
-                              setCreating({
-                                ...creating,
-                                rows: creating.rows.map(i =>
-                                  i.sizeValueId === value.id ? { ...i, height } : i
-                                ),
-                              })
-                            } else {
-                              setCreating({
-                                ...creating,
-                                rows: [
-                                  ...creating?.rows,
-                                  {
-                                    sizeValueId: value.id ?? 0,
-                                    orderNum: value.orderNum ?? 0,
-                                    sizeValue: {
-                                      ...value,
-                                      id: value.id ?? 0,
-                                      typeId: value.typeId ?? 0,
-                                      orderNum: value.orderNum ?? 0,
-                                    },
-                                    chest: 0,
-                                    waist: 0,
-                                    hips: 0,
-                                    height,
-                                  },
-                                ],
-                              })
-                            }
+                            setCreating({
+                              ...creating,
+                              rows: creating.rows.map((i, idx) =>
+                                idx === index ? { ...i, height } : i
+                              ),
+                            })
                           }}
                           placeholder="Рост"
                         />
                         <NumericFormat
-                          value={creating.rows.find(i => i.sizeValueId === value.id)?.chest || ''}
+                          value={value.chest || ''}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             const chest: number = e.target.value === '' ? 0 : Number(e.target.value)
-                            if (
-                              creating.rows.find((i: SizeTableRow) => i.sizeValueId === value.id)
-                            ) {
-                              setCreating({
-                                ...creating,
-                                rows: creating.rows.map((i: SizeTableRow) =>
-                                  i.sizeValueId === value.id ? { ...i, chest } : i
-                                ),
-                              })
-                            } else {
-                              setCreating({
-                                ...creating,
-                                rows: [
-                                  ...creating.rows,
-                                  {
-                                    sizeValueId: value.id ?? 0,
-                                    orderNum: value.orderNum ?? 0,
-                                    sizeValue: {
-                                      ...value,
-                                      id: value.id ?? 0,
-                                      orderNum: value.orderNum ?? 0,
-                                    },
-                                    chest,
-                                    waist: 0,
-                                    hips: 0,
-                                    height: 0,
-                                  } as SizeTableRow,
-                                ],
-                              })
-                            }
+                            setCreating({
+                              ...creating,
+                              rows: creating.rows.map((i, idx) =>
+                                idx === index ? { ...i, chest } : i
+                              ),
+                            })
                           }}
                           placeholder="Обхват груди"
                         />
+
                         <NumericFormat
-                          value={
-                            creating.rows.find((i: SizeTableRow) => i.sizeValueId === value.id)
-                              ?.waist || ''
-                          }
+                          value={value.waist || ''}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             const waist = e.target.value === '' ? 0 : Number(e.target.value)
-                            if (creating.rows.find(i => i.sizeValueId === value.id)) {
-                              setCreating({
-                                ...creating,
-                                rows: creating.rows.map(i =>
-                                  i.sizeValueId === value.id ? { ...i, waist } : i
-                                ),
-                              })
-                            } else {
-                              setCreating({
-                                ...creating,
-                                rows: [
-                                  ...creating.rows,
-                                  {
-                                    sizeValueId: value.id ?? 0,
-                                    orderNum: value.orderNum ?? 0,
-                                    sizeValue: {
-                                      ...value,
-                                      id: value.id ?? 0,
-                                      orderNum: value.orderNum ?? 0,
-                                    },
-                                    chest: 0,
-                                    waist,
-                                    hips: 0,
-                                    height: 0,
-                                  } as SizeTableRow,
-                                ],
-                              })
-                            }
+                            setCreating({
+                              ...creating,
+                              rows: creating.rows.map((i, idx) =>
+                                idx === index ? { ...i, waist } : i
+                              ),
+                            })
                           }}
                           placeholder="Обхват талии"
                         />
                         <NumericFormat
-                          value={creating.rows.find(i => i.sizeValueId === value.id)?.hips || ''}
+                          value={value.hips || ''}
                           onChange={(e: { target: { value: string } }) => {
                             const hips = e.target.value === '' ? 0 : Number(e.target.value)
-                            if (creating.rows.find(i => i.sizeValueId === value.id)) {
-                              setCreating({
-                                ...creating,
-                                rows: creating.rows.map(i =>
-                                  i.sizeValueId === value.id ? { ...i, hips } : i
-                                ),
-                              })
-                            } else {
-                              setCreating({
-                                ...creating,
-                                rows: [
-                                  ...creating.rows,
-                                  {
-                                    sizeValueId: value.id ?? 0,
-                                    orderNum: value.orderNum ?? 0,
-                                    sizeValue: {
-                                      ...value,
-                                      id: value.id ?? 0,
-                                      orderNum: value.orderNum ?? 0,
-                                    },
-                                    chest: 0,
-                                    waist: 0,
-                                    hips,
-                                    height: 0,
-                                  } as SizeTableRow,
-                                ],
-                              })
-                            }
+                            setCreating({
+                              ...creating,
+                              rows: creating.rows.map((i, idx) =>
+                                idx === index ? { ...i, hips } : i
+                              ),
+                            })
                           }}
                           placeholder="Обхват бедер"
                         />
-                        <div></div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCreating(
+                              !creating
+                                ? null
+                                : {
+                                    ...creating,
+                                    rows: creating.rows.filter((_, i) => i !== index),
+                                  }
+                            )
+                          }
+                          className="flex items-center justify-center text-[#E02844] ml-auto bg-[#FFF3F3] w-[36px] h-[36px] rounded-[12px]"
+                        >
+                          <LuTrash2 />
+                        </button>
                       </div>
                     ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
                 type="button"
@@ -2706,7 +2690,7 @@ const SizeTables = () => {
               >
                 Отмена
               </button>
-              <button id="admin-button" type="submit">
+              <button id="admin-button" type="submit" onClick={handleCreate}>
                 Сохранить
               </button>
             </section>
@@ -2736,8 +2720,7 @@ const SizeTables = () => {
       {editing && (
         <div className={`${styles.modal} `}>
           <form
-            className={` w-[1100px]  ${styles.modal_body}`}
-            style={{ maxWidth: '825px' }}
+            className={`max-w-[1100px_!important] w-[1100px] ${styles.modal_body}`}
             onSubmit={handleUpdate}
           >
             <h2 id="h2">Редактирование таблицы размеров</h2>
@@ -2809,7 +2792,41 @@ const SizeTables = () => {
               </select>
             </label>
             <div className={`${styles.modal_body_label}`}>
-              <p>Размеры</p>
+              <div className="flex items-center justify-between mb-[10px]">
+                <p>Общее колличество: {editing.rows.length}</p>
+                <button
+                  onClick={() => {
+                    setEditing(
+                      !editing
+                        ? null
+                        : {
+                            ...editing,
+                            rows: [
+                              ...editing.rows,
+                              {
+                                sizeValueId: 0,
+                                orderNum: editing.rows.length + 1,
+                                sizeValue: {
+                                  id: 0,
+                                  typeId: 0,
+                                  name: '',
+                                  orderNum: 0,
+                                },
+                                chest: 0,
+                                waist: 0,
+                                hips: 0,
+                                height: 0,
+                              },
+                            ],
+                          }
+                    )
+                  }}
+                  type="button"
+                  className="rounded-[12px] h-[40px] flex gap-[5px] items-center justify-center border-solid border-[1px] border-[#DADADA] p-[15px]"
+                >
+                  <LuPlus /> Добавить строчку
+                </button>
+              </div>
               <div className={styles.sizeTypes_list}>
                 <div
                   className={`pl-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] gap-[10px] ${styles.sizeTypes_list_top}`}
@@ -2826,7 +2843,48 @@ const SizeTables = () => {
                     key={index}
                     className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
                   >
-                    <input type="text" value={row.sizeValue.name} readOnly name="" id="" />
+                    <select
+                      value={row.sizeValue.id}
+                      onChange={e => {
+                        if (e.target.value === '0') {
+                          toast.error('Выберите размер')
+                          return
+                        }
+                        const size = sizeTypes
+                          ?.find(i => i.id === editing.type.id)
+                          ?.values.find(i => i.id === Number(e.target.value))
+                        setEditing({
+                          ...editing,
+                          rows: editing.rows.map(i =>
+                            i.sizeValueId === row.sizeValueId
+                              ? {
+                                  ...i,
+                                  sizeValueId: Number(e.target.value),
+                                  sizeValue: size!,
+                                }
+                              : i
+                          ),
+                        })
+                      }}
+                    >
+                      <option value={0}>Выберите размер</option>
+
+                      {sizeTypes
+                        ?.find(i => i.id === editing.type.id)
+                        ?.values.filter(
+                          size =>
+                            !editing.rows
+                              .filter(r => r.sizeValue.id !== row.sizeValue.id) // исключаем текущий редактируемый элемент
+                              .map(r => r.sizeValue.id)
+                              .includes(size.id)
+                        ) // фильтруем
+                        .map((size, idx) => (
+                          <option key={idx} value={size.id}>
+                            {size.name}
+                          </option>
+                        ))}
+                    </select>
+
                     <NumericFormat
                       value={row.height || ''}
                       onChange={(e: { target: { value: string } }) => {
@@ -2879,7 +2937,22 @@ const SizeTables = () => {
                       }}
                       placeholder="Обхват бедер"
                     />
-                    <div></div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditing(
+                          !editing
+                            ? null
+                            : {
+                                ...editing,
+                                rows: editing.rows.filter(i => i.sizeValueId !== row.sizeValueId),
+                              }
+                        )
+                      }
+                      className="flex items-center justify-center text-[#E02844] ml-auto bg-[#FFF3F3] w-[36px] h-[36px] rounded-[12px]"
+                    >
+                      <LuTrash2 />
+                    </button>
                   </div>
                 ))}
               </div>
