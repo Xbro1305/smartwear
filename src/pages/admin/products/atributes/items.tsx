@@ -13,6 +13,7 @@ import { HiDotsHorizontal, HiPlus } from 'react-icons/hi'
 import styles from './Atributes.module.scss'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CiFilter } from 'react-icons/ci'
+import { IoSettingsOutline } from 'react-icons/io5'
 
 // cloth types
 
@@ -3551,7 +3552,7 @@ export const Collection = () => {
         </button>
       </div>
       <div className="flex flex-col">
-        <div className="flex h-[45px]">
+        <div className="flex h-[45px] items-center">
           <button
             onClick={() => setCreatingBrand({ id: 0, value: '' })}
             className="p-[15px_24px] text-[14px] text-(black) flex items-center gap-[10px]"
@@ -3559,11 +3560,11 @@ export const Collection = () => {
             <FaPlus /> Добавить бренд
           </button>
           {itemBrands && itemBrands.length > 0 && (
-            <div className="flex gap-[5px] flex-wrap">
+            <div className="flex gap-[5px] flex-wrap h-full ">
               {itemBrands.map(brand => (
                 <div
                   key={brand.id}
-                  className={`${selectedBrandId == brand.id && '[background:linear-gradient(357.7deg,#FFFFFF_25.78%,#FFBBBB_307.71%)]'} cursor-pointer px-[15px] py-[8px] rounded-t-[8px] flex items-center gap-5px border-[1px] border-b-[white] border-solid border-[#DADADA]`}
+                  className={`${selectedBrandId == brand.id && '[background:linear-gradient(357.7deg,#FFFFFF_25.78%,#FFBBBB_307.71%)]'} h-full  cursor-pointer px-[15px] py-[8px] rounded-t-[8px] flex items-center gap-5px border-[1px] border-b-[white] border-solid border-[#DADADA]`}
                   onClick={() => {
                     setSelectedBrandId(brand?.id || 0)
                   }}
@@ -3573,6 +3574,12 @@ export const Collection = () => {
               ))}
             </div>
           )}
+          <button
+            onClick={() => setBrandsMenuOpened(!brandsMenuOpened)}
+            className={`ml-[5px] h-full cursor-pointer px-[25px] py-[8px] rounded-t-[8px] flex items-center gap-5px border-[1px] border-b-[white] border-solid border-[#DADADA]`}
+          >
+            <IoSettingsOutline />
+          </button>
         </div>
         <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] border-solid border-[1px] border-[#DDE1E6]">
           <section className="flex items-center justify-between">
@@ -3931,6 +3938,69 @@ export const Collection = () => {
               </button>
             </section>
           </form>
+        </div>
+      )}
+
+      {brandsMenuOpened && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <div className={`w-[430px] max-w-[430px_!important]  ${styles.modal_body} relative`}>
+            <h2 id="h2">Настройка брендов</h2>
+            <div className="flex flex-col max-h-[400px] overflow-y-auto">
+              {itemBrands && itemBrands.length > 0 ? (
+                itemBrands.map(brand => (
+                  <div
+                    key={brand.id}
+                    className="py-[10px] border-b-[#DDE1E6] border-solid border-b-[1px] grid-cols-[1fr_40px_!important] gap-[20px] grid items-center"
+                  >
+                    <p className="px-[20px]">{brand.value}</p>
+                    <button
+                      onClick={() => {
+                        const confirm = window.confirm(
+                          `Вы уверены, что хотите удалить бренд "${brand.value}" из коллекции? Все товары этого бренда будут удалены из коллекции.`
+                        )
+                        if (!confirm) return
+                        axios(
+                          `${import.meta.env.VITE_APP_API_URL}/collections/${item?.id}/brands/${brand.id}`,
+                          {
+                            method: 'DELETE',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${localStorage.getItem('token')}`,
+                            },
+                          }
+                        )
+                          .then(() => {
+                            refetchCollection()
+                            toast.success('Бренд успешно удален из коллекции')
+                          })
+                          .catch(err => {
+                            const errorText = err.response.data.message || 'Ошибка получения данных'
+                            toast.error(errorText)
+                          })
+                      }}
+                      className="text-[#E02844] rounded-[12px] cursor-pointer w-[36px] h-[36px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
+                    >
+                      <LuTrash2 />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="p2">Брендов нет</p>
+              )}
+            </div>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              {/* <button
+                type="button"
+                onClick={() => setBrandsMenuOpened(false)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button> */}
+              <button id="admin-button" type="button" onClick={() => setBrandsMenuOpened(false)}>
+                Сохранить
+              </button>
+            </section>
+          </div>
         </div>
       )}
     </div>
