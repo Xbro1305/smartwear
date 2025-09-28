@@ -3387,9 +3387,9 @@ export const Collection = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       data: {
-        name: 'Новый товар',
-        article: '000000',
-        price: 0,
+        name: '',
+        article: '',
+        price: '',
         gender: '',
         season: '',
         brandId: creatingBrand.id,
