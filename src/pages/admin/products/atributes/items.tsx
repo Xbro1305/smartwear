@@ -3397,6 +3397,7 @@ export const Collection = () => {
     })
       .then(async (res: { data: CollectionItem }) => {
         refetchCollection()
+        setSelectedBrandId(creatingBrand.id)
         setEditingRow(res.data)
         toast.success('Успешно добавлено')
       })
