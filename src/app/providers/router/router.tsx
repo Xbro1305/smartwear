@@ -9,7 +9,6 @@ import { privateRoutes } from './private-routes'
 import { publicRoutes } from './public-routes'
 const { ADMINLOGIN } = ROUTER_PATHS
 
-;``
 const router = createBrowserRouter([
   {
     children: [...publicRoutes, ...privateRoutes],

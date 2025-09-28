@@ -12,10 +12,11 @@ import { AdminGuard } from './admin-guard'
 import { CloneArticle } from '@/pages/admin/articles/Clone/Clone'
 import { ProductFeatures, ProductsList } from '@/pages/admin/products'
 import { Atributes } from '@/pages/admin/products/atributes/Atributes'
+import { Collection } from '@/pages/admin/products/atributes/items'
 
 const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS, EDIT_PRODUCT } = ROUTER_PATHS
 const { EDITARTICLE, CLONEARTICLE, ADMINPRODUCTS, ADMINSETTINGS, CREATE_PRODUCT } = ROUTER_PATHS
-const { ADMINPRODUCTS_FEATURES, ADMINPRODUCTS_ATRIBUTES } = ROUTER_PATHS
+const { ADMINPRODUCTS_FEATURES, ADMINPRODUCTS_ATRIBUTES, ADMIN_COLLECTION } = ROUTER_PATHS
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -35,6 +36,7 @@ export const adminRoutes: RouteObject[] = [
       { element: <RestorePass />, path: RESTOREPASS },
       { element: <ArticlesList />, path: ADMINARTICLES },
       { element: <CreateArticle />, path: CREATEARTICLE },
+      { element: <Collection />, path: `${ADMIN_COLLECTION}/:id` },
       { element: <EditArticle />, path: `${EDITARTICLE}/:id` },
       { element: <CloneArticle />, path: `${CLONEARTICLE}/:id` },
     ],

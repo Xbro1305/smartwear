@@ -45,4 +45,5 @@ export const ROUTER_PATHS = {
   TRACK_ORDER: '/track-order',
   USER_ARTICLE: '/article',
   WOMEN: '/women',
+  ADMIN_COLLECTION: '/admin/products/atributes/collections',
 } as const

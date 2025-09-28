@@ -1,14 +1,20 @@
 import { FormEvent, useEffect, useState } from 'react'
-import styles from './Atributes.module.scss'
-import { LuPencil, LuPlus, LuTrash2 } from 'react-icons/lu'
-import { Link } from 'react-router-dom'
+
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { FeatureEditor } from '../Components/FeatureEditor/editor'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { AiOutlineClose, AiOutlinePicture, AiOutlinePlus } from 'react-icons/ai'
-import { FaCheck } from 'react-icons/fa'
+import { FaCheck, FaChevronLeft, FaPlus } from 'react-icons/fa'
 import { NumericFormat } from 'react-number-format'
 import { CustomSelect } from '../Components/CustomSelect/CustomSelect'
+import { LuCheck, LuPencil, LuPlus, LuTrash2, LuX } from 'react-icons/lu'
+import { HiDotsHorizontal, HiPlus } from 'react-icons/hi'
+import styles from './Atributes.module.scss'
+import { ROUTER_PATHS } from '@/shared/config/routes'
+import { CiFilter } from 'react-icons/ci'
+
+// cloth types
 
 export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
@@ -172,6 +178,8 @@ export const Types = ({ id }: { id: number }) => {
   )
 }
 
+// seasons
+
 interface Season {
   value: string
   id: number
@@ -267,15 +275,15 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault()
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
       data: {
-        value: editing?.value,
         startDate: `${editing?.meta?.startDate}T00:00:00.000Z`,
+        value: editing?.value,
       },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'PUT',
     })
       .then(() => {
         refresh()
@@ -283,6 +291,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
+
         toast.error(errorText)
       })
     setEditing(null)
@@ -291,9 +300,9 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
   return (
     <>
       <button
-        onClick={() => setCreating({ value: '', startDate: '' })}
         className="ml-auto"
         id="admin-button"
+        onClick={() => setCreating({ value: '', startDate: '' })}
       >
         Добавить сезон
       </button>
@@ -445,6 +454,13 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       )}
     </>
   )
+}
+
+// genders
+
+interface Genders {
+  id: number
+  value: string
 }
 
 export const TargetGroups = ({ id }: { id: number }) => {
@@ -605,6 +621,8 @@ export const TargetGroups = ({ id }: { id: number }) => {
     </>
   )
 }
+
+// brands
 
 interface Brand {
   id?: number
@@ -1085,6 +1103,8 @@ export const Brands = ({ id }: { id: number }) => {
     </>
   )
 }
+
+// colors
 
 interface Color {
   id?: number
@@ -1627,6 +1647,41 @@ export const Colors = ({ id }: { id: number }) => {
   )
 }
 
+// sizes
+
+interface SizeTable {
+  id?: number
+  brand: { id: number; value: string }
+  gender: { id: number; value: string }
+  type: { id: number; value: string }
+  rows: SizeTableRow[]
+}
+
+interface SizeTableRow {
+  id?: number
+  tableId?: number
+  sizeValueId: number
+  orderNum: number
+  sizeValue: { id?: number; typeId?: number; name: string; orderNum?: number }
+  chest: number
+  waist: number
+  hips: number
+  height: number
+}
+
+interface SizeType {
+  id?: number
+  name: string
+  values: SizeTypeValue[]
+}
+
+interface SizeTypeValue {
+  id?: number
+  typeId?: number
+  name: string
+  orderNum?: number
+}
+
 export const Sizes = () => {
   const [active, setActive] = useState('Виды размеров')
 
@@ -1654,19 +1709,6 @@ export const Sizes = () => {
       {/* {active == 'Таблица размеров' && <SizeCharts />} */}
     </>
   )
-}
-
-interface SizeType {
-  id?: number
-  name: string
-  values: SizeTypeValue[]
-}
-
-interface SizeTypeValue {
-  id?: number
-  typeId?: number
-  name: string
-  orderNum?: number
 }
 
 const SizeTypes = () => {
@@ -2199,31 +2241,6 @@ const SizeTypes = () => {
       )}
     </>
   )
-}
-
-interface SizeTable {
-  id?: number
-  brand: { id: number; value: string }
-  gender: { id: number; value: string }
-  type: { id: number; value: string }
-  rows: SizeTableRow[]
-}
-
-interface SizeTableRow {
-  id?: number
-  tableId?: number
-  sizeValueId: number
-  orderNum: number
-  sizeValue: { id?: number; typeId?: number; name: string; orderNum?: number }
-  chest: number
-  waist: number
-  hips: number
-  height: number
-}
-
-interface Genders {
-  id: number
-  value: string
 }
 
 const SizeTables = () => {
@@ -2973,5 +2990,949 @@ const SizeTables = () => {
         </div>
       )}
     </>
+  )
+}
+
+// ---- Items ----
+export interface CollectionItem {
+  article: string
+  id?: number
+  name: string
+  price: number
+  gender: string
+  season: string
+  brands: [
+    {
+      collectionItemId: number
+      id: number
+      attributeValueId: number
+      brand: {
+        id: number
+        value: string
+      }
+    },
+  ]
+}
+
+// ---- Collections ----
+
+interface Collection {
+  id?: number
+  name: string
+  startDate: string
+  endDate: string
+  items?: CollectionItem[]
+}
+
+export const Collections = () => {
+  const [items, setItems] = useState<null | Collection[]>(null)
+  const [adding, setAdding] = useState<null | Collection>(null)
+  const [deleting, setDeleting] = useState<null | Collection>(null)
+  const [search, setSearch] = useState('')
+
+  const refresh = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setItems(res.data)
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
+  useEffect(() => refresh(), [])
+
+  const handleCreate = (e: FormEvent) => {
+    e.preventDefault()
+    if (!adding) return toast.error('Нету данных для создания')
+    if (adding.name.trim() === '') {
+      toast.error('Название не может быть пустым')
+      return
+    }
+    if (items?.find(i => i.name === adding.name.trim())) {
+      toast.error('Такая коллекция уже существует')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { ...adding, brandIds: [] },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно добавлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setAdding(null)
+  }
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        refresh()
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setDeleting(null)
+  }
+
+  return (
+    <>
+      <div className="ml-auto flex gap-[10px] item-center mb-[20px]">
+        <button
+          onClick={() =>
+            setAdding({
+              name: '',
+              startDate: new Date().toISOString().split('T')[0],
+              endDate: '',
+            })
+          }
+          className="ml-auto"
+          id="admin-button"
+        >
+          Добавить коллекцию
+        </button>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Поиск по названию"
+          className="h-[40px] px-[15px] rounded-[12px] border-solid border-[1px] border-[#DADADA]"
+        />
+      </div>
+      {items &&
+        items.length > 0 &&
+        items.map(item => {
+          const brandIds = new Set<number>()
+
+          if (item?.items) {
+            for (const i of item.items) {
+              for (const brand of i.brands) {
+                if (!brandIds.has(brand.brand.id)) brandIds.add(brand.brand.id)
+              }
+            }
+          }
+
+          return (
+            <Link
+              to={`/admin/products/atributes/collections/${item.id}`}
+              className={`${styles.atributes_list}`}
+            >
+              <h3>{item.name}</h3>
+              <div className="flex items-start justify-between mt-[10px]">
+                <div className="flex flex-col gap-[5px]">
+                  <p className="p2">Товаров</p>
+                  <h3 id="h3">{item?.items?.length}</h3>
+                </div>{' '}
+                <div className="flex flex-col gap-[5px]">
+                  <p className="p2">Брендов </p>
+                  <h3 id="h3">{brandIds.size}</h3>
+                </div>
+                <div className="flex flex-col gap-[5px]">
+                  <p className="p2">Период действия коллекции</p>
+                  <h3 id="h3">
+                    {item.startDate.split('T')[0].replace('-', '.').replace('-', '.')} -{' '}
+                    {item.endDate.split('T')[0].replace('-', '.').replace('-', '.') || '∞'}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-[10px]">
+                  <Link to={ROUTER_PATHS.ADMIN_COLLECTION + '/' + item?.id} id="admin-button">
+                    Открыть коллекцию
+                  </Link>
+
+                  <button
+                    onClick={e => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setDeleting(item)
+                    }}
+                    className="text-[#E02844] bg-[#FFF3F3] w-[36px] h-[36px] rounded-[12px] flex items-center justify-center"
+                  >
+                    <LuTrash2 />
+                  </button>
+                </div>
+              </div>
+            </Link>
+          )
+        })}
+
+      {adding && (
+        <div className={`${styles.modal}`}>
+          <form
+            className={`w-[400px] max-w-[400px_!important]  ${styles.modal_body}`}
+            onSubmit={e => e.preventDefault()}
+          >
+            <h2 id="h2">Добавление коллекции</h2>
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Название коллекции</p>
+              <input
+                autoFocus
+                value={adding.name}
+                onChange={e => setAdding({ ...adding, name: e.target.value })}
+                placeholder="Название коллекции"
+              />
+            </label>
+
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Дата начала действия коллекции</p>
+              <input
+                type="date"
+                value={adding.startDate}
+                onChange={e => setAdding({ ...adding, startDate: e.target.value })}
+              />
+            </label>
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Дата окончания действия коллекции</p>
+              <input
+                type="date"
+                value={adding.endDate}
+                onChange={e => setAdding({ ...adding, endDate: e.target.value })}
+              />
+            </label>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setAdding(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit" onClick={handleCreate}>
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {deleting && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form onSubmit={handleDelete} className={styles.modal_body}>
+            <h2 id="h2">Удаление коллекции</h2>
+            <p id="p2">Вы уверены, что хотите удалить эту коллекцию?</p>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setDeleting(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
+
+export const Collection = () => {
+  const [item, setItem] = useState<null | Collection>(null)
+  const [deletingRow, setDeletingRow] = useState<null | CollectionItem>(null)
+  const [addingRow, setAddingRow] = useState<null | {
+    brandId: number
+    article: string
+    price: number
+    season: string
+    gender: string
+  }>(null)
+  const [editingRow, setEditingRow] = useState<null | CollectionItem>(null)
+  const [itemBrands, setItemBrands] = useState<{ id: number; value: string }[]>([])
+
+  const [creatingBrand, setCreatingBrand] = useState<{ id: number; value: string } | null>(null)
+  const [brandsMenuOpened, setBrandsMenuOpened] = useState<boolean>(false)
+  const [selectedBrandId, setSelectedBrandId] = useState<number>(0)
+
+  const [brands, setBrands] = useState<Brand[] | null>(null)
+  const [genders, setGenders] = useState<Genders[] | null>(null)
+  const [seasons, setSeasons] = useState<Season[] | null>(null)
+
+  const [editingTitle, setEditingTitle] = useState<null | Collection>(null)
+
+  const navigate = useNavigate()
+
+  const { id } = useParams<{ id: string }>()
+
+  const refetchCollection = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then((res: { data: Collection }) => {
+        setItem(res.data)
+
+        const uniqueBrands = new Set<{ id: number; value: string }>()
+
+        res.data.items?.forEach(i => {
+          i.brands.forEach(b => {
+            if (!Array.from(uniqueBrands.values()).find(item => item.id == b.brand.id))
+              uniqueBrands.add(b.brand)
+          })
+        })
+
+        const br = Array.from(uniqueBrands.values())
+
+        setItemBrands(br)
+        setSelectedBrandId(
+          br.find(item => item.id === selectedBrandId) ? selectedBrandId : br[0]?.id || 0
+        )
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
+  const refresh = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then((res: { data: Collection }) => {
+        setItem(res.data)
+
+        const uniqueBrands = new Set<{ id: number; value: string }>()
+
+        res.data.items?.forEach(i => {
+          i.brands.forEach(b => {
+            if (!Array.from(uniqueBrands.values()).find(item => item.id == b.brand.id))
+              uniqueBrands.add(b.brand)
+          })
+        })
+
+        setItemBrands(Array.from(uniqueBrands.values()))
+        setSelectedBrandId(
+          Array.from(uniqueBrands.values())[0] ? Array.from(uniqueBrands.values())[0].id : 0
+        )
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/brands`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setBrands(res.data)
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setGenders(res.data.find((attr: any) => attr.name === 'Целевые группы')?.values || [])
+        setSeasons(res.data.find((attr: any) => attr.name === 'Сезон')?.values || [])
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
+  useEffect(() => refresh(), [])
+
+  const handleAddBrand = (e: FormEvent) => {
+    e.preventDefault()
+    if (!creatingBrand) return toast.error('Нету данных для добавления')
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/${item?.id}/items`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        name: 'Новый товар',
+        article: '000000',
+        price: 0,
+        gender: '',
+        season: '',
+        brandId: creatingBrand.id,
+      },
+    })
+      .then(() => {
+        refetchCollection()
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setCreatingBrand(null)
+  }
+
+  const editTitle = (e: FormEvent) => {
+    e.preventDefault()
+    if (!editingTitle) return toast.error('Нету данных для редактирования')
+    if (editingTitle.name.trim() === '') {
+      toast.error('Название не может быть пустым')
+      return
+    }
+    if (item?.id !== editingTitle.id && item?.name === editingTitle.name.trim()) {
+      toast.error('Такая коллекция уже существует')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/${item?.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        name: editingTitle.name,
+        startDate: editingTitle.startDate,
+        endDate: editingTitle.endDate,
+      },
+    })
+      .then(() => {
+        refetchCollection()
+        toast.success('Успешно отредактировано')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setEditingTitle(null)
+  }
+
+  const handleAddRow = (e: FormEvent) => {
+    e.preventDefault()
+    if (!addingRow) return toast.error('Нету данных для создавания')
+    if (addingRow.article.trim() === '') {
+      toast.error('Артикул не может быть пустым')
+      return
+    }
+    if (!addingRow.price) {
+      toast.error('Укажите цену!')
+      return
+    }
+    if (!addingRow.season) {
+      toast.error('Укажите сезон!')
+      return
+    }
+    if (!addingRow.gender) {
+      toast.error('Укажите пол!')
+      return
+    }
+    if (!addingRow.brandId) {
+      toast.error('Укажите бренд!')
+      return
+    }
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/${item?.id}/items`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { name: '', ...addingRow },
+    })
+      .then(() => {
+        refetchCollection()
+        toast.success('Успешно отредактировано')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setAddingRow(null)
+  }
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/items/${deletingRow?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        refetchCollection()
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setDeletingRow(null)
+  }
+
+  const handleEditRow = (e: FormEvent) => {
+    e.preventDefault()
+    if (!editingRow) return toast.error('Нету данных для редактирования')
+    if (editingRow.article.trim() === '') {
+      toast.error('Артикул не может быть пустым')
+      return
+    }
+    if (!editingRow.price) {
+      toast.error('Укажите цену!')
+      return
+    }
+    if (!editingRow.season) {
+      toast.error('Укажите сезон!')
+      return
+    }
+    if (!editingRow.gender) {
+      toast.error('Укажите пол!')
+      return
+    }
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/collections/items/${editingRow.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { ...editingRow },
+    })
+      .then(() => {
+        refetchCollection()
+        toast.success('Успешно отредактировано')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setEditingRow(null)
+  }
+
+  return (
+    <div className="flex flex-col gap-[32px] p-[36px_60px]">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-[10px]">
+        <FaChevronLeft /> Ко всем коллекциям
+      </button>
+      <div className="flex items-center gap-[10px]">
+        <h1 id="h1">{item?.name}</h1>
+        <button onClick={() => setEditingTitle(item)}>
+          <HiDotsHorizontal className="opacity-40 text-[24px]" />
+        </button>
+      </div>
+      <div className="flex flex-col">
+        <div className="flex h-[45px]">
+          <button
+            onClick={() => setCreatingBrand({ id: 0, value: '' })}
+            className="p-[15px_24px] text-[14px] text-(black) flex items-center gap-[10px]"
+          >
+            <FaPlus /> Добавить бренд
+          </button>
+          {itemBrands && itemBrands.length > 0 && (
+            <div className="flex gap-[5px] flex-wrap">
+              {itemBrands.map(brand => (
+                <div
+                  key={brand.id}
+                  className={`${selectedBrandId == brand.id && '[background:linear-gradient(357.7deg,#FFFFFF_25.78%,#FFBBBB_307.71%)]'} cursor-pointer px-[15px] py-[8px] rounded-t-[8px] flex items-center gap-5px border-[1px] border-b-[white] border-solid border-[#DADADA]`}
+                  onClick={() => {
+                    setSelectedBrandId(brand?.id || 0)
+                  }}
+                >
+                  <p>{brand.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] border-solid border-[1px] border-[#DDE1E6]">
+          <section className="flex items-center justify-between">
+            <p className="p1">
+              {item?.items?.length || 0} товар
+              {item?.items?.length === 1
+                ? ''
+                : item?.items?.length && item.items.length < 5
+                  ? 'а'
+                  : 'ов'}
+            </p>
+            <section className=" flex flex-wrap gap-[10px]">
+              <button className=" px-[15px] h-[40px] flex justify-center gap-[10px] rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center">
+                <CiFilter /> Фильтры
+              </button>
+              <button
+                onClick={() =>
+                  setAddingRow({
+                    article: '',
+                    price: 0,
+                    gender: '',
+                    season: '',
+                    brandId: selectedBrandId,
+                  })
+                }
+                className=" px-[15px] h-[40px] flex justify-center gap-[10px] rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center"
+              >
+                <HiPlus /> Добавить товар
+              </button>
+            </section>
+          </section>
+          <div className={styles.sizeTypes_list}>
+            <div
+              className={`${styles.sizeTypes_list_top} pl-[10px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid`}
+            >
+              <p>Артикул</p>
+              <p>Сезон</p>
+              <p>Пол</p>
+              <p>Цена</p>
+              <p></p>
+            </div>
+            <div className={`${styles.sizeTypes_list} max-h-[500px] overflow-y-auto`}>
+              {addingRow && (
+                <div className="pl-[10px] py-[20px] border-b-[#DDE1E6] border-solid border-b-[1px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid items-center">
+                  <input
+                    type="text"
+                    className="w-full px-[10px] border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                    autoFocus
+                    value={addingRow.article}
+                    onChange={e => setAddingRow({ ...addingRow, article: e.target.value })}
+                    placeholder="Артикул"
+                  />
+                  <select
+                    className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                    value={addingRow.season}
+                    onChange={e => setAddingRow({ ...addingRow, season: e.target.value })}
+                  >
+                    <option value="">Выберите сезон</option>
+                    {seasons &&
+                      seasons.length > 0 &&
+                      seasons.map((season, index) => (
+                        <option key={index} value={season.value}>
+                          {season.value}
+                        </option>
+                      ))}
+                  </select>
+                  <select
+                    className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                    value={addingRow.gender}
+                    onChange={e => setAddingRow({ ...addingRow, gender: e.target.value })}
+                  >
+                    {genders &&
+                      genders.length > 0 &&
+                      genders.map((gender, index) => (
+                        <option key={index} value={gender.value}>
+                          {gender.value}
+                        </option>
+                      ))}
+                    <option value="">Выберите пол</option>
+                  </select>
+                  <NumericFormat
+                    thousandSeparator=" "
+                    suffix=" ₽"
+                    className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                    value={addingRow.price || ''}
+                    onChange={(e: { target: { value: string } }) =>
+                      setAddingRow({
+                        ...addingRow,
+                        price:
+                          e.target.value === ''
+                            ? 0
+                            : Number(e.target.value.split(' ₽')[0].replace(' ', '')),
+                      })
+                    }
+                    placeholder="Цена"
+                  />
+                  <div className="flex items-center gap-[10px] ml-auto">
+                    <button
+                      onClick={() => setAddingRow(null)}
+                      className="text-[#E02844] rounded-[12px] cursor-pointer w-[40px] h-[40px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
+                    >
+                      <LuTrash2 />
+                    </button>
+                    <button
+                      onClick={handleAddRow}
+                      className="text-[#22C55E] cursor-pointer bg-[#DCFCE7] rounded-[12px] flex items-center justify-center h-[40px] w-[40px]"
+                    >
+                      <LuCheck />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {item?.items && item.items.length > 0 ? (
+                (item.items.filter(i => i.brands[0].brand.id == selectedBrandId) || []).map(i => (
+                  <div
+                    key={i.id}
+                    className={`${editingRow?.id == i.id && 'pl-[10px]'} py-[20px] border-b-[#DDE1E6] border-solid border-b-[1px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid items-center`}
+                  >
+                    {editingRow && editingRow.id === i.id ? (
+                      <>
+                        <input
+                          type="text"
+                          className="w-full px-[10px] border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                          value={editingRow?.article}
+                          onChange={e =>
+                            setEditingRow(
+                              editingRow ? { ...editingRow, article: e.target.value } : null
+                            )
+                          }
+                        />
+                        <select
+                          className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                          value={editingRow?.season || ''}
+                          onChange={e =>
+                            setEditingRow(
+                              editingRow ? { ...editingRow, season: e.target.value } : null
+                            )
+                          }
+                        >
+                          <option value="">Выберите сезон</option>
+                          {seasons &&
+                            seasons.length > 0 &&
+                            seasons.map((season, index) => (
+                              <option key={index} value={season.value}>
+                                {season.value}
+                              </option>
+                            ))}
+                        </select>
+                        <select
+                          className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                          value={editingRow?.gender || ''}
+                          onChange={e =>
+                            setEditingRow(
+                              editingRow ? { ...editingRow, gender: e.target.value } : null
+                            )
+                          }
+                        >
+                          <option value="">Выберите пол</option>
+                          {genders &&
+                            genders.length > 0 &&
+                            genders.map((gender, index) => (
+                              <option key={index} value={gender.value}>
+                                {gender.value}
+                              </option>
+                            ))}
+                        </select>
+                        <NumericFormat
+                          thousandSeparator=" "
+                          suffix=" ₽"
+                          className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                          value={editingRow?.price || ''}
+                          onChange={(e: { target: { value: string } }) =>
+                            setEditingRow(
+                              editingRow
+                                ? {
+                                    ...editingRow,
+                                    price:
+                                      e.target.value === ''
+                                        ? 0
+                                        : Number(e.target.value.split(' ₽')[0].replace(' ', '')),
+                                  }
+                                : null
+                            )
+                          }
+                          placeholder="Цена"
+                        />
+                        <div className="flex items-center gap-[10px] ml-auto">
+                          <button
+                            onClick={() => setEditingRow(null)}
+                            className="text-[#E02844] rounded-[12px] cursor-pointer w-[40px] h-[40px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
+                          >
+                            <LuX />
+                          </button>
+                          <button
+                            onClick={handleEditRow}
+                            className="text-[#22C55E] cursor-pointer bg-[#DCFCE7] rounded-[12px] flex items-center justify-center h-[40px] w-[40px]"
+                          >
+                            <LuCheck />
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="px-[20px]">{i?.article}</p>
+                        <p className="px-[20px] text-center">{i.season}</p>
+                        <p className="px-[20px] text-center">{i.gender}</p>
+                        <p className="px-[20px] text-center">
+                          <NumericFormat
+                            value={i.price}
+                            thousandSeparator=" "
+                            displayType="text"
+                            suffix=" ₽"
+                          />
+                        </p>
+
+                        <div className="flex items-center gap-[10px] ml-auto">
+                          <button
+                            onClick={() => setDeletingRow(i)}
+                            className="text-[#E02844] rounded-[12px] cursor-pointer w-[40px] h-[40px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
+                          >
+                            <LuTrash2 />
+                          </button>
+                          <button
+                            onClick={() => setEditingRow(i)}
+                            className="text-[#202224] cursor-pointer bg-[#F8F8F8] rounded-[12px] flex items-center justify-center h-[40px] w-[40px]"
+                          >
+                            <LuPencil />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="p2">Товаров нет</p>
+              )}
+            </div>
+            <div className={`${styles.sizeTypes_list_top} rotate-180 border-[#f9fafb]`}>
+              <p></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {editingTitle && (
+        <div className={`${styles.modal}`}>
+          <form
+            className={`w-[400px] max-w-[400px_!important]  ${styles.modal_body}`}
+            onSubmit={e => e.preventDefault()}
+          >
+            <h2 id="h2">Редактирование коллекции</h2>
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Название коллекции</p>
+              <input
+                autoFocus
+                value={editingTitle.name}
+                onChange={e => setEditingTitle({ ...editingTitle, name: e.target.value })}
+                placeholder="Название коллекции"
+              />
+            </label>
+
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Дата начала действия коллекции</p>
+              <input
+                type="date"
+                value={editingTitle.startDate.split('T')[0]}
+                onChange={e => setEditingTitle({ ...editingTitle, startDate: e.target.value })}
+              />
+            </label>
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Дата окончания действия коллекции</p>
+              <input
+                type="date"
+                value={editingTitle.endDate.split('T')[0]}
+                onChange={e => setEditingTitle({ ...editingTitle, endDate: e.target.value })}
+              />
+            </label>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setEditingTitle(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit" onClick={editTitle}>
+                Сохранить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+
+      {creatingBrand && (
+        <div className={`${styles.modal}`}>
+          <form
+            className={`w-[430px] max-w-[430px_!important]  ${styles.modal_body}`}
+            onSubmit={e => e.preventDefault()}
+          >
+            <h2 id="h2">Добавление бренда</h2>
+            <div className={`w-[100%] relative ${styles.modal_body_label}`}>
+              <p>Бренд</p>
+              <CustomSelect
+                value={creatingBrand || { id: 0, value: '' }}
+                onChange={(id, value) => setCreatingBrand({ id: id, value: value || '' })}
+                data={
+                  brands
+                    ? brands
+                        .filter(
+                          (brand): brand is Brand & { id: number } => typeof brand.id === 'number'
+                        )
+                        .map(brand => ({ id: brand.id, value: brand.value }))
+                        .filter(brand => !itemBrands.map(b => b.id).includes(brand.id))
+                    : [{ id: 0, value: 'Нет брендов' }]
+                }
+                placeholder="Бренд"
+              />
+            </div>
+            <div className="flex gap-[10px] mt-[20px] ml-auto">
+              <button
+                type="button"
+                onClick={() => setCreatingBrand(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button
+                id="admin-button"
+                type="submit"
+                onClick={handleAddBrand}
+                disabled={creatingBrand.id === 0}
+              >
+                Добавить бренд
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {deletingRow && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form onSubmit={handleDelete} className={styles.modal_body}>
+            <h2 id="h2">Удаление товара из коллекции</h2>
+            <p id="p2">Вы уверены, что хотите удалить этот товар из коллекции?</p>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setDeletingRow(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </div>
   )
 }

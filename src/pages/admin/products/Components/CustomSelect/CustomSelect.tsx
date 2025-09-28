@@ -3,7 +3,7 @@ import { FaChevronDown } from 'react-icons/fa'
 
 interface SelectProps {
   data: { id: number; value: string }[]
-  onChange: (value: number) => void
+  onChange: (id: number, value?: string) => void
   value: { id: number; value: string } | null
   placeholder: string
 }
@@ -30,7 +30,7 @@ export const CustomSelect: React.FC<SelectProps> = ({ data, onChange, value, pla
           <div
             key={item.id}
             onClick={() => {
-              onChange(item.id)
+              onChange(item.id, item?.value)
               setOpened(false)
             }}
             className="p-[15px] bg-white z-40 hover:bg-[#eee] cursor-pointer"
@@ -45,7 +45,7 @@ export const CustomSelect: React.FC<SelectProps> = ({ data, onChange, value, pla
           <div
             key={item.id}
             onClick={() => {
-              onChange(item.id)
+              onChange(item.id, item?.value)
               setOpened(false)
             }}
             className="p-[4px_16px] cursor-pointer bg-[#F2F3F5] rounded-xl"
