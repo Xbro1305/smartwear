@@ -3395,8 +3395,10 @@ export const Collection = () => {
         brandId: creatingBrand.id,
       },
     })
-      .then(() => {
+      .then(async (res: { data: CollectionItem }) => {
         refetchCollection()
+        setEditingRow(res.data)
+        toast.success('Успешно добавлено')
       })
       .catch(err => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
