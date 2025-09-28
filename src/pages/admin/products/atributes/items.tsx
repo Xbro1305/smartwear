@@ -3292,10 +3292,10 @@ export const Collection = () => {
 
         const uniqueBrands = new Set<{ id: number; value: string }>()
 
-        res.data.items?.forEach(i => {
-          i.brands.forEach(b => {
-            if (!Array.from(uniqueBrands.values()).find(item => item.id == b.brand.id))
-              uniqueBrands.add(b.brand)
+        res.data?.items?.forEach(i => {
+          i?.brands?.forEach(b => {
+            if (!Array.from(uniqueBrands.values()).find(item => item.id == b?.brand?.id))
+              uniqueBrands.add(b?.brand)
           })
         })
 
@@ -3326,9 +3326,9 @@ export const Collection = () => {
         const uniqueBrands = new Set<{ id: number; value: string }>()
 
         res.data.items?.forEach(i => {
-          i.brands.forEach(b => {
-            if (!Array.from(uniqueBrands.values()).find(item => item.id == b.brand.id))
-              uniqueBrands.add(b.brand)
+          i?.brands.forEach(b => {
+            if (!Array.from(uniqueBrands.values()).find(item => item.id == b?.brand?.id))
+              uniqueBrands.add(b?.brand)
           })
         })
 
@@ -3596,7 +3596,11 @@ export const Collection = () => {
                 <CiFilter /> Фильтры
               </button>
               <button
-                onClick={() =>
+                onClick={() => {
+                  if (itemBrands.length === 0) {
+                    toast.error('Сначала добавьте бренд!')
+                    return setCreatingBrand({ id: 0, value: '' })
+                  }
                   setAddingRow({
                     article: '',
                     price: 0,
@@ -3604,7 +3608,7 @@ export const Collection = () => {
                     season: '',
                     brandId: selectedBrandId,
                   })
-                }
+                }}
                 className=" px-[15px] h-[40px] flex justify-center gap-[10px] rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center"
               >
                 <HiPlus /> Добавить товар
