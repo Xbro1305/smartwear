@@ -8,11 +8,11 @@ import { AiOutlineClose, AiOutlinePicture, AiOutlinePlus } from 'react-icons/ai'
 import { FaCheck, FaChevronLeft, FaPlus } from 'react-icons/fa'
 import { NumericFormat } from 'react-number-format'
 import { CustomSelect } from '../Components/CustomSelect/CustomSelect'
+import { FilterSelector as Select1 } from '../Components/FilterSelector/Selector'
 import { LuCheck, LuPencil, LuPlus, LuTrash2, LuX } from 'react-icons/lu'
 import { HiDotsHorizontal, HiPlus } from 'react-icons/hi'
 import styles from './Atributes.module.scss'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import { CiFilter } from 'react-icons/ci'
 import { IoSettingsOutline } from 'react-icons/io5'
 
 // cloth types
@@ -194,7 +194,9 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
     values: Season[]
   }>(null)
   const [deleting, setDeleting] = useState<null | Season>(null)
-  const [creating, setCreating] = useState<null | { value: string; startDate: string }>(null)
+  const [creating, setCreating] = useState<null | { value: string; meta: { startDate: string } }>(
+    null
+  )
   const [editing, setEditing] = useState<null | Season>(null)
 
   const refresh = () => {
@@ -259,7 +261,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
       data: {
         value: creating?.value,
-        startDate: `${creating?.startDate}T00:00:00.000Z`,
+        startDate: `${creating?.meta.startDate}T00:00:00.000Z`,
       },
     })
       .then(() => {
@@ -277,7 +279,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
     e.preventDefault()
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
       data: {
-        startDate: `${editing?.meta?.startDate}T00:00:00.000Z`,
+        meta: { startDate: `${editing?.meta?.startDate}T00:00:00.000Z` },
         value: editing?.value,
       },
       headers: {
@@ -303,7 +305,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       <button
         className="ml-auto"
         id="admin-button"
-        onClick={() => setCreating({ value: '', startDate: '' })}
+        onClick={() => setCreating({ value: '', meta: { startDate: '' } })}
       >
         Добавить сезон
       </button>
@@ -383,8 +385,8 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
               <p>Дата начала сезона</p>
               <input
                 required
-                value={creating.startDate}
-                onChange={e => setCreating({ ...creating, startDate: e.target.value })}
+                value={creating.meta.startDate}
+                onChange={e => setCreating({ ...creating, meta: { startDate: e.target.value } })}
                 type="date"
                 placeholder={`Дата начала сезона`}
               />
@@ -3039,8 +3041,10 @@ export const Collections = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     })
-      .then(res => {
-        setItems(res.data)
+      .then((res: { data: Collection[] }) => {
+        setItems(
+          res.data.sort((a, b) => new Date(b?.endDate).getTime() - new Date(a?.endDate).getTime())
+        )
       })
       .catch(err => {
         const errorText = err?.response?.data?.message || 'Ошибка получения данных'
@@ -3268,6 +3272,7 @@ export const Collection = () => {
   const [creatingBrand, setCreatingBrand] = useState<{ id: number; value: string } | null>(null)
   const [brandsMenuOpened, setBrandsMenuOpened] = useState<boolean>(false)
   const [selectedBrandId, setSelectedBrandId] = useState<number>(0)
+  const [deletingBrand, setDeletingBrand] = useState<null | { id: number; value: string }>(null)
 
   const [brands, setBrands] = useState<Brand[] | null>(null)
   const [genders, setGenders] = useState<Genders[] | null>(null)
@@ -3365,7 +3370,7 @@ export const Collection = () => {
       },
     })
       .then(res => {
-        setGenders(res.data.find((attr: any) => attr.name === 'Целевые группы')?.values || [])
+        setGenders(res.data.find((attr: any) => attr.name === 'Целевая группа')?.values || [])
         setSeasons(res.data.find((attr: any) => attr.name === 'Сезон')?.values || [])
       })
       .catch(err => {
@@ -3390,8 +3395,8 @@ export const Collection = () => {
         name: 'Новый товар',
         article: 'ABC-123',
         price: '0',
-        gender: '',
-        season: '',
+        gender: genders?.[0].value,
+        season: seasons?.[0].value,
         brandId: creatingBrand.id,
       },
     })
@@ -3584,7 +3589,7 @@ export const Collection = () => {
             <IoSettingsOutline />
           </button>
         </div>
-        <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] border-solid border-[1px] border-[#DDE1E6]">
+        <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] max-h-[600px] overflow-y-auto relative border-solid border-[1px] border-[#DDE1E6]">
           <section className="flex items-center justify-between">
             <p className="p1">
               {item?.items?.length || 0} товар
@@ -3595,9 +3600,6 @@ export const Collection = () => {
                   : 'ов'}
             </p>
             <section className=" flex flex-wrap gap-[10px]">
-              <button className=" px-[15px] h-[40px] flex justify-center gap-[10px] rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center">
-                <CiFilter /> Фильтры
-              </button>
               <button
                 onClick={() => {
                   if (itemBrands.length === 0) {
@@ -3620,7 +3622,7 @@ export const Collection = () => {
           </section>
           <div className={styles.sizeTypes_list}>
             <div
-              className={`${styles.sizeTypes_list_top} pl-[10px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid`}
+              className={`${styles.sizeTypes_list_top} pl-[10px] sticky top-[0px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid`}
             >
               <p>Артикул</p>
               <p>Сезон</p>
@@ -3628,7 +3630,9 @@ export const Collection = () => {
               <p>Цена</p>
               <p></p>
             </div>
-            <div className={`${styles.sizeTypes_list} max-h-[500px] overflow-y-auto`}>
+            <div
+              className={`${styles.sizeTypes_list} max-h-[${(item?.items?.length || 0) * 81 + (addingRow ? 1 : 0)}px]`}
+            >
               {addingRow && (
                 <div className="pl-[10px] py-[20px] border-b-[#DDE1E6] border-solid border-b-[1px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid items-center">
                   <input
@@ -3639,34 +3643,42 @@ export const Collection = () => {
                     onChange={e => setAddingRow({ ...addingRow, article: e.target.value })}
                     placeholder="Артикул"
                   />
-                  <select
-                    className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
-                    value={addingRow.season}
-                    onChange={e => setAddingRow({ ...addingRow, season: e.target.value })}
-                  >
-                    <option value="">Выберите сезон</option>
-                    {seasons &&
-                      seasons.length > 0 &&
-                      seasons.map((season, index) => (
-                        <option key={index} value={season.value}>
-                          {season.value}
-                        </option>
-                      ))}
-                  </select>
-                  <select
-                    className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
-                    value={addingRow.gender}
-                    onChange={e => setAddingRow({ ...addingRow, gender: e.target.value })}
-                  >
-                    {genders &&
-                      genders.length > 0 &&
-                      genders.map((gender, index) => (
-                        <option key={index} value={gender.value}>
-                          {gender.value}
-                        </option>
-                      ))}
-                    <option value="">Выберите пол</option>
-                  </select>
+                  <Select1
+                    options={seasons?.map(season => ({ id: season.id, title: season.value })) || []}
+                    value={
+                      seasons?.find(season => season.value === addingRow.season)
+                        ? {
+                            id: seasons?.find(season => season.value === addingRow.season)?.id || 0,
+                            title:
+                              seasons?.find(season => season.value === addingRow.season)?.value ||
+                              '',
+                          }
+                        : null
+                    }
+                    onChange={option => {
+                      setAddingRow({ ...addingRow, season: option ? option.title : '' })
+                    }}
+                    isEmpty={addingRow.season === ''}
+                    className="mt-[-10px]"
+                  />
+                  <Select1
+                    options={genders?.map(gender => ({ id: gender.id, title: gender.value })) || []}
+                    value={
+                      genders?.find(gender => gender.value === addingRow.gender)
+                        ? {
+                            id: genders?.find(gender => gender.value === addingRow.gender)?.id || 0,
+                            title:
+                              genders?.find(gender => gender.value === addingRow.gender)?.value ||
+                              '',
+                          }
+                        : null
+                    }
+                    onChange={option => {
+                      setAddingRow({ ...addingRow, gender: option ? option.title : '' })
+                    }}
+                    isEmpty={addingRow.gender === ''}
+                    className="mt-[-10px]"
+                  />
                   <NumericFormat
                     thousandSeparator=" "
                     suffix=" ₽"
@@ -3717,42 +3729,58 @@ export const Collection = () => {
                             )
                           }
                         />
-                        <select
-                          className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
-                          value={editingRow?.season || ''}
-                          onChange={e =>
-                            setEditingRow(
-                              editingRow ? { ...editingRow, season: e.target.value } : null
-                            )
+                        <Select1
+                          options={
+                            seasons?.map(season => ({ id: season.id, title: season.value })) || []
                           }
-                        >
-                          <option value="">Выберите сезон</option>
-                          {seasons &&
-                            seasons.length > 0 &&
-                            seasons.map((season, index) => (
-                              <option key={index} value={season.value}>
-                                {season.value}
-                              </option>
-                            ))}
-                        </select>
-                        <select
-                          className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
-                          value={editingRow?.gender || ''}
-                          onChange={e =>
-                            setEditingRow(
-                              editingRow ? { ...editingRow, gender: e.target.value } : null
-                            )
+                          value={
+                            seasons?.find(season => season.value === editingRow.season)
+                              ? {
+                                  id:
+                                    seasons?.find(season => season.value === editingRow.season)
+                                      ?.id || 0,
+                                  title:
+                                    seasons?.find(season => season.value === editingRow.season)
+                                      ?.value || '',
+                                }
+                              : null
                           }
-                        >
-                          <option value="">Выберите пол</option>
-                          {genders &&
-                            genders.length > 0 &&
-                            genders.map((gender, index) => (
-                              <option key={index} value={gender.value}>
-                                {gender.value}
-                              </option>
-                            ))}
-                        </select>
+                          onChange={option => {
+                            setEditingRow(
+                              editingRow
+                                ? { ...editingRow, season: option ? option.title : '' }
+                                : null
+                            )
+                          }}
+                          isEmpty={editingRow.season === ''}
+                          className="mt-[-10px]"
+                        />{' '}
+                        <Select1
+                          options={
+                            genders?.map(gender => ({ id: gender.id, title: gender.value })) || []
+                          }
+                          value={
+                            genders?.find(gender => gender.value === editingRow.gender)
+                              ? {
+                                  id:
+                                    genders?.find(gender => gender.value === editingRow.gender)
+                                      ?.id || 0,
+                                  title:
+                                    genders?.find(gender => gender.value === editingRow.gender)
+                                      ?.value || '',
+                                }
+                              : null
+                          }
+                          onChange={option => {
+                            setEditingRow(
+                              editingRow
+                                ? { ...editingRow, gender: option ? option.title : '' }
+                                : null
+                            )
+                          }}
+                          isEmpty={editingRow.gender === ''}
+                          className="mt-[-10px]"
+                        />
                         <NumericFormat
                           thousandSeparator=" "
                           suffix=" ₽"
@@ -3930,8 +3958,8 @@ export const Collection = () => {
       {deletingRow && (
         <div className={`${styles.modal} flex p-[10px] `}>
           <form onSubmit={handleDelete} className={styles.modal_body}>
-            <h2 id="h2">Удаление товара из коллекции</h2>
-            <p id="p2">Вы уверены, что хотите удалить этот товар из коллекции?</p>
+            <h2 id="h2">Вы точно хотите удалить строчку с артикулом {deletingRow.article}</h2>
+            {/* <p id="p2">Вы уверены, что хотите удалить этот товар из коллекции?</p> */}
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
                 type="button"
@@ -3961,30 +3989,7 @@ export const Collection = () => {
                   >
                     <p className="px-[20px]">{brand.value}</p>
                     <button
-                      onClick={() => {
-                        const confirm = window.confirm(
-                          `Вы уверены, что хотите удалить бренд "${brand.value}" из коллекции? Все товары этого бренда будут удалены из коллекции.`
-                        )
-                        if (!confirm) return
-                        axios(
-                          `${import.meta.env.VITE_APP_API_URL}/collections/${item?.id}/brands/${brand.id}`,
-                          {
-                            method: 'DELETE',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              Authorization: `Bearer ${localStorage.getItem('token')}`,
-                            },
-                          }
-                        )
-                          .then(() => {
-                            refetchCollection()
-                            toast.success('Бренд успешно удален из коллекции')
-                          })
-                          .catch(err => {
-                            const errorText = err.response.data.message || 'Ошибка получения данных'
-                            toast.error(errorText)
-                          })
-                      }}
+                      onClick={() => setDeletingBrand(brand)}
                       className="text-[#E02844] rounded-[12px] cursor-pointer w-[36px] h-[36px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
                     >
                       <LuTrash2 />
@@ -4008,6 +4013,52 @@ export const Collection = () => {
               </button>
             </section>
           </div>
+        </div>
+      )}
+
+      {deletingBrand && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form
+            onSubmit={e => {
+              e.preventDefault()
+              axios(
+                `${import.meta.env.VITE_APP_API_URL}/collections/${item?.id}/brands/${deletingBrand.id}`,
+                {
+                  method: 'DELETE',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  },
+                }
+              )
+                .then(() => {
+                  refetchCollection()
+                  toast.success('Бренд успешно удален из коллекции')
+                  setDeletingBrand(null)
+                  setBrandsMenuOpened(false)
+                })
+                .catch(err => {
+                  const errorText = err.response.data.message || 'Ошибка получения данных'
+                  toast.error(errorText)
+                })
+            }}
+            className={styles.modal_body}
+          >
+            <h2 id="h2">Вы точно хотите удалить бренд {deletingBrand.value}</h2>
+            <p id="p2">Удаление бренда так же удалит все товары под этим брендом</p>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setDeletingBrand(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
         </div>
       )}
     </div>

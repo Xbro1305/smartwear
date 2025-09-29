@@ -4,10 +4,11 @@ import { FaChevronDown } from 'react-icons/fa'
 
 interface SelectorProps {
   isEmpty: boolean
-  title: string
+  title?: string
   options: any[]
   value: any
   onChange: (value: any) => void
+  className?: string
 }
 
 export const FilterSelector: React.FC<SelectorProps> = ({
@@ -15,6 +16,7 @@ export const FilterSelector: React.FC<SelectorProps> = ({
   title,
   isEmpty,
   value,
+  className,
   onChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -23,15 +25,17 @@ export const FilterSelector: React.FC<SelectorProps> = ({
     setIsOpen(false)
   }
 
+  console.log(value, options)
+
   return (
-    <div className={styles.selector}>
+    <div className={`${className} ${styles.selector}`}>
       <h2 className={styles.selector_title}>{title}</h2>
       <div className={styles.selector_value}>
         <p onClick={() => setIsOpen(!isOpen)}>{isEmpty ? 'Не выбрано' : value?.title}</p>
         <section className={styles.selector_changeIcons}>
           {!isEmpty && (
             <p
-              onClick={() => handleOptionClick({ title: '' })}
+              onClick={() => handleOptionClick({ title: '', id: null })}
               style={{ borderRight: '1px solid #DFE2EB', fontSize: '20px' }}
             >
               &times;
@@ -51,11 +55,11 @@ export const FilterSelector: React.FC<SelectorProps> = ({
           <ul className={styles.selector_options_list}>
             {options.map((option, index) => (
               <li
-                className={`${value.title == option.title && styles.selector_options_active}`}
+                className={`${value?.title == option?.title && styles.selector_options_active}`}
                 key={index}
                 onClick={() => handleOptionClick(option)}
               >
-                {option.title}
+                {option?.title}
               </li>
             ))}
           </ul>

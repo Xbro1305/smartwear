@@ -66,6 +66,8 @@
     top: calc(100% + 5px);
     background: var(--white);
     z-index: 2;
+    max-height: 200px;
+    overflow: auto;
 
     &_list {
       display: flex;

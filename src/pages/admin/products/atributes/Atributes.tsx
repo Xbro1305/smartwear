@@ -1,10 +1,13 @@
-import { useState } from 'react'
 import styles from './Atributes.module.scss'
 import { SeasonAttrCase, TargetGroups, Types, Brands, Colors, Sizes, Collections } from './items'
+import { useDispatch, useSelector } from 'react-redux'
+import { setAttributePage } from '@/app/store/attributePageSlice'
 
 export const Atributes = () => {
-  const [active, setActive] = useState(atributes[0].name)
-  const activeAttr = atributes.find(attr => attr.name === active)
+  // const [active, setActive] = useState(atributes[0].name)
+  const dispatch = useDispatch<AppDispatch>()
+  const attributePage = useSelector((state: RootState) => state.attributePage.value)
+  const activeAttr = atributes.find(attr => attr.name === attributePage)
 
   return (
     <div className={styles.atributes}>
@@ -17,8 +20,8 @@ export const Atributes = () => {
             .map(item => (
               <div
                 key={item.id}
-                onClick={() => setActive(item.name)}
-                className={`${styles.atributes_menu_item} ${active === item.name ? styles.atributes_menu_item_active : ''}`}
+                onClick={() => dispatch(setAttributePage(item.name))}
+                className={`${styles.atributes_menu_item} ${attributePage === item.name ? styles.atributes_menu_item_active : ''}`}
               >
                 <h2>{item.name}</h2>
               </div>
