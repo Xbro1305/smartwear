@@ -3603,7 +3603,7 @@ export const Collection = () => {
               <button
                 onClick={() => {
                   if (itemBrands.length === 0) {
-                    toast.error('Сначала добавьте бренд!')``
+                    toast.error('Сначала добавьте бренд!')
                     return setCreatingBrand({ id: 0, value: '' })
                   }
                   setAddingRow({
