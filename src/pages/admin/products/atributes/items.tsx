@@ -261,7 +261,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
       },
       data: {
         value: creating?.value,
-        startDate: `${creating?.meta.startDate}T00:00:00.000Z`,
+        meta: { startDate: `${creating?.meta.startDate}T00:00:00.000Z` },
       },
     })
       .then(() => {
@@ -1434,7 +1434,7 @@ export const Colors = ({ id }: { id: number }) => {
                   <button
                     type="button"
                     onClick={() => setAdding('')}
-                    className="mb-[10px] flex items-center gap-[5px] text-[var(--admin-blue)] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid border-[#bdbfc7] w-fit"
+                    className="mb-[10px] flex items-center gap-[5px] text-[var(--admin-blue)] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid border-[#dfe2eb] w-fit"
                   >
                     <AiOutlinePlus />
                     Добавить вариант
@@ -1603,7 +1603,7 @@ export const Colors = ({ id }: { id: number }) => {
                   <button
                     type="button"
                     onClick={() => setAdding('')}
-                    className="mb-[10px] flex items-center gap-[5px] text-[var(--admin-blue)] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid border-[#bdbfc7] w-fit"
+                    className="mb-[10px] flex items-center gap-[5px] text-[var(--admin-blue)] p-[7px] px-[10px] rounded-[12px] border-[1px] border-solid border-[#dfe2eb] w-fit"
                   >
                     <AiOutlinePlus />
                     Добавить вариант
@@ -3235,8 +3235,7 @@ export const Collections = () => {
       {deleting && (
         <div className={`${styles.modal} flex p-[10px] `}>
           <form onSubmit={handleDelete} className={styles.modal_body}>
-            <h2 id="h2">Удаление коллекции</h2>
-            <p id="p2">Вы уверены, что хотите удалить эту коллекцию?</p>
+            <h2 id="h2">Вы точно хотите удалить коллекцию {deleting.name}?</h2>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
                 type="button"
@@ -3589,7 +3588,7 @@ export const Collection = () => {
             <IoSettingsOutline />
           </button>
         </div>
-        <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] border-solid border-[1px] border-[#DDE1E6]">
+        <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] max-h-[600px] overflow-y-auto relative border-solid border-[1px] border-[#DDE1E6]">
           <section className="flex items-center justify-between">
             <p className="p1">
               {item?.items?.length || 0} товар
@@ -3698,15 +3697,12 @@ export const Collection = () => {
                   <div className="flex items-center gap-[10px] ml-auto">
                     <button
                       onClick={() => setAddingRow(null)}
-                      className="text-[#E02844] rounded-[12px] cursor-pointer w-[40px] h-[40px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
+                      className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
                     >
-                      <LuTrash2 />
+                      Отмена
                     </button>
-                    <button
-                      onClick={handleAddRow}
-                      className="text-[#22C55E] cursor-pointer bg-[#DCFCE7] rounded-[12px] flex items-center justify-center h-[40px] w-[40px]"
-                    >
-                      <LuCheck />
+                    <button onClick={handleAddRow} id="admin-button">
+                      Сохранить
                     </button>
                   </div>
                 </div>
@@ -3721,7 +3717,7 @@ export const Collection = () => {
                       <>
                         <input
                           type="text"
-                          className="w-full px-[10px] border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                          className="w-full px-[10px] border-[1px] border-solid border-[#dfe2eb] rounded-[12px] h-[40px] px-[12px] "
                           value={editingRow?.article}
                           onChange={e =>
                             setEditingRow(
@@ -3784,7 +3780,7 @@ export const Collection = () => {
                         <NumericFormat
                           thousandSeparator=" "
                           suffix=" ₽"
-                          className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                          className="w-full border-[1px] border-solid border-[#dfe2eb] rounded-[12px] h-[40px] px-[12px] "
                           value={editingRow?.price || ''}
                           onChange={(e: { target: { value: string } }) =>
                             setEditingRow(
@@ -3804,15 +3800,12 @@ export const Collection = () => {
                         <div className="flex items-center gap-[10px] ml-auto">
                           <button
                             onClick={() => setEditingRow(null)}
-                            className="text-[#E02844] rounded-[12px] cursor-pointer w-[40px] h-[40px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
+                            className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
                           >
-                            <LuX />
+                            Отмена
                           </button>
-                          <button
-                            onClick={handleEditRow}
-                            className="text-[#22C55E] cursor-pointer bg-[#DCFCE7] rounded-[12px] flex items-center justify-center h-[40px] w-[40px]"
-                          >
-                            <LuCheck />
+                          <button onClick={handleEditRow} id="admin-button">
+                            Сохранить
                           </button>
                         </div>
                       </>
@@ -3958,7 +3951,7 @@ export const Collection = () => {
       {deletingRow && (
         <div className={`${styles.modal} flex p-[10px] `}>
           <form onSubmit={handleDelete} className={styles.modal_body}>
-            <h2 id="h2">Вы точно хотите удалить строчку с артикулом {deletingRow.article}</h2>
+            <h2 id="h2">Вы точно хотите удалить строчку с артикулом {deletingRow.article}?</h2>
             {/* <p id="p2">Вы уверены, что хотите удалить этот товар из коллекции?</p> */}
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
