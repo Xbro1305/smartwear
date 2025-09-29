@@ -3589,7 +3589,7 @@ export const Collection = () => {
             <IoSettingsOutline />
           </button>
         </div>
-        <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] max-h-[600px] overflow-y-auto relative border-solid border-[1px] border-[#DDE1E6]">
+        <div className="flex flex-col p-[25px] gap-[25px] rounded-[8px] border-solid border-[1px] border-[#DDE1E6]">
           <section className="flex items-center justify-between">
             <p className="p1">
               {item?.items?.length || 0} товар
@@ -3603,7 +3603,7 @@ export const Collection = () => {
               <button
                 onClick={() => {
                   if (itemBrands.length === 0) {
-                    toast.error('Сначала добавьте бренд!')
+                    toast.error('Сначала добавьте бренд!')``
                     return setCreatingBrand({ id: 0, value: '' })
                   }
                   setAddingRow({
