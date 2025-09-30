@@ -3636,7 +3636,7 @@ export const Collection = () => {
                 <div className="pl-[10px] py-[20px] border-b-[#DDE1E6] border-solid border-b-[1px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid items-center">
                   <input
                     type="text"
-                    className="w-full px-[10px] border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                    className="w-full px-[10px] border-[1px] border-solid border-[#dfe2eb] rounded-[12px] h-[40px] px-[12px] "
                     autoFocus
                     value={addingRow.article}
                     onChange={e => setAddingRow({ ...addingRow, article: e.target.value })}
@@ -3681,7 +3681,7 @@ export const Collection = () => {
                   <NumericFormat
                     thousandSeparator=" "
                     suffix=" ₽"
-                    className="w-full border-[1px] border-solid border-[#BDBFC7] rounded-[12px] h-[40px] px-[12px] "
+                    className="w-full border-[1px] border-solid border-[#dfe2eb] rounded-[12px] h-[40px] px-[12px] "
                     value={addingRow.price || ''}
                     onChange={(e: { target: { value: string } }) =>
                       setAddingRow({
@@ -4037,8 +4037,8 @@ export const Collection = () => {
             }}
             className={styles.modal_body}
           >
-            <h2 id="h2">Вы точно хотите удалить бренд {deletingBrand.value}</h2>
-            <p id="p2">Удаление бренда так же удалит все товары под этим брендом</p>
+            <h2 id="h2">Вы точно хотите удалить бренд {deletingBrand.value}?</h2>
+            {/* <p id="p2">Удаление бренда так же удалит все товары под этим брендом</p> */}
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button
                 type="button"
