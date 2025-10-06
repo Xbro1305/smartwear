@@ -1,5 +1,4 @@
 import { FormEvent, useEffect, useState } from 'react'
-
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { FeatureEditor } from '../Components/FeatureEditor/editor'
 import axios from 'axios'
@@ -15,7 +14,7 @@ import styles from './Atributes.module.scss'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { IoSettingsOutline } from 'react-icons/io5'
 
-// cloth types
+// ---- Cloth types ----
 
 export const Types = ({ id }: { id: number }) => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
@@ -179,7 +178,7 @@ export const Types = ({ id }: { id: number }) => {
   )
 }
 
-// seasons
+// ---- Seasons ----
 
 interface Season {
   value: string
@@ -459,7 +458,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
   )
 }
 
-// genders
+// ---- Genders ----
 
 interface Genders {
   id: number
@@ -625,7 +624,7 @@ export const TargetGroups = ({ id }: { id: number }) => {
   )
 }
 
-// brands
+// ---- Brands ----
 
 interface Brand {
   id?: number
@@ -1107,7 +1106,7 @@ export const Brands = ({ id }: { id: number }) => {
   )
 }
 
-// colors
+// ---- Colors ----
 
 interface Color {
   id?: number
@@ -1650,7 +1649,7 @@ export const Colors = ({ id }: { id: number }) => {
   )
 }
 
-// sizes
+// ---- Sizes ----
 
 interface SizeTable {
   id?: number
@@ -2996,7 +2995,16 @@ const SizeTables = () => {
   )
 }
 
-// ---- Items ----
+// ---- Collections ----
+
+interface Collection {
+  id?: number
+  name: string
+  startDate: string
+  endDate: string
+  items?: CollectionItem[]
+}
+
 export interface CollectionItem {
   article: string
   id?: number
@@ -3015,16 +3023,6 @@ export interface CollectionItem {
       }
     },
   ]
-}
-
-// ---- Collections ----
-
-interface Collection {
-  id?: number
-  name: string
-  startDate: string
-  endDate: string
-  items?: CollectionItem[]
 }
 
 export const Collections = () => {
@@ -4055,5 +4053,391 @@ export const Collection = () => {
         </div>
       )}
     </div>
+  )
+}
+
+// ---- Cloth lengths ----
+
+interface ClothLength {
+  id?: number
+  name: string
+  minValue?: number | null
+  maxValue?: number | null
+  orderNum: number
+  createdAt?: string
+}
+
+export const Lengths = () => {
+  const [lengths, setLengths] = useState<ClothLength[] | null>(null)
+  const [deleting, setDeleting] = useState<null | ClothLength>(null)
+  const [adding, setAdding] = useState<ClothLength | null>(null)
+  const [editing, setEditing] = useState<null | ClothLength>(null)
+
+  const refetch = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/product/lengths`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then((res: { data: ClothLength[] }) => {
+        setLengths(res.data.sort((a, b) => a.maxValue! - b.maxValue!))
+      })
+      .catch(err => {
+        const errorText = err?.response?.data?.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
+  useEffect(() => refetch(), [])
+
+  const handleAdd = (e: FormEvent) => {
+    e.preventDefault()
+    if (!adding) return toast.error('Нету данных для добавления')
+    if (adding.name.trim() === '') return toast.error('Название не может быть пустым')
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/product/lengths`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { ...adding, orderNum: lengths ? lengths.length + 1 : 1 },
+    })
+      .then(() => {
+        refetch()
+        toast.success('Успешно добавлено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setAdding(null)
+  }
+
+  const handleEdit = (e: FormEvent) => {
+    e.preventDefault()
+    if (!editing) return toast.error('Нету данных для добавления')
+    if (editing.name.trim() === '') return toast.error('Название не может быть пустым')
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/product/lengths/${editing?.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { ...editing },
+    })
+      .then(() => {
+        refetch()
+        toast.success('Успешно изменено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setEditing(null)
+  }
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/product/lengths/${deleting?.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        refetch()
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setDeleting(null)
+  }
+
+  return (
+    <>
+      <button
+        id="admin-button"
+        className="ml-auto"
+        onClick={() => setAdding({ name: '', orderNum: 0 })}
+      >
+        <HiPlus />
+        Добавить длину
+      </button>
+
+      {/* list */}
+
+      <div className={styles.sizeTypes_list}>
+        <div
+          className={`${styles.sizeTypes_list_top} pl-[10px] sticky top-[0px] grid-cols-[220px_220px_1fr_!important] gap-[20px] grid`}
+        >
+          <p>Название</p>
+          <p>Диапазон длины</p>
+          <p></p>
+        </div>
+        <div className={`${styles.sizeTypes_list} max-h-[400px] overflow-y-auto`}>
+          {lengths && lengths.length > 0 ? (
+            lengths.map(length => (
+              <div
+                key={length.id}
+                className="pl-[10px] py-[20px] border-b-[#DDE1E6] border-solid border-b-[1px] grid-cols-[220px_220px_1fr_!important] gap-[20px] grid items-center"
+              >
+                <p className="px-[20px]">{length.name}</p>
+                <p className="px-[20px] text-center">
+                  {length.maxValue
+                    ? length.minValue
+                      ? `${length.minValue}-${length.maxValue} см`
+                      : `до ${length.maxValue} см`
+                    : length.minValue
+                      ? `от ${length.minValue} см`
+                      : 'Не указан'}
+                </p>
+                <div className="flex items-center gap-[10px] ml-auto">
+                  <button
+                    onClick={() => setDeleting(length)}
+                    className="text-[#E02844] rounded-[12px] cursor-pointer w-[40px] h-[40px] bg-[#FFF3F3] flex items-center justify-center text-[18px]"
+                  >
+                    <LuTrash2 />
+                  </button>
+                  <button
+                    onClick={() => setEditing(length)}
+                    className="text-[#202224] cursor-pointer bg-[#F8F8F8] rounded-[12px] flex items-center justify-center h-[40px] w-[40px]"
+                  >
+                    <LuPencil />
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="p2">Длин нет</p>
+          )}
+        </div>
+        <div className={`${styles.sizeTypes_list_top} rotate-180 border-[#f9fafb]`}>
+          <p></p>
+        </div>
+      </div>
+
+      {adding && (
+        <div className={`${styles.modal}`}>
+          <form
+            className={`w-[700px] max-w-[700px_!important]  ${styles.modal_body}`}
+            onSubmit={e => e.preventDefault()}
+          >
+            <h2 id="h2">Добавление диапазона длин</h2>
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Название длины</p>
+              <input
+                autoFocus
+                placeholder="Название длины"
+                value={adding.name}
+                onChange={e => setAdding({ ...adding, name: e.target.value })}
+              />
+            </label>
+            <div className={`w-[100%] flex items-center gap-[30px]`}>
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[265px_!important]`}
+              >
+                <p>Длина от, см</p>
+                <NumericFormat
+                  className="w-[150px_!important] disabled:bg-[#DADADA]"
+                  value={adding.minValue || 0}
+                  onChange={(e: { target: { value: any } }) =>
+                    setAdding({ ...adding, minValue: Number(e.target.value) })
+                  }
+                  disabled={adding.minValue === null}
+                />
+              </label>{' '}
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[350px]`}
+              >
+                <p>отобржать длину «от»</p>
+                <CustomSelect
+                  data={[
+                    { id: 0, value: 'Нет' },
+                    { id: 1, value: 'Да' },
+                  ]}
+                  onChange={id => setAdding({ ...adding, minValue: id == 1 ? 0 : null })}
+                  placeholder=""
+                  value={
+                    adding.minValue === null ? { id: 1, value: 'Нет' } : { id: 1, value: 'Да' }
+                  }
+                  className="w-[150px]"
+                  showSuggestions={false}
+                />
+              </label>
+            </div>{' '}
+            <div className={`w-[100%] flex items-center gap-[30px]`}>
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[270px_!important]`}
+              >
+                <p>Длина до, см</p>
+                <NumericFormat
+                  className="w-[150px_!important] disabled:bg-[#DADADA]"
+                  value={adding.maxValue || 0}
+                  onChange={(e: { target: { value: any } }) =>
+                    setAdding({ ...adding, maxValue: Number(e.target.value) })
+                  }
+                  disabled={adding.maxValue === null}
+                />
+              </label>{' '}
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[350px]`}
+              >
+                <p>отобржать длину «до»</p>
+                <CustomSelect
+                  data={[
+                    { id: 0, value: 'Нет' },
+                    { id: 1, value: 'Да' },
+                  ]}
+                  onChange={id => setAdding({ ...adding, maxValue: id == 1 ? 0 : null })}
+                  placeholder=""
+                  value={
+                    adding.maxValue === null ? { id: 1, value: 'Нет' } : { id: 1, value: 'Да' }
+                  }
+                  className="w-[150px]"
+                  showSuggestions={false}
+                />
+              </label>
+            </div>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setAdding(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit" onClick={handleAdd}>
+                Добавить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {editing && (
+        <div className={`${styles.modal}`}>
+          <form
+            className={`w-[700px] max-w-[700px_!important]  ${styles.modal_body}`}
+            onSubmit={e => e.preventDefault()}
+          >
+            <h2 id="h2">Редактирование диапазона длин</h2>
+            <label className={`w-[100%] ${styles.modal_body_label}`}>
+              <p>Название длины</p>
+              <input
+                autoFocus
+                placeholder="Название длины"
+                value={editing.name}
+                onChange={e => setEditing({ ...editing, name: e.target.value })}
+              />
+            </label>
+            <div className={`w-[100%] flex items-center gap-[30px]`}>
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[265px_!important]`}
+              >
+                <p>Длина от, см</p>
+                <NumericFormat
+                  className="w-[150px_!important] disabled:bg-[#DADADA]"
+                  value={editing.minValue || 0}
+                  onChange={(e: { target: { value: any } }) =>
+                    setEditing({ ...editing, minValue: Number(e.target.value) })
+                  }
+                  disabled={editing.minValue === null}
+                />
+              </label>{' '}
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[350px]`}
+              >
+                <p>отобржать длину «от»</p>
+                <CustomSelect
+                  data={[
+                    { id: 0, value: 'Нет' },
+                    { id: 1, value: 'Да' },
+                  ]}
+                  onChange={id => setEditing({ ...editing, minValue: id == 1 ? 0 : null })}
+                  placeholder=""
+                  value={
+                    editing.minValue === null ? { id: 1, value: 'Нет' } : { id: 1, value: 'Да' }
+                  }
+                  className="w-[150px]"
+                  showSuggestions={false}
+                />
+              </label>
+            </div>{' '}
+            <div className={`w-[100%] flex items-center gap-[30px]`}>
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[270px_!important]`}
+              >
+                <p>Длина до, см</p>
+                <NumericFormat
+                  className="w-[150px_!important] disabled:bg-[#DADADA]"
+                  value={editing.maxValue || 0}
+                  onChange={(e: { target: { value: any } }) =>
+                    setEditing({ ...editing, maxValue: Number(e.target.value) })
+                  }
+                  disabled={editing.maxValue === null}
+                />
+              </label>{' '}
+              <label
+                className={`${styles.modal_body_label} [flex-direction:row_!important] items-center gap-[20px_!important] w-[350px]`}
+              >
+                <p>отобржать длину «до»</p>
+                <CustomSelect
+                  data={[
+                    { id: 0, value: 'Нет' },
+                    { id: 1, value: 'Да' },
+                  ]}
+                  onChange={id => setEditing({ ...editing, maxValue: id == 1 ? 0 : null })}
+                  placeholder=""
+                  value={
+                    editing.maxValue === null ? { id: 1, value: 'Нет' } : { id: 1, value: 'Да' }
+                  }
+                  className="w-[150px]"
+                  showSuggestions={false}
+                />
+              </label>
+            </div>
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit" onClick={handleEdit}>
+                Добавить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+      {deleting && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form onSubmit={handleDelete} className={styles.modal_body}>
+            <h2 id="h2">Вы точно хотите удалить диапазон длин {deleting.name}?</h2>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setDeleting(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
   )
 }

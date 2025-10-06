@@ -1,5 +1,14 @@
 import styles from './Atributes.module.scss'
-import { SeasonAttrCase, TargetGroups, Types, Brands, Colors, Sizes, Collections } from './items'
+import {
+  SeasonAttrCase,
+  TargetGroups,
+  Types,
+  Brands,
+  Colors,
+  Sizes,
+  Collections,
+  Lengths,
+} from './items'
 import { useDispatch, useSelector } from 'react-redux'
 import { setAttributePage } from '@/app/store/attributePageSlice'
 
@@ -52,6 +61,6 @@ const atributes: {
   { id: 4, name: 'Бренд', isSystem: true, component: <Brands id={4} /> },
   { id: 5, name: 'Цвет', isSystem: true, component: <Colors id={5} /> },
   { id: 6, name: 'Размер', isSystem: true, component: <Sizes /> },
-  { id: 7, name: 'Длина изделия', isSystem: true, component: <Types id={7} /> },
+  { id: 7, name: 'Длина изделия', isSystem: true, component: <Lengths /> },
   { id: 8, name: 'Коллекция', isSystem: true, component: <Collections /> },
 ]
