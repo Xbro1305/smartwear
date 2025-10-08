@@ -13,10 +13,11 @@ import { HiDotsHorizontal, HiPlus } from 'react-icons/hi'
 import styles from './Atributes.module.scss'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { IoSettingsOutline } from 'react-icons/io5'
+import { ItemDependency } from './SimpleAtribute'
 
 // ---- Cloth types ----
 
-export const Types = ({ id }: { id: number }) => {
+export const Types = () => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
   const [creating, setCreating] = useState<null | { value: string }>(null)
 
@@ -27,7 +28,7 @@ export const Types = ({ id }: { id: number }) => {
   }>(null)
 
   useEffect(() => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${1}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -78,14 +79,14 @@ export const Types = ({ id }: { id: number }) => {
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/1/values`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       data: {
-        attributeId: id,
+        attributeId: 1,
         value: creating?.value,
       },
     })
@@ -186,7 +187,7 @@ interface Season {
   meta: { startDate: string }
 }
 
-export const SeasonAttrCase = ({ id }: { id: number }) => {
+export const SeasonAttrCase = () => {
   const [items, setItems] = useState<null | {
     name: string
     id: number
@@ -199,7 +200,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
   const [editing, setEditing] = useState<null | Season>(null)
 
   const refresh = () => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/2`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -252,7 +253,7 @@ export const SeasonAttrCase = ({ id }: { id: number }) => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/2/values`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -465,7 +466,7 @@ interface Genders {
   value: string
 }
 
-export const TargetGroups = ({ id }: { id: number }) => {
+export const TargetGroups = () => {
   const [deleting, setDeleting] = useState<{ value: string; id: number } | null>(null)
   const [creating, setCreating] = useState<null | { value: string }>(null)
 
@@ -476,7 +477,7 @@ export const TargetGroups = ({ id }: { id: number }) => {
   }>(null)
 
   useEffect(() => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/3`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -526,7 +527,7 @@ export const TargetGroups = ({ id }: { id: number }) => {
 
   const handleCreate = (e: FormEvent) => {
     e.preventDefault()
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/3/values`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -638,7 +639,7 @@ interface Brand {
   }
 }
 
-export const Brands = ({ id }: { id: number }) => {
+export const Brands = () => {
   const [description, setDescription] = useState('')
   const [creating, setCreating] = useState<null | Brand>(null)
   const [editing, setEditing] = useState<null | Brand>(null)
@@ -646,7 +647,7 @@ export const Brands = ({ id }: { id: number }) => {
   const [items, setItems] = useState<Brand[] | null>(null)
 
   const refresh = () => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/4`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -688,7 +689,7 @@ export const Brands = ({ id }: { id: number }) => {
       },
     }
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/4/values`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1117,7 +1118,7 @@ interface Color {
   }
 }
 
-export const Colors = ({ id }: { id: number }) => {
+export const Colors = () => {
   const [items, setItems] = useState<null | { name: string; id: number; values: Color[] }>(null)
   const [deleting, setDeleting] = useState<null | Color>(null)
   const [creating, setCreating] = useState<null | Color>(null)
@@ -1125,7 +1126,7 @@ export const Colors = ({ id }: { id: number }) => {
   const [adding, setAdding] = useState<null | string>(null)
 
   const refresh = () => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/5`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -1181,7 +1182,7 @@ export const Colors = ({ id }: { id: number }) => {
       toast.error('Добавьте хотя бы один вариант атрибута')
       return
     }
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/values`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/5/values`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -4422,6 +4423,178 @@ export const Lengths = () => {
         <div className={`${styles.modal} flex p-[10px] `}>
           <form onSubmit={handleDelete} className={styles.modal_body}>
             <h2 id="h2">Вы точно хотите удалить диапазон длин {deleting.name}?</h2>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setDeleting(null)}
+                className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Удалить
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ---- Simple attributes ----
+
+export interface SimpleAttributeType {
+  id?: number
+  name: string
+  orderNum: number
+  isSystem: boolean
+  isFreeValue: boolean
+  values: SimpleAttributeItem[]
+}
+
+export interface SimpleAttributeItem {
+  id?: number
+  value: string
+  attributeId: number
+}
+
+export const SimpleAttributeList = ({ id, onDelete }: { id: number; onDelete: () => void }) => {
+  const [attribute, setAttribute] = useState<SimpleAttributeType | null>(null)
+  const [deleting, setDeleting] = useState<SimpleAttributeType | null>(null)
+  const [dependencies, setDependencies] = useState<ItemDependency[]>([])
+
+  const refetch = () => {
+    setAttribute(null)
+    setDependencies([])
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then((res: { data: SimpleAttributeType }) => {
+        setAttribute(res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}/dependencies`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then((res: { data: ItemDependency[] }) => {
+        setDependencies(res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  useEffect(() => refetch(), [id])
+
+  const handleDelete = (e: FormEvent) => {
+    e.preventDefault()
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(() => {
+        refetch()
+        onDelete()
+        toast.success('Успешно удалено')
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+    setDeleting(null)
+  }
+
+  return (
+    <>
+      <div className="flex ml-auto gap-[10px]">
+        <Link to={`/admin/products/atributes/${id}`} id="admin-button">
+          Редактировать атрибут
+        </Link>
+        <button
+          className="w-[40px] h-[40px] flex justify-center rounded-[12px] border-solid border-[1px] border-[var(--admin-light-gray)] items-center"
+          onClick={() => setDeleting(attribute)}
+        >
+          <LuTrash2 />
+        </button>
+      </div>
+      <div className="shadow-[0px_4px_6.5px_0px_#C8C8C81A] px-[55px] py-[35px] rounded-[12px] flex flex-col gap-[18px]">
+        <h3 id="h3">{attribute?.name}</h3>
+        <span className="border-solid border-[1px] border-[#DDE1E6]"></span>
+        <div className="grid grid-cols-[repeat(3,1fr)]">
+          <div className="flex flex-col gap-[0px]">
+            <p className="p2 text-[#20222460] mb-[10px]">Атрибуты</p>
+            {attribute?.values.map(item => (
+              <p className="text-[20px] font-[400] text-[#202224]">{item.value}</p>
+            ))}
+          </div>{' '}
+          <div className="flex flex-col gap-[15px]">
+            {!dependencies.length && (
+              <div>
+                {' '}
+                <p className="p2 text-[#20222460]">Всегда активен</p>
+                <p className="text-[20px] font-[400] text-[#202224]">Да</p>
+              </div>
+            )}
+            {dependencies.find(item => item.type === 'HIDE') && (
+              <div className="flex flex-col">
+                <p className="p2 text-[#20222460]">Не показывать если</p>
+                <p className="text-[20px] font-[400] text-[#202224]">
+                  {dependencies.find(item => item.type == 'HIDE')?.targetAttr?.name}
+                </p>
+              </div>
+            )}
+            {dependencies.find(item => item.type === 'SHOW') && (
+              <div className="flex flex-col">
+                <p className="p2 text-[#20222460]">Показывать если</p>
+                <p className="text-[20px] font-[400] text-[#202224]">
+                  {dependencies.find(item => item.type == 'SHOW')?.targetAttr?.name}
+                </p>
+              </div>
+            )}
+          </div>{' '}
+          <div className="flex flex-col gap-[15px]">
+            {dependencies.find(item => item.type === 'SHOW') && (
+              <div className="flex flex-col">
+                <p className="p2 text-[#20222460]">Значение</p>
+
+                <p className="text-[20px] font-[400] text-[#202224]">
+                  {dependencies.find(item => item.type == 'SHOW')?.targetValue?.value}
+                </p>
+              </div>
+            )}{' '}
+            {dependencies.find(item => item.type === 'HIDE') && (
+              <div className="flex flex-col">
+                <p className="p2 text-[#20222460]">Значение</p>
+
+                <p className="text-[20px] font-[400] text-[#202224]">
+                  {dependencies.find(item => item.type == 'HIDE')?.targetValue?.value}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {deleting && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <form onSubmit={handleDelete} className={styles.modal_body}>
+            <h2 id="h2">Вы точно хотите удалить атрибут {deleting.name}?</h2>
 
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button

@@ -13,6 +13,7 @@ import { CloneArticle } from '@/pages/admin/articles/Clone/Clone'
 import { ProductFeatures, ProductsList } from '@/pages/admin/products'
 import { Atributes } from '@/pages/admin/products/atributes/Atributes'
 import { Collection } from '@/pages/admin/products/atributes/items'
+import { SimpleAtribute } from '@/pages/admin/products/atributes/SimpleAtribute'
 
 const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS, EDIT_PRODUCT } = ROUTER_PATHS
 const { EDITARTICLE, CLONEARTICLE, ADMINPRODUCTS, ADMINSETTINGS, CREATE_PRODUCT } = ROUTER_PATHS
@@ -31,6 +32,7 @@ export const adminRoutes: RouteObject[] = [
       { element: <ProductsList />, path: ADMINPRODUCTS },
       { element: <ProductFeatures />, path: ADMINPRODUCTS_FEATURES },
       { element: <Atributes />, path: ADMINPRODUCTS_ATRIBUTES },
+      { element: <SimpleAtribute />, path: `${ADMINPRODUCTS_ATRIBUTES}/:id` },
       { element: <div>Cоздать продукт</div>, path: CREATE_PRODUCT },
       { element: <div>Редактировать продукт</div>, path: `${EDIT_PRODUCT}/:id` },
       { element: <RestorePass />, path: RESTOREPASS },
