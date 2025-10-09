@@ -77,7 +77,7 @@ export const SimpleAtribute = () => {
   }
 
   const getAttributes = () => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/simple`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

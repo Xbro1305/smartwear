@@ -94,7 +94,7 @@ export const Atributes = () => {
               Простые атрибуты
             </p>
             {opened && (
-              <div className="absolute top-[calc(100%+20px)] right-[-15px] bg-white p-[15px] rounded-[12px] shadow-[0px_4px_30px_0px_#00000010] flex flex-col gap-[12px]">
+              <div className="absolute top-[calc(100%+20px)] right-[-15px] bg-white z-50 p-[15px] rounded-[12px] shadow-[0px_4px_30px_0px_#00000010] flex flex-col gap-[12px]">
                 <div className="flex flex-col gap-[10px] max-h-[400px] overflow-y-auto">
                   {simpleAttributes.map(i => (
                     <div
