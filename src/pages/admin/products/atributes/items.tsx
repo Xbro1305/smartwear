@@ -4540,7 +4540,7 @@ export const SimpleAttributeList = ({ id, onDelete }: { id: number; onDelete: ()
         <div className="grid grid-cols-[repeat(3,1fr)]">
           <div className="flex flex-col gap-[0px]">
             <p className="p2 text-[#20222460] mb-[10px]">Атрибуты</p>
-            {attribute?.isFreeValue ? (
+            {attribute?.isFreeValue || attribute?.values?.length == 0 ? (
               <p className="text-[20px] font-[400] text-[#202224]">Произвольные</p>
             ) : (
               attribute?.values.map(item => (
