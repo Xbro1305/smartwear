@@ -84,8 +84,8 @@ export const SimpleAtribute = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     })
-      .then(res => {
-        setAttributes(res.data)
+      .then((res: { data: SimpleAttributeType[] }) => {
+        setAttributes(res.data.filter(item => item.id != id))
       })
       .catch(err => {
         console.log(err)
