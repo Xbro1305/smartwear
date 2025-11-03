@@ -14,10 +14,12 @@ import { ProductFeatures, ProductsList } from '@/pages/admin/products'
 import { Atributes } from '@/pages/admin/products/atributes/Atributes'
 import { Collection } from '@/pages/admin/products/atributes/items'
 import { SimpleAtribute } from '@/pages/admin/products/atributes/SimpleAtribute'
+import { CreateProduct } from '@/pages/admin/products/Create/CreateProduct'
+import { AdminStores } from '@/pages/admin/Stores/Stores'
 
+const { ADMINPRODUCTS_FEATURES, ADMINPRODUCTS_ATRIBUTES, ADMIN_COLLECTION, ADMINSTORES } = ROUTER_PATHS
 const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS, EDIT_PRODUCT } = ROUTER_PATHS
 const { EDITARTICLE, CLONEARTICLE, ADMINPRODUCTS, ADMINSETTINGS, CREATE_PRODUCT } = ROUTER_PATHS
-const { ADMINPRODUCTS_FEATURES, ADMINPRODUCTS_ATRIBUTES, ADMIN_COLLECTION } = ROUTER_PATHS
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -33,7 +35,8 @@ export const adminRoutes: RouteObject[] = [
       { element: <ProductFeatures />, path: ADMINPRODUCTS_FEATURES },
       { element: <Atributes />, path: ADMINPRODUCTS_ATRIBUTES },
       { element: <SimpleAtribute />, path: `${ADMINPRODUCTS_ATRIBUTES}/:id` },
-      { element: <div>Cоздать продукт</div>, path: CREATE_PRODUCT },
+      { element: <CreateProduct />, path: CREATE_PRODUCT },
+      { element: <AdminStores />, path: ADMINSTORES },
       { element: <div>Редактировать продукт</div>, path: `${EDIT_PRODUCT}/:id` },
       { element: <RestorePass />, path: RESTOREPASS },
       { element: <ArticlesList />, path: ADMINARTICLES },

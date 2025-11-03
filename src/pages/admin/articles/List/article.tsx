@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { FaEye, FaPen, FaTrash } from 'react-icons/fa'
 
@@ -28,6 +28,10 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
   // const [createArticle] = useCreateArticleMutation()
 
   const { data: articles } = useGetArticlesQuery()
+
+  useEffect(() => {
+    document.title = 'Статьи - Панель администратора'
+  }, [])
 
   const handleCopy = async (id: number) => {
     const confirm = window.confirm('Копировать статью?')

@@ -47,6 +47,8 @@ export const ProductFeatures = () => {
       .catch(err => {
         console.log(err)
       })
+
+    document.title = 'Особенности - Панель администратора'
   }, [])
 
   const handleEdit = () => {

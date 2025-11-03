@@ -10,7 +10,6 @@ import { LuBlocks } from 'react-icons/lu'
 import atributesImg from '@/assets/images/broadcast-one.svg'
 import { useEffect, useState } from 'react'
 
-const { ADMINARTICLES, ADMIN, HOME, ADMINSETTINGS } = ROUTER_PATHS
 const rp = { ...ROUTER_PATHS }
 
 export const SideBar = ({ redirectingPage }: { redirectingPage: string }) => {
@@ -28,7 +27,7 @@ export const SideBar = ({ redirectingPage }: { redirectingPage: string }) => {
 
   return (
     <div className={styles.sidebar}>
-      <Link to={HOME}>
+      <Link to={rp.HOME}>
         <img src={logo} className={styles.sidebar_logo} alt="" />
       </Link>
       <div className={styles.sidebar_navigation}>
@@ -75,10 +74,11 @@ type MenuItems = {
 
 const menuItems: MenuItems = {
   home: [
-    { name: 'Статистика', icon: <FaHome />, path: ADMIN, end: true },
-    { name: 'Статьи', icon: <FaFileAlt />, path: ADMINARTICLES, end: false },
-    { name: 'Настройки', icon: <FaCog />, path: ADMINSETTINGS, end: false },
+    { name: 'Статистика', icon: <FaHome />, path: rp.ADMIN, end: true },
+    { name: 'Статьи', icon: <FaFileAlt />, path: rp.ADMINARTICLES, end: false },
+    { name: 'Настройки', icon: <FaCog />, path: rp.ADMINSETTINGS, end: false },
   ],
+  stores: [{ name: 'Cписок магазинов', icon: <FaList />, path: rp.ADMINSTORES, end: true }],
   products: [
     { name: 'Список товаров', icon: <FaList />, path: rp.ADMINPRODUCTS, end: true },
     { name: 'Категории', icon: <LuBlocks />, path: rp.ADMINPRODUCTS_CATEGORIES, end: false },

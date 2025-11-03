@@ -46,7 +46,10 @@ export const Atributes = () => {
       .catch(err => console.log(err))
   }
 
-  useEffect(() => refetch(), [])
+  useEffect(() => {
+    refetch()
+    document.title = 'Атрибуты - Панель администратора'
+  }, [])
 
   const handleAdd = (e: FormEvent) => {
     e.preventDefault()

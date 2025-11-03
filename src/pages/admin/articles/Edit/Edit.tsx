@@ -62,6 +62,10 @@ export const EditArticle = () => {
 
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(articleId))
 
+  useEffect(() => {
+    document.title = 'Редактировать статью - Панель администратора'
+  }, [])
+
   const handleDelete = (paragraph: CreateParagraphinArticleDto) => {
     if (paragraph.order) {
       deleteParagraph({ articleId: article?.id as number, order: paragraph.order })

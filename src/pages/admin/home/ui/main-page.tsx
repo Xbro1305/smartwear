@@ -7,12 +7,17 @@ import clock from '@/assets/images/clock.svg'
 import styles from './home.module.scss'
 import { ChartComponent } from './chart'
 import { CustomSelect, Select } from '@/widgets/customSelect/select'
+import { useEffect } from 'react'
 
 const sellsPoints = [380, 204, 222, 203, 312, 318, 115, 145, 120, 128, 143, 176, 140, 145]
 const ordersPoints = [128, 80, 130, 65, 89, 130, 115, 145, 120, 128, 143, 176, 140, 145]
 const returnsPoints = [9, 8, 5, 6, 8, 7, 9, 10, 9, 10, 10, 9, 11, 7]
 
 export const MainPage = () => {
+  useEffect(() => {
+    document.title = 'Главная - Панель администратора'
+  }, [])
+
   return (
     <div className={styles.adminHome}>
       <div className={styles.adminHome_right}>

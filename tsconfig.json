@@ -20,9 +20,9 @@
     "noFallthroughCasesInSwitch": true,
     "typeRoots": ["node_modules/@types", "types/"],
     "types": ["node"],
-    "baseUrl": ".",
+    // "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
   },
   "include": ["src", "types"],

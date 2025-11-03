@@ -51,6 +51,10 @@ export const CloneArticle = () => {
   const [uploadParagraphImage] = useUploadParagraphImageMutation()
   const [deleteParagraph] = useDeleteParagraphMutation()
 
+  useEffect(() => {
+    document.title = 'Клонировать статью - Панель администратора'
+  }, [])
+
   const { id } = useParams<{ id: string }>()
   const { data: article, isError, isLoading } = useGetArticleByIdQuery(Number(id))
 

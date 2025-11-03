@@ -59,20 +59,6 @@ interface Product {
   features: Feature[]
 }
 
-// {
-//     "name": "Женская зимняя куртка LimoLady 3007",
-//     "description": "Теплая куртка с водонепроницаемым покрытием",
-//     "article": "12345678",
-//     "status": "true",
-//     "price": "5623",
-//     "quantity": "87" ,
-//   "category": "Одежда",
-//   "featureIds": [
-//     1,
-//     2
-//   ]
-// }
-
 const { CREATE_PRODUCT, EDIT_PRODUCT, PRODUCT } = ROUTER_PATHS
 
 export const ProductsList = () => {
@@ -155,6 +141,8 @@ export const ProductsList = () => {
       .catch(() => {
         toast.error('Ошибка при загрузке товаров')
       })
+
+    document.title = 'Товары - Панель администратора'
   }, [])
 
   const deleteProduct = (id: number) => {
@@ -200,7 +188,7 @@ export const ProductsList = () => {
               {spittedPL == '1'
                 ? 'товар'
                 : spittedPL == '2' || spittedPL == '3' || spittedPL == '4'
-                  ? 'товарa'
+                  ? 'тoвapa'
                   : 'товаров'}
             </p>
           </section>

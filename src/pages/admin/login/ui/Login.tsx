@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useLoginMutation, useRequestAdminCodeMutation } from '@/entities/auth'
@@ -27,6 +27,10 @@ export const AdminLogin = () => {
   const [email, setEmail] = useState<string>('')
   const [pass, setPass] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    document.title = 'Вход - Панель администратора'
+  }, [])
 
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e?.preventDefault()

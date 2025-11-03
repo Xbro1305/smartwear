@@ -29,10 +29,15 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-        xl: '12px',
+        default: '12px',
+      },
+      gap: {
+        sm: '6px',
+        lg: '12px',
+        xl: '24px',
+        '2xl': '36px',
+        '3xl': '48px',
+        '4xl': '64px',
       },
       colors: {
         accent: {

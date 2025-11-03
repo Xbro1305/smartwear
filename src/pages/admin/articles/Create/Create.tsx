@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import cat from '@/assets/images/Cat.png'
@@ -46,6 +46,10 @@ export const CreateArticle = () => {
   const navigate = useNavigate()
   const { data: user } = useGetMeQuery()
   const { ADMINARTICLES } = ROUTER_PATHS
+
+  useEffect(() => {
+    document.title = 'Создать статью - Панель администратора'
+  }, [])
 
   const handleSubmit = async (e: any, draft: boolean) => {
     e.preventDefault()
