@@ -8,9 +8,10 @@ import './Login.css'
 
 import styles from './Login.module.scss'
 
-import eye from '../../../../assets/images/eye-off-outline.svg'
-import eyeon from '../../../../assets/images/eye-outline.svg'
-import logo from '../../../../assets/images/logo.png'
+import eye from '@/assets/images/eye-off-outline.svg'
+import eyeon from '@/assets/images/eye-outline.svg'
+import logo from '@/assets/images/logo.png'
+import { NumericFormat } from 'react-number-format'
 
 export const AdminLogin = () => {
   const [stage, setStage] = useState<number>(1)
@@ -223,7 +224,7 @@ export const AdminLogin = () => {
           </p>
           <section className={styles.adminLogin_code_sect}>
             {values.map((value, index) => (
-              <input
+              <NumericFormat
                 autoFocus={index === 0}
                 className={'code-inp'}
                 disabled={codeId < index ? true : false}

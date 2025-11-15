@@ -22,10 +22,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
   return (
     <div className={`relative ${className}`}>
       <label className="w-full cursor-pointer px-[15px] h-[40px] border-[1px] flex items-center justify-between border-solid border-[#BDBFC7] rounded-xl">
-        <p
-          onClick={() => setOpened(!opened)}
-          className={`text-[14px] ${value?.id == 0 && 'text-[#20222460]'}`}
-        >
+        <p className={`text-[14px] ${value?.id == 0 && 'text-[#20222460]'}`}>
           {value?.id != 0 ? value?.value : placeholder}
         </p>
         <button onClick={() => setOpened(!opened)}>

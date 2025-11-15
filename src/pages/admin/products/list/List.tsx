@@ -44,6 +44,7 @@ interface Feature {
 }
 
 interface Product {
+  seoSlug: any
   id: number
   name: string
   description: string
@@ -274,7 +275,7 @@ export const ProductsList = () => {
             </p>
             <p></p>
           </div>
-          <div className={styles.productsList_wrapper_bottom}>
+          <div className={`overflow-y-auto max-h-[400px] ${styles.productsList_wrapper_bottom}`}>
             {products &&
               products?.map((i, index) => (
                 <div key={index} className={styles.productsList_wrapper_item}>
@@ -326,7 +327,7 @@ export const ProductsList = () => {
                       <i>Редактировать</i>
                     </Link>
                     <Link
-                      to={`${PRODUCT}/${i.articul}`}
+                      to={`${PRODUCT}/${i.seoSlug}`}
                       className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
                     >
                       <LuEye />

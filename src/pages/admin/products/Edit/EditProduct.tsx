@@ -5,11 +5,11 @@ import { NumericFormat } from 'react-number-format'
 import axios from 'axios'
 import { CustomInput } from './Components/Input/input'
 import { LuTrash2 } from 'react-icons/lu'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { IoImage } from 'react-icons/io5'
 import { FaCheck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
-import './Create.css'
+import '../Create/Create.css'
 
 interface Item {
   main: {
@@ -39,9 +39,11 @@ interface Item {
     colorAttrValueId: number
     price: number
     oldPrice: number
+    id?: number
   }[]
   variantCodes?: {
     colorAttrValueId: number
+    id?: number
     // colorAttrValue: string
     // colorAlias: string
     colorCode: string
@@ -76,13 +78,14 @@ interface Feature {
 }
 
 interface Media {
+  url?: string
   type: 'photo' | 'lining' | 'cover' | 'video'
   file: File
   colorAttrValueId: number
   id?: any
 }
 
-export const CreateProduct = () => {
+export const EditProduct = () => {
   const [item, setItem] = useState<Item>()
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [features, setFeatures] = useState<Feature[]>([])
@@ -90,10 +93,12 @@ export const CreateProduct = () => {
   const [sizeTypes, setSizeTypes] = useState<any[]>([])
   const [itemMedia, setItemMedia] = useState<Media[]>()
 
+  const { id } = useParams()
+
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.title = 'Создать товар - Панель администратора'
+    document.title = 'Редактировать товар - Панель администратора'
 
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes`)
       .then(res => {
@@ -128,6 +133,63 @@ export const CreateProduct = () => {
       })
   }, [])
 
+  useEffect(() => {
+    if (attributes.length && features.length && sizeTypes.length && cares.length) {
+      axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}`)
+        .then(res => {
+          const data = res.data
+          const getAttr = (attrName: string) => {
+            return data.attributeValues.find(
+              (attr: any) => attr.attributeValue.attribute.name == attrName
+            )
+          }
+
+          const product: Item = {
+            main: {
+              articul: data.articul || '',
+              description: data.description || '',
+              name: data.name || '',
+              isDeliverable: data.isDeliverable || 0,
+              isPublished: data.isPublished || 0,
+              price: data.price || 0,
+              oldPrice: data.oldPrice || 0,
+              sizeTypeId: data.sizeTypeId || 0,
+              careIds: data.cares.map((care: any) => care.careIcon.id) || [],
+              featureIds: data.features.map((feature: any) => feature.feature.id) || [],
+              careRecommendation: data.careRecommendation,
+              brandId: getAttr('Бренд').attributeValueId || 0,
+              seasonId: getAttr('Сезон').attributeValueId || 0,
+              typeId: getAttr('Вид изделия').attributeValueId || 0,
+              materialId: getAttr('Утеплитель').attributeValueId || 0,
+            },
+            seo: {
+              metaTitle: data.metaTitle || '',
+              metaDescription: data.metaDescription || '',
+              seoSlug: data.seoSlug || '',
+            },
+            variantCodes: data.variants || [],
+            prices: data.colorPrices,
+          }
+          setItem(product)
+        })
+        .catch(err => {
+          console.error('Error fetching size types:', err)
+        })
+
+      axios(`${import.meta.env.VITE_APP_API_URL}/media/${id}`).then(res => {
+        setItemMedia(
+          res.data.map((m: any) => ({
+            type: m.kind,
+            colorAttrValueId: m.colorAttrValueId,
+            url: m.url,
+            id: m.id,
+          }))
+        )
+        console.log(itemMedia)
+      })
+    }
+  }, [attributes, features, sizeTypes, cares])
+
   const deleteRow = (rowIndex: number) => {
     setItem(prev => {
       if (!prev) return prev
@@ -138,6 +200,19 @@ export const CreateProduct = () => {
         variantCodes: newVariantCodes,
       }
     })
+  }
+
+  const syncronize = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/stock/sync`, {
+      method: 'POST',
+    })
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
+    axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/stock`, {
+      method: 'GET',
+    })
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -173,77 +248,73 @@ export const CreateProduct = () => {
     const prices = [...(item?.prices || [])]
     const media = [...(itemMedia || [])]
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/products`, {
-      method: 'POST',
+    axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       data,
     })
-      .then(res => {
-        setTimeout(async () => {
-          const id = res.data.id
+      .then(() => {
+        media.forEach(media => {
+          const formData = new FormData()
+          formData.append('file', media.file)
+          formData.append('kind', media.type)
+          ;(media.type == 'cover' || media.type == 'photo') &&
+            formData.append('colorAttrValueId', String(media.colorAttrValueId))
 
-          axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/seo`, {
-            method: 'PUT',
+          media.id == null
+          axios(`${import.meta.env.VITE_APP_API_URL}/media/${id}/`, {
+            method: 'POST',
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'application/json',
+              'Content-Type': 'multipar/form-data',
             },
-            data: seoData,
-          }).catch(err => {
-            toast.error('Произошла ошибка при добавлении Seo-информации')
-            console.log(err)
-          })
-
-          for (const price of prices) {
-            try {
-              await axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color`, {
-                method: 'POST',
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                  'Content-Type': 'application/json',
-                },
-                data: price,
-              })
-            } catch (err) {
-              console.error(err)
-              toast.error('Произошла ошибка при добавлении цены')
-            }
-
-            // интервал между запросами (например, 300 мс)
-            await new Promise(resolve => setTimeout(resolve, 300))
-          }
-
-          for (const mediaItem of media) {
-            try {
-              const formData = new FormData()
-              formData.append('file', mediaItem.file)
-              formData.append('kind', mediaItem.type)
-              if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
-                formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
-              }
-
-              await axios(`${import.meta.env.VITE_APP_API_URL}/media/${id}/`, {
-                method: 'POST',
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                  'Content-Type': 'multipart/form-data',
-                },
-                data: formData,
-              })
-            } catch (err) {
-              console.error(err)
-              toast.error('Произошла ошибка при добавлении медиа')
-            }
-
-            // интервал между медиа-запросами (например, 500 мс)
-            await new Promise(resolve => setTimeout(resolve, 500))
-          }
-        }, 200)
+            data: formData,
+          }).catch(err => console.log(err))
+        })
       })
       .catch(err => console.log(err))
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/seo`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      data: seoData,
+    }).catch(err => {
+      toast.error('Произошла ошибка при добавлении Seo-информации')
+      console.log(err)
+    })
+
+    prices.forEach(price => {
+      if (price?.id)
+        axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+          data: price,
+        }).catch(err => {
+          console.log(err)
+          toast.error('Произошла ошибка при добавлении индивидуальных цветов')
+        })
+      else
+        axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+          data: price,
+        }).catch(err => {
+          console.log(err)
+          toast.error('Произошла ошибка при добавлении индивидуальных цветов')
+        })
+    })
   }
 
   return (
@@ -574,6 +645,18 @@ export const CreateProduct = () => {
                   <button
                     className="text-[#E02844] text-[14px]"
                     onClick={() => {
+                      if (priceItem.id != null)
+                        axios(
+                          `${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color/${priceItem.colorAttrValueId}`,
+                          {
+                            method: 'DELETE',
+                            headers: {
+                              Authorization: `Bearer ${localStorage.getItem('token')}`,
+                            },
+                          }
+                        )
+                          .then(res => toast.success(res.data.message))
+                          .catch(err => console.log(err))
                       const newPrices = [...(item.prices || [])]
                       newPrices.splice(index, 1)
                       setItem(
@@ -1200,6 +1283,9 @@ export const CreateProduct = () => {
                   </div>
                 ))}
               </div>
+              <button className="admin-input w-fit flex items-center" onClick={syncronize}>
+                Синхронизировать остатки
+              </button>
             </>
           )}
         </div>
@@ -1226,14 +1312,14 @@ export const CreateProduct = () => {
 
           <div className="grid grid-cols-[470px_470px] gap-[10px]">
             {itemMedia
-              ?.filter(item => item.type === 'cover' || item.type === 'photo')
+              ?.filter(item => item.type == 'cover' || item.type == 'photo')
               ?.map(item => (
                 <div
-                  key={item.file.name}
+                  key={item?.file?.name || item?.id}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <img
-                    src={URL.createObjectURL(item.file)}
+                    src={item?.url || URL.createObjectURL(item?.file)}
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
@@ -1247,7 +1333,8 @@ export const CreateProduct = () => {
                             prev?.map(media => ({
                               ...media,
                               type:
-                                media.file.name === item.file.name
+                                (item?.id != null && media?.id == item?.id) ||
+                                (item?.file?.name != null && media?.file?.name === item?.file?.name)
                                   ? 'cover'
                                   : media.type === 'cover'
                                     ? 'photo'
@@ -1279,7 +1366,7 @@ export const CreateProduct = () => {
                         onChange={id => {
                           setItemMedia(prev =>
                             prev?.map(media =>
-                              media.file.name === item.file.name
+                              media?.id == item?.id || media?.file?.name === item?.file?.name
                                 ? { ...media, colorAttrValueId: id }
                                 : media
                             )
@@ -1298,7 +1385,27 @@ export const CreateProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        setItemMedia(prev => prev?.filter(it => it.file.name !== item.file.name))
+                        item.id != null
+                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${item.id}`, {
+                              method: 'DELETE',
+                              headers: {
+                                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                              },
+                            })
+                              .then(res => {
+                                toast.success(res.data.message)
+                                setItemMedia(prev =>
+                                  prev?.filter(
+                                    it => it?.id != item?.id || it?.file?.name != item?.file?.name
+                                  )
+                                )
+                              })
+                              .catch(err => console.log(err))
+                          : setItemMedia(prev =>
+                              prev?.filter(
+                                it => it?.id != item?.id || it?.file?.name != item?.file?.name
+                              )
+                            )
                       }}
                     >
                       Удалить фото
@@ -1338,11 +1445,11 @@ export const CreateProduct = () => {
               ?.filter(item => item.type === 'lining')
               ?.map(item => (
                 <div
-                  key={item.file.name}
+                  key={item.id || item.file.name}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <img
-                    src={URL.createObjectURL(item.file)}
+                    src={item.url || URL.createObjectURL(item.file)}
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
@@ -1350,7 +1457,27 @@ export const CreateProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        setItemMedia(prev => prev?.filter(it => it.file.name !== item.file.name))
+                        item.id != null
+                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${item.id}`, {
+                              method: 'DELETE',
+                              headers: {
+                                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                              },
+                            })
+                              .then(res => {
+                                toast.success(res.data.message)
+                                setItemMedia(prev =>
+                                  prev?.filter(
+                                    it => it?.id != item?.id || it?.file?.name != item?.file?.name
+                                  )
+                                )
+                              })
+                              .catch(err => console.log(err))
+                          : setItemMedia(prev =>
+                              prev?.filter(
+                                it => it?.id != item?.id || it?.file?.name != item?.file?.name
+                              )
+                            )
                       }}
                     >
                       Удалить фото
@@ -1390,11 +1517,11 @@ export const CreateProduct = () => {
               ?.filter(item => item.type === 'video')
               ?.map(item => (
                 <div
-                  key={item.file.name}
+                  key={item.id || item.file.name}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <video
-                    src={URL.createObjectURL(item.file)}
+                    src={item.url || URL.createObjectURL(item.file)}
                     className="w-[185px] aspect-square rounded-[12px]"
                     controls
                   />
@@ -1402,7 +1529,27 @@ export const CreateProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        setItemMedia(prev => prev?.filter(it => it.file.name !== item.file.name))
+                        item.id != null
+                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${item.id}`, {
+                              method: 'DELETE',
+                              headers: {
+                                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                              },
+                            })
+                              .then(res => {
+                                toast.success(res.data.message)
+                                setItemMedia(prev =>
+                                  prev?.filter(
+                                    it => it?.id != item?.id || it?.file?.name != item?.file?.name
+                                  )
+                                )
+                              })
+                              .catch(err => console.log(err))
+                          : setItemMedia(prev =>
+                              prev?.filter(
+                                it => it?.id != item?.id || it?.file?.name != item?.file?.name
+                              )
+                            )
                       }}
                     >
                       Удалить видео

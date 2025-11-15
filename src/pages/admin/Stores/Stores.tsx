@@ -32,7 +32,7 @@ export const AdminStores = () => {
     if (password.length >= 8) level++
     if (/[A-ZА-Я]/.test(password) && /[a-zа-я]/.test(password)) level++
     if (/[0-9]/.test(password)) level++
-    if (/[!@#$%^&*]/.test(password)) level++
+    if (/[!@#$%^&*.,]/.test(password)) level++
     return level
   }
 
@@ -196,6 +196,17 @@ export const AdminStores = () => {
                 onChange={e => setCreating({ ...creating, shortName: e.target.value })}
                 placeholder="Краткое название магазина"
               />
+            </label>{' '}
+            <label className="flex flex-col gap-sm">
+              <p className="font-semibold text-[14px]">Адресс</p>
+              <input
+                type="text"
+                className="admin-input"
+                required
+                value={creating.address}
+                onChange={e => setCreating({ ...creating, address: e.target.value })}
+                placeholder="Адресс магазина"
+              />
             </label>
             <div className="flex gap-[12px]">
               <label className="flex flex-col gap-sm w-full">
@@ -209,7 +220,8 @@ export const AdminStores = () => {
                   onChange={(e: { target: { value: string } }) =>
                     setCreating({ ...creating, phone: e.target.value })
                   }
-                  placeholder="Телефон магазина"
+                  placeholder="+7 (###) ###-##-##"
+                  allowEmptyFormatting
                 />
               </label>
               <label className="flex flex-col gap-sm w-full">
@@ -286,13 +298,13 @@ export const AdminStores = () => {
               </div>
               <div className="flex items-center gap-[12px]">
                 <span className="text-xl">
-                  {/[!@#$%^&*]/.test(creating.passwordHash) ? (
+                  {/[!@#$%^&*.,]/.test(creating.passwordHash) ? (
                     <FaRegCheckCircle />
                   ) : (
                     <FaRegCircle />
                   )}
                 </span>
-                <p>Один специальный символ !@#$%^&*</p>
+                <p>Один специальный символ !@#$%^&*.,</p>
               </div>
             </div>
             <div className="flex items-center gap-[20px]">
@@ -334,7 +346,7 @@ export const AdminStores = () => {
         </div>
       )}
       {editing && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed top-0 left-0 w-full h-full bg-[#00000080] flex items-center justify-center z-50">
           <div className="max-h-[90vh] overflow-auto bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
             <h2 id="h2">Редактировать магазин</h2>
             <label className="flex flex-col gap-sm">
@@ -359,6 +371,18 @@ export const AdminStores = () => {
                 placeholder="Краткое название магазина"
               />
             </label>
+
+            <label className="flex flex-col gap-sm">
+              <p className="font-semibold text-[14px]">Адресс</p>
+              <input
+                type="text"
+                className="admin-input"
+                required
+                value={editing.address}
+                onChange={e => setEditing({ ...editing, address: e.target.value })}
+                placeholder="Адресс магазина"
+              />
+            </label>
             <div className="flex gap-[12px]">
               <label className="flex flex-col gap-sm w-full">
                 <p className="font-semibold text-[14px]">Телефон магазина</p>
@@ -371,7 +395,8 @@ export const AdminStores = () => {
                   onChange={(e: { target: { value: string } }) =>
                     setEditing({ ...editing, phone: e.target.value })
                   }
-                  placeholder="Телефон магазина"
+                  placeholder="+7 (###) ###-##-##"
+                  allowEmptyFormatting
                 />
               </label>
               <label className="flex flex-col gap-sm w-full">
@@ -448,9 +473,13 @@ export const AdminStores = () => {
               </div>
               <div className="flex items-center gap-[12px]">
                 <span className="text-xl">
-                  {/[!@#$%^&*]/.test(editing.passwordHash) ? <FaRegCheckCircle /> : <FaRegCircle />}
+                  {/[!@#$%^&*.,]/.test(editing.passwordHash) ? (
+                    <FaRegCheckCircle />
+                  ) : (
+                    <FaRegCircle />
+                  )}
                 </span>
-                <p>Один специальный символ !@#$%^&*</p>
+                <p>Один специальный символ !@#$%^&*.,</p>
               </div>
             </div>
             <div className="flex items-center gap-[20px]">
@@ -492,7 +521,7 @@ export const AdminStores = () => {
         </div>
       )}
       {deleting && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed top-0 left-0 w-full h-full bg-[#00000080] flex items-center justify-center z-50">
           <div className="bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[800px]">
             <h2 id="h2">Вы уверены, что хотите удалить магазин {deleting.name}?</h2>
             <div className="flex gap-[12px] ml-auto">

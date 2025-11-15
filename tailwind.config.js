@@ -20,13 +20,25 @@ export default {
       center: true,
       padding: '2rem',
       screens: {
-        '2xl': '1400px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1215px',
+        '2xl': '1215px',
+        '3xl': '1400px',
       },
+    },
+
+    colors: {
+      red: '#DC2A1F',
+      white: '#fff',
     },
     extend: {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+      },
+      textColor: {
+        dark: '#282B32',
       },
       borderRadius: {
         default: '12px',
@@ -46,6 +58,7 @@ export default {
         },
         background: 'hsl(var(--background))',
         border: 'hsl(var(--border))',
+
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',

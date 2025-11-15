@@ -15,6 +15,7 @@ import PvzMapWidget from '@/pages/pvz/PvzMapWidget'
 import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { ProductPage } from '@/pages/ProductPage/ProductPage'
 
 const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN } = ROUTER_PATHS
 const { ACS, ARTICLES, MEN, NEWS, SIGN_UP, USER_ARTICLE, WOMEN, PRODUCT } = ROUTER_PATHS
@@ -38,7 +39,7 @@ export const publicRoutes: RouteObject[] = [
       { element: <AboutPage />, path: ABOUT },
       { element: <ContactPage />, path: CONTACTS },
       { element: <DeliveryPage />, path: DELIVERY },
-      { element: <div>Продукт</div>, path: PRODUCT },
+      { element: <ProductPage />, path: `${PRODUCT}/:id` },
     ],
   },
 ]

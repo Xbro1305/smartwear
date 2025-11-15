@@ -1,0 +1,37 @@
+.care p {
+  display: none;
+}
+
+.care:hover p {
+  display: flex;
+  position: absolute;
+  font-family: Nunito Sans;
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 100%;
+  letter-spacing: 0px;
+  background:
+    linear-gradient(0deg, #202224, #202224),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
+  top: 100%;
+  color: var(--white);
+  text-wrap: nowrap;
+  left: 50%;
+  padding: 10px;
+  font-style: normal;
+  transform: translate(-50%, 10px);
+  z-index: 999999;
+}
+
+.care:hover p:after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background:
+    linear-gradient(0deg, #202224, #202224),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -5px) rotate(45deg);
+}
