@@ -25,8 +25,6 @@ export const FilterSelector: React.FC<SelectorProps> = ({
     setIsOpen(false)
   }
 
-  console.log(value, options)
-
   return (
     <div className={`${className} ${styles.selector}`}>
       <h2 className={styles.selector_title}>{title}</h2>

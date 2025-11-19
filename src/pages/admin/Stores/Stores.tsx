@@ -172,8 +172,8 @@ export const AdminStores = () => {
         </div>
       </div>
       {creating && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center z-50">
-          <div className="max-h-[90vh] overflow-auto bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
+        <div className="fixed top-0 left-0 w-full h-full bg-[#00000080] flex items-center justify-center z-50">
+          <div className="max-h-[90vh] overflow-auto max-w-[700px] bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
             <h2 id="h2">Создать магазин</h2>
             <label className="flex flex-col gap-sm">
               <p className="font-semibold text-[14px]">Полное название</p>
@@ -314,7 +314,7 @@ export const AdminStores = () => {
               />
               Магазин отправитель МойСклад
             </div>
-            {creating.isOnlineSender && (
+            {/* {creating.isOnlineSender && (
               <div className="flex flex-col">
                 <h3 className="h4">Синхронизация с МойСклад</h3>
                 <label className="flex flex-col gap-sm w-full">
@@ -329,7 +329,7 @@ export const AdminStores = () => {
                   />
                 </label>
               </div>
-            )}
+            )} */}
             <div className="flex gap-[12px] ml-auto">
               <button
                 id="admin-button"
@@ -347,7 +347,7 @@ export const AdminStores = () => {
       )}
       {editing && (
         <div className="fixed top-0 left-0 w-full h-full bg-[#00000080] flex items-center justify-center z-50">
-          <div className="max-h-[90vh] overflow-auto bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
+          <div className="max-h-[90vh] overflow-auto max-w-[700px] bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
             <h2 id="h2">Редактировать магазин</h2>
             <label className="flex flex-col gap-sm">
               <p className="font-semibold text-[14px]">Полное название</p>
@@ -489,7 +489,7 @@ export const AdminStores = () => {
               />
               Магазин отправитель МойСклад
             </div>
-            {editing.isOnlineSender && (
+            {/* {editing.isOnlineSender && (
               <div className="flex flex-col">
                 <h3 className="h4">Синхронизация с МойСклад</h3>
                 <label className="flex flex-col gap-sm w-full">
@@ -504,7 +504,7 @@ export const AdminStores = () => {
                   />
                 </label>
               </div>
-            )}
+            )} */}
             <div className="flex gap-[12px] ml-auto">
               <button
                 id="admin-button"

@@ -52,7 +52,7 @@ interface Item {
   }[]
 }
 
-interface Attribute {
+export interface Attribute {
   id: number
   isFreeValue: boolean
   isSystem: boolean
@@ -140,7 +140,7 @@ export const CreateProduct = () => {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     const data = {
@@ -157,93 +157,82 @@ export const CreateProduct = () => {
       careRecommendation: item?.main?.careRecommendation,
       careIconIds: item?.main?.careIds,
       variantCodes: item?.variantCodes,
-      attributeValueIds: [
-        item?.main.brandId,
-        item?.main.seasonId,
-        item?.main.materialId,
-        item?.main.typeId,
-      ],
+      categoryName: 'Одежда',
+      attributeValueIds: [item?.main.brandId, item?.main.seasonId, item?.main.typeId].filter(
+        id => id != null
+      ),
       simpleAttributes: {
-        [attributes.find(i => i.name == 'Утеплитель')?.id || 0]: item?.main.materialId,
+        [attributes.find(i => i.name === 'Утеплитель')?.id || 0]: item?.main.materialId,
       },
       quantity: 1,
+      seoSlug: item?.seo.seoSlug,
+      metaTitle: item?.seo.metaTitle,
+      metaDescription: item?.seo.metaDescription,
     }
 
-    const seoData = { ...item?.seo }
     const prices = [...(item?.prices || [])]
     const media = [...(itemMedia || [])]
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/products`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      data,
-    })
-      .then(res => {
-        setTimeout(async () => {
-          const id = res.data.id
+    try {
+      // Создание продукта
+      const res = await axios.post(`${import.meta.env.VITE_APP_API_URL}/products`, data, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
 
-          axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/seo`, {
-            method: 'PUT',
+      const productId = res.data.id
+
+      // Добавление цен
+      for (const price of prices) {
+        try {
+          await axios.post(
+            `${import.meta.env.VITE_APP_API_URL}/products/${productId}/prices/color`,
+            price,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+            }
+          )
+          await new Promise(resolve => setTimeout(resolve, 300)) // небольшой интервал
+        } catch (err) {
+          toast.error('Произошла ошибка при добавлении цены')
+          console.error(err)
+        }
+      }
+
+      // Добавление медиа
+      for (const mediaItem of media) {
+        try {
+          const formData = new FormData()
+          formData.append('file', mediaItem.file)
+          formData.append('kind', mediaItem.type)
+          if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
+            formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
+          }
+
+          await axios.post(`${import.meta.env.VITE_APP_API_URL}/media/${productId}/`, formData, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'application/json',
+              'Content-Type': 'multipart/form-data',
             },
-            data: seoData,
-          }).catch(err => {
-            toast.error('Произошла ошибка при добавлении Seo-информации')
-            console.log(err)
           })
+          await new Promise(resolve => setTimeout(resolve, 500)) // небольшой интервал
+        } catch (err) {
+          toast.error('Произошла ошибка при добавлении медиа')
+          console.error(err)
+        }
+      }
 
-          for (const price of prices) {
-            try {
-              await axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color`, {
-                method: 'POST',
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                  'Content-Type': 'application/json',
-                },
-                data: price,
-              })
-            } catch (err) {
-              console.error(err)
-              toast.error('Произошла ошибка при добавлении цены')
-            }
-
-            // интервал между запросами (например, 300 мс)
-            await new Promise(resolve => setTimeout(resolve, 300))
-          }
-
-          for (const mediaItem of media) {
-            try {
-              const formData = new FormData()
-              formData.append('file', mediaItem.file)
-              formData.append('kind', mediaItem.type)
-              if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
-                formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
-              }
-
-              await axios(`${import.meta.env.VITE_APP_API_URL}/media/${id}/`, {
-                method: 'POST',
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                  'Content-Type': 'multipart/form-data',
-                },
-                data: formData,
-              })
-            } catch (err) {
-              console.error(err)
-              toast.error('Произошла ошибка при добавлении медиа')
-            }
-
-            // интервал между медиа-запросами (например, 500 мс)
-            await new Promise(resolve => setTimeout(resolve, 500))
-          }
-        }, 200)
-      })
-      .catch(err => console.log(err))
+      // После успешного добавления — редирект
+      navigate('/admin/products')
+    } catch (err) {
+      toast.error('Произошла ошибка при создании продукта')
+      console.error(err)
+    }
   }
 
   return (
@@ -488,132 +477,156 @@ export const CreateProduct = () => {
               />
             </label>
           </div>
-          <p className="text-[14px] font-semibold">Индвидуальная цена</p>
-          <div className="flex flex-col gap-[16px]">
-            {item?.prices ? (
-              item?.prices?.map((priceItem, index) => (
-                <div className="flex flex-col gap-[12px] items-start py-[12px] border-b-[1px] border-solid border-service">
-                  <div key={index} className="flex items-center gap-[20px]">
-                    <p>Для цвета</p>
-                    <CustomSelect
-                      data={
-                        attributes
-                          .find(attr => attr.name === 'Цвет')
-                          ?.values.map(item => {
-                            return { id: item.id, value: item.value }
-                          }) || []
-                      }
-                      placeholder="Выберите цвет"
-                      className="w-[170px]"
-                      onChange={id => {
-                        const newPrices = [...(item.prices || [])]
-                        newPrices[index].colorAttrValueId = id
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              prices: newPrices,
-                            }) as Item
-                        )
-                      }}
-                      value={
-                        attributes
-                          .find(attr => attr.name === 'Цвет')
-                          ?.values.map(item => {
-                            return { id: item.id, value: item.value }
-                          })
-                          .find(val => val.id === priceItem.colorAttrValueId) || {
-                          id: 0,
-                          value: '',
-                        }
-                      }
-                      showSuggestions={false}
-                    />
-                    <p>актуальаня цена</p>
-                    <NumericFormat
-                      className="admin-input w-[100px]"
-                      placeholder="Цена"
-                      required
-                      onChange={(e: any) => {
-                        const newPrices = [...(item.prices || [])]
-                        const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
-                        newPrices[index].price = Number(numberValue)
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              prices: newPrices,
-                            }) as Item
-                        )
-                      }}
-                      value={priceItem.price || ''}
-                      thousandSeparator=" "
-                      suffix=" ₽"
-                    />
-                    <p>цена до акции</p>
-                    <NumericFormat
-                      className="admin-input w-[100px]"
-                      placeholder="Цена"
-                      onChange={(e: any) => {
-                        const newPrices = [...(item.prices || [])]
-                        const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
-                        newPrices[index].oldPrice = Number(numberValue)
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              prices: newPrices,
-                            }) as Item
-                        )
-                      }}
-                      value={priceItem.oldPrice || ''}
-                      thousandSeparator=" "
-                      suffix=" ₽"
-                    />
-                  </div>
-                  <button
-                    className="text-[#E02844] text-[14px]"
-                    onClick={() => {
-                      const newPrices = [...(item.prices || [])]
-                      newPrices.splice(index, 1)
-                      setItem(
-                        prev =>
-                          ({
-                            ...prev,
-                            prices: newPrices,
-                          }) as Item
-                      )
-                    }}
-                  >
-                    Удалить цену
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div>Индвидуальная цена не задана</div>
-            )}
-          </div>
-          <button
-            className="admin-input w-fit flex items-center justify-center"
-            onClick={() => {
-              const newPrices = item?.prices ? [...item.prices] : []
-              newPrices.push({
-                colorAttrValueId: 0,
-                price: 0,
-                oldPrice: 0,
-              })
-              setItem(
-                prev =>
-                  ({
-                    ...prev,
-                    prices: newPrices,
-                  }) as Item
-              )
-            }}
-          >
-            {' '}
-            + Добавить цену
-          </button>
+          {item?.prices?.length != 0 && item?.prices && (
+            <p className="text-[14px] font-semibold">Индвидуальная цена</p>
+          )}{' '}
+          {item?.variantCodes?.length != 0 && item?.variantCodes && (
+            <>
+              <div className="flex flex-col gap-[16px]">
+                {item?.prices ? (
+                  item?.prices?.map((priceItem, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col gap-[12px] items-start py-[12px] border-b-[1px] border-solid border-service"
+                    >
+                      <div className="flex items-center gap-[20px]">
+                        <p>Для цвета</p>
+                        <CustomSelect
+                          onClick={() => {
+                            if (
+                              (attributes
+                                .find(attr => attr.name === 'Цвет')
+                                ?.values.filter(v =>
+                                  item.variantCodes?.some(m => m.colorAttrValueId === v.id)
+                                ).length ?? 0) === 0
+                            ) {
+                              toast.error('Сначала укажите цвета в таблице!')
+                            }
+                          }}
+                          data={
+                            attributes
+                              .find(attr => attr.name === 'Цвет')
+                              ?.values.filter(v =>
+                                item.variantCodes?.some(m => m.colorAttrValueId === v.id)
+                              )
+                              .map(v => ({
+                                id: v.id,
+                                value: v.value,
+                              })) || []
+                          }
+                          placeholder="Выберите цвет"
+                          className="w-[170px]"
+                          onChange={id => {
+                            const newPrices = [...(item.prices || [])]
+                            newPrices[index].colorAttrValueId = id
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  prices: newPrices,
+                                }) as Item
+                            )
+                          }}
+                          value={
+                            attributes
+                              .find(attr => attr.name === 'Цвет')
+                              ?.values.map(item => {
+                                return { id: item.id, value: item.value }
+                              })
+                              .find(val => val.id === priceItem.colorAttrValueId) || {
+                              id: 0,
+                              value: '',
+                            }
+                          }
+                          showSuggestions={false}
+                        />
+                        <p>актуальаня цена</p>
+                        <NumericFormat
+                          className="admin-input w-[100px]"
+                          placeholder="Цена"
+                          required
+                          onChange={(e: any) => {
+                            const newPrices = [...(item.prices || [])]
+                            const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
+                            newPrices[index].price = Number(numberValue)
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  prices: newPrices,
+                                }) as Item
+                            )
+                          }}
+                          value={priceItem.price || ''}
+                          thousandSeparator=" "
+                          suffix=" ₽"
+                        />
+                        <p>цена до акции</p>
+                        <NumericFormat
+                          className="admin-input w-[100px]"
+                          placeholder="Цена"
+                          onChange={(e: any) => {
+                            const newPrices = [...(item.prices || [])]
+                            const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
+                            newPrices[index].oldPrice = Number(numberValue)
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  prices: newPrices,
+                                }) as Item
+                            )
+                          }}
+                          value={priceItem.oldPrice || ''}
+                          thousandSeparator=" "
+                          suffix=" ₽"
+                        />
+                      </div>
+                      <button
+                        className="text-[#E02844] text-[14px]"
+                        onClick={() => {
+                          const newPrices = [...(item.prices || [])]
+                          newPrices.splice(index, 1)
+                          setItem(
+                            prev =>
+                              ({
+                                ...prev,
+                                prices: newPrices,
+                              }) as Item
+                          )
+                        }}
+                      >
+                        Удалить цену
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div>Индвидуальная цена не задана</div>
+                )}
+              </div>
+              <button
+                className="admin-input w-fit flex items-center justify-center"
+                onClick={() => {
+                  const newPrices = item?.prices ? [...item.prices] : []
+                  newPrices.push({
+                    colorAttrValueId: 0,
+                    price: 0,
+                    oldPrice: 0,
+                  })
+                  setItem(
+                    prev =>
+                      ({
+                        ...prev,
+                        prices: newPrices,
+                      }) as Item
+                  )
+                }}
+              >
+                {' '}
+                + Добавить цену
+              </button>
+            </>
+          )}
         </div>
         <div className="flex flex-col gap-[24px]">
           <h3 id="details" className="text-[24px]">
@@ -863,7 +876,8 @@ export const CreateProduct = () => {
                       }
                     }}
                   >
-                    <img src={care.imageUrl} alt={care.name} />
+                    <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
+
                     <p>{care.name}</p>
                   </div>
                 ))}
@@ -878,7 +892,7 @@ export const CreateProduct = () => {
                   .map(care => (
                     <div
                       key={care.id}
-                      className="relative care bg-[#E02844] text-white text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer flex gap-[5px]"
+                      className="relative care bg-[#E02844] text-white text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer items-center flex gap-[5px]"
                       onClick={() => {
                         setItem(
                           prev =>
@@ -892,7 +906,8 @@ export const CreateProduct = () => {
                         )
                       }}
                     >
-                      <img src={care.imageUrl} alt={care.name} /> &times;
+                      <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
+                      &times;
                       <p>{care.name}</p>
                     </div>
                   ))}
@@ -1216,10 +1231,14 @@ export const CreateProduct = () => {
               type="file"
               className="hidden"
               accept="image/*"
-              onChange={(e: any) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                setItemMedia((prev: any) => [...(prev || []), { file, type: 'photo' }])
+              multiple
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const files = e.target.files
+                if (!files || files.length === 0) return
+
+                Array.from(files).forEach(file => {
+                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'photo' }])
+                })
               }}
             />
           </label>
@@ -1227,13 +1246,13 @@ export const CreateProduct = () => {
           <div className="grid grid-cols-[470px_470px] gap-[10px]">
             {itemMedia
               ?.filter(item => item.type === 'cover' || item.type === 'photo')
-              ?.map(item => (
+              ?.map(m => (
                 <div
-                  key={item.file.name}
+                  key={m.file.name}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <img
-                    src={URL.createObjectURL(item.file)}
+                    src={URL.createObjectURL(m.file)}
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
@@ -1247,7 +1266,7 @@ export const CreateProduct = () => {
                             prev?.map(media => ({
                               ...media,
                               type:
-                                media.file.name === item.file.name
+                                media.file.name === m.file.name
                                   ? 'cover'
                                   : media.type === 'cover'
                                     ? 'photo'
@@ -1255,13 +1274,13 @@ export const CreateProduct = () => {
                             }))
                           )
                         }}
-                        checked={item.type === 'cover'}
+                        checked={m.type === 'cover'}
                       />
                       <p
                         className="w-[18px] h-[18px] rounded-[4px] border-solid border-[2px] flex items-center justify-center text-[#E02844]"
-                        style={{ borderColor: item.type === 'cover' ? '#E02844' : '#BDBFC7' }}
+                        style={{ borderColor: m.type === 'cover' ? '#E02844' : '#BDBFC7' }}
                       >
-                        {item.type === 'cover' && <FaCheck className="text-[12px]" />}
+                        {m.type === 'cover' && <FaCheck className="text-[12px]" />}
                       </p>
                       Обложка
                     </label>
@@ -1272,14 +1291,20 @@ export const CreateProduct = () => {
                         data={
                           attributes
                             .find(attr => attr.name === 'Цвет')
-                            ?.values.map(item => ({ id: item.id, value: item.value })) || []
+                            ?.values.filter(v =>
+                              item?.variantCodes?.some(m => m.colorAttrValueId === v.id)
+                            )
+                            .map(v => ({
+                              id: v.id,
+                              value: v.value,
+                            })) || []
                         }
                         placeholder="Выберите цвет"
                         className="w-[170px]"
                         onChange={id => {
                           setItemMedia(prev =>
                             prev?.map(media =>
-                              media.file.name === item.file.name
+                              media.file.name === m.file.name
                                 ? { ...media, colorAttrValueId: id }
                                 : media
                             )
@@ -1288,8 +1313,8 @@ export const CreateProduct = () => {
                         value={
                           attributes
                             .find(attr => attr.name === 'Цвет')
-                            ?.values.map(item => ({ id: item.id, value: item.value }))
-                            .find(val => val.id === item.colorAttrValueId) || { id: 0, value: '' }
+                            ?.values.map(m => ({ id: m.id, value: m.value }))
+                            .find(val => val.id === m.colorAttrValueId) || { id: 0, value: '' }
                         }
                         showSuggestions={false}
                       />
@@ -1298,7 +1323,7 @@ export const CreateProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        setItemMedia(prev => prev?.filter(it => it.file.name !== item.file.name))
+                        setItemMedia(prev => prev?.filter(it => it.file.name !== m.file.name))
                       }}
                     >
                       Удалить фото
@@ -1322,13 +1347,14 @@ export const CreateProduct = () => {
               type="file"
               className="hidden"
               accept="image/*"
-              onChange={(e: any) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                setItemMedia((prev: any) => [
-                  ...(prev || []),
-                  { file, type: 'lining', colorAttrValueId: 0 },
-                ])
+              multiple
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const files = e.target.files
+                if (!files || files.length === 0) return
+
+                Array.from(files).forEach(file => {
+                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'lining' }])
+                })
               }}
             />
           </label>

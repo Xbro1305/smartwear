@@ -134,7 +134,7 @@ export const EditProduct = () => {
   }, [])
 
   useEffect(() => {
-    if (attributes.length && features.length && sizeTypes.length && cares.length) {
+    if (attributes.length && sizeTypes.length) {
       axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}`)
         .then(res => {
           const data = res.data
@@ -157,10 +157,10 @@ export const EditProduct = () => {
               careIds: data.cares.map((care: any) => care.careIcon.id) || [],
               featureIds: data.features.map((feature: any) => feature.feature.id) || [],
               careRecommendation: data.careRecommendation,
-              brandId: getAttr('Бренд').attributeValueId || 0,
-              seasonId: getAttr('Сезон').attributeValueId || 0,
-              typeId: getAttr('Вид изделия').attributeValueId || 0,
-              materialId: getAttr('Утеплитель').attributeValueId || 0,
+              brandId: getAttr('Бренд')?.attributeValueId || 0,
+              seasonId: getAttr('Сезон')?.attributeValueId || 0,
+              typeId: getAttr('Вид изделия')?.attributeValueId || 0,
+              materialId: getAttr('Утеплитель')?.attributeValueId || 0,
             },
             seo: {
               metaTitle: data.metaTitle || '',
@@ -185,7 +185,6 @@ export const EditProduct = () => {
             id: m.id,
           }))
         )
-        console.log(itemMedia)
       })
     }
   }, [attributes, features, sizeTypes, cares])
@@ -202,22 +201,23 @@ export const EditProduct = () => {
     })
   }
 
-  const syncronize = () => {
+  const syncronize = async () => {
+    await sendData()
+
     axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/stock/sync`, {
       method: 'POST',
     })
       .then(res => console.log(res))
-      .catch(err => console.log(err))
+      .catch(err => toast.error(err.response.data.message))
+
     axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/stock`, {
       method: 'GET',
     })
       .then(res => console.log(res))
-      .catch(err => console.log(err))
+      .catch(err => toast.error(err.response.data.message))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const sendData = async () => {
     const data = {
       name: item?.main?.name,
       articul: item?.main?.articul,
@@ -226,8 +226,8 @@ export const EditProduct = () => {
       sizeTypeId: item?.main?.sizeTypeId,
       status: true,
       featureIds: item?.main?.featureIds,
-      isPublished: item?.main?.isPublished,
-      isDeliverable: item?.main?.isDeliverable,
+      isPublished: Boolean(item?.main?.isPublished),
+      isDeliverable: Boolean(item?.main?.isDeliverable),
       oldPrice: item?.main?.oldPrice,
       careRecommendation: item?.main?.careRecommendation,
       careIconIds: item?.main?.careIds,
@@ -242,79 +242,81 @@ export const EditProduct = () => {
         [attributes.find(i => i.name == 'Утеплитель')?.id || 0]: item?.main.materialId,
       },
       quantity: 1,
+      seoSlug: item?.seo.seoSlug,
+      metaTitle: item?.seo.metaTitle,
+      metaDescription: item?.seo.metaDescription,
     }
 
-    const seoData = { ...item?.seo }
-    const prices = [...(item?.prices || [])]
-    const media = [...(itemMedia || [])]
+    try {
+      await axios.put(`${import.meta.env.VITE_APP_API_URL}/products/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      data,
-    })
-      .then(() => {
-        media.forEach(media => {
-          const formData = new FormData()
-          formData.append('file', media.file)
-          formData.append('kind', media.type)
-          ;(media.type == 'cover' || media.type == 'photo') &&
-            formData.append('colorAttrValueId', String(media.colorAttrValueId))
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-          media.id == null
-          axios(`${import.meta.env.VITE_APP_API_URL}/media/${id}/`, {
-            method: 'POST',
+    try {
+      // 1️⃣ UPDATE MAIN PRODUCT
+      await sendData()
+
+      // 2️⃣ SEND MEDIA
+      const media = [...(itemMedia || [])]
+
+      for (const mediaItem of media) {
+        // if (mediaItem.file || mediaItem.id == null) continue
+
+        const formData = new FormData()
+        formData.append('file', mediaItem.file)
+        formData.append('kind', mediaItem.type)
+
+        if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
+          formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
+        }
+
+        try {
+          await axios.post(`${import.meta.env.VITE_APP_API_URL}/media/${id}/`, formData, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'multipar/form-data',
+              'Content-Type': 'multipart/form-data',
             },
-            data: formData,
-          }).catch(err => console.log(err))
-        })
-      })
-      .catch(err => console.log(err))
-
-    axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/seo`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-      data: seoData,
-    }).catch(err => {
-      toast.error('Произошла ошибка при добавлении Seo-информации')
-      console.log(err)
-    })
-
-    prices.forEach(price => {
-      if (price?.id)
-        axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-          data: price,
-        }).catch(err => {
+          })
+        } catch (err) {
           console.log(err)
-          toast.error('Произошла ошибка при добавлении индивидуальных цветов')
-        })
-      else
-        axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-          data: price,
-        }).catch(err => {
+        }
+      }
+
+      // 4️⃣ SEND PRICES
+      const prices = [...(item?.prices || [])]
+
+      for (const price of prices) {
+        try {
+          await axios({
+            url: `${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color`,
+            method: price?.id ? 'PUT' : 'POST',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json',
+            },
+            data: price,
+          })
+        } catch (err) {
           console.log(err)
-          toast.error('Произошла ошибка при добавлении индивидуальных цветов')
-        })
-    })
+          toast.error('Ошибка при добавлении цвета')
+        }
+      }
+
+      // 5️⃣ REDIRECT AFTER ALL REQUESTS
+      // window.location.href = '/admin/products'
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   return (
@@ -559,144 +561,156 @@ export const EditProduct = () => {
               />
             </label>
           </div>
-          <p className="text-[14px] font-semibold">Индвидуальная цена</p>
-          <div className="flex flex-col gap-[16px]">
-            {item?.prices ? (
-              item?.prices?.map((priceItem, index) => (
-                <div className="flex flex-col gap-[12px] items-start py-[12px] border-b-[1px] border-solid border-service">
-                  <div key={index} className="flex items-center gap-[20px]">
-                    <p>Для цвета</p>
-                    <CustomSelect
-                      data={
-                        attributes
-                          .find(attr => attr.name === 'Цвет')
-                          ?.values.map(item => {
-                            return { id: item.id, value: item.value }
-                          }) || []
-                      }
-                      placeholder="Выберите цвет"
-                      className="w-[170px]"
-                      onChange={id => {
-                        const newPrices = [...(item.prices || [])]
-                        newPrices[index].colorAttrValueId = id
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              prices: newPrices,
-                            }) as Item
-                        )
-                      }}
-                      value={
-                        attributes
-                          .find(attr => attr.name === 'Цвет')
-                          ?.values.map(item => {
-                            return { id: item.id, value: item.value }
-                          })
-                          .find(val => val.id === priceItem.colorAttrValueId) || {
-                          id: 0,
-                          value: '',
-                        }
-                      }
-                      showSuggestions={false}
-                    />
-                    <p>актуальаня цена</p>
-                    <NumericFormat
-                      className="admin-input w-[100px]"
-                      placeholder="Цена"
-                      required
-                      onChange={(e: any) => {
-                        const newPrices = [...(item.prices || [])]
-                        const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
-                        newPrices[index].price = Number(numberValue)
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              prices: newPrices,
-                            }) as Item
-                        )
-                      }}
-                      value={priceItem.price || ''}
-                      thousandSeparator=" "
-                      suffix=" ₽"
-                    />
-                    <p>цена до акции</p>
-                    <NumericFormat
-                      className="admin-input w-[100px]"
-                      placeholder="Цена"
-                      onChange={(e: any) => {
-                        const newPrices = [...(item.prices || [])]
-                        const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
-                        newPrices[index].oldPrice = Number(numberValue)
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              prices: newPrices,
-                            }) as Item
-                        )
-                      }}
-                      value={priceItem.oldPrice || ''}
-                      thousandSeparator=" "
-                      suffix=" ₽"
-                    />
-                  </div>
-                  <button
-                    className="text-[#E02844] text-[14px]"
-                    onClick={() => {
-                      if (priceItem.id != null)
-                        axios(
-                          `${import.meta.env.VITE_APP_API_URL}/products/${id}/prices/color/${priceItem.colorAttrValueId}`,
-                          {
-                            method: 'DELETE',
-                            headers: {
-                              Authorization: `Bearer ${localStorage.getItem('token')}`,
-                            },
+          {item?.prices?.length != 0 && item?.prices && (
+            <p className="text-[14px] font-semibold">Индвидуальная цена</p>
+          )}{' '}
+          {item?.variantCodes?.length != 0 && item?.variantCodes && (
+            <>
+              <div className="flex flex-col gap-[16px]">
+                {item?.prices ? (
+                  item?.prices?.map((priceItem, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col gap-[12px] items-start py-[12px] border-b-[1px] border-solid border-service"
+                    >
+                      <div className="flex items-center gap-[20px]">
+                        <p>Для цвета</p>
+                        <CustomSelect
+                          onClick={() => {
+                            if (
+                              (attributes
+                                .find(attr => attr.name === 'Цвет')
+                                ?.values.filter(v =>
+                                  item.variantCodes?.some(m => m.colorAttrValueId === v.id)
+                                ).length ?? 0) === 0
+                            ) {
+                              toast.error('Сначала укажите цвета в таблице!')
+                            }
+                          }}
+                          data={
+                            attributes
+                              .find(attr => attr.name === 'Цвет')
+                              ?.values.filter(v =>
+                                item.variantCodes?.some(m => m.colorAttrValueId === v.id)
+                              )
+                              .map(v => ({
+                                id: v.id,
+                                value: v.value,
+                              })) || []
                           }
-                        )
-                          .then(res => toast.success(res.data.message))
-                          .catch(err => console.log(err))
-                      const newPrices = [...(item.prices || [])]
-                      newPrices.splice(index, 1)
-                      setItem(
-                        prev =>
-                          ({
-                            ...prev,
-                            prices: newPrices,
-                          }) as Item
-                      )
-                    }}
-                  >
-                    Удалить цену
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div>Индвидуальная цена не задана</div>
-            )}
-          </div>
-          <button
-            className="admin-input w-fit flex items-center justify-center"
-            onClick={() => {
-              const newPrices = item?.prices ? [...item.prices] : []
-              newPrices.push({
-                colorAttrValueId: 0,
-                price: 0,
-                oldPrice: 0,
-              })
-              setItem(
-                prev =>
-                  ({
-                    ...prev,
-                    prices: newPrices,
-                  }) as Item
-              )
-            }}
-          >
-            {' '}
-            + Добавить цену
-          </button>
+                          placeholder="Выберите цвет"
+                          className="w-[170px]"
+                          onChange={id => {
+                            const newPrices = [...(item.prices || [])]
+                            newPrices[index].colorAttrValueId = id
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  prices: newPrices,
+                                }) as Item
+                            )
+                          }}
+                          value={
+                            attributes
+                              .find(attr => attr.name === 'Цвет')
+                              ?.values.map(item => {
+                                return { id: item.id, value: item.value }
+                              })
+                              .find(val => val.id === priceItem.colorAttrValueId) || {
+                              id: 0,
+                              value: '',
+                            }
+                          }
+                          showSuggestions={false}
+                        />
+                        <p>актуальаня цена</p>
+                        <NumericFormat
+                          className="admin-input w-[100px]"
+                          placeholder="Цена"
+                          required
+                          onChange={(e: any) => {
+                            const newPrices = [...(item.prices || [])]
+                            const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
+                            newPrices[index].price = Number(numberValue)
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  prices: newPrices,
+                                }) as Item
+                            )
+                          }}
+                          value={priceItem.price || ''}
+                          thousandSeparator=" "
+                          suffix=" ₽"
+                        />
+                        <p>цена до акции</p>
+                        <NumericFormat
+                          className="admin-input w-[100px]"
+                          placeholder="Цена"
+                          onChange={(e: any) => {
+                            const newPrices = [...(item.prices || [])]
+                            const numberValue = e.target.value.replace(/\s/g, '').split('₽')[0]
+                            newPrices[index].oldPrice = Number(numberValue)
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  prices: newPrices,
+                                }) as Item
+                            )
+                          }}
+                          value={priceItem.oldPrice || ''}
+                          thousandSeparator=" "
+                          suffix=" ₽"
+                        />
+                      </div>
+                      <button
+                        className="text-[#E02844] text-[14px]"
+                        onClick={() => {
+                          const newPrices = [...(item.prices || [])]
+                          newPrices.splice(index, 1)
+                          setItem(
+                            prev =>
+                              ({
+                                ...prev,
+                                prices: newPrices,
+                              }) as Item
+                          )
+                        }}
+                      >
+                        Удалить цену
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div>Индвидуальная цена не задана</div>
+                )}
+              </div>
+              <button
+                className="admin-input w-fit flex items-center justify-center"
+                onClick={() => {
+                  const newPrices = item?.prices ? [...item.prices] : []
+                  newPrices.push({
+                    colorAttrValueId: 0,
+                    price: 0,
+                    oldPrice: 0,
+                  })
+                  setItem(
+                    prev =>
+                      ({
+                        ...prev,
+                        prices: newPrices,
+                      }) as Item
+                  )
+                }}
+              >
+                {' '}
+                + Добавить цену
+              </button>
+            </>
+          )}
         </div>
         <div className="flex flex-col gap-[24px]">
           <h3 id="details" className="text-[24px]">
@@ -946,7 +960,7 @@ export const EditProduct = () => {
                       }
                     }}
                   >
-                    <img src={care.imageUrl} alt={care.name} />
+                    <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
                     <p>{care.name}</p>
                   </div>
                 ))}
@@ -961,7 +975,7 @@ export const EditProduct = () => {
                   .map(care => (
                     <div
                       key={care.id}
-                      className="relative care bg-[#E02844] text-white text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer flex gap-[5px]"
+                      className="relative care bg-[#E02844] text-white text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer flex gap-[5px] items-center"
                       onClick={() => {
                         setItem(
                           prev =>
@@ -975,7 +989,8 @@ export const EditProduct = () => {
                         )
                       }}
                     >
-                      <img src={care.imageUrl} alt={care.name} /> &times;
+                      <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
+                      &times;
                       <p>{care.name}</p>
                     </div>
                   ))}
@@ -1302,10 +1317,14 @@ export const EditProduct = () => {
               type="file"
               className="hidden"
               accept="image/*"
-              onChange={(e: any) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                setItemMedia((prev: any) => [...(prev || []), { file, type: 'photo' }])
+              multiple
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const files = e.target.files
+                if (!files || files.length === 0) return
+
+                Array.from(files).forEach(file => {
+                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'photo' }])
+                })
               }}
             />
           </label>
@@ -1313,13 +1332,13 @@ export const EditProduct = () => {
           <div className="grid grid-cols-[470px_470px] gap-[10px]">
             {itemMedia
               ?.filter(item => item.type == 'cover' || item.type == 'photo')
-              ?.map(item => (
+              ?.map(m => (
                 <div
-                  key={item?.file?.name || item?.id}
+                  key={m?.file?.name || m?.id}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <img
-                    src={item?.url || URL.createObjectURL(item?.file)}
+                    src={m?.url || URL.createObjectURL(m?.file)}
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
@@ -1333,8 +1352,8 @@ export const EditProduct = () => {
                             prev?.map(media => ({
                               ...media,
                               type:
-                                (item?.id != null && media?.id == item?.id) ||
-                                (item?.file?.name != null && media?.file?.name === item?.file?.name)
+                                (m?.id != null && media?.id == m?.id) ||
+                                (m?.file?.name != null && media?.file?.name === m?.file?.name)
                                   ? 'cover'
                                   : media.type === 'cover'
                                     ? 'photo'
@@ -1342,13 +1361,13 @@ export const EditProduct = () => {
                             }))
                           )
                         }}
-                        checked={item.type === 'cover'}
+                        checked={m.type === 'cover'}
                       />
                       <p
                         className="w-[18px] h-[18px] rounded-[4px] border-solid border-[2px] flex items-center justify-center text-[#E02844]"
-                        style={{ borderColor: item.type === 'cover' ? '#E02844' : '#BDBFC7' }}
+                        style={{ borderColor: m.type === 'cover' ? '#E02844' : '#BDBFC7' }}
                       >
-                        {item.type === 'cover' && <FaCheck className="text-[12px]" />}
+                        {m.type === 'cover' && <FaCheck className="text-[12px]" />}
                       </p>
                       Обложка
                     </label>
@@ -1359,14 +1378,20 @@ export const EditProduct = () => {
                         data={
                           attributes
                             .find(attr => attr.name === 'Цвет')
-                            ?.values.map(item => ({ id: item.id, value: item.value })) || []
+                            ?.values.filter(v =>
+                              item?.variantCodes?.some(m => m.colorAttrValueId === v.id)
+                            )
+                            .map(v => ({
+                              id: v.id,
+                              value: v.value,
+                            })) || []
                         }
                         placeholder="Выберите цвет"
                         className="w-[170px]"
                         onChange={id => {
                           setItemMedia(prev =>
                             prev?.map(media =>
-                              media?.id == item?.id || media?.file?.name === item?.file?.name
+                              media?.id == m?.id || media?.file?.name === m?.file?.name
                                 ? { ...media, colorAttrValueId: id }
                                 : media
                             )
@@ -1375,8 +1400,8 @@ export const EditProduct = () => {
                         value={
                           attributes
                             .find(attr => attr.name === 'Цвет')
-                            ?.values.map(item => ({ id: item.id, value: item.value }))
-                            .find(val => val.id === item.colorAttrValueId) || { id: 0, value: '' }
+                            ?.values.map(m => ({ id: m.id, value: m.value }))
+                            .find(val => val.id === m.colorAttrValueId) || { id: 0, value: '' }
                         }
                         showSuggestions={false}
                       />
@@ -1385,8 +1410,8 @@ export const EditProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        item.id != null
-                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${item.id}`, {
+                        m.id != null
+                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${m.id}`, {
                               method: 'DELETE',
                               headers: {
                                 Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -1396,15 +1421,13 @@ export const EditProduct = () => {
                                 toast.success(res.data.message)
                                 setItemMedia(prev =>
                                   prev?.filter(
-                                    it => it?.id != item?.id || it?.file?.name != item?.file?.name
+                                    it => it?.id != m?.id || it?.file?.name != m?.file?.name
                                   )
                                 )
                               })
                               .catch(err => console.log(err))
                           : setItemMedia(prev =>
-                              prev?.filter(
-                                it => it?.id != item?.id || it?.file?.name != item?.file?.name
-                              )
+                              prev?.filter(it => it?.id != m?.id || it?.file?.name != m?.file?.name)
                             )
                       }}
                     >
@@ -1429,13 +1452,14 @@ export const EditProduct = () => {
               type="file"
               className="hidden"
               accept="image/*"
-              onChange={(e: any) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                setItemMedia((prev: any) => [
-                  ...(prev || []),
-                  { file, type: 'lining', colorAttrValueId: 0 },
-                ])
+              multiple
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const files = e.target.files
+                if (!files || files.length === 0) return
+
+                Array.from(files).forEach(file => {
+                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'lining' }])
+                })
               }}
             />
           </label>

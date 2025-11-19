@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { type Attribute } from '../Create/CreateProduct'
 
 interface Filters {
   gender?: { title: '' } | { title: 'Женский'; key: 'female' } | { title: 'Мужской'; key: 'male' }
@@ -58,6 +59,7 @@ interface Product {
   updatedAt: string
   category: Category
   features: Feature[]
+  media: { url: string; kind: string }[]
 }
 
 const { CREATE_PRODUCT, EDIT_PRODUCT, PRODUCT } = ROUTER_PATHS
@@ -157,6 +159,7 @@ export const ProductsList = () => {
       .then(() => {
         setProducts(products.filter(product => product.id !== id))
         toast.success('Товар успешно удален')
+        setDeletingId(null)
       })
       .catch(() => {
         toast.error('Ошибка при удалении товара')
@@ -234,7 +237,7 @@ export const ProductsList = () => {
           </section>
         </div>
         <div className={styles.productsList_wrapper}>
-          <div className={styles.productsList_wrapper_top}>
+          <div className={`overflow-y-auto ${styles.productsList_wrapper_top}`}>
             <p>Название товара и фото</p>
             <p>Артикул</p>
             <p onClick={() => handleSort('status')}>
@@ -275,7 +278,7 @@ export const ProductsList = () => {
             </p>
             <p></p>
           </div>
-          <div className={`overflow-y-auto max-h-[400px] ${styles.productsList_wrapper_bottom}`}>
+          <div className={`max-h-[400px] ${styles.productsList_wrapper_bottom}`}>
             {products &&
               products?.map((i, index) => (
                 <div key={index} className={styles.productsList_wrapper_item}>
@@ -295,7 +298,15 @@ export const ProductsList = () => {
                       name="item"
                       id="checkbox"
                     />
-                    <img src={productImg} alt="" />
+                    <img
+                      src={
+                        i?.media?.find(m => m?.kind == 'cover')?.url ||
+                        i?.media[0]?.url ||
+                        productImg
+                      }
+                      alt=""
+                      className="w-[40px] aspect-square"
+                    />
                     <p>{i.name}</p>
                   </label>
                   <label>{i.articul}</label>
@@ -388,6 +399,38 @@ const FilterItems = ({
   handleFilterChange: (filter: keyof Filters, value: any) => void
   isFilterOpen: boolean
 }) => {
+  const [stores, setStores] = useState<any[]>([])
+  const [attributs, setAttributes] = useState<Attribute[]>([])
+
+  useEffect(() => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/stores`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setStores(res.data)
+      })
+      .catch(() => {
+        toast.error('Ошибка при загрузке товаров')
+      })
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setAttributes(res.data)
+      })
+      .catch(() => {
+        toast.error('Ошибка при загрузке товаров')
+      })
+  }, [])
+
   return (
     <>
       <div
@@ -395,10 +438,11 @@ const FilterItems = ({
       >
         <label>
           <FilterSelector
-            options={[
-              { title: 'Мужской', key: 'male' },
-              { title: 'Женский', key: 'female' },
-            ]}
+            options={
+              attributs
+                .find(i => i.name == 'Целевая группа')
+                ?.values.map(a => ({ title: a.value, key: a.id })) || []
+            }
             isEmpty={filters.gender?.title === ''}
             value={filters.gender}
             onChange={value => handleFilterChange('gender', value)}
@@ -431,12 +475,11 @@ const FilterItems = ({
         </label>
         <label>
           <FilterSelector
-            options={[
-              { title: 'Демисезон', key: 'Демисезон' },
-              { title: 'Весна/Лето', key: 'Весна/Лето' },
-              { title: 'Зима', key: 'Зима' },
-              { title: 'Все сезоны', key: 'Все сезоны' },
-            ]}
+            options={
+              attributs
+                .find(i => i.name == 'Сезон')
+                ?.values.map(a => ({ title: a.value, key: a.id })) || []
+            }
             isEmpty={filters.season?.title === ''}
             value={filters.season}
             onChange={value => handleFilterChange('season', value)}
@@ -457,10 +500,7 @@ const FilterItems = ({
         </label>
         <label className="col-span-2">
           <FilterSelector
-            options={[
-              { title: 'Москва, дом 4', key: 'Москва, дом 4' },
-              { title: 'Москва, дом 6', key: 'Москва, дом 6' },
-            ]}
+            options={stores?.map((s: any) => ({ title: s.name, key: s.id })) || []}
             isEmpty={filters.warehouse?.title === ''}
             value={filters.warehouse}
             onChange={value => handleFilterChange('warehouse', value)}

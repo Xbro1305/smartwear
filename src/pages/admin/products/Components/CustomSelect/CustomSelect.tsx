@@ -8,6 +8,7 @@ interface SelectProps {
   placeholder: string
   showSuggestions?: boolean
   className?: string
+  onClick?: () => void
 }
 
 export const CustomSelect: React.FC<SelectProps> = ({
@@ -17,10 +18,11 @@ export const CustomSelect: React.FC<SelectProps> = ({
   placeholder,
   showSuggestions = true,
   className,
+  onClick,
 }) => {
   const [opened, setOpened] = useState(false)
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} onClick={onClick}>
       <label className="w-full cursor-pointer px-[15px] h-[40px] border-[1px] flex items-center justify-between border-solid border-[#BDBFC7] rounded-xl">
         <p className={`text-[14px] ${value?.id == 0 && 'text-[#20222460]'}`}>
           {value?.id != 0 ? value?.value : placeholder}

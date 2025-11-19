@@ -36,8 +36,8 @@ interface Size {
 export const ProductPage = () => {
   const { id } = useParams()
   const [item, setItem] = useState<any>()
-  const [_, setSelectedPhoto] = useState<any>()
-  const [__, setMedia] = useState<Media[]>()
+  const [selectedPhoto, setSelectedPhoto] = useState<any>()
+  const [media, setMedia] = useState<Media[]>()
   const [selectedColor, setSelectedColor] = useState<Color | null>()
   const [selectedSize, setSelectedSize] = useState<Size | undefined>()
   const [colors, setColors] = useState<Color[] | null>()
@@ -92,12 +92,14 @@ export const ProductPage = () => {
   }, [])
 
   const oldPrice =
-    item?.colorPrices?.find((p: any) => p.colorAttrValueId == selectedColor?.id).oldPrice ||
-    item?.oldPrice
+    item?.colorPrices?.find((p: any) => p.colorAttrValueId == selectedColor?.id)?.oldPrice ||
+    item?.oldPrice ||
+    0
 
   const price =
-    item?.colorPrices?.find((p: any) => p.colorAttrValueId == selectedColor?.id).price ||
-    item?.price
+    item?.colorPrices?.find((p: any) => p.colorAttrValueId == selectedColor?.id)?.price ||
+    item?.price ||
+    0
 
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
@@ -115,17 +117,27 @@ export const ProductPage = () => {
             </div>
             <div className="lg:w-[60%] w-full flex sm:flex-row flex-col gap-[10px] sm:max-h-screen lg:max-h-none ">
               <div className="lg:hidden col-span-full w-full">
-                {/* <img className='object-cover w-full h-full aspect-[3/4]' src={selectedPhoto?.url || img1} alt={item?.name} /> */}
-                <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
+                <img
+                  className="object-cover w-full h-full aspect-[3/4]"
+                  src={selectedPhoto?.url || img1}
+                  alt={item?.name}
+                />
+                {/* <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" /> */}
               </div>
               <div className="sm:grid lg:grid-cols-2 flex flex-row gap-[10px] xl:gap-[20px] w-full max-h-[200px] h-[200px] sm:h-auto sm:max-h-full lg:max-h-none overflow-y-auto lg:overflow-initial sm:w-[40%] lg:w-full">
-                {/* {media?.map(m => (
-                    <img className='object-cover w-full h-full aspect-[3/4]' onClick={() => setSelectedPhoto(m)} src={m.url || img1} alt={item.name} />
-                ))} */}
+                {media?.map(m => (
+                  <img
+                    key={m.id}
+                    className="object-cover w-auto sm:w-full sm:h-auto h-full aspect-[3/4]"
+                    onClick={() => setSelectedPhoto(m)}
+                    src={m.url || img1}
+                    alt={item.name}
+                  />
+                ))}
+                {/* <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
                 <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
                 <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
-                <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
-                <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
+                <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" /> */}
               </div>
             </div>
             <div className="flex flex-col gap-[32px] w-full lg:w-[40%]">
@@ -156,6 +168,7 @@ export const ProductPage = () => {
                     className="text-red text-[24px] font-medium mb-[12px]"
                     thousandSeparator=" "
                     displayType="text"
+                    allowNegative={false}
                   />
                 </div>
                 <a
@@ -214,6 +227,7 @@ export const ProductPage = () => {
                   <div className="flex gap-[10px]">
                     {colors?.map(color => (
                       <span
+                        key={color.id}
                         className={`block w-[27px] h-[27px] rounded-[50%] cursor-pointer`}
                         style={{ background: color.meta.colorCode }}
                         onClick={() => setSelectedColor(color)}
@@ -232,6 +246,7 @@ export const ProductPage = () => {
                   <div className="flex gap-[10px]">
                     {sizes?.map(size => (
                       <p
+                        key={size.id}
                         className="text-[23px] cursor-pointer p-[10px]"
                         onClick={() => setSelectedSize(size)}
                         style={{ background: selectedSize?.id == size.id ? '#F2F2F2' : '' }}
@@ -263,6 +278,7 @@ export const ProductPage = () => {
                     className="text-red text-[18px] font-medium mb-[7px]"
                     thousandSeparator=" "
                     displayType="text"
+                    allowNegative={false}
                   />
                 </div>
                 <div className="flex flex-col gap-[10px]">
@@ -299,7 +315,10 @@ export const ProductPage = () => {
                 {selectedInfo == 'features' && (
                   <ul className="flex md:hidden list-disc ml-[27px] text-[22px] flex-col gap-[5px]">
                     {item.features.map((feature: any) => (
-                      <li dangerouslySetInnerHTML={{ __html: feature.feature.description }}></li>
+                      <li
+                        dangerouslySetInnerHTML={{ __html: feature.feature.description }}
+                        key={feature.feature.id}
+                      ></li>
                     ))}
                   </ul>
                 )}
@@ -345,7 +364,10 @@ export const ProductPage = () => {
                 {selectedInfo == 'shops' && (
                   <div className="flex md:hidden flex-col gap-[10px] w-full">
                     {stores?.map((store: any) => (
-                      <div className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full">
+                      <div
+                        key={store.id}
+                        className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full"
+                      >
                         <h3 className="h3 flex items-center justify-between w-full">
                           {store.shortName} <FaChevronRight />
                         </h3>
@@ -380,7 +402,7 @@ export const ProductPage = () => {
                 {selectedInfo == 'care' && (
                   <div className="flex md:hidden flex-col gap-[10px]">
                     {item.cares.map((care: any) => (
-                      <div className="flex items-center gap-[10px]">
+                      <div key={care.id} className="flex items-center gap-[10px]">
                         <img src={care.careIcon.imageUrl} alt={care.careIcon.name} />
                         <p className="p1">{care.careIcon.name}</p>
                       </div>
@@ -404,14 +426,20 @@ export const ProductPage = () => {
               {selectedInfo == 'features' && (
                 <ul className="flex list-disc ml-[27px] text-[22px] flex-col gap-[5px] text-[dark]">
                   {item.features.map((feature: any) => (
-                    <li dangerouslySetInnerHTML={{ __html: feature.feature.description }}></li>
+                    <li
+                      dangerouslySetInnerHTML={{ __html: feature.feature.description }}
+                      key={feature.feture.id}
+                    ></li>
                   ))}
                 </ul>
               )}
               {selectedInfo == 'info' && (
                 <div className="flex flex-col gap-[10px] w-full">
                   {item.attributeValues.map((attr: any) => (
-                    <div className="flex items-end gap-[10px] w-full text-[#878787] text-[22px]">
+                    <div
+                      className="flex items-end gap-[10px] w-full text-[#878787] text-[22px]"
+                      key={attr.id}
+                    >
                       <p>{attr.attributeValue.attribute.name}</p>
                       <div className="flex-1 border-b border-dotted border-[#878787]"></div>
                       <p>{attr.attributeValue.value}</p>
@@ -422,7 +450,10 @@ export const ProductPage = () => {
               {selectedInfo == 'shops' && (
                 <div className="flex flex-col gap-[10px] w-full">
                   {stores?.map((store: any) => (
-                    <div className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full">
+                    <div
+                      key={store.id}
+                      className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full"
+                    >
                       <h3 className="h3 flex items-center justify-between w-full">
                         {store.shortName} <FaChevronRight />
                       </h3>
@@ -442,7 +473,7 @@ export const ProductPage = () => {
               {selectedInfo == 'care' && (
                 <div className="flex flex-col gap-[10px]">
                   {item.cares.map((care: any) => (
-                    <div className="flex items-center gap-[10px]">
+                    <div className="flex items-center gap-[10px]" key={care.careIcon.id}>
                       <img src={care.careIcon.imageUrl} alt={care.careIcon.name} />
                       <p className="p1">{care.careIcon.name}</p>
                     </div>
@@ -466,13 +497,14 @@ export const ProductPage = () => {
             <h2 className={'h2'}>Рекомендуем на зиму</h2>
             <div className={styles.home_recommendations_wrapper}>
               {recomendations.map(i => (
-                <div className={styles.home_recommendations_item}>
+                <div className={styles.home_recommendations_item} key={i.title}>
                   <img alt={''} src={i.img} />
                   <div className={styles.home_recommendations_item_info}>
                     <div className={styles.home_recommendations_item_top}>
                       <div className={styles.home_recommendations_item_colors}>
                         {i.colors.map(c => (
                           <div
+                            key={c}
                             className={styles.home_recommendations_item_color}
                             style={{ background: `${c}` }}
                           ></div>
@@ -498,14 +530,15 @@ export const ProductPage = () => {
             </div>
 
             <Slider className={styles.home_recommendations_mob} {...settings}>
-              {recomendations.map(i => (
-                <div className={styles.home_recommendations_item}>
+              {recomendations.map((i, index) => (
+                <div className={styles.home_recommendations_item} key={index}>
                   <img alt={''} src={i.img} />
                   <div className={styles.home_recommendations_item_info}>
                     <div className={styles.home_recommendations_item_top}>
                       <div className={styles.home_recommendations_item_colors}>
                         {i.colors.map(c => (
                           <div
+                            key={c}
                             className={styles.home_recommendations_item_color}
                             style={{ background: `${c}` }}
                           ></div>
