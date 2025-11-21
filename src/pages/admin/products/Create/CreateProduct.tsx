@@ -83,6 +83,16 @@ interface Media {
   id?: any
 }
 
+interface StockItem {
+  code: string
+  stock: { [storeId: string]: number }[]
+}
+
+interface UniqueStore {
+  storeId: string
+  storeName?: string
+}
+
 export const CreateProduct = () => {
   const [item, setItem] = useState<Item>({
     main: {
@@ -99,6 +109,8 @@ export const CreateProduct = () => {
   const [cares, setCares] = useState<any[]>([])
   const [sizeTypes, setSizeTypes] = useState<any[]>([])
   const [itemMedia, setItemMedia] = useState<Media[]>()
+  const [stock, setStock] = useState<StockItem[]>([])
+  const [warehouses, setWarehouses] = useState<UniqueStore[]>([])
 
   const navigate = useNavigate()
 
@@ -148,6 +160,54 @@ export const CreateProduct = () => {
         variantCodes: newVariantCodes,
       }
     })
+  }
+
+  const syncronize = async () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/preview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: {
+        codes: item.variantCodes?.flatMap(c =>
+          c.codes.map(i => i.code).filter(code => code && code.trim() !== '')
+        ),
+      },
+    })
+      .then(res => {
+        const st = Object.values(
+          res.data.reduce((acc: any, item: any) => {
+            const code = item.variantCode
+
+            if (!acc[code]) {
+              acc[code] = {
+                code,
+                stock: [],
+              }
+            }
+
+            acc[code].stock.push({
+              [item.storeId]: item.quantity,
+            })
+
+            return acc
+          }, {})
+        )
+
+        setStock(st as StockItem[])
+
+        const uniqueStores = Array.from(
+          new Map(
+            res.data.map((item: any) => [
+              item.storeId,
+              { storeId: item.storeId, storeName: item.storeName },
+            ])
+          ).values()
+        )
+        setWarehouses(uniqueStores as UniqueStore[])
+      })
+      .catch(err => toast.error(err.response.data.message))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -245,9 +305,13 @@ export const CreateProduct = () => {
     }
   }
 
+  const columns = `110px 110px 110px 110px 120px 110px 50px ${warehouses
+    .map(() => '110px')
+    .join(' ')} 90px`
+
   return (
     <div className="py-[80px] px-[36px] flex justify-between relative">
-      <div className="flex flex-col gap-[48px] w-[800px]">
+      <div className="flex flex-col gap-[48px]">
         <h1 id="h1">Редактор товара</h1>
         <div className="flex flex-col gap-[24px]">
           <h3 id="main" className="text-[20px]">
@@ -436,7 +500,7 @@ export const CreateProduct = () => {
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="prices" className="text-[20px] pt-[50px]">
+          <h3 id="prices" className="text-[20px] pt-[50px] z-[10]">
             Цена
           </h3>
           <div className="flex items-center gap-[20px]">
@@ -639,7 +703,7 @@ export const CreateProduct = () => {
           )}
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="details" className="text-[24px] pt-[50px]">
+          <h3 id="details" className="text-[24px] pt-[50px] z-[10]">
             Характеристики
           </h3>
           <div className="flex gap-[24px]">
@@ -951,8 +1015,8 @@ export const CreateProduct = () => {
             }}
           />
         </div>
-        <div className="flex flex-col gap-[24px]">
-          <h3 id="sync" className="text-[24px] pt-[50px]">
+        <div className="flex flex-col gap-[24px] max-w-[1020px] w-full">
+          <h3 id="sync" className="text-[24px] pt-[50px] z-[10]">
             Синхронизация остатков
           </h3>
           <div className="flex flex-col gap-sm">
@@ -993,7 +1057,7 @@ export const CreateProduct = () => {
 
           {item?.main?.sizeTypeId && (
             <>
-              <div className="flex justify-between">
+              <div className="flex justify-between z-[10]">
                 <p>Общее колличество 1</p>
                 <button
                   className="flex items-center justify-center border-solid border-[1px] border-[#DADADA] rounded-[12px] h-[40px] p-[13px] bg-[#fff]"
@@ -1017,228 +1081,259 @@ export const CreateProduct = () => {
                   + Добавить строчку
                 </button>
               </div>
-              <div className="flex flex-col">
-                <div
-                  className={`min-w-fit grid grid-cols-[110px_110px_110px_110px_120px_110px_50px_90px] rounded-t-[8px] bg-[#F9FAFB] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px] py-[10px]`}
-                >
-                  <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                    КТ1
-                  </p>
-                  <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                    КТ2
-                  </p>
-                  <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                    КТ3
-                  </p>{' '}
-                  <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                    Размер
-                  </p>{' '}
-                  <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                    Цвет
-                  </p>{' '}
-                  <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                    ГЦ
-                  </p>{' '}
-                  <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                    <span className={`block w-[16px] h-[16px] rounded-[8px] bg-[#D9D9D9]`}></span>
-                  </p>{' '}
-                </div>
-
-                {item?.variantCodes?.map((variant, index) => (
+              <div className="flex flex-col z-[10]">
+                <div className="flex flex-col relative max-w-[1020px] w-full overflow-x-auto overflow-y-visible z-[10]">
                   <div
-                    key={index}
-                    className="min-w-fit grid grid-cols-[110px_110px_110px_110px_120px_110px_50px_90px] bg-[#fff] py-[20px] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px]"
+                    className={`w-fit rounded-t-[8px] bg-[#F9FAFB] border-[#DDE1E6] border-solid border-b-[1px] grid gap-[5px] py-[10px]`}
+                    style={{ gridTemplateColumns: columns }}
                   >
-                    <label>
-                      <NumericFormat
-                        allowLeadingZeros={true}
-                        type="text"
-                        className="admin-input max-w-full"
-                        placeholder="123456789"
-                        maxLength={9}
-                        onChange={(e: any) => {
-                          const newVariantCodes = [...(item.variantCodes || [])]
-                          newVariantCodes[index].codes[0].code = e.target.value
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
-                        }}
-                        value={variant.codes[0].code || ''}
-                      />
-                    </label>
-                    <label className="px-[5px]">
-                      <NumericFormat
-                        allowLeadingZeros={true}
-                        type="text"
-                        className="admin-input max-w-full"
-                        placeholder="123456"
-                        maxLength={6}
-                        onChange={(e: any) => {
-                          const newVariantCodes = [...(item.variantCodes || [])]
-                          newVariantCodes[index].codes[1].code = e.target.value
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
-                        }}
-                        value={variant.codes[1].code || ''}
-                      />
-                    </label>
-                    <label className="px-[5px]">
-                      <NumericFormat
-                        allowLeadingZeros={true}
-                        type="text"
-                        className="admin-input max-w-full"
-                        placeholder="123456"
-                        maxLength={6}
-                        onChange={(e: any) => {
-                          const newVariantCodes = [...(item?.variantCodes || [])]
-                          newVariantCodes[index].codes[2].code = e.target.value
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
-                        }}
-                        value={variant.codes[2].code || ''}
-                      />
-                    </label>
-                    <div className="px-[5px]">
-                      <CustomSelect
-                        className="w-full"
-                        data={
-                          sizeTypes
-                            ?.find(sizeType => sizeType.id === item?.main?.sizeTypeId)
-                            ?.values?.map((size: any) => ({
-                              id: size.id,
-                              value: size.name,
-                            })) || []
-                        }
-                        placeholder="Pазмер"
-                        onChange={id => {
-                          const newVariantCodes = [...(item?.variantCodes || [])]
-                          newVariantCodes[index].sizeValueId = id
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
-                        }}
-                        value={
-                          sizeTypes
-                            ?.find(sizeType => sizeType.id === item?.main?.sizeTypeId)
-                            ?.values?.map((size: any) => ({
-                              id: size.id,
-                              value: size.name,
-                            }))
-                            .find((val: any) => val.id === variant.sizeValueId) || {
-                            id: 0,
-                            value: '',
-                          }
-                        }
-                        showSuggestions={false}
-                      />
-                    </div>
-                    <div>
-                      <CustomSelect
-                        className="w-full"
-                        data={
-                          // attributes
-                          //   .find(attr => attr.name === 'Цвет')
-                          //   ?.values.flatMap(
-                          //     (item, idx) =>
-                          //       item.meta?.aliases?.map((i, index) => ({
-                          //         id: Number(`${index}${idx}`),
-                          //         value: i,
-                          //       })) || []
-                          //   ) || []
-                          attributes
-                            .find(item => item.name == 'Цвет')
-                            ?.values.map(i => ({ id: i.id, value: i.value })) || []
-                        }
-                        placeholder="Цвет"
-                        onChange={id => {
-                          // const color = attributes
-                          //   .find(attr => attr.name == 'Цвет')
-                          //   ?.values.find(item => item.meta?.aliases?.includes(value || ''))
-                          // newVariantCodes[index].colorAttrValueId = color?.id || 0
-                          // newVariantCodes[index].colorAttrValue = color?.value || ''
-                          // newVariantCodes[index].colorAlias = value || ''
-                          // newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
-                          // setItem(
-                          //   prev =>
-                          //     ({
-                          //       ...prev,
-                          //       variantCodes: newVariantCodes,
-                          //     }) as Item
-                          // )
-                          const newVariantCodes = [...(item?.variantCodes || [])]
-
-                          newVariantCodes[index].colorAttrValueId = id
-
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
-                        }}
-                        value={{
-                          id: item.variantCodes?.[index].colorAttrValueId || 0,
-                          value:
-                            attributes
-                              .find(i => i.name == 'Цвет')
-                              ?.values.find(i => i.id == variant.colorAttrValueId)?.value || '',
-                        }}
-                        showSuggestions={false}
-                      />
-                    </div>
-                    <div className="px-[5px] flex justify-center items-center text-center">
-                      {
-                        attributes
-                          .find(i => i.name == 'Цвет')
-                          ?.values.find(i => i.id == variant.colorAttrValueId)?.value
-                      }
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <span
-                        className={`block w-[16px] h-[16px] rounded-[8px]`}
-                        style={{
-                          background: attributes
-                            .find(i => i.name == 'Цвет')
-                            ?.values.find(i => i.id == variant.colorAttrValueId)?.meta?.colorCode,
-                        }}
-                      ></span>
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <button
-                        className="bg-[#FFF3F3] text-[#E02844] h-[36px] w-[36px] flex items-center justify-center text-[18px] rounded-[12px]"
-                        onClick={() => deleteRow(index)}
-                      >
-                        <LuTrash2 />
-                      </button>
-                    </div>
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      КТ1
+                    </p>
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      КТ2
+                    </p>
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      КТ3
+                    </p>{' '}
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      Размер
+                    </p>{' '}
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      Цвет
+                    </p>{' '}
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      ГЦ
+                    </p>{' '}
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      <span className={`block w-[16px] h-[16px] rounded-[8px] bg-[#D9D9D9]`}></span>
+                    </p>{' '}
+                    {warehouses.map(warehouse => (
+                      <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                        {warehouse?.storeName}
+                      </p>
+                    ))}
                   </div>
-                ))}
+
+                  {item?.variantCodes?.map((variant, index) => (
+                    <div
+                      key={index * index + Math.random() * 100}
+                      style={{ gridTemplateColumns: columns }}
+                      className="w-fit grid bg-[#fff] py-[20px] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px]"
+                    >
+                      <label>
+                        <NumericFormat
+                          allowLeadingZeros={true}
+                          type="text"
+                          className="admin-input max-w-full"
+                          placeholder="123456789"
+                          maxLength={9}
+                          onChange={(e: any) => {
+                            const newVariantCodes = [...(item.variantCodes || [])]
+                            newVariantCodes[index].codes[0].code = e.target.value
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  variantCodes: newVariantCodes,
+                                }) as Item
+                            )
+                          }}
+                          value={variant.codes[0].code || ''}
+                        />
+                      </label>
+                      <label className="px-[5px]">
+                        <NumericFormat
+                          allowLeadingZeros={true}
+                          type="text"
+                          className="admin-input max-w-full"
+                          placeholder="123456"
+                          maxLength={6}
+                          onChange={(e: any) => {
+                            const newVariantCodes = [...(item.variantCodes || [])]
+                            newVariantCodes[index].codes[1].code = e.target.value
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  variantCodes: newVariantCodes,
+                                }) as Item
+                            )
+                          }}
+                          value={variant.codes[1].code || ''}
+                        />
+                      </label>
+                      <label className="px-[5px]">
+                        <NumericFormat
+                          allowLeadingZeros={true}
+                          type="text"
+                          className="admin-input max-w-full"
+                          placeholder="123456"
+                          maxLength={6}
+                          onChange={(e: any) => {
+                            const newVariantCodes = [...(item?.variantCodes || [])]
+                            newVariantCodes[index].codes[2].code = e.target.value
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  variantCodes: newVariantCodes,
+                                }) as Item
+                            )
+                          }}
+                          value={variant.codes[2].code || ''}
+                        />
+                      </label>
+                      <div className="px-[5px]">
+                        <CustomSelect
+                          className="w-full"
+                          data={
+                            sizeTypes
+                              ?.find(sizeType => sizeType.id === item?.main?.sizeTypeId)
+                              ?.values?.map((size: any) => ({
+                                id: size.id,
+                                value: size.name,
+                              })) || []
+                          }
+                          placeholder="Pазмер"
+                          onChange={id => {
+                            const newVariantCodes = [...(item?.variantCodes || [])]
+                            newVariantCodes[index].sizeValueId = id
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  variantCodes: newVariantCodes,
+                                }) as Item
+                            )
+                          }}
+                          value={
+                            sizeTypes
+                              ?.find(sizeType => sizeType.id === item?.main?.sizeTypeId)
+                              ?.values?.map((size: any) => ({
+                                id: size.id,
+                                value: size.name,
+                              }))
+                              .find((val: any) => val.id === variant.sizeValueId) || {
+                              id: 0,
+                              value: '',
+                            }
+                          }
+                          showSuggestions={false}
+                        />
+                      </div>
+                      <div>
+                        <CustomSelect
+                          className="w-full"
+                          data={
+                            // attributes
+                            //   .find(attr => attr.name === 'Цвет')
+                            //   ?.values.flatMap(
+                            //     (item, idx) =>
+                            //       item.meta?.aliases?.map((i, index) => ({
+                            //         id: Number(`${index}${idx}`),
+                            //         value: i,
+                            //       })) || []
+                            //   ) || []
+                            attributes
+                              .find(item => item.name == 'Цвет')
+                              ?.values.map(i => ({ id: i.id, value: i.value })) || []
+                          }
+                          placeholder="Цвет"
+                          onChange={id => {
+                            // const color = attributes
+                            //   .find(attr => attr.name == 'Цвет')
+                            //   ?.values.find(item => item.meta?.aliases?.includes(value || ''))
+                            // newVariantCodes[index].colorAttrValueId = color?.id || 0
+                            // newVariantCodes[index].colorAttrValue = color?.value || ''
+                            // newVariantCodes[index].colorAlias = value || ''
+                            // newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
+                            // setItem(
+                            //   prev =>
+                            //     ({
+                            //       ...prev,
+                            //       variantCodes: newVariantCodes,
+                            //     }) as Item
+                            // )
+                            const newVariantCodes = [...(item?.variantCodes || [])]
+
+                            newVariantCodes[index].colorAttrValueId = id
+
+                            setItem(
+                              prev =>
+                                ({
+                                  ...prev,
+                                  variantCodes: newVariantCodes,
+                                }) as Item
+                            )
+                          }}
+                          value={{
+                            id: item.variantCodes?.[index].colorAttrValueId || 0,
+                            value:
+                              attributes
+                                .find(i => i.name == 'Цвет')
+                                ?.values.find(i => i.id == variant.colorAttrValueId)?.value || '',
+                          }}
+                          showSuggestions={false}
+                        />
+                      </div>
+                      <div className="px-[5px] flex justify-center items-center text-center">
+                        {
+                          attributes
+                            .find(i => i.name == 'Цвет')
+                            ?.values.find(i => i.id == variant.colorAttrValueId)?.value
+                        }
+                      </div>
+                      <div className="flex items-center justify-center">
+                        <span
+                          className={`block w-[16px] h-[16px] rounded-[8px]`}
+                          style={{
+                            background: attributes
+                              .find(i => i.name == 'Цвет')
+                              ?.values.find(i => i.id == variant.colorAttrValueId)?.meta?.colorCode,
+                          }}
+                        ></span>
+                      </div>
+                      {warehouses.map(warehouse => {
+                        const c = stock.find(s =>
+                          variant.codes.map(i => i.code.includes(s.code))
+                        )?.stock
+
+                        const st =
+                          c?.find(st => st.hasOwnProperty(warehouse.storeId))?.[
+                            warehouse.storeId
+                          ] || 0
+
+                        return (
+                          <span
+                            key={warehouse.storeId}
+                            className="px-[5px] flex items-center justify-center text-center"
+                          >
+                            {st}
+                          </span>
+                        )
+                      })}
+                      <div className="flex items-center justify-center">
+                        <button
+                          className="bg-[#FFF3F3] text-[#E02844] h-[36px] w-[36px] flex items-center justify-center text-[18px] rounded-[12px]"
+                          onClick={() => deleteRow(index)}
+                        >
+                          <LuTrash2 />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="admin-input w-fit flex items-center" onClick={syncronize}>
+                  Синхронизировать остатки
+                </button>
               </div>
             </>
           )}
         </div>
         <div className="flex flex-col gap-[24px]">
           {/* === Фото товара === */}
-          <h3 className="text-[20px] font-[500] pt-[50px]" id="media">
+          <h3 className="text-[20px] font-[500] pt-[50px] z-[10]" id="media">
             Фото товара
           </h3>
 

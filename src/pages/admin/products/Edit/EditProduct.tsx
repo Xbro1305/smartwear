@@ -86,6 +86,16 @@ interface Media {
   id?: any
 }
 
+interface StockItem {
+  code: string
+  stock: { [storeId: string]: number }[]
+}
+
+interface UniqueStore {
+  storeId: string
+  storeName?: string
+}
+
 export const EditProduct = () => {
   const [item, setItem] = useState<Item>()
   const [attributes, setAttributes] = useState<Attribute[]>([])
@@ -93,6 +103,8 @@ export const EditProduct = () => {
   const [cares, setCares] = useState<any[]>([])
   const [sizeTypes, setSizeTypes] = useState<any[]>([])
   const [itemMedia, setItemMedia] = useState<Media[]>()
+  const [stock, setStock] = useState<StockItem[]>([])
+  const [warehouses, setWarehouses] = useState<UniqueStore[]>([])
 
   const { id } = useParams()
 
@@ -144,6 +156,8 @@ export const EditProduct = () => {
               (attr: any) => attr.attributeValue.attribute.name == attrName
             )
           }
+
+          syncronize()
 
           const product: Item = {
             main: {
@@ -203,18 +217,45 @@ export const EditProduct = () => {
   }
 
   const syncronize = async () => {
-    await sendData()
-
     axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/stock/sync`, {
       method: 'POST',
-    })
-      .then(res => console.log(res))
-      .catch(err => toast.error(err.response.data.message))
+    }).catch(err => toast.error(err.response.data.message))
 
     axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}/stock`, {
       method: 'GET',
     })
-      .then(res => console.log(res))
+      .then(res => {
+        const st = Object.values(
+          res.data.reduce((acc: any, item: any) => {
+            const code = item.variantCode
+
+            if (!acc[code]) {
+              acc[code] = {
+                code,
+                stock: [],
+              }
+            }
+
+            acc[code].stock.push({
+              [item.storeId]: item.quantity,
+            })
+
+            return acc
+          }, {})
+        )
+
+        setStock(st as StockItem[])
+
+        const uniqueStores = Array.from(
+          new Map(
+            res.data.map((item: any) => [
+              item.storeId,
+              { storeId: item.storeId, storeName: item.storeName },
+            ])
+          ).values()
+        )
+        setWarehouses(uniqueStores as UniqueStore[])
+      })
       .catch(err => toast.error(err.response.data.message))
   }
 
@@ -320,6 +361,10 @@ export const EditProduct = () => {
       console.log(e)
     }
   }
+
+  const columns = `110px 110px 110px 110px 120px 110px 50px ${warehouses
+    .map(() => '110px')
+    .join(' ')} 90px`
 
   return (
     <div className="py-[80px] px-[36px] flex justify-between relative">
@@ -523,7 +568,6 @@ export const EditProduct = () => {
                 placeholder="Цена актуальная"
                 required
                 onValueChange={({ floatValue }) => {
-                  console.log(floatValue)
                   setItem(
                     prev =>
                       ({
@@ -1026,7 +1070,7 @@ export const EditProduct = () => {
             }}
           />
         </div>
-        <div className="flex flex-col gap-[24px]">
+        <div className="flex flex-col gap-[24px] z-[10]">
           <h3 id="sync" className="text-[24px] pt-[50px]">
             Синхронизация остатков
           </h3>
@@ -1092,9 +1136,10 @@ export const EditProduct = () => {
                   + Добавить строчку
                 </button>
               </div>
-              <div className="flex flex-col relative">
+              <div className="flex flex-col relative max-w-[1020px] w-full overflow-x-auto overflow-y-visible">
                 <div
-                  className={`min-w-fit grid grid-cols-[110px_110px_110px_110px_120px_110px_50px_90px] rounded-t-[8px] bg-[#F9FAFB] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px] py-[10px]`}
+                  className={`w-fit rounded-t-[8px] bg-[#F9FAFB] border-[#DDE1E6] border-solid border-b-[1px] grid gap-[5px] py-[10px]`}
+                  style={{ gridTemplateColumns: columns }}
                 >
                   <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
                     КТ1
@@ -1117,12 +1162,18 @@ export const EditProduct = () => {
                   <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
                     <span className={`block w-[16px] h-[16px] rounded-[8px] bg-[#D9D9D9]`}></span>
                   </p>{' '}
+                  {warehouses.map(warehouse => (
+                    <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
+                      {warehouse?.storeName}
+                    </p>
+                  ))}
                 </div>
 
                 {item?.variantCodes?.map((variant, index) => (
                   <div
-                    key={index}
-                    className="min-w-fit grid grid-cols-[110px_110px_110px_110px_120px_110px_50px_90px] bg-[#fff] py-[20px] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px]"
+                    key={(variant.id || index) * index}
+                    style={{ gridTemplateColumns: columns }}
+                    className="w-fit grid bg-[#fff] py-[20px] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px]"
                   >
                     <label>
                       <NumericFormat
@@ -1297,6 +1348,24 @@ export const EditProduct = () => {
                         }}
                       ></span>
                     </div>
+                    {warehouses.map(warehouse => {
+                      const c = stock.find(s =>
+                        variant.codes.map(i => i.code.includes(s.code))
+                      )?.stock
+
+                      const st =
+                        c?.find(st => st.hasOwnProperty(warehouse.storeId))?.[warehouse.storeId] ||
+                        0
+
+                      return (
+                        <span
+                          key={warehouse.storeId}
+                          className="px-[5px] flex items-center justify-center text-center"
+                        >
+                          {st}
+                        </span>
+                      )
+                    })}
                     <div className="flex items-center justify-center">
                       <button
                         className="bg-[#FFF3F3] text-[#E02844] h-[36px] w-[36px] flex items-center justify-center text-[18px] rounded-[12px]"
@@ -1314,7 +1383,7 @@ export const EditProduct = () => {
             </>
           )}
         </div>
-        <div className="flex flex-col gap-[24px]">
+        <div className="flex flex-col gap-[24px] z-[10]">
           {/* === Фото товара === */}
           <h3 className="text-[20px] font-[500] pt-[50px]" id="media">
             Фото товара
@@ -1352,7 +1421,7 @@ export const EditProduct = () => {
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
-                  <div className="flex flex-col gap-[24px]">
+                  <div className="flex flex-col gap-[24px] z-[10]">
                     <label className="flex items-center gap-[5px] cursor-pointer">
                       <input
                         type="checkbox"
@@ -1450,7 +1519,7 @@ export const EditProduct = () => {
         </div>
 
         {/* === Фото подкладки === */}
-        <div className="flex flex-col gap-[24px] relative ">
+        <div className="flex flex-col gap-[24px] z-[10] relative ">
           <h3 className="text-[20px] font-[500]" id="media">
             Фото подкладки
           </h3>
@@ -1487,7 +1556,7 @@ export const EditProduct = () => {
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
-                  <div className="flex flex-col gap-[24px]">
+                  <div className="flex flex-col gap-[24px] z-[10]">
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
@@ -1523,7 +1592,7 @@ export const EditProduct = () => {
         </div>
 
         {/* === Видео === */}
-        <div className="flex flex-col gap-[24px] relative ">
+        <div className="flex flex-col gap-[24px] z-[10] relative ">
           <h3 className="text-[20px] font-[500]" id="media">
             Видео
           </h3>
