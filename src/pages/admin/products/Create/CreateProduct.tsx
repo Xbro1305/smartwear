@@ -10,6 +10,7 @@ import { IoImage } from 'react-icons/io5'
 import { FaCheck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import './Create.css'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 interface Item {
   main: {
@@ -83,7 +84,16 @@ interface Media {
 }
 
 export const CreateProduct = () => {
-  const [item, setItem] = useState<Item>()
+  const [item, setItem] = useState<Item>({
+    main: {
+      name: '',
+      articul: '',
+      price: 0,
+      description: '',
+      isDeliverable: true,
+      isPublished: true,
+    },
+  } as Item)
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [features, setFeatures] = useState<Feature[]>([])
   const [cares, setCares] = useState<any[]>([])
@@ -236,7 +246,7 @@ export const CreateProduct = () => {
   }
 
   return (
-    <div className="py-[80px] px-[36px] flex gap-[50px] justify-between relative">
+    <div className="py-[80px] px-[36px] flex justify-between relative">
       <div className="flex flex-col gap-[48px] w-[800px]">
         <h1 id="h1">Редактор товара</h1>
         <div className="flex flex-col gap-[24px]">
@@ -426,7 +436,7 @@ export const CreateProduct = () => {
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="prices" className="text-[20px]">
+          <h3 id="prices" className="text-[20px] pt-[50px]">
             Цена
           </h3>
           <div className="flex items-center gap-[20px]">
@@ -629,7 +639,7 @@ export const CreateProduct = () => {
           )}
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="details" className="text-[24px]">
+          <h3 id="details" className="text-[24px] pt-[50px]">
             Характеристики
           </h3>
           <div className="flex gap-[24px]">
@@ -786,7 +796,7 @@ export const CreateProduct = () => {
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="features" className="text-[24px]">
+          <h3 id="features" className="text-[24px] pt-[50px]">
             Особенности
           </h3>
           <div className="grid grid-cols-[1fr_2px_1fr] max-w-[790px] gap-[24px]">
@@ -850,7 +860,7 @@ export const CreateProduct = () => {
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="features" className="text-[24px]">
+          <h3 id="care" className="text-[24px] pt-[50px]">
             Уход за одеждой
           </h3>
           <div className="grid grid-cols-[1fr_2px_1fr] max-w-[790px] gap-[24px]">
@@ -876,7 +886,11 @@ export const CreateProduct = () => {
                       }
                     }}
                   >
-                    <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
+                    <img
+                      src={care.imageUrl}
+                      alt={care.name}
+                      className="w-[30px] aspect-square grayscale huerotate"
+                    />
 
                     <p>{care.name}</p>
                   </div>
@@ -906,7 +920,11 @@ export const CreateProduct = () => {
                         )
                       }}
                     >
-                      <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
+                      <img
+                        src={care.imageUrl}
+                        alt={care.name}
+                        className="w-[30px] aspect-square grayscale brightness-0 invert"
+                      />
                       &times;
                       <p>{care.name}</p>
                     </div>
@@ -934,7 +952,7 @@ export const CreateProduct = () => {
           />
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="sync" className="text-[24px]">
+          <h3 id="sync" className="text-[24px] pt-[50px]">
             Синхронизация остатков
           </h3>
           <div className="flex flex-col gap-sm">
@@ -1220,7 +1238,7 @@ export const CreateProduct = () => {
         </div>
         <div className="flex flex-col gap-[24px]">
           {/* === Фото товара === */}
-          <h3 className="text-[20px] font-[500]" id="media">
+          <h3 className="text-[20px] font-[500] pt-[50px]" id="media">
             Фото товара
           </h3>
 
@@ -1443,7 +1461,7 @@ export const CreateProduct = () => {
         <div className="flex gap-[12px] ml-auto">
           <button
             className="bg-[#20222450] p-[13px] h-[40px] flex items-center rounded-[12px] border-none text-[white]"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(ROUTER_PATHS.ADMINPRODUCTS)}
           >
             Отмена
           </button>
@@ -1455,8 +1473,8 @@ export const CreateProduct = () => {
           </button>
         </div>
       </div>
-      <div className="flex flex-col gap-[24px]">
-        <div className="flex flex-col gap-[10px] bg-[#F4F4F4] text-[#202224] rounded-[8px] p-[24px] ">
+      <div className="flex flex-col gap-[24px] bg-[#fff] fixed right-[60px]">
+        <div className="flex flex-col gap-[10px] bg-[#F4F4F4] text-[#202224] rounded-[8px] p-[24px]">
           <p>Редактируемый товар</p>
           <span className="text-[#20222480]">{item?.main?.articul}</span>
         </div>

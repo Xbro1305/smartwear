@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './Selector.module.scss'
 import { FaChevronDown } from 'react-icons/fa'
 
@@ -9,6 +9,8 @@ interface SelectorProps {
   value: any
   onChange: (value: any) => void
   className?: string
+  isOpen?: boolean
+  onClick?: () => void
 }
 
 export const FilterSelector: React.FC<SelectorProps> = ({
@@ -18,15 +20,21 @@ export const FilterSelector: React.FC<SelectorProps> = ({
   value,
   className,
   onChange,
+  isOpen: propIsOpen,
+  onClick,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(propIsOpen || false)
   const handleOptionClick = (option: any) => {
     onChange(option)
     setIsOpen(false)
   }
 
+  useEffect(() => {
+    setIsOpen(propIsOpen || false)
+  }, [propIsOpen])
+
   return (
-    <div className={`${className} ${styles.selector}`}>
+    <div className={`${className} ${styles.selector}`} onClick={onClick}>
       <h2 className={styles.selector_title}>{title}</h2>
       <div className={styles.selector_value}>
         <p onClick={() => setIsOpen(!isOpen)}>{isEmpty ? 'Не выбрано' : value?.title}</p>

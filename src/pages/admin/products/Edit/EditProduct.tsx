@@ -10,6 +10,7 @@ import { IoImage } from 'react-icons/io5'
 import { FaCheck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import '../Create/Create.css'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 interface Item {
   main: {
@@ -271,6 +272,7 @@ export const EditProduct = () => {
 
       for (const mediaItem of media) {
         // if (mediaItem.file || mediaItem.id == null) continue
+        if (!mediaItem.file) continue
 
         const formData = new FormData()
         formData.append('file', mediaItem.file)
@@ -320,8 +322,8 @@ export const EditProduct = () => {
   }
 
   return (
-    <div className="py-[80px] px-[36px] flex gap-[50px] justify-between relative">
-      <div className="flex flex-col gap-[48px] w-[800px]">
+    <div className="py-[80px] px-[36px] flex justify-between relative">
+      <div className="flex flex-col gap-[48px]">
         <h1 id="h1">Редактор товара</h1>
         <div className="flex flex-col gap-[24px]">
           <h3 id="main" className="text-[20px]">
@@ -510,7 +512,7 @@ export const EditProduct = () => {
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="prices" className="text-[20px]">
+          <h3 id="prices" className="text-[20px] pt-[50px]">
             Цена
           </h3>
           <div className="flex items-center gap-[20px]">
@@ -571,7 +573,7 @@ export const EditProduct = () => {
                   item?.prices?.map((priceItem, index) => (
                     <div
                       key={index}
-                      className="flex flex-col gap-[12px] items-start py-[12px] border-b-[1px] border-solid border-service"
+                      className="flex flex-col gap-[12px] items-start py-[12px] border-b-[1px] border-solid border-service max-w-[800px]"
                     >
                       <div className="flex items-center gap-[20px]">
                         <p>Для цвета</p>
@@ -713,7 +715,7 @@ export const EditProduct = () => {
           )}
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="details" className="text-[24px]">
+          <h3 id="details" className="text-[24px] pt-[50px]">
             Характеристики
           </h3>
           <div className="flex gap-[24px]">
@@ -870,7 +872,7 @@ export const EditProduct = () => {
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="features" className="text-[24px]">
+          <h3 id="features" className="text-[24px] pt-[50px]">
             Особенности
           </h3>
           <div className="grid grid-cols-[1fr_2px_1fr] max-w-[790px] gap-[24px]">
@@ -934,7 +936,7 @@ export const EditProduct = () => {
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="features" className="text-[24px]">
+          <h3 id="care" className="text-[24px] pt-[50px]">
             Уход за одеждой
           </h3>
           <div className="grid grid-cols-[1fr_2px_1fr] max-w-[790px] gap-[24px]">
@@ -960,7 +962,11 @@ export const EditProduct = () => {
                       }
                     }}
                   >
-                    <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
+                    <img
+                      src={care.imageUrl}
+                      alt={care.name}
+                      className="w-[30px] aspect-square grayscale"
+                    />
                     <p>{care.name}</p>
                   </div>
                 ))}
@@ -989,7 +995,11 @@ export const EditProduct = () => {
                         )
                       }}
                     >
-                      <img src={care.imageUrl} alt={care.name} className="w-[30px] aspect-square" />
+                      <img
+                        src={care.imageUrl}
+                        alt={care.name}
+                        className="w-[30px] aspect-square grayscale brightness-0 invert"
+                      />
                       &times;
                       <p>{care.name}</p>
                     </div>
@@ -1017,7 +1027,7 @@ export const EditProduct = () => {
           />
         </div>
         <div className="flex flex-col gap-[24px]">
-          <h3 id="sync" className="text-[24px]">
+          <h3 id="sync" className="text-[24px] pt-[50px]">
             Синхронизация остатков
           </h3>
           <div className="flex flex-col gap-sm">
@@ -1082,7 +1092,7 @@ export const EditProduct = () => {
                   + Добавить строчку
                 </button>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col relative">
                 <div
                   className={`min-w-fit grid grid-cols-[110px_110px_110px_110px_120px_110px_50px_90px] rounded-t-[8px] bg-[#F9FAFB] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px] py-[10px]`}
                 >
@@ -1306,7 +1316,7 @@ export const EditProduct = () => {
         </div>
         <div className="flex flex-col gap-[24px]">
           {/* === Фото товара === */}
-          <h3 className="text-[20px] font-[500]" id="media">
+          <h3 className="text-[20px] font-[500] pt-[50px]" id="media">
             Фото товара
           </h3>
 
@@ -1329,13 +1339,13 @@ export const EditProduct = () => {
             />
           </label>
 
-          <div className="grid grid-cols-[470px_470px] gap-[10px]">
+          <div className="grid grid-cols-[470px_470px] gap-[10px] relative ">
             {itemMedia
               ?.filter(item => item.type == 'cover' || item.type == 'photo')
               ?.map(m => (
                 <div
                   key={m?.file?.name || m?.id}
-                  className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
+                  className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420] bg-[#fff]"
                 >
                   <img
                     src={m?.url || URL.createObjectURL(m?.file)}
@@ -1440,7 +1450,7 @@ export const EditProduct = () => {
         </div>
 
         {/* === Фото подкладки === */}
-        <div className="flex flex-col gap-[24px]">
+        <div className="flex flex-col gap-[24px] relative ">
           <h3 className="text-[20px] font-[500]" id="media">
             Фото подкладки
           </h3>
@@ -1470,7 +1480,7 @@ export const EditProduct = () => {
               ?.map(item => (
                 <div
                   key={item.id || item.file.name}
-                  className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
+                  className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420] bg-[#fff]"
                 >
                   <img
                     src={item.url || URL.createObjectURL(item.file)}
@@ -1513,7 +1523,7 @@ export const EditProduct = () => {
         </div>
 
         {/* === Видео === */}
-        <div className="flex flex-col gap-[24px]">
+        <div className="flex flex-col gap-[24px] relative ">
           <h3 className="text-[20px] font-[500]" id="media">
             Видео
           </h3>
@@ -1542,7 +1552,7 @@ export const EditProduct = () => {
               ?.map(item => (
                 <div
                   key={item.id || item.file.name}
-                  className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
+                  className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420] bg-[#fff]"
                 >
                   <video
                     src={item.url || URL.createObjectURL(item.file)}
@@ -1585,10 +1595,10 @@ export const EditProduct = () => {
         </div>
 
         {/* === Кнопки === */}
-        <div className="flex gap-[12px] ml-auto">
+        <div className="flex gap-[12px] ml-auto relative z-[10] bg-[#fff]">
           <button
             className="bg-[#20222450] p-[13px] h-[40px] flex items-center rounded-[12px] border-none text-[white]"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(ROUTER_PATHS.ADMINPRODUCTS)}
           >
             Отмена
           </button>
@@ -1600,7 +1610,7 @@ export const EditProduct = () => {
           </button>
         </div>
       </div>
-      <div className="flex flex-col gap-[24px]">
+      <div className="flex flex-col gap-[24px] bg-[#fff] fixed right-[60px]">
         <div className="flex flex-col gap-[10px] bg-[#F4F4F4] text-[#202224] rounded-[8px] p-[24px] ">
           <p>Редактируемый товар</p>
           <span className="text-[#20222480]">{item?.main?.articul}</span>

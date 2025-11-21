@@ -31,6 +31,7 @@ interface Color {
 interface Size {
   id: number
   name: string
+  orderNum: number
 }
 
 export const ProductPage = () => {
@@ -79,7 +80,13 @@ export const ProductPage = () => {
 
         axios(`${import.meta.env.VITE_APP_API_URL}/media/${res.data.id}`)
           .then(res => {
-            setMedia(res.data)
+            setMedia(
+              res.data.sort((a: Media, b: Media) => {
+                if (a.kind === 'cover' && b.kind !== 'cover') return -1
+                if (a.kind !== 'cover' && b.kind === 'cover') return 1
+                return a.id - b.id
+              })
+            )
             setSelectedPhoto(res.data.find((i: any) => i.kind == 'cover') || res.data[0])
           })
           .catch(err => console.log(err))
@@ -101,15 +108,42 @@ export const ProductPage = () => {
     item?.price ||
     0
 
+  const isSizeAvailableForColor = (sizeId: number) => {
+    if (!selectedColor) return true
+
+    return item.variants?.some(
+      (v: any) => v.colorAttrValueId === selectedColor.id && v.sizeValueId === sizeId
+    )
+  }
+
+  useEffect(() => {
+    if (!selectedColor || !sizes?.length) return
+
+    const firstAvailableSize = sizes.find(size =>
+      item.variants?.some(
+        (v: any) => v.colorAttrValueId === selectedColor.id && v.sizeValueId === size.id
+      )
+    )
+
+    if (firstAvailableSize) {
+      setSelectedSize(firstAvailableSize)
+    } else {
+      setSelectedSize(undefined)
+    }
+  }, [selectedColor])
+
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
       {item && (
         <div className="flex flex-col gap-xl">
+          <p className="text-[16px] text-[#B0B7BF]">
+            Главная {'>'} {id}
+          </p>
           <div className="flex flex-col lg:flex-row items-start gap-xl">
             <div className="lg:hidden flex flex-col gap-[20px]">
               <p className="text-base text-dark">Модель: {item.articul}</p>
               <h3 className="h1">{item.name}</h3>
-              <p className="p1" dangerouslySetInnerHTML={{ __html: item.description }}></p>
+              <div className="p1" dangerouslySetInnerHTML={{ __html: item.description }}></div>
               <p className="p1 flex items-center gap-[5px]">
                 <HiThumbUp className="text-red" />
                 Купили более 100 раз
@@ -143,7 +177,7 @@ export const ProductPage = () => {
             <div className="flex flex-col gap-[32px] w-full lg:w-[40%]">
               <div className="flex-col hidden lg:flex">
                 <h1 className="h1">{item.name}</h1>
-                <p dangerouslySetInnerHTML={{ __html: item.description }}></p>
+                <div dangerouslySetInnerHTML={{ __html: item.description }}></div>
               </div>
               <div className="hidden lg:flex flex-col gap-[10px]">
                 <div className="flex flex-row items-end gap-[20px]">
@@ -229,7 +263,10 @@ export const ProductPage = () => {
                       <span
                         key={color.id}
                         className={`block w-[27px] h-[27px] rounded-[50%] cursor-pointer`}
-                        style={{ background: color.meta.colorCode }}
+                        style={{
+                          background: color.meta.colorCode,
+                          border: selectedColor?.id == color.id ? '1px solid black' : '',
+                        }}
                         onClick={() => setSelectedColor(color)}
                       ></span>
                     ))}
@@ -244,16 +281,32 @@ export const ProductPage = () => {
                     </p>
                   </div>
                   <div className="flex gap-[10px]">
-                    {sizes?.map(size => (
-                      <p
-                        key={size.id}
-                        className="text-[23px] cursor-pointer p-[10px]"
-                        onClick={() => setSelectedSize(size)}
-                        style={{ background: selectedSize?.id == size.id ? '#F2F2F2' : '' }}
-                      >
-                        {size.name}
-                      </p>
-                    ))}
+                    {sizes
+                      ?.sort((a, b) => a.orderNum - b.orderNum)
+                      ?.map(size => {
+                        const isAvailable = isSizeAvailableForColor(size.id)
+
+                        return (
+                          <div
+                            key={size.id}
+                            className={`
+                              relative text-[23px] p-[10px] cursor-pointer
+                              ${!isAvailable ? 'text-[#00000060] cursor-not-allowed' : ''}
+                              ${selectedSize?.id === size.id ? 'bg-[#F2F2F2]' : ''}
+                            `}
+                            onClick={() => {
+                              if (!isAvailable) return
+                              setSelectedSize(size)
+                            }}
+                          >
+                            {size.name}
+
+                            {!isAvailable && (
+                              <span className="absolute rotate-[45deg] block border-b border-[#00000060] translate-y-[50%] w-full" />
+                            )}
+                          </div>
+                        )
+                      })}
                   </div>
                 </div>
                 <div className="flex lg:hidden justify-center flex-row items-end gap-[20px] -mb-[10px]">
@@ -461,7 +514,7 @@ export const ProductPage = () => {
                       <p className="p2">Пн-вт 9:00-21:00, сб-вс выходной</p>
                       <div className="flex items-center justify-between mt-[20px]">
                         <button className="bg-red h-[50px] rounded-[8px] text-white px-[24px]">
-                          Заказать
+                          Подробнее
                         </button>
                         <p className="text-[red_!important] p2">Количество: {item.quantity} шт.</p>
                       </div>
@@ -496,8 +549,8 @@ export const ProductPage = () => {
           <div className={styles.home_recommendations}>
             <h2 className={'h2'}>Рекомендуем на зиму</h2>
             <div className={styles.home_recommendations_wrapper}>
-              {recomendations.map(i => (
-                <div className={styles.home_recommendations_item} key={i.title}>
+              {recomendations.map((i, index) => (
+                <div className={`${styles.home_recommendations_item}`} key={index}>
                   <img alt={''} src={i.img} />
                   <div className={styles.home_recommendations_item_info}>
                     <div className={styles.home_recommendations_item_top}>
@@ -521,15 +574,21 @@ export const ProductPage = () => {
                       thousandSeparator={' '}
                       value={i.price}
                     />
-                    <a className={'button'} href={''}>
+                    <a
+                      className={
+                        'button opacity-85 hover:opacity-100 transition-opactiy transition-[0.3s]'
+                      }
+                      href={''}
+                    >
                       Подробнее
                     </a>
                   </div>
                 </div>
               ))}
             </div>
-
-            <Slider className={styles.home_recommendations_mob} {...settings}>
+          </div>
+          <div className="lg:hidden">
+            <Slider className={`${styles.home_recommendations_mob}`} {...settings}>
               {recomendations.map((i, index) => (
                 <div className={styles.home_recommendations_item} key={index}>
                   <img alt={''} src={i.img} />
@@ -555,13 +614,18 @@ export const ProductPage = () => {
                       thousandSeparator={' '}
                       value={i.price}
                     />
-                    <a className={'button'} href={''}>
+                    <a
+                      className={
+                        'button opacity-85 hover:opacity-100 transition-opactiy transition-[0.3s]'
+                      }
+                      href={''}
+                    >
                       Подробнее
                     </a>
                   </div>
                 </div>
               ))}
-            </Slider>
+            </Slider>{' '}
           </div>
         </div>
       )}
@@ -606,27 +670,6 @@ const recomendations = [
     img: catalog,
     price: 24150,
     sale: false,
-    title: 'Женская демисезонная куртка limolady 3279',
-  },
-  {
-    colors: ['#849051', '#EFC7BD'],
-    img: catalog,
-    price: 24150,
-    sale: false,
-    title: 'Женская демисезонная куртка limolady 3279',
-  },
-  {
-    colors: ['#849051', '#EFC7BD'],
-    img: catalog,
-    price: 24150,
-    sale: true,
-    title: 'Женская демисезонная куртка limolady 3279',
-  },
-  {
-    colors: ['#849051', '#EFC7BD'],
-    img: catalog,
-    price: 24150,
-    sale: true,
     title: 'Женская демисезонная куртка limolady 3279',
   },
   {

@@ -12,7 +12,7 @@ export const ROUTER_PATHS = {
   ADMINSTORES: '/admin/stores',
   CREATE_PRODUCT: '/admin/products/create',
   EDIT_PRODUCT: '/admin/products/edit',
-  PRODUCT: '/product',
+  PRODUCT: '',
   ADMINLOGIN: '/admin/login',
   ARTICLES: '/articles',
   BOOKMARKS: '/bookmarks',

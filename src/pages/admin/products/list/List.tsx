@@ -212,6 +212,12 @@ export const ProductsList = () => {
                 <FaFilter />
                 Фильтр
               </p>
+              {isFilterOpen && (
+                <div
+                  className="z-40 fixed w-full h-screen top-[0] left-[0]"
+                  onClick={() => setIsFilterOpen(false)}
+                ></div>
+              )}
               <FilterItems
                 isFilterOpen={isFilterOpen}
                 handleFilterChange={handleFilterChange}
@@ -339,6 +345,7 @@ export const ProductsList = () => {
                     </Link>
                     <Link
                       to={`${PRODUCT}/${i.seoSlug}`}
+                      target="_blank"
                       className={`${styles.productsList_top_deleteButton} ${styles.productsList_hoverItem} `}
                     >
                       <LuEye />
@@ -401,6 +408,7 @@ const FilterItems = ({
 }) => {
   const [stores, setStores] = useState<any[]>([])
   const [attributs, setAttributes] = useState<Attribute[]>([])
+  const [openedFilter, setOpenedFilter] = useState<string | null>(null)
 
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/stores`, {
@@ -434,7 +442,7 @@ const FilterItems = ({
   return (
     <>
       <div
-        className={`${styles.productsList_top_filterButton_child} ${isFilterOpen ? styles.productsList_top_filterButton_child_active : 'hidden'}`}
+        className={`${styles.productsList_top_filterButton_child} ${isFilterOpen ? styles.productsList_top_filterButton_child_active : 'hidden'} z-50 relative`}
       >
         <label>
           <FilterSelector
@@ -447,6 +455,8 @@ const FilterItems = ({
             value={filters.gender}
             onChange={value => handleFilterChange('gender', value)}
             title={'Пол'}
+            onClick={() => setOpenedFilter(openedFilter === 'gender' ? null : 'gender')}
+            isOpen={openedFilter === 'gender'}
           />
         </label>
         <label>
@@ -459,6 +469,8 @@ const FilterItems = ({
             value={filters.image}
             onChange={value => handleFilterChange('image', value)}
             title={'Изображение'}
+            onClick={() => setOpenedFilter(openedFilter === 'image' ? null : 'image')}
+            isOpen={openedFilter === 'image'}
           />
         </label>
         <label>
@@ -471,6 +483,8 @@ const FilterItems = ({
             value={filters.availability}
             onChange={value => handleFilterChange('availability', value)}
             title={'Наличие'}
+            onClick={() => setOpenedFilter(openedFilter === 'stock' ? null : 'stock')}
+            isOpen={openedFilter === 'stock'}
           />
         </label>
         <label>
@@ -484,6 +498,8 @@ const FilterItems = ({
             value={filters.season}
             onChange={value => handleFilterChange('season', value)}
             title={'Сезон'}
+            onClick={() => setOpenedFilter(openedFilter === 'season' ? null : 'season')}
+            isOpen={openedFilter === 'season'}
           />
         </label>
         <label className="col-span-2">
@@ -496,6 +512,8 @@ const FilterItems = ({
             value={filters.status}
             onChange={value => handleFilterChange('status', value)}
             title={'Статус'}
+            onClick={() => setOpenedFilter(openedFilter === 'status' ? null : 'status')}
+            isOpen={openedFilter === 'status'}
           />
         </label>
         <label className="col-span-2">
@@ -505,6 +523,8 @@ const FilterItems = ({
             value={filters.warehouse}
             onChange={value => handleFilterChange('warehouse', value)}
             title={'Склад'}
+            onClick={() => setOpenedFilter(openedFilter === 'warehouse' ? null : 'warehouse')}
+            isOpen={openedFilter === 'warehouse'}
           />
         </label>
       </div>
