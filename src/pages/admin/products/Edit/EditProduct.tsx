@@ -356,7 +356,7 @@ export const EditProduct = () => {
       }
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      // window.location.href = '/admin/products'
+      window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
@@ -923,28 +923,30 @@ export const EditProduct = () => {
             <div className="flex flex-col gap-[10px]">
               <p className="text-[14px] font-medium">Все особенности</p>
               <div className="flex flex-wrap gap-[8px]">
-                {features.map(feature => (
-                  <div
-                    key={feature.id}
-                    className="bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
-                    onClick={() => {
-                      if (!item?.main.featureIds?.includes(feature.id)) {
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              main: {
-                                ...prev?.main,
-                                featureIds: [...(prev?.main.featureIds || []), feature.id],
-                              },
-                            }) as Item
-                        )
-                      }
-                    }}
-                  >
-                    {feature.name}
-                  </div>
-                ))}
+                {features
+                  .filter(feature => !item?.main?.featureIds?.includes(feature.id))
+                  .map(feature => (
+                    <div
+                      key={feature.id}
+                      className="bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
+                      onClick={() => {
+                        if (!item?.main.featureIds?.includes(feature.id)) {
+                          setItem(
+                            prev =>
+                              ({
+                                ...prev,
+                                main: {
+                                  ...prev?.main,
+                                  featureIds: [...(prev?.main.featureIds || []), feature.id],
+                                },
+                              }) as Item
+                          )
+                        }
+                      }}
+                    >
+                      {feature.name}
+                    </div>
+                  ))}
               </div>
             </div>
             <span className="block h-full w-[1px] bg-[#20222420]"></span>

@@ -314,7 +314,7 @@ export const AdminStores = () => {
               />
               Магазин отправитель МойСклад
             </div>
-            {/* {creating.isOnlineSender && (
+            {creating.isOnlineSender && (
               <div className="flex flex-col">
                 <h3 className="h4">Синхронизация с МойСклад</h3>
                 <label className="flex flex-col gap-sm w-full">
@@ -329,7 +329,7 @@ export const AdminStores = () => {
                   />
                 </label>
               </div>
-            )} */}
+            )}
             <div className="flex gap-[12px] ml-auto">
               <button
                 id="admin-button"
@@ -489,7 +489,7 @@ export const AdminStores = () => {
               />
               Магазин отправитель МойСклад
             </div>
-            {/* {editing.isOnlineSender && (
+            {editing.isOnlineSender && (
               <div className="flex flex-col">
                 <h3 className="h4">Синхронизация с МойСклад</h3>
                 <label className="flex flex-col gap-sm w-full">
@@ -504,7 +504,7 @@ export const AdminStores = () => {
                   />
                 </label>
               </div>
-            )} */}
+            )}
             <div className="flex gap-[12px] ml-auto">
               <button
                 id="admin-button"

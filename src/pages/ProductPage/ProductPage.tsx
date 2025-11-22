@@ -63,6 +63,18 @@ export const ProductPage = () => {
         })
         const sizes = Array.from(sizesMap.values()) as Size[]
 
+        document.title = res.data.metaTitle
+
+        let meta = document.querySelector('meta[name="description"]')
+
+        if (!meta) {
+          meta = document.createElement('meta')
+          meta.setAttribute('name', 'description')
+          document.head.appendChild(meta)
+        }
+
+        meta.setAttribute('content', res.data.metaDescription)
+
         // 2. Уникальные цвета по value
         const colorsMap = new Map()
         res.data.variants.forEach((v: any) => {
@@ -213,7 +225,7 @@ export const ProductPage = () => {
                 </a>
               </div>
               <div className="flex flex-col gap-[20px]">
-                <div className="flex items-center justify-between">
+                <div className="hidden lg:flex items-center justify-between">
                   <p className="text-[22px]">Модель: {item.articul}</p>
                   <p className="p1 flex items-center gap-[10px]">
                     <HiThumbUp className="text-red" />
@@ -428,7 +440,7 @@ export const ProductPage = () => {
                         <p className="p2">Пн-вт 9:00-21:00, сб-вс выходной</p>
                         <div className="flex items-center justify-between mt-[20px]">
                           <button className="bg-red h-[50px] rounded-[8px] text-white px-[24px]">
-                            Заказать
+                            Подробнее
                           </button>
                           <p className="text-[red_!important] p2">
                             Количество: {item.quantity} шт.
@@ -456,7 +468,11 @@ export const ProductPage = () => {
                   <div className="flex md:hidden flex-col gap-[10px]">
                     {item.cares.map((care: any) => (
                       <div key={care.id} className="flex items-center gap-[10px]">
-                        <img src={care.careIcon.imageUrl} alt={care.careIcon.name} />
+                        <img
+                          src={care.careIcon.imageUrl}
+                          alt={care.careIcon.name}
+                          className="w-[20px] aspect-square grayscale"
+                        />
                         <p className="p1">{care.careIcon.name}</p>
                       </div>
                     ))}
@@ -527,7 +543,11 @@ export const ProductPage = () => {
                 <div className="flex flex-col gap-[10px]">
                   {item.cares.map((care: any) => (
                     <div className="flex items-center gap-[10px]" key={care.careIcon.id}>
-                      <img src={care.careIcon.imageUrl} alt={care.careIcon.name} />
+                      <img
+                        src={care.careIcon.imageUrl}
+                        alt={care.careIcon.name}
+                        className="w-[25px] aspect-square grayscale"
+                      />
                       <p className="p1">{care.careIcon.name}</p>
                     </div>
                   ))}
