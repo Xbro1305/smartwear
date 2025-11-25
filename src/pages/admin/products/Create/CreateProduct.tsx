@@ -83,14 +83,20 @@ interface Media {
   id?: any
 }
 
-interface StockItem {
-  code: string
-  stock: { [storeId: string]: number }[]
+interface Store {
+  storeId: number
+  name: string
+  shortName?: string
 }
 
-interface UniqueStore {
-  storeId: string
-  storeName?: string
+interface Stock {
+  code: string
+  stores: {
+    storeId: number
+    name: string
+    quantity: number
+    shortName?: string
+  }[]
 }
 
 export const CreateProduct = () => {
@@ -109,8 +115,8 @@ export const CreateProduct = () => {
   const [cares, setCares] = useState<any[]>([])
   const [sizeTypes, setSizeTypes] = useState<any[]>([])
   const [itemMedia, setItemMedia] = useState<Media[]>()
-  const [stock, setStock] = useState<StockItem[]>([])
-  const [warehouses, setWarehouses] = useState<UniqueStore[]>([])
+  const [stock, setStock] = useState<Stock[]>([])
+  const [warehouses, setWarehouses] = useState<Store[]>([])
 
   const navigate = useNavigate()
 
@@ -163,49 +169,37 @@ export const CreateProduct = () => {
   }
 
   const syncronize = async () => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/preview`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      data: {
-        codes: item.variantCodes?.flatMap(c =>
-          c.codes.map(i => i.code).filter(code => code && code.trim() !== '')
-        ),
-      },
+    }).catch(err => toast.error(err.response.data.message))
+
+    const codes =
+      item?.variantCodes
+        ?.map(c => c.codes.map(vc => vc.code).filter(code => code && code.trim() !== ''))
+        .filter(arr => arr && arr.length > 0)
+        .flat() || []
+
+    const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
+
+    axios(url, {
+      method: 'GET',
     })
-      .then(res => {
-        const st = Object.values(
-          res.data.reduce((acc: any, item: any) => {
-            const code = item.variantCode
-
-            if (!acc[code]) {
-              acc[code] = {
-                code,
-                stock: [],
-              }
-            }
-
-            acc[code].stock.push({
-              [item.storeId]: item.quantity,
-            })
-
-            return acc
-          }, {})
-        )
-
-        setStock(st as StockItem[])
+      .then((res: { data: Stock[] }) => {
+        setStock(res.data as Stock[])
 
         const uniqueStores = Array.from(
           new Map(
-            res.data.map((item: any) => [
-              item.storeId,
-              { storeId: item.storeId, storeName: item.storeName },
-            ])
+            res.data.flatMap(item =>
+              item.stores.map(store => [
+                store.storeId,
+                { storeId: store.storeId, name: store.name, shortName: store.shortName },
+              ])
+            )
           ).values()
         )
-        setWarehouses(uniqueStores as UniqueStore[])
+        setWarehouses(uniqueStores as Store[])
+
+        console.log(uniqueStores)
       })
       .catch(err => toast.error(err.response.data.message))
   }
@@ -1117,7 +1111,7 @@ export const CreateProduct = () => {
                         </p>{' '}
                         {warehouses.map(warehouse => (
                           <p className="flex items-center justify-center text-center text-[#20222480] text-[12px]">
-                            {warehouse?.storeName}
+                            Остаток на {warehouse?.shortName}
                           </p>
                         ))}
                       </div>
@@ -1304,21 +1298,20 @@ export const CreateProduct = () => {
                             ></span>
                           </div>
                           {warehouses.map(warehouse => {
-                            const c = stock.find(s =>
-                              variant.codes.map(i => i.code.includes(s.code))
-                            )?.stock
-
-                            const st =
-                              c?.find(st => st.hasOwnProperty(warehouse.storeId))?.[
-                                warehouse.storeId
-                              ] || 0
+                            const quantity = stock
+                              .filter(s => variant.codes.some(vc => vc.code === s.code))
+                              .filter(s => s.stores.some(st => st.storeId === warehouse.storeId))
+                              .reduce((acc, s) => {
+                                const store = s.stores.find(st => st.storeId === warehouse.storeId)
+                                return acc + (store ? store.quantity : 0)
+                              }, 0)
 
                             return (
                               <span
                                 key={warehouse.storeId}
                                 className="px-[5px] flex items-center justify-center text-center"
                               >
-                                {st}
+                                {quantity}
                               </span>
                             )
                           })}
