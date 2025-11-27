@@ -117,13 +117,15 @@ export const CustomSelect: React.FC<SelectProps> = ({
       <button
         ref={triggerRef}
         type="button"
-        className="w-full cursor-pointer px-[15px] h-[40px] border-[1px] flex items-center justify-between border-solid border-[#BDBFC7] rounded-xl bg-white"
+        className="w-full gap-[10px] cursor-pointer px-[15px] h-[40px] border-[1px] flex items-center justify-between border-solid border-[#BDBFC7] rounded-xl bg-white"
         onClick={e => {
           e.stopPropagation()
           setOpened(s => !s)
         }}
       >
-        <p className={`text-[14px] ${!value || value.id === 0 ? 'text-[#20222460]' : ''}`}>
+        <p
+          className={`text-[14px] whitespace-nowrap max-w-[calc(100%-10px)] ${!value || value.id === 0 ? 'text-[#20222460]' : ''}`}
+        >
           {value && value.id !== 0 ? value.value : placeholder}
         </p>
 
@@ -143,7 +145,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
                 onChange(item.id, item.value)
                 setOpened(false)
               }}
-              className="p-[4px_16px] cursor-pointer bg-[#F2F3F5] rounded-xl text-[13px] select-none"
+              className="p-[4px_16px] whitespace-nowrap cursor-pointer bg-[#F2F3F5] rounded-xl text-[13px] select-none"
             >
               {item.value}
             </div>

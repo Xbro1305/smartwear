@@ -26,6 +26,7 @@ interface Color {
   value: string
   id: number
   meta: { colorCode: string }
+  alias: string
 }
 
 interface Size {
@@ -47,6 +48,8 @@ export const ProductPage = () => {
   const [selectedInfo, setSelectedInfo] = useState<'features' | 'info' | 'shops' | 'care'>(
     'features'
   )
+
+  console.log(colors)
 
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/products/slug/${id}`)
@@ -80,7 +83,7 @@ export const ProductPage = () => {
         res.data.variants.forEach((v: any) => {
           const color = v.colorAttrValue
           if (!colorsMap.has(color.value)) {
-            colorsMap.set(color.value, color)
+            colorsMap.set(color.value, { ...color, alias: v.colorAlias })
           }
         })
         const colors = Array.from(colorsMap.values()) as Color[]
@@ -268,7 +271,7 @@ export const ProductPage = () => {
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-between">
                     <p className="text-[22px]">Цвет: </p>
-                    <p className="p1 flex items-center gap-[10px]">{selectedColor?.value}</p>
+                    <p className="p1 flex items-center gap-[10px]">{selectedColor?.alias}</p>
                   </div>
                   <div className="flex gap-[10px]">
                     {colors?.map(color => (
@@ -497,7 +500,7 @@ export const ProductPage = () => {
                   {item.features.map((feature: any) => (
                     <li
                       dangerouslySetInnerHTML={{ __html: feature.feature.description }}
-                      key={feature.feture.id}
+                      key={feature?.feature?.id}
                     ></li>
                   ))}
                 </ul>
@@ -596,11 +599,11 @@ export const ProductPage = () => {
                     />
                     <a
                       className={
-                        'button opacity-85 hover:opacity-100 transition-opactiy transition-[0.3s]'
+                        'button w-[100%_!important] h-[60px_!important] text-center items-center flex justify-center rounded-[0_!important] hover:opacity-100 transition-opactiy transition-[0.3s]'
                       }
                       href={''}
                     >
-                      Подробнее
+                      Посмотреть подробнее
                     </a>
                   </div>
                 </div>
@@ -636,11 +639,11 @@ export const ProductPage = () => {
                     />
                     <a
                       className={
-                        'button opacity-85 hover:opacity-100 transition-opactiy transition-[0.3s]'
+                        'button opacity-85 w-full hover:opacity-100 transition-opactiy transition-[0.3s]'
                       }
                       href={''}
                     >
-                      Подробнее
+                      Посмотреть подробнее
                     </a>
                   </div>
                 </div>

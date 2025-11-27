@@ -1510,7 +1510,7 @@ export const Colors = () => {
                                 : {
                                     ...editing,
                                     meta: {
-                                      ...editing.meta,
+                                      ...(editing?.meta || []),
                                       aliases: editing.meta.aliases.filter((_, i) => i !== index),
                                     },
                                   }
@@ -1579,8 +1579,8 @@ export const Colors = () => {
                             : {
                                 ...editing,
                                 meta: {
-                                  ...editing.meta,
-                                  aliases: [...editing.meta.aliases, adding.trim()],
+                                  ...editing?.meta,
+                                  aliases: [...(editing?.meta?.aliases || []), adding.trim()],
                                 },
                               }
                         )

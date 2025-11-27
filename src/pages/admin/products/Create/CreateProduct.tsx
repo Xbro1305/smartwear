@@ -42,9 +42,9 @@ interface Item {
     oldPrice: number
   }[]
   variantCodes?: {
+    colorAlias: string
+    colorAttrValue?: string
     colorAttrValueId: number
-    // colorAttrValue: string
-    // colorAlias: string
     colorCode: string
     sizeValueId: number
     codes: {
@@ -226,7 +226,7 @@ export const CreateProduct = () => {
         id => id != null
       ),
       simpleAttributes: {
-        [attributes.find(i => i.name === 'Утеплитель')?.id || 0]: item?.main.materialId,
+        [attributes.find(i => i.name === 'Вид утеплителя')?.id || 0]: item?.main.materialId,
       },
       quantity: 1,
       seoSlug: item?.seo.seoSlug,
@@ -302,6 +302,8 @@ export const CreateProduct = () => {
   const columns = `110px 110px 110px 110px 120px 110px 50px ${warehouses
     .map(() => '110px')
     .join(' ')} 90px`
+
+  console.log(item)
 
   return (
     <div className="py-[80px] px-[36px] flex justify-between relative">
@@ -815,17 +817,17 @@ export const CreateProduct = () => {
               />
             </div>
             <div className="flex flex-col gap-sm">
-              <p className="font-semibold text-[14px]">Утеплитель</p>
+              <p className="font-semibold text-[14px]">Вид утеплителя</p>
               <CustomSelect
                 className="w-[372px]"
                 data={
                   attributes
-                    .find(attr => attr.name === 'Утеплитель')
+                    .find(attr => attr.name === 'Вид утеплителя')
                     ?.values.map(item => {
                       return { id: item.id, value: item.value }
                     }) || []
                 }
-                placeholder="Выберите Утеплитель"
+                placeholder="Выберите Вид утеплителя"
                 onChange={id => {
                   setItem(
                     prev =>
@@ -840,7 +842,7 @@ export const CreateProduct = () => {
                 }}
                 value={
                   attributes
-                    .find(attr => attr.name === 'Утеплитель')
+                    .find(attr => attr.name === 'Вид утеплителя')
                     ?.values.map(item => {
                       return { id: item.id, value: item.value }
                     })
@@ -927,34 +929,36 @@ export const CreateProduct = () => {
             <div className="flex flex-col gap-[10px]">
               <p className="text-[14px] font-medium">Все рекомендации</p>
               <div className="flex flex-wrap gap-[8px]">
-                {cares.map(care => (
-                  <div
-                    key={care.id}
-                    className="relative care bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
-                    onClick={() => {
-                      if (!item?.main.careIds?.includes(care.id)) {
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              main: {
-                                ...prev?.main,
-                                careIds: [...(prev?.main.careIds || []), care.id],
-                              },
-                            }) as Item
-                        )
-                      }
-                    }}
-                  >
-                    <img
-                      src={care.imageUrl}
-                      alt={care.name}
-                      className="w-[30px] aspect-square grayscale huerotate"
-                    />
+                {cares
+                  .filter(care => !item?.main?.careIds?.includes(care.id))
+                  .map(care => (
+                    <div
+                      key={care.id}
+                      className="relative care bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
+                      onClick={() => {
+                        if (!item?.main.careIds?.includes(care.id)) {
+                          setItem(
+                            prev =>
+                              ({
+                                ...prev,
+                                main: {
+                                  ...prev?.main,
+                                  careIds: [...(prev?.main.careIds || []), care.id],
+                                },
+                              }) as Item
+                          )
+                        }
+                      }}
+                    >
+                      <img
+                        src={care.imageUrl}
+                        alt={care.name}
+                        className="w-[30px] aspect-square grayscale huerotate"
+                      />
 
-                    <p>{care.name}</p>
-                  </div>
-                ))}
+                      <p>{care.name}</p>
+                    </div>
+                  ))}
               </div>
             </div>
             <span className="block h-full w-[1px] bg-[#20222420]"></span>
@@ -1063,6 +1067,7 @@ export const CreateProduct = () => {
                       colorAttrValueId: 0,
                       sizeValueId: 0,
                       colorCode: '',
+                      colorAlias: '',
                       codes: [{ code: '' }, { code: '' }, { code: '' }],
                     })
                     setItem(
@@ -1145,6 +1150,7 @@ export const CreateProduct = () => {
                           </label>
                           <label className="px-[5px]">
                             <NumericFormat
+                              autoFocus
                               allowLeadingZeros={true}
                               type="text"
                               className="admin-input max-w-full"
@@ -1227,39 +1233,30 @@ export const CreateProduct = () => {
                             <CustomSelect
                               className="w-full"
                               data={
-                                // attributes
-                                //   .find(attr => attr.name === 'Цвет')
-                                //   ?.values.flatMap(
-                                //     (item, idx) =>
-                                //       item.meta?.aliases?.map((i, index) => ({
-                                //         id: Number(`${index}${idx}`),
-                                //         value: i,
-                                //       })) || []
-                                //   ) || []
                                 attributes
-                                  .find(item => item.name == 'Цвет')
-                                  ?.values.map(i => ({ id: i.id, value: i.value })) || []
+                                  .find(attr => attr.name === 'Цвет')
+                                  ?.values.flatMap(
+                                    (item, idx) =>
+                                      item.meta?.aliases?.map((i, index) => ({
+                                        id: Number(`${index}${idx}`),
+                                        value: i,
+                                      })) || []
+                                  ) || []
+                                // attributes
+                                //   .find(item => item.name == 'Цвет')
+                                //   ?.values.map(i => ({ id: i.id, value: i.value })) || []
                               }
                               placeholder="Цвет"
-                              onChange={id => {
-                                // const color = attributes
-                                //   .find(attr => attr.name == 'Цвет')
-                                //   ?.values.find(item => item.meta?.aliases?.includes(value || ''))
-                                // newVariantCodes[index].colorAttrValueId = color?.id || 0
-                                // newVariantCodes[index].colorAttrValue = color?.value || ''
-                                // newVariantCodes[index].colorAlias = value || ''
-                                // newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
-                                // setItem(
-                                //   prev =>
-                                //     ({
-                                //       ...prev,
-                                //       variantCodes: newVariantCodes,
-                                //     }) as Item
-                                // )
+                              onChange={(_, value) => {
                                 const newVariantCodes = [...(item?.variantCodes || [])]
 
-                                newVariantCodes[index].colorAttrValueId = id
-
+                                const color = attributes
+                                  .find(attr => attr.name == 'Цвет')
+                                  ?.values.find(item => item.meta?.aliases?.includes(value || ''))
+                                newVariantCodes[index].colorAttrValueId = color?.id || 0
+                                newVariantCodes[index].colorAttrValue = color?.value || ''
+                                newVariantCodes[index].colorAlias = value || ''
+                                newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
                                 setItem(
                                   prev =>
                                     ({
@@ -1267,33 +1264,37 @@ export const CreateProduct = () => {
                                       variantCodes: newVariantCodes,
                                     }) as Item
                                 )
+
+                                // newVariantCodes[index].colorAttrValueId = id
+
+                                // setItem(
+                                //   prev =>
+                                //     ({
+                                //       ...prev,
+                                //       variantCodes: newVariantCodes,
+                                //     }) as Item
+                                // )
                               }}
                               value={{
                                 id: item.variantCodes?.[index].colorAttrValueId || 0,
-                                value:
-                                  attributes
-                                    .find(i => i.name == 'Цвет')
-                                    ?.values.find(i => i.id == variant.colorAttrValueId)?.value ||
-                                  '',
+                                value: variant.colorAlias || '',
                               }}
                               showSuggestions={false}
                             />
                           </div>
                           <div className="px-[5px] flex justify-center items-center text-center">
                             {
-                              attributes
-                                .find(i => i.name == 'Цвет')
-                                ?.values.find(i => i.id == variant.colorAttrValueId)?.value
+                              // attributes
+                              //   .find(i => i.name == 'Цвет')
+                              //   ?.values.find(i => i.id == variant.colorAttrValueId)?.value
+                              variant.colorAttrValue
                             }
                           </div>
                           <div className="flex items-center justify-center">
                             <span
                               className={`block w-[16px] h-[16px] rounded-[8px]`}
                               style={{
-                                background: attributes
-                                  .find(i => i.name == 'Цвет')
-                                  ?.values.find(i => i.id == variant.colorAttrValueId)?.meta
-                                  ?.colorCode,
+                                background: variant.colorCode || '#D9D9D9',
                               }}
                             ></span>
                           </div>

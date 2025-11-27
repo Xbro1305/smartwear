@@ -45,8 +45,8 @@ interface Item {
   variantCodes?: {
     colorAttrValueId: number
     id?: number
-    // colorAttrValue: string
-    // colorAlias: string
+    colorAlias: string
+    colorAttrValue?: any
     colorCode: string
     sizeValueId: number
     codes: {
@@ -179,7 +179,7 @@ export const EditProduct = () => {
               brandId: getAttr('Бренд')?.attributeValueId || 0,
               seasonId: getAttr('Сезон')?.attributeValueId || 0,
               typeId: getAttr('Вид изделия')?.attributeValueId || 0,
-              materialId: getAttr('Утеплитель')?.attributeValueId || 0,
+              materialId: getAttr('Вид утеплителя')?.attributeValueId || 0,
             },
             seo: {
               metaTitle: data.metaTitle || '',
@@ -189,9 +189,9 @@ export const EditProduct = () => {
             variantCodes: data.variants || [],
             prices: data.colorPrices,
           }
-          setItem(product)
 
-          setTimeout(() => syncronize(), 500)
+          syncronize(product)
+          setItem(product)
         })
         .catch(err => {
           console.error('Error fetching size types:', err)
@@ -222,13 +222,15 @@ export const EditProduct = () => {
     })
   }
 
-  const syncronize = async () => {
+  const syncronize = async (i: Item | undefined = item) => {
+    if (!i) return
+
     axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
       method: 'POST',
     }).catch(err => toast.error(err.response.data.message))
 
     const codes =
-      item?.variantCodes
+      i?.variantCodes
         ?.map(c => c.codes.map(vc => vc.code).filter(code => code && code.trim() !== ''))
         .filter(arr => arr && arr.length > 0)
         .flat() || []
@@ -280,7 +282,7 @@ export const EditProduct = () => {
         item?.main.typeId,
       ],
       simpleAttributes: {
-        [attributes.find(i => i.name == 'Утеплитель')?.id || 0]: item?.main.materialId,
+        [attributes.find(i => i.name == 'Вид утеплителя')?.id || 0]: item?.main.materialId,
       },
       quantity: 1,
       seoSlug: item?.seo.seoSlug,
@@ -876,17 +878,17 @@ export const EditProduct = () => {
               />
             </div>
             <div className="flex flex-col gap-sm">
-              <p className="font-semibold text-[14px]">Утеплитель</p>
+              <p className="font-semibold text-[14px]">Вид утеплителя</p>
               <CustomSelect
                 className="w-[372px]"
                 data={
                   attributes
-                    .find(attr => attr.name === 'Утеплитель')
+                    .find(attr => attr.name === 'Вид утеплителя')
                     ?.values.map(item => {
                       return { id: item.id, value: item.value }
                     }) || []
                 }
-                placeholder="Выберите Утеплитель"
+                placeholder="Выберите Вид утеплителя"
                 onChange={id => {
                   setItem(
                     prev =>
@@ -901,7 +903,7 @@ export const EditProduct = () => {
                 }}
                 value={
                   attributes
-                    .find(attr => attr.name === 'Утеплитель')
+                    .find(attr => attr.name === 'Вид утеплителя')
                     ?.values.map(item => {
                       return { id: item.id, value: item.value }
                     })
@@ -1114,7 +1116,14 @@ export const EditProduct = () => {
           {item?.main?.sizeTypeId && (
             <>
               <div className="flex justify-between">
-                <p>Общее колличество 1</p>
+                <p>
+                  Общее колличество{' '}
+                  {stock
+                    ? stock.reduce((acc, cur) => {
+                        return acc + cur.stores.reduce((sum, store) => sum + store.quantity, 0)
+                      }, 0)
+                    : 0}
+                </p>
                 <button
                   className="flex items-center justify-center border-solid border-[1px] border-[#DADADA] rounded-[12px] h-[40px] p-[13px] bg-[#fff]"
                   onClick={() => {
@@ -1123,6 +1132,7 @@ export const EditProduct = () => {
                       colorAttrValueId: 0,
                       sizeValueId: 0,
                       colorCode: '',
+                      colorAlias: '',
                       codes: [{ code: '' }, { code: '' }, { code: '' }],
                     })
                     setItem(
@@ -1180,6 +1190,7 @@ export const EditProduct = () => {
                       <NumericFormat
                         allowLeadingZeros={true}
                         type="text"
+                        autoFocus
                         className="admin-input max-w-full"
                         placeholder="123456789"
                         maxLength={9}
@@ -1281,39 +1292,30 @@ export const EditProduct = () => {
                       <CustomSelect
                         className="w-full"
                         data={
-                          // attributes
-                          //   .find(attr => attr.name === 'Цвет')
-                          //   ?.values.flatMap(
-                          //     (item, idx) =>
-                          //       item.meta?.aliases?.map((i, index) => ({
-                          //         id: Number(`${index}${idx}`),
-                          //         value: i,
-                          //       })) || []
-                          //   ) || []
                           attributes
-                            .find(item => item.name == 'Цвет')
-                            ?.values.map(i => ({ id: i.id, value: i.value })) || []
+                            ?.find(attr => attr.name === 'Цвет')
+                            ?.values?.flatMap(
+                              (item, idx) =>
+                                item.meta?.aliases?.map((i, index) => ({
+                                  id: Number(`${index}${idx}`),
+                                  value: i,
+                                })) || []
+                            ) || []
+                          // attributes
+                          //   .find(item => item.name == 'Цвет')
+                          //   ?.values.map(i => ({ id: i.id, value: i.value })) || []
                         }
                         placeholder="Цвет"
-                        onChange={id => {
-                          // const color = attributes
-                          //   .find(attr => attr.name == 'Цвет')
-                          //   ?.values.find(item => item.meta?.aliases?.includes(value || ''))
-                          // newVariantCodes[index].colorAttrValueId = color?.id || 0
-                          // newVariantCodes[index].colorAttrValue = color?.value || ''
-                          // newVariantCodes[index].colorAlias = value || ''
-                          // newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
-                          // setItem(
-                          //   prev =>
-                          //     ({
-                          //       ...prev,
-                          //       variantCodes: newVariantCodes,
-                          //     }) as Item
-                          // )
+                        onChange={(_, value) => {
                           const newVariantCodes = [...(item?.variantCodes || [])]
 
-                          newVariantCodes[index].colorAttrValueId = id
-
+                          const color = attributes
+                            .find(attr => attr.name == 'Цвет')
+                            ?.values.find(item => item.meta?.aliases?.includes(value || ''))
+                          newVariantCodes[index].colorAttrValueId = color?.id || 0
+                          newVariantCodes[index].colorAttrValue = color?.value || ''
+                          newVariantCodes[index].colorAlias = value || ''
+                          newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
                           setItem(
                             prev =>
                               ({
@@ -1321,31 +1323,33 @@ export const EditProduct = () => {
                                 variantCodes: newVariantCodes,
                               }) as Item
                           )
+                          // const newVariantCodes = [...(item?.variantCodes || [])]
+
+                          // newVariantCodes[index].colorAttrValueId = id
+
+                          // setItem(
+                          //   prev =>
+                          //     ({
+                          //       ...prev,
+                          //       variantCodes: newVariantCodes,
+                          //     }) as Item
+                          // )
                         }}
                         value={{
-                          id: item.variantCodes?.[index].colorAttrValueId || 0,
-                          value:
-                            attributes
-                              .find(i => i.name == 'Цвет')
-                              ?.values.find(i => i.id == variant.colorAttrValueId)?.value || '',
+                          id: variant.colorAttrValueId || 0,
+                          value: variant?.colorAlias || '',
                         }}
                         showSuggestions={false}
                       />
                     </div>
                     <div className="px-[5px] flex justify-center items-center text-center">
-                      {
-                        attributes
-                          .find(i => i.name == 'Цвет')
-                          ?.values.find(i => i.id == variant.colorAttrValueId)?.value
-                      }
+                      {variant?.colorAttrValue.value || ' '}
                     </div>
                     <div className="flex items-center justify-center">
                       <span
                         className={`block w-[16px] h-[16px] rounded-[8px]`}
                         style={{
-                          background: attributes
-                            .find(i => i.name == 'Цвет')
-                            ?.values.find(i => i.id == variant.colorAttrValueId)?.meta?.colorCode,
+                          background: variant?.colorAttrValue?.meta?.colorCode || '#D9D9D9',
                         }}
                       ></span>
                     </div>
@@ -1378,7 +1382,10 @@ export const EditProduct = () => {
                   </div>
                 ))}
               </div>
-              <button className="admin-input w-fit flex items-center" onClick={syncronize}>
+              <button
+                className="admin-input w-fit flex items-center"
+                onClick={() => syncronize(item)}
+              >
                 Синхронизировать остатки
               </button>
             </>

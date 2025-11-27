@@ -308,7 +308,7 @@ export const SimpleAtribute = () => {
                 <p className="text-[16px]">Показывать, если в атрибуте</p>
                 <CustomSelect
                   showSuggestions={false}
-                  className={`w-[180px] ${!showDependency && 'bg-[#8484844D] rounded-[12px]'}`}
+                  className={`w-fit min-w-[180px] ${!showDependency && 'bg-[#8484844D] rounded-[12px]'}`}
                   onChange={id => depChange(id, 'SHOW')}
                   data={
                     attributes
@@ -333,7 +333,7 @@ export const SimpleAtribute = () => {
                     <p className="text-[16px]">указано</p>
                     <CustomSelect
                       showSuggestions={false}
-                      className="w-[180px]"
+                      className="min-w-[180px] w-fit"
                       onChange={id =>
                         setShowDependency({
                           ...showDependency,
@@ -420,7 +420,7 @@ export const SimpleAtribute = () => {
                     <p className="text-[16px]">указано</p>
                     <CustomSelect
                       showSuggestions={false}
-                      className="w-[180px]"
+                      className="min-w-[180px] w-fit"
                       onChange={id =>
                         setHideDependency({
                           ...hideDependency,

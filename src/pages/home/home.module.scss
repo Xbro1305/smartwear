@@ -299,6 +299,10 @@
         }
       }
 
+      span {
+        height: 60px;
+      }
+
       a {
         width: fit-content;
       }
@@ -307,8 +311,13 @@
         display: none;
       }
 
-      &:hover a {
-        display: flex !important;
+      &:hover {
+        span {
+          display: none;
+        }
+        a {
+          display: flex !important;
+        }
       }
 
       @media (max-width: 1024px) {
