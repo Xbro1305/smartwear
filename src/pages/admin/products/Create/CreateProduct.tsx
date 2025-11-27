@@ -577,11 +577,15 @@ export const CreateProduct = () => {
                             attributes
                               .find(attr => attr.name === 'Цвет')
                               ?.values.filter(v =>
-                                item.variantCodes?.some(m => m.colorAttrValueId === v.id)
+                                item?.variantCodes?.some(m => m.colorAttrValueId === v.id)
                               )
                               .map(v => ({
                                 id: v.id,
-                                value: v.value,
+                                value: item.variantCodes?.find(
+                                  variant => variant.colorAlias && variant.colorAttrValueId === v.id
+                                )
+                                  ? `${v.value} (${item.variantCodes?.find(vc => vc.colorAlias && vc.colorAttrValueId === v.id)?.colorAlias})`
+                                  : v.value,
                               })) || []
                           }
                           placeholder="Выберите цвет"
@@ -600,8 +604,16 @@ export const CreateProduct = () => {
                           value={
                             attributes
                               .find(attr => attr.name === 'Цвет')
-                              ?.values.map(item => {
-                                return { id: item.id, value: item.value }
+                              ?.values.map(i => {
+                                return {
+                                  id: i.id,
+                                  value: item.variantCodes?.find(
+                                    variant =>
+                                      variant.colorAlias && variant.colorAttrValueId === i.id
+                                  )
+                                    ? `${i.value} (${item.variantCodes?.find(vc => vc.colorAlias && vc.colorAttrValueId === i.id)?.colorAlias})`
+                                    : i.value,
+                                }
                               })
                               .find(val => val.id === priceItem.colorAttrValueId) || {
                               id: 0,
@@ -1414,7 +1426,11 @@ export const CreateProduct = () => {
                             )
                             .map(v => ({
                               id: v.id,
-                              value: v.value,
+                              value: item.variantCodes?.find(
+                                variant => variant.colorAlias && variant.colorAttrValueId === v.id
+                              )
+                                ? `${v.value} (${item.variantCodes?.find(vc => vc.colorAlias && vc.colorAttrValueId === v.id)?.colorAlias})`
+                                : v.value,
                             })) || []
                         }
                         placeholder="Выберите цвет"
@@ -1431,7 +1447,16 @@ export const CreateProduct = () => {
                         value={
                           attributes
                             .find(attr => attr.name === 'Цвет')
-                            ?.values.map(m => ({ id: m.id, value: m.value }))
+                            ?.values.map(i => {
+                              return {
+                                id: i.id,
+                                value: item.variantCodes?.find(
+                                  variant => variant.colorAlias && variant.colorAttrValueId === i.id
+                                )
+                                  ? `${i.value} (${item.variantCodes?.find(vc => vc.colorAlias && vc.colorAttrValueId === i.id)?.colorAlias})`
+                                  : i.value,
+                              }
+                            })
                             .find(val => val.id === m.colorAttrValueId) || { id: 0, value: '' }
                         }
                         showSuggestions={false}

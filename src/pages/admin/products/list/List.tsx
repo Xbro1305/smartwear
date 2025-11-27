@@ -305,13 +305,15 @@ export const ProductsList = () => {
                       id="checkbox"
                     />
                     <img
-                      src={
-                        i?.media?.find(m => m?.kind == 'cover')?.url ||
-                        i?.media[0]?.url ||
-                        productImg
-                      }
+                      src={i?.media?.find(m => m?.kind == 'cover')?.url || i?.media[0]?.url}
                       alt=""
                       className="w-[40px] aspect-square"
+                      style={{
+                        opacity:
+                          i?.media?.find(m => m?.kind == 'cover')?.url || i?.media[0]?.url
+                            ? '1'
+                            : '0',
+                      }}
                     />
                     <p>{i.name}</p>
                   </label>

@@ -49,8 +49,6 @@ export const ProductPage = () => {
     'features'
   )
 
-  console.log(colors)
-
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/products/slug/${id}`)
       .then(res => {
@@ -146,6 +144,36 @@ export const ProductPage = () => {
       setSelectedSize(undefined)
     }
   }, [selectedColor])
+
+  const getQty = (store: any) => {
+    const variant = item?.variants
+      .filter((v: any) => v.colorAttrValueId == selectedColor?.id)
+      .find((v: any) => v.sizeValueId == selectedSize?.id)
+
+    if (!variant) return 0
+
+    const qty = variant.codes.reduce((acc: any, cur: { stocks: any[] }) => {
+      const stock = cur.stocks.find((s: any) => s?.storeId == store?.id)
+      return acc + (stock?.quantity || 0)
+    }, 0)
+
+    return qty
+  }
+
+  const getAllQtyByVariant = () => {
+    const variant = item?.variants
+      .filter((v: any) => v.colorAttrValueId == selectedColor?.id)
+      .find((v: any) => v.sizeValueId == selectedSize?.id)
+
+    if (!variant) return 0
+    const qty = variant.codes.reduce((acc: any, cur: { stocks: any[] }) => {
+      const totalStock = cur.stocks.reduce((storeAcc: any, storeCur: { quantity: number }) => {
+        return storeAcc + storeCur.quantity
+      }, 0)
+      return acc + totalStock
+    }, 0)
+    return qty
+  }
 
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
@@ -252,19 +280,29 @@ export const ProductPage = () => {
                     <div className="flex items-center gap-[5px]">
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
-                        style={{ backgroundColor: item.quantity >= 1 ? '#DC2A1F' : '#B0B7BF' }}
+                        style={{
+                          backgroundColor: getAllQtyByVariant() >= 1 ? '#DC2A1F' : '#B0B7BF',
+                        }}
                       ></span>
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
-                        style={{ backgroundColor: item.quantity > 3 ? '#DC2A1F' : '#B0B7BF' }}
+                        style={{
+                          backgroundColor: getAllQtyByVariant() > 3 ? '#DC2A1F' : '#B0B7BF',
+                        }}
                       ></span>
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
-                        style={{ backgroundColor: item.quantity > 11 ? '#DC2A1F' : '#B0B7BF' }}
+                        style={{
+                          backgroundColor: getAllQtyByVariant() > 11 ? '#DC2A1F' : '#B0B7BF',
+                        }}
                       ></span>
                     </div>
                     <span>
-                      {item.quantity >= 1 ? 'Мало' : item.quantity > 3 ? 'Достаточно' : 'Много'}
+                      {getAllQtyByVariant() >= 1
+                        ? 'Мало'
+                        : getAllQtyByVariant() > 3
+                          ? 'Достаточно'
+                          : 'Много'}
                     </span>
                   </p>
                 </div>
@@ -446,7 +484,7 @@ export const ProductPage = () => {
                             Подробнее
                           </button>
                           <p className="text-[red_!important] p2">
-                            Количество: {item.quantity} шт.
+                            Количество: {getQty(store)} шт.
                           </p>
                         </div>
                       </div>
@@ -535,7 +573,7 @@ export const ProductPage = () => {
                         <button className="bg-red h-[50px] rounded-[8px] text-white px-[24px]">
                           Подробнее
                         </button>
-                        <p className="text-[red_!important] p2">Количество: {item.quantity} шт.</p>
+                        <p className="text-[red_!important] p2">Количество: {getQty(store)} шт.</p>
                       </div>
                     </div>
                   ))}
