@@ -409,7 +409,7 @@ export const EditProduct = () => {
       syncronize()
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      // window.location.href = '/admin/products'
+      window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
