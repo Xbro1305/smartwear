@@ -23,7 +23,7 @@ interface Item {
     seasonId?: number
     typeId?: number
     materialId?: number
-    attributeValueIds?: number[]
+    attributeValueIds?: { [key: number]: number }[]
     featureIds?: number[]
     isPublished?: boolean
     isDeliverable?: boolean
@@ -111,6 +111,7 @@ export const CreateProduct = () => {
     },
   } as Item)
   const [attributes, setAttributes] = useState<Attribute[]>([])
+  const [dependencies, setDependencies] = useState<any[]>([])
   const [features, setFeatures] = useState<Feature[]>([])
   const [cares, setCares] = useState<any[]>([])
   const [sizeTypes, setSizeTypes] = useState<any[]>([])
@@ -126,6 +127,14 @@ export const CreateProduct = () => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes`)
       .then(res => {
         setAttributes(res.data)
+      })
+      .catch(err => {
+        console.error('Error fetching product attributes:', err)
+      })
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/dependencies/all`)
+      .then(res => {
+        setDependencies(res.data)
       })
       .catch(err => {
         console.error('Error fetching product attributes:', err)
@@ -207,6 +216,10 @@ export const CreateProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const simpleAttributeIds = item.main.attributeValueIds?.map(av => Object.values(av)[0]) || []
+
+    console.log(simpleAttributeIds)
+
     const data = {
       name: item?.main?.name,
       articul: item?.main?.articul,
@@ -222,12 +235,13 @@ export const CreateProduct = () => {
       careIconIds: item?.main?.careIds,
       variantCodes: item?.variantCodes,
       categoryName: 'Одежда',
-      attributeValueIds: [item?.main.brandId, item?.main.seasonId, item?.main.typeId].filter(
-        id => id != null
-      ),
-      simpleAttributes: {
-        [attributes.find(i => i.name === 'Вид утеплителя')?.id || 0]: item?.main.materialId,
-      },
+      attributeValueIds: [
+        item?.main.brandId,
+        item?.main.seasonId,
+        item?.main.typeId,
+        item?.main.materialId,
+        ...simpleAttributeIds,
+      ].filter(id => id != null),
       quantity: 1,
       seoSlug: item?.seo.seoSlug,
       metaTitle: item?.seo.metaTitle,
@@ -292,7 +306,7 @@ export const CreateProduct = () => {
       }
 
       // После успешного добавления — редирект
-      navigate('/admin/products')
+      // navigate('/admin/products')
     } catch (err) {
       toast.error('Произошла ошибка при создании продукта')
       console.error(err)
@@ -302,8 +316,6 @@ export const CreateProduct = () => {
   const columns = `110px 110px 110px 110px 120px 110px 50px ${warehouses
     .map(() => '110px')
     .join(' ')} 90px`
-
-  console.log(item)
 
   return (
     <div className="py-[80px] px-[36px] flex justify-between relative">
@@ -539,7 +551,7 @@ export const CreateProduct = () => {
                         ...prev,
                         main: {
                           ...prev?.main,
-                          oldPrice: floatValue || 0, // ✅ всегда число
+                          oldPrice: floatValue || 0,
                         },
                       }) as Item
                   )
@@ -865,6 +877,75 @@ export const CreateProduct = () => {
                 }
               />
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-[24px]">
+            {dependencies
+              .filter(dependency => dependency.dependentAttributeId !== null)
+              .filter(dependency => dependency.type == 'SHOW')
+              .filter(dependency => {
+                const d = [
+                  item.main.brandId,
+                  item.main.seasonId,
+                  item.main.typeId,
+                  item.main.materialId,
+                ].includes(dependency.targetValueId)
+
+                return d
+              })
+              .map(dependency => {
+                {
+                  const attr = attributes.find(attr => attr?.id === dependency.attributeId)
+
+                  return (
+                    <div className="flex flex-col gap-sm" key={attr?.name}>
+                      <p className="font-semibold text-[14px]">{attr?.name}</p>
+                      <CustomSelect
+                        className="w-[372px]"
+                        data={
+                          attr?.values.map(item => {
+                            return { id: item.id, value: item.value }
+                          }) || []
+                        }
+                        placeholder="Выберите Вид изделия"
+                        onChange={id => {
+                          setItem(
+                            prev =>
+                              ({
+                                ...prev,
+                                main: {
+                                  ...prev?.main,
+                                  attributeValueIds: [
+                                    ...(prev?.main?.attributeValueIds || []).filter(
+                                      av =>
+                                        !Object.keys(av).includes(String(dependency.attributeId))
+                                    ),
+                                    { [String(dependency.attributeId)]: id },
+                                  ],
+                                },
+                              }) as Item
+                          )
+                        }}
+                        value={
+                          attr?.values
+                            .map(item => {
+                              return { id: item.id, value: item.value }
+                            })
+                            .find(
+                              val =>
+                                val.id ===
+                                item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
+                                  Number(attr?.id)
+                                ]
+                            ) || {
+                            id: 0,
+                            value: '',
+                          }
+                        }
+                      />
+                    </div>
+                  )
+                }
+              })}
           </div>
         </div>
         <div className="flex flex-col gap-[24px]">

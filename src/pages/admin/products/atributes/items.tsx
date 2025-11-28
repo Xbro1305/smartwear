@@ -129,7 +129,12 @@ export const Types = () => {
 
       {deleting && (
         <div className={`${styles.modal} flex`}>
-          <div className={styles.modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
+
+          <div className={`${styles.modal_body} z-50`}>
             <h2 id="h2">Вы точно хотите удалить вид товара {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
@@ -148,6 +153,10 @@ export const Types = () => {
 
       {creating && (
         <div className={`${styles.modal} flex`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
           <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
             <h2 id="h2">Добавление вида товара</h2>
             <label className={styles.modal_body_label}>
@@ -348,7 +357,12 @@ export const SeasonAttrCase = () => {
 
       {deleting && (
         <div className={`${styles.modal} flex`}>
-          <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
+
+          <form onSubmit={e => handleDelete(e)} className={`${styles.modal_body} z-50`}>
             <h2 id="h2">Вы точно хотите удалить сезон {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
@@ -368,6 +382,10 @@ export const SeasonAttrCase = () => {
 
       {creating && (
         <div className={`${styles.modal} flex`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
           <form onSubmit={e => handleSubmit(e)} className={styles.modal_body}>
             <h2 id="h2">Добавление сезона</h2>
             <label className={styles.modal_body_label}>
@@ -408,6 +426,10 @@ export const SeasonAttrCase = () => {
       )}
       {editing && (
         <div className={`${styles.modal} flex`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setEditing(null)}
+          ></button>
           <form onSubmit={e => handleUpdate(e)} className={styles.modal_body}>
             <h2 id="h2">Редактирование сезона</h2>
             <label className={styles.modal_body_label}>
@@ -575,7 +597,12 @@ export const TargetGroups = () => {
 
       {deleting && (
         <div className={`${styles.modal} flex`}>
-          <div className={styles.modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
+
+          <div className={`${styles.modal_body} z-50`}>
             <h2 id="h2">Вы точно хотите удалить целевую группу {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
@@ -594,6 +621,10 @@ export const TargetGroups = () => {
 
       {creating && (
         <div className={`${styles.modal} flex`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
           <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
             <h2 id="h2">Добавление целевой группы</h2>
             <label className={styles.modal_body_label}>
@@ -857,6 +888,10 @@ export const Brands = () => {
       </div>
       {creating && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
           <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
             <h2 id="h2">Добавление бренда</h2>
             <label className={styles.modal_body_label}>
@@ -977,6 +1012,10 @@ export const Brands = () => {
 
       {editing && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
           <form onSubmit={e => handleUpdate(e)} className={styles.modal_body}>
             <h2 id="h2">Редактирование бренда</h2>
             <label className={styles.modal_body_label}>
@@ -1086,7 +1125,12 @@ export const Brands = () => {
 
       {deleting && (
         <div className={`${styles.modal} flex`}>
-          <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
+
+          <form onSubmit={e => handleDelete(e)} className={`${styles.modal_body} z-50`}>
             <h2 id="h2">Вы точно хотите удалить бренд {deleting.value}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
@@ -1290,6 +1334,10 @@ export const Colors = () => {
 
         {creating && (
           <div className={`${styles.modal} flex`}>
+            <button
+              className="z-40 absolute w-full h-screen opacity-0"
+              onClick={() => setCreating(null)}
+            ></button>
             <form onSubmit={handleSubmit} className={styles.modal_body}>
               <h2 id="h2">Добавление группы цветов</h2>
               <label className={styles.modal_body_label}>
@@ -1459,6 +1507,10 @@ export const Colors = () => {
         )}
         {editing && (
           <div className={`${styles.modal} flex`}>
+            <button
+              className="z-40 absolute w-full h-screen opacity-0"
+              onClick={() => setEditing(null)}
+            ></button>
             <form onSubmit={handleUpdate} className={styles.modal_body}>
               <h2 id="h2">Редактирование группы цветов</h2>
               <label className={styles.modal_body_label}>
@@ -1628,7 +1680,12 @@ export const Colors = () => {
         )}
         {deleting && (
           <div className={`${styles.modal} flex`}>
-            <form onSubmit={handleDelete} className={styles.modal_body}>
+            <button
+              className="z-40 absolute w-full h-screen opacity-0"
+              onClick={() => setDeleting(null)}
+            ></button>
+
+            <form onSubmit={handleDelete} className={`${styles.modal_body} z-50`}>
               <h2 id="h2">Вы точно хотите удалить группу цветов {deleting.value}?</h2>
               <section className="flex gap-[10px] mt-[20px] ml-auto">
                 <button
@@ -1875,7 +1932,12 @@ const SizeTypes = () => {
       </div>
       {deleting && (
         <div className={`${styles.modal} flex`}>
-          <form onSubmit={e => handleDelete(e)} className={styles.modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
+
+          <form onSubmit={e => handleDelete(e)} className={`z-50 ${styles.modal_body}`}>
             <h2 id="h2">Вы точно хотите удалить вид размера {deleting.name}?</h2>
             <section className="flex gap-[10px] mt-[20px] ml-auto">
               <button
@@ -1894,6 +1956,10 @@ const SizeTypes = () => {
       )}
       {creating && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
           <form onSubmit={handleCreate} className={styles.modal_body}>
             <h2 id="h2">Добавление вида размера</h2>
             <label className={styles.modal_body_label}>
@@ -2069,6 +2135,10 @@ const SizeTypes = () => {
       )}
       {editing && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setEditing(null)}
+          ></button>
           <form onSubmit={handleUpdate} className={styles.modal_body}>
             <h2 id="h2">Редактирование вида размера</h2>
             <label className={styles.modal_body_label}>
@@ -2469,6 +2539,10 @@ const SizeTables = () => {
       </div>
       {creating && (
         <div className={`${styles.modal}`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
           <form
             className={`w-[1100px] max-w-[1100px_!important]  ${styles.modal_body}`}
             onSubmit={e => e.preventDefault()}
@@ -2719,6 +2793,10 @@ const SizeTables = () => {
       )}
       {deleting && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
           <form onSubmit={handleDelete} className={styles.modal_body}>
             <h2 id="h2">Удаление таблицы размеров</h2>
             <p id="p2">Вы уверены, что хотите удалить эту таблицу размеров?</p>
@@ -2739,6 +2817,10 @@ const SizeTables = () => {
       )}
       {editing && (
         <div className={`${styles.modal} `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setEditing(null)}
+          ></button>
           <form
             className={`max-w-[1100px_!important] w-[1100px] ${styles.modal_body}`}
             onSubmit={handleUpdate}
@@ -3184,6 +3266,10 @@ export const Collections = () => {
 
       {adding && (
         <div className={`${styles.modal}`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setAdding(null)}
+          ></button>
           <form
             className={`w-[400px] max-w-[400px_!important]  ${styles.modal_body}`}
             onSubmit={e => e.preventDefault()}
@@ -3233,6 +3319,10 @@ export const Collections = () => {
       )}
       {deleting && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
           <form onSubmit={handleDelete} className={styles.modal_body}>
             <h2 id="h2">Вы точно хотите удалить коллекцию {deleting.name}?</h2>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
@@ -3853,6 +3943,10 @@ export const Collection = () => {
 
       {editingTitle && (
         <div className={`${styles.modal}`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setEditingTitle(null)}
+          ></button>
           <form
             className={`w-[400px] max-w-[400px_!important]  ${styles.modal_body}`}
             onSubmit={e => e.preventDefault()}
@@ -3903,6 +3997,10 @@ export const Collection = () => {
 
       {creatingBrand && (
         <div className={`${styles.modal}`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreatingBrand(null)}
+          ></button>
           <form
             className={`w-[430px] max-w-[430px_!important]  ${styles.modal_body}`}
             onSubmit={e => e.preventDefault()}
@@ -3949,6 +4047,10 @@ export const Collection = () => {
 
       {deletingRow && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeletingRow(null)}
+          ></button>
           <form onSubmit={handleDelete} className={styles.modal_body}>
             <h2 id="h2">Вы точно хотите удалить строчку с артикулом {deletingRow.article}?</h2>
             {/* <p id="p2">Вы уверены, что хотите удалить этот товар из коллекции?</p> */}
@@ -3970,6 +4072,10 @@ export const Collection = () => {
 
       {brandsMenuOpened && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setBrandsMenuOpened(false)}
+          ></button>
           <div className={`w-[430px] max-w-[430px_!important]  ${styles.modal_body} relative`}>
             <h2 id="h2">Настройка брендов</h2>
             <div className="flex flex-col max-h-[400px] overflow-y-auto">
@@ -4010,6 +4116,10 @@ export const Collection = () => {
 
       {deletingBrand && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeletingBrand(null)}
+          ></button>
           <form
             onSubmit={e => {
               e.preventDefault()
@@ -4227,6 +4337,10 @@ export const Lengths = () => {
 
       {adding && (
         <div className={`${styles.modal}`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setAdding(null)}
+          ></button>
           <form
             className={`w-[700px] max-w-[700px_!important]  ${styles.modal_body}`}
             onSubmit={e => e.preventDefault()}
@@ -4324,6 +4438,10 @@ export const Lengths = () => {
       )}
       {editing && (
         <div className={`${styles.modal}`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setEditing(null)}
+          ></button>
           <form
             className={`w-[700px] max-w-[700px_!important]  ${styles.modal_body}`}
             onSubmit={e => e.preventDefault()}
@@ -4421,6 +4539,10 @@ export const Lengths = () => {
       )}
       {deleting && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
           <form onSubmit={handleDelete} className={styles.modal_body}>
             <h2 id="h2">Вы точно хотите удалить диапазон длин {deleting.name}?</h2>
 
@@ -4597,6 +4719,10 @@ export const SimpleAttributeList = ({ id, onDelete }: { id: number; onDelete: ()
       </div>
       {deleting && (
         <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
           <form onSubmit={handleDelete} className={styles.modal_body}>
             <h2 id="h2">Вы точно хотите удалить атрибут {deleting.name}?</h2>
 

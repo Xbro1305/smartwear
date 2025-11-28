@@ -173,7 +173,12 @@ export const AdminStores = () => {
       </div>
       {creating && (
         <div className="fixed top-0 left-0 w-full h-full bg-[#00000080] flex items-center justify-center z-50">
-          <div className="max-h-[90vh] overflow-auto max-w-[700px] bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
+
+          <div className="z-50 max-h-[90vh] overflow-auto max-w-[700px] bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
             <h2 id="h2">Создать магазин</h2>
             <label className="flex flex-col gap-sm">
               <p className="font-semibold text-[14px]">Полное название</p>
@@ -347,7 +352,12 @@ export const AdminStores = () => {
       )}
       {editing && (
         <div className="fixed top-0 left-0 w-full h-full bg-[#00000080] flex items-center justify-center z-50">
-          <div className="max-h-[90vh] overflow-auto max-w-[700px] bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setEditing(null)}
+          ></button>
+
+          <div className="z-50 max-h-[90vh] overflow-auto max-w-[700px] bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[1100px]">
             <h2 id="h2">Редактировать магазин</h2>
             <label className="flex flex-col gap-sm">
               <p className="font-semibold text-[14px]">Полное название</p>
@@ -522,7 +532,12 @@ export const AdminStores = () => {
       )}
       {deleting && (
         <div className="fixed top-0 left-0 w-full h-full bg-[#00000080] flex items-center justify-center z-50">
-          <div className="bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[800px]">
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(null)}
+          ></button>
+
+          <div className="bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[800px] z-50">
             <h2 id="h2">Вы уверены, что хотите удалить магазин {deleting.name}?</h2>
             <div className="flex gap-[12px] ml-auto">
               <button

@@ -131,8 +131,13 @@ export const Atributes = () => {
 
       {creating !== null && (
         <div className={`${styles.modal}`}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setCreating(null)}
+          ></button>
+
           <form
-            className={`w-[700px] max-w-[700px_!important]  ${styles.modal_body}`}
+            className={`w-[700px] max-w-[700px_!important] z-50 ${styles.modal_body}`}
             onSubmit={e => e.preventDefault()}
           >
             <h2 id="h2">Создание простого атрибута</h2>

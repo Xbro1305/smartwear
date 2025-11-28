@@ -361,7 +361,11 @@ export const ProductsList = () => {
       </div>
 
       <div className={`${styles.deleteModal} ${isDeleting ? 'flex' : 'hidden'}`}>
-        <div className={styles.deleteModal_body}>
+        <button
+          className="z-40 absolute w-full h-screen opacity-0"
+          onClick={() => setIsDeleting(false)}
+        ></button>
+        <div className={`z-50 ${styles.deleteModal_body}`}>
           <h2 id="h2">Удалить выбранные товары?</h2>
           <p id="b2">Вы уверены, что хотите удалить выбранные товары?</p>
           <section className="ml-auto flex gap-[10px] mt-[20px]">
@@ -379,7 +383,11 @@ export const ProductsList = () => {
       </div>
 
       <div className={`${styles.deleteModal} ${deletingId ? 'flex' : 'hidden'}`}>
-        <div className={styles.deleteModal_body}>
+        <button
+          className="z-40 absolute w-full h-screen opacity-0"
+          onClick={() => setDeletingId(null)}
+        ></button>
+        <div className={`z-50 ${styles.deleteModal_body}`}>
           <h2 id="h2">Удалить товар?</h2>
           <p>Вы уверены, что хотите удалить товар?</p>
           <section className="ml-auto flex gap-[10px] mt-[20px]">

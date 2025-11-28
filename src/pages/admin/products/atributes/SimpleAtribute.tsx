@@ -470,7 +470,12 @@ export const SimpleAtribute = () => {
           </section>
           {deletingValue && (
             <div className={`${styles.modal} flex p-[10px] `}>
-              <form onSubmit={handleDelete} className={styles.modal_body}>
+              <button
+                className="z-40 absolute w-full h-screen opacity-0"
+                onClick={() => setDeletingValue(null)}
+              ></button>
+
+              <form onSubmit={handleDelete} className={`z-50 ${styles.modal_body}`}>
                 <h2 id="h2">Вы точно хотите удалить вариант {deletingValue.value}?</h2>
 
                 <section className="ml-auto flex gap-[10px] mt-[20px]">
@@ -490,7 +495,12 @@ export const SimpleAtribute = () => {
           )}
           {creatingValue && (
             <div className={`${styles.modal} flex`}>
-              <form onSubmit={e => handleCreate(e)} className={styles.modal_body}>
+              <button
+                className="z-40 absolute w-full h-screen opacity-0"
+                onClick={() => setCreatingValue(null)}
+              ></button>
+
+              <form onSubmit={e => handleCreate(e)} className={`z-50 ${styles.modal_body}`}>
                 <h2 id="h2">Добавление варианта атрибута</h2>
                 <label className={styles.modal_body_label}>
                   <p>Название</p>

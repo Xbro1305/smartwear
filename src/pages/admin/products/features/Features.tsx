@@ -173,7 +173,11 @@ export const ProductFeatures = () => {
       </div>
       {editing && (
         <div className={`${styles.features_modal} flex`}>
-          <div className={styles.features_modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setEditing(false)}
+          ></button>
+          <div className={`z-50 ${styles.features_modal_body}`}>
             <h2 id="h2">Редактирование особенности</h2>
             <label className={styles.features_modal_body_label}>
               <p>Название</p>
@@ -204,7 +208,11 @@ export const ProductFeatures = () => {
       )}
       {isCreating && (
         <div className={`${styles.features_modal} flex`}>
-          <div className={styles.features_modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setIsCreating(false)}
+          ></button>
+          <div className={`z-50 ${styles.features_modal_body}`}>
             <h2 id="h2">Создание особенности</h2>
             <label className={styles.features_modal_body_label}>
               <p>Название</p>
@@ -233,10 +241,13 @@ export const ProductFeatures = () => {
           </div>
         </div>
       )}
-
       {deleting && (
         <div className={`${styles.features_modal} flex`}>
-          <div className={styles.features_modal_body}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setDeleting(false)}
+          ></button>
+          <div className={`z-50 ${styles.features_modal_body}`}>
             <h2 id="h2">Вы точно хотите удалить особенность {deleting.name}?</h2>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
               <button

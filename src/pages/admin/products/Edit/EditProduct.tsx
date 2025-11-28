@@ -11,6 +11,7 @@ import { FaCheck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import '../Create/Create.css'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { Product } from './data'
 
 interface Item {
   main: {
@@ -23,7 +24,7 @@ interface Item {
     seasonId?: number
     typeId?: number
     materialId?: number
-    attributeValueIds?: number[]
+    attributeValueIds?: { [key: string]: number }[]
     featureIds?: number[]
     isPublished?: boolean
     isDeliverable?: boolean
@@ -105,6 +106,7 @@ interface Stock {
 export const EditProduct = () => {
   const [item, setItem] = useState<Item>()
   const [attributes, setAttributes] = useState<Attribute[]>([])
+  const [dependencies, setDependencies] = useState<any[]>([])
   const [features, setFeatures] = useState<Feature[]>([])
   const [cares, setCares] = useState<any[]>([])
   const [sizeTypes, setSizeTypes] = useState<any[]>([])
@@ -122,6 +124,14 @@ export const EditProduct = () => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes`)
       .then(res => {
         setAttributes(res.data)
+      })
+      .catch(err => {
+        console.error('Error fetching product attributes:', err)
+      })
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/dependencies/all`)
+      .then(res => {
+        setDependencies(res.data)
       })
       .catch(err => {
         console.error('Error fetching product attributes:', err)
@@ -155,7 +165,7 @@ export const EditProduct = () => {
   useEffect(() => {
     if (attributes.length && sizeTypes.length) {
       axios(`${import.meta.env.VITE_APP_API_URL}/products/${id}`)
-        .then(res => {
+        .then((res: { data: Product }) => {
           const data = res.data
           const getAttr = (attrName: string) => {
             return data.attributeValues.find(
@@ -168,10 +178,10 @@ export const EditProduct = () => {
               articul: data.articul || '',
               description: data.description || '',
               name: data.name || '',
-              isDeliverable: data.isDeliverable || 0,
-              isPublished: data.isPublished || 0,
-              price: data.price || 0,
-              oldPrice: data.oldPrice || 0,
+              isDeliverable: Boolean(data.isDeliverable),
+              isPublished: Boolean(data.isPublished),
+              price: Number(data.price) || 0,
+              oldPrice: Number(data.oldPrice) || 0,
               sizeTypeId: data.sizeTypeId || 0,
               careIds: data.cares.map((care: any) => care.careIcon.id) || [],
               featureIds: data.features.map((feature: any) => feature.feature.id) || [],
@@ -180,6 +190,17 @@ export const EditProduct = () => {
               seasonId: getAttr('Сезон')?.attributeValueId || 0,
               typeId: getAttr('Вид изделия')?.attributeValueId || 0,
               materialId: getAttr('Вид утеплителя')?.attributeValueId || 0,
+              attributeValueIds: [
+                ...(data.attributeValues
+                  .map(a =>
+                    ['Бренд', 'Сезон', 'Вид изделия', 'Вид утеплителя'].includes(
+                      a.attributeValue.attribute.name
+                    )
+                      ? null
+                      : { [a.attributeValue.attribute.id]: a.attributeValueId }
+                  )
+                  .filter(Boolean) as { [key: string]: number }[]),
+              ],
             },
             seo: {
               metaTitle: data.metaTitle || '',
@@ -189,6 +210,8 @@ export const EditProduct = () => {
             variantCodes: data.variants || [],
             prices: data.colorPrices,
           }
+
+          console.log('PRODUCT FORM DATA', product)
 
           syncronize(product)
           setItem(product)
@@ -254,8 +277,6 @@ export const EditProduct = () => {
           ).values()
         )
         setWarehouses(uniqueStores as Store[])
-
-        console.log(uniqueStores)
       })
       .catch(err => toast.error(err.response.data.message))
   }
@@ -384,7 +405,7 @@ export const EditProduct = () => {
       }
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      // window.location.href = '/admin/products'
+      window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
@@ -954,6 +975,75 @@ export const EditProduct = () => {
               />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-[24px]">
+            {dependencies
+              .filter(dependency => dependency.dependentAttributeId !== null)
+              .filter(dependency => dependency.type == 'SHOW')
+              .filter(dependency => {
+                const d = [
+                  item?.main.brandId,
+                  item?.main.seasonId,
+                  item?.main.typeId,
+                  item?.main.materialId,
+                ].includes(dependency.targetValueId)
+
+                return d
+              })
+              .map(dependency => {
+                {
+                  const attr = attributes.find(attr => attr?.id === dependency.attributeId)
+
+                  return (
+                    <div className="flex flex-col gap-sm" key={attr?.name}>
+                      <p className="font-semibold text-[14px]">{attr?.name}</p>
+                      <CustomSelect
+                        className="w-[372px]"
+                        data={
+                          attr?.values.map(item => {
+                            return { id: item.id, value: item.value }
+                          }) || []
+                        }
+                        placeholder="Выберите Вид изделия"
+                        onChange={id => {
+                          setItem(
+                            prev =>
+                              ({
+                                ...prev,
+                                main: {
+                                  ...prev?.main,
+                                  attributeValueIds: [
+                                    ...(prev?.main?.attributeValueIds || []).filter(
+                                      av =>
+                                        !Object.keys(av).includes(String(dependency.attributeId))
+                                    ),
+                                    { [String(dependency.attributeId)]: id },
+                                  ],
+                                },
+                              }) as Item
+                          )
+                        }}
+                        value={
+                          attr?.values
+                            .map(item => {
+                              return { id: item.id, value: item.value }
+                            })
+                            .find(
+                              val =>
+                                val.id ===
+                                item?.main?.attributeValueIds?.find(av => av[String(attr?.id)])?.[
+                                  String(attr?.id)
+                                ]
+                            ) || {
+                            id: 0,
+                            value: '',
+                          }
+                        }
+                      />
+                    </div>
+                  )
+                }
+              })}
+          </div>
         </div>
         <div className="flex flex-col gap-[24px]">
           <h3 id="features" className="text-[24px] pt-[50px]">
@@ -1112,7 +1202,7 @@ export const EditProduct = () => {
             }}
           />
         </div>
-        <div className="flex flex-col gap-[24px] z-[10]">
+        <div className="flex flex-col gap-[24px] z-[1]">
           <h3 id="sync" className="text-[24px] pt-[50px]">
             Синхронизация остатков
           </h3>
@@ -1430,7 +1520,7 @@ export const EditProduct = () => {
             </>
           )}
         </div>
-        <div className="flex flex-col gap-[24px] z-[10]">
+        <div className="flex flex-col gap-[24px] z-[1]">
           {/* === Фото товара === */}
           <h3 className="text-[20px] font-[500] pt-[50px]" id="media">
             Фото товара
@@ -1468,7 +1558,7 @@ export const EditProduct = () => {
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
-                  <div className="flex flex-col gap-[24px] z-[10]">
+                  <div className="flex flex-col gap-[24px] z-[1]">
                     <label className="flex items-center gap-[5px] cursor-pointer">
                       <input
                         type="checkbox"
@@ -1579,7 +1669,7 @@ export const EditProduct = () => {
         </div>
 
         {/* === Фото подкладки === */}
-        <div className="flex flex-col gap-[24px] z-[10] relative ">
+        <div className="flex flex-col gap-[24px] z-[1] relative ">
           <h3 className="text-[20px] font-[500]" id="media">
             Фото подкладки
           </h3>
@@ -1616,7 +1706,7 @@ export const EditProduct = () => {
                     alt=""
                     className="w-[185px] aspect-square rounded-[12px]"
                   />
-                  <div className="flex flex-col gap-[24px] z-[10]">
+                  <div className="flex flex-col gap-[24px] z-[1]">
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
@@ -1652,7 +1742,7 @@ export const EditProduct = () => {
         </div>
 
         {/* === Видео === */}
-        <div className="flex flex-col gap-[24px] z-[10] relative ">
+        <div className="flex flex-col gap-[24px] z-[1] relative ">
           <h3 className="text-[20px] font-[500]" id="media">
             Видео
           </h3>
@@ -1724,7 +1814,7 @@ export const EditProduct = () => {
         </div>
 
         {/* === Кнопки === */}
-        <div className="flex gap-[12px] ml-auto relative z-[10] bg-[#fff]">
+        <div className="flex gap-[12px] ml-auto relative z-[1] bg-[#fff]">
           <button
             className="bg-[#20222450] p-[13px] h-[40px] flex items-center rounded-[12px] border-none text-[white]"
             onClick={() => navigate(ROUTER_PATHS.ADMINPRODUCTS)}
