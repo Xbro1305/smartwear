@@ -325,8 +325,8 @@ export const EditProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // if (sending) return
-    // setSending(true)
+    if (sending) return
+    setSending(true)
 
     try {
       // 1️⃣ UPDATE MAIN PRODUCT
