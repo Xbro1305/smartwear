@@ -212,8 +212,6 @@ export const EditProduct = () => {
             prices: data.colorPrices,
           }
 
-          console.log('PRODUCT FORM DATA', product)
-
           syncronize(product)
           setItem(product)
         })
@@ -283,6 +281,8 @@ export const EditProduct = () => {
   }
 
   const sendData = async () => {
+    const simpleAttributeIds = item?.main.attributeValueIds?.map(av => Object.values(av)[0]) || []
+
     const data = {
       name: item?.main?.name,
       articul: item?.main?.articul,
@@ -300,12 +300,10 @@ export const EditProduct = () => {
       attributeValueIds: [
         item?.main.brandId,
         item?.main.seasonId,
-        item?.main.materialId,
         item?.main.typeId,
-      ],
-      simpleAttributes: {
-        [attributes.find(i => i.name == 'Вид утеплителя')?.id || 0]: item?.main.materialId,
-      },
+        item?.main.materialId,
+        ...simpleAttributeIds,
+      ].filter(id => id != null),
       quantity: 1,
       seoSlug: item?.seo.seoSlug,
       metaTitle: item?.seo.metaTitle,
@@ -327,8 +325,8 @@ export const EditProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (sending) return
-    setSending(true)
+    // if (sending) return
+    // setSending(true)
 
     try {
       // 1️⃣ UPDATE MAIN PRODUCT
@@ -411,7 +409,7 @@ export const EditProduct = () => {
       syncronize()
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      window.location.href = '/admin/products'
+      // window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
