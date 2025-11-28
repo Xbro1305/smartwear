@@ -113,6 +113,7 @@ export const EditProduct = () => {
   const [itemMedia, setItemMedia] = useState<Media[]>()
   const [stock, setStock] = useState<Stock[]>([])
   const [warehouses, setWarehouses] = useState<Store[]>([])
+  const [sending, setSending] = useState<boolean>(false)
 
   const { id } = useParams()
 
@@ -325,6 +326,9 @@ export const EditProduct = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (sending) return
+    setSending(true)
 
     try {
       // 1️⃣ UPDATE MAIN PRODUCT
@@ -1247,14 +1251,18 @@ export const EditProduct = () => {
           {item?.main?.sizeTypeId && (
             <>
               <div className="flex justify-between">
-                <p>
-                  Общее колличество{' '}
-                  {stock
-                    ? stock.reduce((acc, cur) => {
-                        return acc + cur.stores.reduce((sum, store) => sum + store.quantity, 0)
-                      }, 0)
-                    : 0}
-                </p>
+                {stock.length ? (
+                  <p>
+                    Общее колличество
+                    {stock
+                      ? stock.reduce((acc, cur) => {
+                          return acc + cur.stores.reduce((sum, store) => sum + store.quantity, 0)
+                        }, 0)
+                      : 0}
+                  </p>
+                ) : (
+                  <p></p>
+                )}
                 <button
                   className="flex items-center justify-center border-solid border-[1px] border-[#DADADA] rounded-[12px] h-[40px] p-[13px] bg-[#fff]"
                   onClick={() => {
@@ -1824,8 +1832,9 @@ export const EditProduct = () => {
             Отмена
           </button>
           <button
-            className="bg-[#E02844] p-[13px] h-[40px] flex items-center rounded-[12px] border-none text-[white]"
+            className="bg-[#E02844] p-[13px] h-[40px] flex items-center rounded-[12px] border-none text-[white] hover:bg-[#c0273f] disabled:bg-[#E0284490] cursor-pointer disabled:cursor-not-allowed"
             onClick={handleSubmit}
+            disabled={sending}
           >
             Сохранить
           </button>

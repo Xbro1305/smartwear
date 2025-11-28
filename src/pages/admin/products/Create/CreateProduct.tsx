@@ -118,6 +118,7 @@ export const CreateProduct = () => {
   const [itemMedia, setItemMedia] = useState<Media[]>()
   const [stock, setStock] = useState<Stock[]>([])
   const [warehouses, setWarehouses] = useState<Store[]>([])
+  const [sending, setSending] = useState<boolean>(false)
 
   const navigate = useNavigate()
 
@@ -216,6 +217,34 @@ export const CreateProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!item?.main?.name || item?.main?.name.trim() === '') {
+      toast.error('Название товара обязательно для заполнения')
+      return
+    }
+
+    if (!item?.main?.articul || item?.main?.articul.trim() === '') {
+      toast.error('Артикул товара обязательно для заполнения')
+      return
+    }
+
+    if (!item?.main?.price || item?.main?.price <= 0) {
+      toast.error('Актуальная цена товара должна быть больше нуля')
+      return
+    }
+
+    if (!item?.main?.description || item?.main?.description.trim() === '') {
+      toast.error('Описание товара обязательно для заполнения')
+      return
+    }
+
+    if (!item?.main?.brandId) {
+      toast.error('Бренд товара обязателен для заполнения')
+      return
+    }
+
+    if (sending) return
+    setSending(true)
+
     const simpleAttributeIds = item.main.attributeValueIds?.map(av => Object.values(av)[0]) || []
 
     console.log(simpleAttributeIds)
@@ -306,7 +335,7 @@ export const CreateProduct = () => {
       }
 
       // После успешного добавления — редирект
-      // navigate('/admin/products')
+      navigate('/admin/products')
     } catch (err) {
       toast.error('Произошла ошибка при создании продукта')
       console.error(err)
@@ -1151,7 +1180,18 @@ export const CreateProduct = () => {
           {item?.main?.sizeTypeId && (
             <>
               <div className="flex justify-between">
-                <p>Общее колличество 1</p>
+                {stock.length ? (
+                  <p>
+                    Общее колличество
+                    {stock
+                      ? stock.reduce((acc, cur) => {
+                          return acc + cur.stores.reduce((sum, store) => sum + store.quantity, 0)
+                        }, 0)
+                      : 0}
+                  </p>
+                ) : (
+                  <p></p>
+                )}
                 <button
                   className="flex items-center justify-center border-solid border-[1px] border-[#DADADA] rounded-[12px] h-[40px] p-[13px] bg-[#fff]"
                   onClick={() => {
@@ -1672,8 +1712,9 @@ export const CreateProduct = () => {
             Отмена
           </button>
           <button
-            className="bg-[#E02844] p-[13px] h-[40px] flex items-center rounded-[12px] border-none text-[white]"
+            className="bg-[#E02844] p-[13px] h-[40px] flex items-center rounded-[12px] border-none text-[white] hover:bg-[#c0273f] disabled:bg-[#E0284490] cursor-pointer disabled:cursor-not-allowed"
             onClick={handleSubmit}
+            disabled={sending}
           >
             Сохранить
           </button>

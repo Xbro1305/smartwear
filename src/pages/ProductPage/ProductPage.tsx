@@ -355,7 +355,7 @@ export const ProductPage = () => {
                             {size.name}
 
                             {!isAvailable && (
-                              <span className="absolute rotate-[45deg] block border-b border-[#00000060] translate-y-[50%] w-full" />
+                              <span className="absolute block border-b border-[1px] border-[#00000060] top-[50%] left-[0] rotate-[45deg] w-full" />
                             )}
                           </div>
                         )
