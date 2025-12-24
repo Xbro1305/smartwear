@@ -17,11 +17,12 @@ import { SimpleAtribute } from '@/pages/admin/products/atributes/SimpleAtribute'
 import { CreateProduct } from '@/pages/admin/products/Create/CreateProduct'
 import { AdminStores } from '@/pages/admin/Stores/Stores'
 import { EditProduct } from '@/pages/admin/products/Edit/EditProduct'
+import { ProductCategories } from '@/pages/admin/products/Categories/Categories'
 
-const { ADMINPRODUCTS_FEATURES, ADMINPRODUCTS_ATRIBUTES, ADMIN_COLLECTION, ADMINSTORES } =
-  ROUTER_PATHS
+const { ADMINPRODUCTS_FEATURES, ADMINPRODUCTS_ATRIBUTES, ADMIN_COLLECTION } = ROUTER_PATHS
 const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS, EDIT_PRODUCT } = ROUTER_PATHS
 const { EDITARTICLE, CLONEARTICLE, ADMINPRODUCTS, ADMINSETTINGS, CREATE_PRODUCT } = ROUTER_PATHS
+const { ADMINSTORES, ADMINPRODUCTS_CATEGORIES } = ROUTER_PATHS
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -31,6 +32,7 @@ export const adminRoutes: RouteObject[] = [
   {
     children: [
       { element: <MainPage />, path: ADMIN },
+      { element: <ProductCategories />, path: ADMINPRODUCTS_CATEGORIES },
       { element: <Navigate to={ADMIN} />, path: '/admin' },
       { element: <MainPage />, path: ADMINSETTINGS },
       { element: <ProductsList />, path: ADMINPRODUCTS },

@@ -18,7 +18,7 @@ export const ROUTER_PATHS = {
   BOOKMARKS: '/bookmarks',
   CARE: '/care',
   CART: '/cart',
-  CATALOG: '/catalogue',
+  CATALOG: '',
   CLONEARTICLE: '/admin/home/articles/clone',
   CONTACTS: '/contacts',
   CREATEARTICLE: '/admin/home/articles/create',

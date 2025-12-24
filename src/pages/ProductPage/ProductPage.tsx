@@ -35,7 +35,11 @@ interface Size {
   orderNum: number
 }
 
-export const ProductPage = () => {
+interface ProductPageProps {
+  data: any
+}
+
+export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   const { id } = useParams()
   const [item, setItem] = useState<any>()
   const [selectedPhoto, setSelectedPhoto] = useState<any>()
@@ -50,66 +54,64 @@ export const ProductPage = () => {
   )
 
   useEffect(() => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/products/slug/${id}`)
+    if (!data) return
+
+    setItem(data)
+
+    // 1. Уникальные размеры по name
+    const sizesMap = new Map()
+    data.variants.forEach((v: any) => {
+      const size = v.sizeValue
+      if (!sizesMap.has(size.name)) {
+        sizesMap.set(size.name, size)
+      }
+    })
+    const sizes = Array.from(sizesMap.values()) as Size[]
+
+    document.title = data.metaTitle
+
+    let meta = document.querySelector('meta[name="description"]')
+
+    if (!meta) {
+      meta = document.createElement('meta')
+      meta.setAttribute('name', 'description')
+      document.head.appendChild(meta)
+    }
+
+    meta.setAttribute('content', data.metaDescription)
+
+    // 2. Уникальные цвета по value
+    const colorsMap = new Map()
+    data.variants.forEach((v: any) => {
+      const color = v.colorAttrValue
+      if (!colorsMap.has(color.value)) {
+        colorsMap.set(color.value, { ...color, alias: v.colorAlias })
+      }
+    })
+    const colors = Array.from(colorsMap.values()) as Color[]
+
+    setSizes(sizes)
+    setColors(colors)
+    setSelectedColor(colors[0])
+    setSelectedSize(sizes[0])
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/media/${data.id}`)
       .then(res => {
-        setItem(res.data)
-
-        // 1. Уникальные размеры по name
-        const sizesMap = new Map()
-        res.data.variants.forEach((v: any) => {
-          const size = v.sizeValue
-          if (!sizesMap.has(size.name)) {
-            sizesMap.set(size.name, size)
-          }
-        })
-        const sizes = Array.from(sizesMap.values()) as Size[]
-
-        document.title = res.data.metaTitle
-
-        let meta = document.querySelector('meta[name="description"]')
-
-        if (!meta) {
-          meta = document.createElement('meta')
-          meta.setAttribute('name', 'description')
-          document.head.appendChild(meta)
-        }
-
-        meta.setAttribute('content', res.data.metaDescription)
-
-        // 2. Уникальные цвета по value
-        const colorsMap = new Map()
-        res.data.variants.forEach((v: any) => {
-          const color = v.colorAttrValue
-          if (!colorsMap.has(color.value)) {
-            colorsMap.set(color.value, { ...color, alias: v.colorAlias })
-          }
-        })
-        const colors = Array.from(colorsMap.values()) as Color[]
-
-        setSizes(sizes)
-        setColors(colors)
-        setSelectedColor(colors[0])
-        setSelectedSize(sizes[0])
-
-        axios(`${import.meta.env.VITE_APP_API_URL}/media/${res.data.id}`)
-          .then(res => {
-            setMedia(
-              res.data.sort((a: Media, b: Media) => {
-                if (a.kind === 'cover' && b.kind !== 'cover') return -1
-                if (a.kind !== 'cover' && b.kind === 'cover') return 1
-                return a.id - b.id
-              })
-            )
-            setSelectedPhoto(res.data.find((i: any) => i.kind == 'cover') || res.data[0])
+        setMedia(
+          res.data.sort((a: Media, b: Media) => {
+            if (a.kind === 'cover' && b.kind !== 'cover') return -1
+            if (a.kind !== 'cover' && b.kind === 'cover') return 1
+            return a.id - b.id
           })
-          .catch(err => console.log(err))
+        )
+        setSelectedPhoto(res.data.find((i: any) => i.kind == 'cover') || res.data[0])
       })
       .catch(err => console.log(err))
 
     axios(`${import.meta.env.VITE_APP_API_URL}/stores`)
       .then(res => setStores(res.data))
       .catch(err => console.log(err))
-  }, [])
+  }, [data])
 
   const oldPrice =
     item?.colorPrices?.find((p: any) => p.colorAttrValueId == selectedColor?.id)?.oldPrice ||

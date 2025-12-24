@@ -41,6 +41,10 @@
     @media (max-width: 1350px) {
       min-width: 248px;
     }
+
+    @media (max-width: 1024px) {
+      display: none;
+    }
   }
 
   &_filter {
@@ -171,17 +175,27 @@
     display: flex;
     flex-direction: column;
     gap: 50px;
+    width: 100%;
   }
 
   &_wrapper {
     display: grid;
-    grid-template-columns: repeat(3, calc(100% / 3 - 20px));
+    grid-template-columns: repeat(3, calc(100% / 3 - 10px));
     justify-content: space-between;
     row-gap: 50px;
-    column-gap: 20px;
+    column-gap: 10px;
 
     @media (max-width: 1024px) {
-      display: none;
+      grid-template-columns: repeat(4, calc(100% / 4 - 10px));
+    }
+
+    @media (max-width: 700px) {
+      grid-template-columns: repeat(3, calc(100% / 3 - 5px));
+    }
+
+    @media (max-width: 500px) {
+      row-gap: 10px;
+      grid-template-columns: repeat(2, calc(100% / 2 - 5px));
     }
   }
 
@@ -189,11 +203,51 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    height: 100%;
+
+    > img {
+      width: 100%;
+      object-fit: cover;
+      cursor: pointer;
+      aspect-ratio: 1 / 1;
+    }
+
+    &_prices {
+      display: flex;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      > :first-child {
+        font-size: 26px !important;
+
+        @media (max-width: 1024px) {
+          font-size: 20px !important;
+        }
+      }
+
+      > :nth-child(2),
+      > :nth-child(3) {
+        color: #b0b7bf !important;
+        font-size: 22px !important;
+        text-decoration: line-through !important;
+
+        @media (max-width: 1024px) {
+          font-size: 16px !important;
+        }
+      }
+
+      > :nth-child(3) {
+        color: var(--red) !important;
+        text-decoration: none !important;
+      }
+    }
 
     &_info {
       display: flex;
       flex-direction: column;
       gap: 15px;
+      flex-grow: 1;
     }
 
     &_top {
@@ -229,11 +283,16 @@
     }
 
     a {
-      width: fit-content;
-    }
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: auto;
+      height: 50px;
 
-    @media (max-width: 1024px) {
-      padding-right: 20px !important;
+      @media (max-width: 1024px) {
+        height: 40px;
+      }
     }
   }
 
