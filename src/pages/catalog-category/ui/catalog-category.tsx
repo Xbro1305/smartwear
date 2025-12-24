@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import { FaChevronDown } from 'react-icons/fa'
 
 import banner from '@/assets/images/catalogBanner.svg'
-import item from '@/assets/images/homeCatalog.jpeg'
+// import item from '@/assets/images/homeCatalog.jpeg'
 import heart from '@/assets/images/homeHeart.svg'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
