@@ -38,7 +38,7 @@
 .select-item {
   padding: 0 20px;
   border-radius: 12px;
-  padding-right: 3px;
+  padding-right: 10px;
   display: flex;
   width: 100%;
   justify-content: space-between;

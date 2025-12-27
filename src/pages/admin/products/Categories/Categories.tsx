@@ -19,13 +19,15 @@ export interface Category {
   showInMenu: boolean
   showOnSite: boolean
   discountMode: 'ALL' | 'DISCOUNTED' | 'NOT_DISCOUNTED'
+  productsCount?: number
   filters?: {
-    attributes: {
-      brand?: string[] | any
-      insulator?: string[] | any
-      season?: string[] | any
-      productType?: string[] | any
-    }
+    attributes: number[]
+    //  {
+    //   brand?: string[] | any
+    //   insulator?: string[] | any
+    //   season?: string[] | any
+    //   productType?: string[] | any
+    // }
   }
   createdAt?: string
   updatedAt?: string
@@ -103,15 +105,17 @@ export const ProductCategories = () => {
           <p className="text-[14px]" onClick={() => hasChildren && toggle(category?.id || 0)}>
             {category.name}
           </p>
-          <p className="text-[14px]">{category.orderNum ?? '—'}</p>
-          <p className="text-[14px]">{/* тут можно кол-во товаров */}—</p>
+          <p className="text-[14px]">{level == 0 && (category.orderNum ?? '—')}</p>
+          <p className="text-[14px]">{category.productsCount || 0}</p>
           <div className="flex items-center gap-[10px] justify-end pr-[20px]">
-            <button
-              className="text-red text-[20px] cursor-pointer"
-              onClick={() => setDeletingItem(category)}
-            >
-              <LuTrash2 />
-            </button>{' '}
+            {page !== 'brands' && (
+              <button
+                className="text-red text-[20px] cursor-pointer"
+                onClick={() => setDeletingItem(category)}
+              >
+                <LuTrash2 />
+              </button>
+            )}
             <button
               className="text-service text-[20px] cursor-pointer"
               onClick={() => setEditingItem(category)}
@@ -243,12 +247,7 @@ export const ProductCategories = () => {
               showInMenu: false,
               showOnSite: false,
               filters: {
-                attributes: {
-                  season: [],
-                  productType: [],
-                  insulator: [],
-                  brand: [],
-                },
+                attributes: [],
               },
             })
           }
@@ -310,6 +309,7 @@ export const ProductCategories = () => {
         attributes={attributes}
         file={file}
         setFile={setFile}
+        isEdit={true}
       />
     </div>
   )
@@ -329,7 +329,7 @@ interface Props {
   title: string
   attributes: Attribute[]
   selectedIds: (number | string)[]
-  onChange: (ids: (number | string)[]) => void
+  onChange: (ids: number | string) => void
 }
 
 const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, onChange }) => {
@@ -349,7 +349,7 @@ const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, on
               <div
                 key={v.id}
                 className="bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
-                onClick={() => onChange([...selectedIds, v.id])}
+                onClick={() => onChange(v.id)}
               >
                 {v.value}
               </div>
@@ -369,7 +369,7 @@ const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, on
               <div
                 key={v.id}
                 className="bg-[#E02844] text-white text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
-                onClick={() => onChange(selectedIds.filter(id => id !== v.id))}
+                onClick={() => onChange(v.id)}
               >
                 {v.value} &times;
               </div>
@@ -388,6 +388,7 @@ interface ModalProps {
   attributes: any[]
   file: File | null
   setFile: (file: File | null) => void
+  isEdit?: boolean
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -398,7 +399,9 @@ const Modal: React.FC<ModalProps> = ({
   attributes,
   file,
   setFile,
+  isEdit = false,
 }) => {
+  console.log(data)
   return (
     <>
       {data && (
@@ -409,7 +412,7 @@ const Modal: React.FC<ModalProps> = ({
           ></button>
 
           <div className="bg-white p-[36px] rounded-[12px] flex flex-col gap-[24px] w-[800px] z-50 max-h-[90vh] overflow-auto">
-            <h2 id="h2">Создание категории</h2>
+            <h2 id="h2">{isEdit ? 'Редактирование' : 'Создание'} категории</h2>
 
             <label className="flex flex-col gap-[5px]">
               <p>Название</p>
@@ -494,8 +497,12 @@ const Modal: React.FC<ModalProps> = ({
             )}
 
             <label className="relative bg-[#F2F3F5] p-[15px] rounded-[12px] aspect-square w-fit flex flex-col items-center justify-center gap-[12px] cursor-pointer">
-              {file ? (
-                <img className="w-[180px] aspect-square" src={URL.createObjectURL(file)} alt="" />
+              {file || data.imageUrl ? (
+                <img
+                  className="w-[180px] aspect-square"
+                  src={file ? URL.createObjectURL(file) : data.imageUrl}
+                  alt=""
+                />
               ) : (
                 <>
                   <IoImage className="text-[#20222460] text-[72px]" />
@@ -578,36 +585,32 @@ const Modal: React.FC<ModalProps> = ({
 
             <h3 className="font-normal text-[20px]">Добавление товаров</h3>
 
-            {['productType', 'insulator', 'season'].map(key => (
+            {attributes.map(attr => (
               <AttributeSelector
-                key={key}
-                title={
-                  key === 'productType'
-                    ? 'Вид изделия'
-                    : key === 'insulator'
-                      ? 'Вид утеплителя'
-                      : 'Сезон'
-                }
+                key={attr.id}
+                title={attr.name}
                 attributes={attributes}
-                selectedIds={
-                  data?.filters?.attributes?.[key as 'productType' | 'insulator' | 'season'] || []
-                }
-                onChange={ids =>
-                  setData((prev: any) =>
-                    prev
-                      ? {
-                          ...prev,
-                          filters: {
-                            ...prev.filters,
-                            attributes: {
-                              ...prev.filters?.attributes,
-                              [key]: ids,
-                            },
-                          },
-                        }
-                      : null
-                  )
-                }
+                selectedIds={data?.filters?.attributes || []}
+                onChange={ids => {
+                  const selected = data?.filters?.attributes || []
+                  if (selected.includes(ids)) {
+                    // Удаление
+                    const newSelected = selected.filter((id: number | string) => id !== ids)
+                    setData((prev: any) =>
+                      prev
+                        ? { ...prev, filters: { ...prev.filters, attributes: newSelected } }
+                        : null
+                    )
+                  } else {
+                    // Добавление
+                    const newSelected = [...selected, ids]
+                    setData((prev: any) =>
+                      prev
+                        ? { ...prev, filters: { ...prev.filters, attributes: newSelected } }
+                        : null
+                    )
+                  }
+                }}
               />
             ))}
 

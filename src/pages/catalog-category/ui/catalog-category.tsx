@@ -12,6 +12,8 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from './catalog-category.module.scss'
 import axios from 'axios'
+import { IoMdSwitch } from 'react-icons/io'
+import { HiOutlineSwitchVertical } from 'react-icons/hi'
 
 type Color = {
   border: string
@@ -86,12 +88,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
   const [price, setPrice] = useState<number>(100000)
 
-  const [brands, setBrands] = useState<string[]>([
-    'Autojack',
-    'Nordwind',
-    'Запорожец',
-    'Технология комфорта',
-  ])
+  const [brands, setBrands] = useState<{ id: number; name: string }[]>([])
 
   const [colors, _] = useState<Color[]>([
     { border: '#000', name: 'Черный', value: '#000000' },
@@ -112,6 +109,17 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     window.scrollTo(0, 0)
 
     axios(`${import.meta.env.VITE_APP_API_URL}/categories/${id}`).then(r => setCategory(r.data))
+
+    const b = data?.items?.reduce((acc: { id: number; name: string }[], item: any) => {
+      if (!acc.some(brand => brand.id === item.brand.id)) {
+        acc.push(item.brand)
+      }
+      return acc
+    }, [])
+
+    console.log(b)
+
+    setBrands(b)
   }, [data])
 
   return (
@@ -150,19 +158,19 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
           <FilterBlock title="Бренды" isOpen={open.brand} toggle={() => toggle('brand')}>
             {brands.map(i => (
-              <label key={i}>
+              <label key={i.id}>
                 <input type="checkbox" />
-                <p className="p1">{i}</p>
+                <p className="p1">{i.name}</p>
               </label>
             ))}
-            <span
+            {/* <span
               className="p2"
               style={{ color: 'var(--service)' }}
-              onClick={() => setBrands([...brands, 'Другие бренды'])}
+              onClick={() => setBrands([...brands])}
             >
               Показать все{' '}
               <span style={{ display: 'block', transform: 'rotate(90deg)' }}>{'>'}</span>
-            </span>
+            </span> */}
           </FilterBlock>
 
           <FilterBlock title="Цена" isOpen>
@@ -228,6 +236,34 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
         {/* RIGHT */}
         <div className={styles.catalog_right}>
+          <div className={styles.catalog_right_top}>
+            <div className={styles.catalog_right_top_header}>
+              <div className={styles.catalog_right_top_title}>
+                <h2 className="h1">{category?.current?.name || 'Каталог'}</h2>
+                <p className="p1">{data.items.length} товара(ов)</p>
+              </div>
+              <div className={styles.catalog_right_top_mobile}>
+                <p className="p2">
+                  <IoMdSwitch /> Фильтры
+                </p>
+                <p className="p2">
+                  <HiOutlineSwitchVertical />
+                  Популярное
+                </p>
+              </div>
+
+              <select>
+                <option value="">Популярное</option>
+              </select>
+            </div>
+            <div className={styles.catalog_right_top_brands}>
+              {brands?.map(b => (
+                <p key={b.id} className="p1">
+                  {b.name}
+                </p>
+              ))}
+            </div>
+          </div>
           <div className={styles.catalog_wrapper}>
             {data.items.map((i: any) => (
               <Link to={`/${i.slug}`} className={styles.catalog_item} key={i.name}>
