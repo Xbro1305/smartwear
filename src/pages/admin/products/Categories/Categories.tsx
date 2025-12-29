@@ -21,7 +21,7 @@ export interface Category {
   discountMode: 'ALL' | 'DISCOUNTED' | 'NOT_DISCOUNTED'
   productsCount?: number
   filters?: {
-    attributes: number[]
+    attributeValueIds: number[]
     //  {
     //   brand?: string[] | any
     //   insulator?: string[] | any
@@ -90,7 +90,7 @@ export const ProductCategories = () => {
           className="grid items-center w-full p-[10px] h-[65px] hover:bg-[#f5f5f5]"
           style={{
             paddingLeft: `${level * 24 + 10}px`,
-            gridTemplateColumns: `50px calc(500px - ${level * 24}px) 200px 200px 1fr`,
+            gridTemplateColumns: `50px calc(400px - ${level * 24}px) 2fr 2fr 100px`,
             background:
               level == 0 ? '#fff' : level == 1 ? '#f6f6f6' : level == 2 ? '#eeeeee' : '#e6e6e6',
           }}
@@ -108,7 +108,7 @@ export const ProductCategories = () => {
           <p className="text-[14px]">{level == 0 && (category.orderNum ?? '—')}</p>
           <p className="text-[14px]">{category.productsCount || 0}</p>
           <div className="flex items-center gap-[10px] justify-end pr-[20px]">
-            {page !== 'brands' && (
+            {(page !== 'brands' || level != 0) && (
               <button
                 className="text-red text-[20px] cursor-pointer"
                 onClick={() => setDeletingItem(category)}
@@ -247,7 +247,7 @@ export const ProductCategories = () => {
               showInMenu: false,
               showOnSite: false,
               filters: {
-                attributes: [],
+                attributeValueIds: [],
               },
             })
           }
@@ -257,7 +257,7 @@ export const ProductCategories = () => {
       </div>
       {/* Table */}
       <div className="flex flex-col gap-[10px]">
-        <div className="grid grid-cols-[50px_500px_200px_200px_1fr] items-center w-full border-solid border-[1px] border-[#dadada] p-[10px] rounded-[12px]">
+        <div className="grid grid-cols-[50px_400px_1fr_1fr_100px] items-center w-full border-solid border-[1px] border-[#dadada] p-[10px] rounded-[12px]">
           <p></p> <p className="text-[14px] font-medium">Название</p>{' '}
           <p className="text-[14px] font-medium w-[60%]">Порядковый номер</p>{' '}
           <p className="text-[14px] font-medium w-[84px]">Артикулов в категории</p>{' '}
@@ -335,6 +335,10 @@ interface Props {
 const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, onChange }) => {
   const attribute = attributes?.find(a => a.name === title)
 
+  const safeSelectedIds = Array.isArray(selectedIds)
+    ? selectedIds.map((v: any) => (typeof v === 'object' ? v.id : v))
+    : []
+
   if (!attribute) return null
 
   return (
@@ -344,8 +348,8 @@ const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, on
         <p className="text-[14px] font-medium">{title}</p>
         <div className="flex flex-wrap gap-[8px]">
           {attribute.values
-            .filter(v => !selectedIds.includes(v.id))
-            .map(v => (
+            ?.filter(v => !safeSelectedIds.includes(v.id))
+            ?.map(v => (
               <div
                 key={v.id}
                 className="bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
@@ -364,7 +368,7 @@ const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, on
         <p className="text-[14px] font-medium">Что показываем</p>
         <div className="flex flex-wrap gap-[8px]">
           {attribute.values
-            .filter(v => selectedIds.includes(v.id))
+            .filter(v => safeSelectedIds.includes(v.id))
             .map(v => (
               <div
                 key={v.id}
@@ -379,6 +383,7 @@ const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, on
     </div>
   )
 }
+
 
 interface ModalProps {
   data: any | null
@@ -429,12 +434,16 @@ const Modal: React.FC<ModalProps> = ({
               <label className="flex flex-col gap-[5px]">
                 <p>Родительская категория</p>
                 <CustomSelect
-                  data={
-                    categories?.map(category => ({
+                  data={[
+                    {
+                      id: 0,
+                      value: 'Нет ',
+                    },
+                    ...(categories?.map(category => ({
                       id: category.id || 0,
                       value: category.name,
-                    })) || []
-                  }
+                    })) || []),
+                  ]}
                   showSuggestions={false}
                   value={{
                     id: data.parentId || 0,
@@ -575,44 +584,54 @@ const Modal: React.FC<ModalProps> = ({
               Показывать на сайте
             </label>
 
-            <label className="flex items-center gap-[15px]">
-              <CustomSwitch
-                value={data.showInMenu}
-                onClick={value => setData((prev: any) => prev && { ...prev, showInMenu: value })}
-              />
-              Показывать в главном меню
-            </label>
+            {!data.parentId && (
+              <label className="flex items-center gap-[15px]">
+                <CustomSwitch
+                  value={data.showInMenu}
+                  onClick={value => setData((prev: any) => prev && { ...prev, showInMenu: value })}
+                />
+                Показывать в главном меню
+              </label>
+            )}
 
             <h3 className="font-normal text-[20px]">Добавление товаров</h3>
 
-            {attributes.map(attr => (
-              <AttributeSelector
-                key={attr.id}
-                title={attr.name}
-                attributes={attributes}
-                selectedIds={data?.filters?.attributes || []}
-                onChange={ids => {
-                  const selected = data?.filters?.attributes || []
-                  if (selected.includes(ids)) {
-                    // Удаление
-                    const newSelected = selected.filter((id: number | string) => id !== ids)
-                    setData((prev: any) =>
-                      prev
-                        ? { ...prev, filters: { ...prev.filters, attributes: newSelected } }
-                        : null
-                    )
-                  } else {
-                    // Добавление
-                    const newSelected = [...selected, ids]
-                    setData((prev: any) =>
-                      prev
-                        ? { ...prev, filters: { ...prev.filters, attributes: newSelected } }
-                        : null
-                    )
-                  }
-                }}
-              />
-            ))}
+            {attributes
+              .filter(a => a.name != 'Размер')
+              .map(attr => (
+                <AttributeSelector
+                  key={attr.id}
+                  title={attr.name}
+                  attributes={attributes}
+                  selectedIds={data?.filters?.attributeValueIds || []}
+                  onChange={ids => {
+                    const selected = data?.filters?.attributeValueIds || []
+                    if (selected.includes(ids)) {
+                      // Удаление
+                      const newSelected = selected.filter((id: number | string) => id !== ids)
+                      setData((prev: any) =>
+                        prev
+                          ? {
+                              ...prev,
+                              filters: { ...prev.filters, attributeValueIds: newSelected },
+                            }
+                          : null
+                      )
+                    } else {
+                      // Добавление
+                      const newSelected = [...selected, ids]
+                      setData((prev: any) =>
+                        prev
+                          ? {
+                              ...prev,
+                              filters: { ...prev.filters, attributeValueIds: newSelected },
+                            }
+                          : null
+                      )
+                    }
+                  }}
+                />
+              ))}
 
             <div className="flex gap-[12px] ml-auto">
               <button

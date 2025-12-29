@@ -294,6 +294,7 @@
   &_item {
     display: flex;
     flex-direction: column;
+    position: relative;
     gap: 20px;
     height: 100%;
 
@@ -302,6 +303,20 @@
       object-fit: cover;
       cursor: pointer;
       aspect-ratio: 1 / 1;
+    }
+
+    &_heart {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+
+      @media (max-width: 1024px) {
+        width: 27px;
+        height: 27px;
+      }
     }
 
     &_prices {

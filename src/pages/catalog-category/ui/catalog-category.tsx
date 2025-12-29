@@ -254,12 +254,16 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
               <select>
                 <option value="">Популярное</option>
+                <option value="">Пo убыванию цены</option>
+                <option value="">По возрастанию цены</option>
+                <option value="">Сначала новые</option>
+                <option value="">Сначала старые</option>
               </select>
             </div>
             <div className={styles.catalog_right_top_brands}>
               {brands?.map(b => (
                 <p key={b.id} className="p1">
-                  {b.name}
+                  <Link to={b.name}>{b.name}</Link>
                 </p>
               ))}
             </div>
@@ -279,7 +283,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                         ></div>
                       ))}
                     </div>
-                    <img src={heart} alt="" />
+                    <img className={styles.catalog_item_heart} src={heart} alt="" />
                   </div>
 
                   <h5 className="h5">{i.name}</h5>

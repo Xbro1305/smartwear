@@ -827,7 +827,7 @@ export const EditProduct = () => {
           <h3 id="details" className="text-[24px] pt-[50px]">
             Характеристики
           </h3>
-          <div className="flex gap-[24px]">
+          <div className="grid grid-cols-2 gap-[24px] max-w-[768px]">
             <div className="flex flex-col gap-sm">
               <p className="font-semibold text-[14px]">Бренд</p>
               <CustomSelect
@@ -902,8 +902,6 @@ export const EditProduct = () => {
                 }
               />
             </div>
-          </div>
-          <div className="flex gap-[24px]">
             <div className="flex flex-col gap-sm">
               <p className="font-semibold text-[14px]">Вид изделия</p>
               <CustomSelect
@@ -978,8 +976,68 @@ export const EditProduct = () => {
                 }
               />
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-[24px]">
+            {attributes
+              .filter(
+                attr =>
+                  !['Бренд', 'Сезон', 'Вид изделия', 'Вид утеплителя', 'Цвет', 'Размер'].includes(
+                    attr.name
+                  )
+              )
+              .filter(attr => attr.isSystem)
+              .filter(
+                attr =>
+                  !dependencies
+                    .filter(dependency => dependency.dependentAttributeId !== null)
+                    .filter(dependency => dependency.type == 'SHOW')
+                    .some(dependency => dependency.attributeId === attr.id)
+              )
+              .map(attr => (
+                <div className="flex flex-col gap-sm w-[372px]" key={attr?.name}>
+                  <p className="font-semibold text-[14px]">{attr?.name}</p>
+                  <CustomSelect
+                    className="w-[372px]"
+                    data={
+                      attr?.values.map(item => {
+                        return { id: item.id, value: item.value }
+                      }) || []
+                    }
+                    placeholder={`Выберите ${attr?.name}`}
+                    onChange={id => {
+                      setItem(
+                        prev =>
+                          ({
+                            ...prev,
+                            main: {
+                              ...prev?.main,
+                              attributeValueIds: [
+                                ...(prev?.main?.attributeValueIds || []).filter(
+                                  av => !Object.keys(av).includes(String(attr?.id))
+                                ),
+                                { [String(attr?.id)]: id },
+                              ],
+                            },
+                          }) as Item
+                      )
+                    }}
+                    value={
+                      attr?.values
+                        .map(item => {
+                          return { id: item.id, value: item.value }
+                        })
+                        .find(
+                          val =>
+                            val.id ===
+                            item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
+                              Number(attr?.id)
+                            ]
+                        ) || {
+                        id: 0,
+                        value: '',
+                      }
+                    }
+                  />
+                </div>
+              ))}
             {dependencies
               .filter(dependency => dependency.dependentAttributeId !== null)
               .filter(dependency => dependency.type == 'SHOW')
