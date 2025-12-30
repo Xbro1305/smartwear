@@ -12,7 +12,7 @@ import { CustomSwitch } from '../Components/CustomSwitch/switch'
 
 export interface Category {
   id?: number
-  parentId?: number | null
+  parentId?: number | null | '0'
   name: string
   slug: string
   orderNum?: number | null
@@ -41,7 +41,7 @@ export const ProductCategories = () => {
   const [page, setPage] = useState<'all' | 'brands'>('all')
   const [data, setData] = useState<Category[]>([])
   const [categories, setCategories] = useState<Category[]>([])
-  const [openedIds, setOpenedIds] = useState<number[]>([])
+  const [closedIds, setClosedIds] = useState<number[]>([])
   const [deletingItem, setDeletingItem] = useState<Category | null>(null)
   const [creatingItem, setCreatingItem] = useState<Category | null>(null)
   const [editingItem, setEditingItem] = useState<Category | null>(null)
@@ -70,11 +70,11 @@ export const ProductCategories = () => {
   }, [])
 
   const toggle = (id: number) => {
-    setOpenedIds(prev => (prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]))
+    setClosedIds(prev => (prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]))
   }
 
   const renderCategory = (category: Category, level = 0) => {
-    const opened = openedIds.includes(category?.id || 0)
+    const opened = !closedIds.includes(category?.id || 0)
     const hasChildren = category?.children?.length || 0 > 0
 
     return (
@@ -131,6 +131,14 @@ export const ProductCategories = () => {
   }
 
   const handleCreate = () => {
+    const data = creatingItem
+
+    if (data?.parentId === '0') delete data.parentId
+
+    const slug = `${categories.find(c => c.id == data?.parentId)?.slug}/${data?.slug}`
+
+    if (data?.parentId) data.slug = slug
+
     axios(`${baseUrl}/categories`, {
       method: 'POST',
       headers: {
@@ -160,6 +168,7 @@ export const ProductCategories = () => {
           .then(() => {
             toast.success('Создано')
             setCreatingItem(null)
+            setFile(null)
             refresh()
           })
           .catch(err => console.log(err))
@@ -180,6 +189,7 @@ export const ProductCategories = () => {
       .then(() => {
         toast.success('Создано')
         setEditingItem(null)
+        setFile(null)
         refresh()
       })
       .catch(err => console.log(err))
@@ -384,7 +394,6 @@ const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, on
   )
 }
 
-
 interface ModalProps {
   data: any | null
   setData: React.Dispatch<React.SetStateAction<any | null>>
@@ -436,8 +445,8 @@ const Modal: React.FC<ModalProps> = ({
                 <CustomSelect
                   data={[
                     {
-                      id: 0,
-                      value: 'Нет ',
+                      id: '0',
+                      value: 'Нет',
                     },
                     ...(categories?.map(category => ({
                       id: category.id || 0,
@@ -447,8 +456,7 @@ const Modal: React.FC<ModalProps> = ({
                   showSuggestions={false}
                   value={{
                     id: data.parentId || 0,
-                    value:
-                      categories?.find(c => c.id == data.parentId)?.name || 'Выберите категорию',
+                    value: categories?.find(c => c.id == data.parentId)?.name || 'Нет',
                   }}
                   onChange={data => setData((prev: any) => prev && { ...prev, parentId: data })}
                   placeholder="Выберите категорию"
@@ -491,7 +499,7 @@ const Modal: React.FC<ModalProps> = ({
               </label>
             </div>
 
-            {!data.parentId && (
+            {(!data.parentId || data.parentId === '0') && (
               <label className="flex flex-col gap-[5px]">
                 <p>Порядковый номер</p>
                 <NumericFormat
@@ -505,10 +513,10 @@ const Modal: React.FC<ModalProps> = ({
               </label>
             )}
 
-            <label className="relative bg-[#F2F3F5] p-[15px] rounded-[12px] aspect-square w-fit flex flex-col items-center justify-center gap-[12px] cursor-pointer">
+            <label className="relative bg-[#F2F3F5] p-[15px] rounded-[12px] aspect-[9/6] w-fit flex flex-col items-center justify-center gap-[12px] cursor-pointer w-[300px]">
               {file || data.imageUrl ? (
                 <img
-                  className="w-[180px] aspect-square"
+                  className="max-w-[300px] aspect-[9/6] w-full object-cover"
                   src={file ? URL.createObjectURL(file) : data.imageUrl}
                   alt=""
                 />
@@ -544,12 +552,19 @@ const Modal: React.FC<ModalProps> = ({
 
             <label className="flex flex-col gap-[5px]">
               <p>Ссылка на категорию</p>
-              <input
-                type="text"
-                className="admin-input w-full"
-                value={data.slug}
-                onChange={e => setData((prev: any) => prev && { ...prev, slug: e.target.value })}
-              />
+              <div className="flex admin-input">
+                {data.parentId && data.parentId !== '0' && (
+                  <p className="flex items-center">
+                    {categories.find(c => c.id == data.parentId).slug}/
+                  </p>
+                )}
+                <input
+                  type="text"
+                  className="w-full"
+                  value={data.slug}
+                  onChange={e => setData((prev: any) => prev && { ...prev, slug: e.target.value })}
+                />
+              </div>
             </label>
 
             <label className="flex flex-col gap-[5px]">

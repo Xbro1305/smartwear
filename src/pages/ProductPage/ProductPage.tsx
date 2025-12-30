@@ -233,22 +233,26 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     thousandSeparator=" "
                     displayType="text"
                   />
-                  <NumericFormat
-                    value={oldPrice}
-                    suffix=" ₽"
-                    className="text-[#777777] text-[32px] font-medium line-through mb-[10px]"
-                    thousandSeparator=" "
-                    displayType="text"
-                  />
-                  <NumericFormat
-                    value={Math.round(((oldPrice - price) / oldPrice) * 100)}
-                    suffix="%"
-                    prefix="-"
-                    className="text-red text-[24px] font-medium mb-[12px]"
-                    thousandSeparator=" "
-                    displayType="text"
-                    allowNegative={false}
-                  />
+                  {oldPrice && oldPrice != 0 && (
+                    <>
+                      <NumericFormat
+                        value={oldPrice}
+                        suffix=" ₽"
+                        className="text-[#777777] text-[32px] font-medium line-through mb-[10px]"
+                        thousandSeparator=" "
+                        displayType="text"
+                      />
+                      <NumericFormat
+                        value={Math.round(((oldPrice - price) / oldPrice) * 100)}
+                        suffix="%"
+                        prefix="-"
+                        className="text-red text-[24px] font-medium mb-[12px]"
+                        thousandSeparator=" "
+                        displayType="text"
+                        allowNegative={false}
+                      />
+                    </>
+                  )}
                 </div>
                 <a
                   href="#info"
@@ -372,22 +376,26 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     thousandSeparator=" "
                     displayType="text"
                   />
-                  <NumericFormat
-                    value={oldPrice}
-                    suffix=" ₽"
-                    className="text-[#777777] text-[24px] font-medium line-through mb-[5px]"
-                    thousandSeparator=" "
-                    displayType="text"
-                  />
-                  <NumericFormat
-                    value={Math.round(((oldPrice - price) / oldPrice) * 100)}
-                    suffix="%"
-                    prefix="-"
-                    className="text-red text-[18px] font-medium mb-[7px]"
-                    thousandSeparator=" "
-                    displayType="text"
-                    allowNegative={false}
-                  />
+                  {oldPrice && oldPrice != 0 && (
+                    <>
+                      <NumericFormat
+                        value={oldPrice}
+                        suffix=" ₽"
+                        className="text-[#777777] text-[24px] font-medium line-through mb-[5px]"
+                        thousandSeparator=" "
+                        displayType="text"
+                      />
+                      <NumericFormat
+                        value={Math.round(((oldPrice - price) / oldPrice) * 100)}
+                        suffix="%"
+                        prefix="-"
+                        className="text-red text-[18px] font-medium mb-[7px]"
+                        thousandSeparator=" "
+                        displayType="text"
+                        allowNegative={false}
+                      />
+                    </>
+                  )}
                 </div>
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-center lg:justify-start gap-[10px]">

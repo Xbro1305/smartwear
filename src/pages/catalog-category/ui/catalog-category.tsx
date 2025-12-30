@@ -261,9 +261,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               </select>
             </div>
             <div className={styles.catalog_right_top_brands}>
-              {brands?.map(b => (
+              {category?.descendants?.map((b: any) => (
                 <p key={b.id} className="p1">
-                  <Link to={b.name}>{b.name}</Link>
+                  <Link to={b.slug}>{b.name}</Link>
                 </p>
               ))}
             </div>
@@ -316,7 +316,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                     )}
                   </div>
 
-                  <Link className="button" to="">
+                  <Link className="button" to={`/${i.slug}`}>
                     Подробнее
                   </Link>
                 </div>

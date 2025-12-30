@@ -16,11 +16,12 @@ export const CatalogResolver = () => {
 
   const baseUrl = import.meta.env.VITE_APP_API_URL
 
-  const getCategoryBySlug = (slug: string) =>
-    axios.get(`${baseUrl}/catalog/${slug}/products`).then(r => r.data)
+  const category = window.location.pathname
 
-  const getProductBySlug = (slug: string) =>
-    axios.get(`${baseUrl}/products/slug/${slug}`).then(r => r.data)
+  const getCategoryBySlug = () =>
+    axios.get(`${baseUrl}/catalog/products?category=${category}`).then(r => r.data)
+
+  const getProductBySlug = () => axios.get(`${baseUrl}/products/slug/${slug}`).then(r => r.data)
 
   useEffect(() => {
     if (!slug) return
