@@ -118,7 +118,12 @@ export const ProductCategories = () => {
             )}
             <button
               className="text-service text-[20px] cursor-pointer"
-              onClick={() => setEditingItem(category)}
+              onClick={() =>
+                setEditingItem({
+                  ...category,
+                  slug: category.slug.split('/').pop() || category.slug,
+                })
+              }
             >
               <LuPencil />
             </button>
