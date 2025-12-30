@@ -31,12 +31,12 @@ export const CatalogResolver = () => {
 
     const load = async () => {
       try {
-        const category = await getCategoryBySlug(slug)
+        const category = await getCategoryBySlug()
         setData(category)
         setType('category')
       } catch {
         try {
-          const product = await getProductBySlug(slug)
+          const product = await getProductBySlug()
           setData(product)
           setType('product')
         } catch {
