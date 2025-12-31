@@ -142,7 +142,11 @@ export const ProductCategories = () => {
 
     const slug = `${categories.find(c => c.id == data?.parentId)?.slug}/${data?.slug}`
 
-    if (data?.parentId) data.slug = slug
+    if (data?.parentId) {
+      data.slug = slug
+      data.showInMenu = false
+      data.orderNum = null
+    }
 
     axios(`${baseUrl}/categories`, {
       method: 'POST',
@@ -183,13 +187,26 @@ export const ProductCategories = () => {
 
   const handleEdit = () => {
     if (!editingItem?.id) return
+
+    const data = editingItem
+
+    if (data?.parentId === '0') delete data.parentId
+
+    const slug = `${categories.find(c => c.id == data?.parentId)?.slug}/${data?.slug}`
+
+    if (data?.parentId) {
+      data.slug = slug
+      data.showInMenu = false
+      data.orderNum = null
+    }
+
     axios(`${baseUrl}/categories/${editingItem.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      data: editingItem,
+      data,
     })
       .then(() => {
         toast.success('Создано')
@@ -259,6 +276,7 @@ export const ProductCategories = () => {
               discountMode: 'ALL',
               name: '',
               slug: '',
+              parentId: '0',
               showInMenu: false,
               showOnSite: false,
               filters: {

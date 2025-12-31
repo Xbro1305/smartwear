@@ -102,13 +102,16 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
   const [category, setCategory] = useState<any>([])
 
-  const url = window.location.pathname.split('/')
-  const id = url[url.length - 1] // last
+  const url = window.location.pathname
 
   useEffect(() => {
     window.scrollTo(0, 0)
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/categories/${id}`).then(r => setCategory(r.data))
+    axios(`${import.meta.env.VITE_APP_API_URL}/categories?slug=${url}`).then(res => {
+      setCategory(res.data)
+      const title = res.data.current.metaTitle
+      document.title = title
+    })
 
     const b = data?.items?.reduce((acc: { id: number; name: string }[], item: any) => {
       if (!acc.some(brand => brand.id === item.brand.id)) {
@@ -116,8 +119,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       }
       return acc
     }, [])
-
-    console.log(b)
 
     setBrands(b)
   }, [data])
