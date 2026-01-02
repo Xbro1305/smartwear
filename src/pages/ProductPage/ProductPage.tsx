@@ -454,13 +454,18 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 </span>
                 {selectedInfo == 'info' && (
                   <div className="md:hidden flex flex-col gap-[10px] w-full">
-                    {item.attributeValues.map((attr: any) => (
-                      <div className="flex items-end gap-[10px] w-full text-[#878787] text-[18px]">
-                        <p>{attr.attributeValue.attribute.name}</p>
-                        <div className="flex-1 border-b border-dotted border-[#878787]"></div>
-                        <p>{attr.attributeValue.value}</p>
-                      </div>
-                    ))}
+                    {item.attributeValues
+                      .sort(
+                        (a: any, b: any) =>
+                          a.attributeValue.attributeId - b.attributeValue.attributeId
+                      )
+                      .map((attr: any) => (
+                        <div className="flex items-end gap-[10px] w-full text-[#878787] text-[18px]">
+                          <p>{attr.attributeValue.attribute.name}</p>
+                          <div className="flex-1 border-b border-dotted border-[#878787]"></div>
+                          <p>{attr.attributeValue.value}</p>
+                        </div>
+                      ))}
                   </div>
                 )}
               </p>
