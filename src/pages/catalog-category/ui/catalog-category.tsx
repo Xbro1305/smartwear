@@ -107,7 +107,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   useEffect(() => {
     window.scrollTo(0, 0)
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/categories?slug=${url}`).then(res => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/categories/by-slug?slug=${url}`).then(res => {
       setCategory(res.data)
       const title = res.data.current.metaTitle
       document.title = title

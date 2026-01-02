@@ -55,14 +55,14 @@ export const ProductCategories = () => {
     axios(`${baseUrl}/categories/tree`)
       .then(res => setData(res.data))
       .catch(err => console.log(err))
-  }
-
-  useEffect(() => {
-    refresh()
 
     axios(`${baseUrl}/categories/`)
       .then(res => setCategories(res.data))
       .catch(err => console.log(err))
+  }
+
+  useEffect(() => {
+    refresh()
 
     axios(`${baseUrl}/attributes/`)
       .then(res => setAttributes(res.data))
@@ -138,15 +138,32 @@ export const ProductCategories = () => {
   const handleCreate = () => {
     const data = creatingItem
 
-    if (data?.parentId === '0') delete data.parentId
+    if (!data) return
 
-    const slug = `${categories.find(c => c.id == data?.parentId)?.slug}/${data?.slug}`
+    // если корневая категория
+    if (data.parentId === '0') {
+      delete data.parentId
+    } else if (data.parentId) {
+      const parent = categories.find(c => c.id == data.parentId)
 
-    if (data?.parentId) {
-      data.slug = slug
+      if (parent?.slug) {
+        const childSlug = data.slug.replace(/\//g, '')
+        data.slug = `${parent.slug}/${childSlug}`
+      }
+
       data.showInMenu = false
       data.orderNum = null
     }
+
+    // гарантируем начальный /
+    if (!data.slug.startsWith('/')) {
+      data.slug = `/${data.slug}`
+    }
+
+    // убираем двойные слэши
+    data.slug = data.slug.replace(/\/+/g, '/')
+
+    console.log(data)
 
     axios(`${baseUrl}/categories`, {
       method: 'POST',
@@ -190,15 +207,32 @@ export const ProductCategories = () => {
 
     const data = editingItem
 
-    if (data?.parentId === '0') delete data.parentId
+    if (!data) return
 
-    const slug = `${categories.find(c => c.id == data?.parentId)?.slug}/${data?.slug}`
+    // если корневая категория
+    if (data.parentId === '0') {
+      delete data.parentId
+    } else if (data.parentId) {
+      const parent = categories.find(c => c.id == data.parentId)
 
-    if (data?.parentId) {
-      data.slug = slug
+      if (parent?.slug) {
+        const childSlug = data.slug.replace(/\//g, '')
+        data.slug = `${parent.slug}/${childSlug}`
+      }
+
       data.showInMenu = false
       data.orderNum = null
     }
+
+    // гарантируем начальный /
+    if (!data.slug.startsWith('/')) {
+      data.slug = `/${data.slug}`
+    }
+
+    // убираем двойные слэши
+    data.slug = data.slug.replace(/\/+/g, '/')
+
+    console.log(data)
 
     axios(`${baseUrl}/categories/${editingItem.id}`, {
       method: 'PUT',
@@ -401,8 +435,8 @@ const AttributeSelector: React.FC<Props> = ({ title, attributes, selectedIds, on
         <p className="text-[14px] font-medium">Что показываем</p>
         <div className="flex flex-wrap gap-[8px]">
           {attribute.values
-            .filter(v => safeSelectedIds.includes(v.id))
-            .map(v => (
+            ?.filter(v => safeSelectedIds.includes(v.id))
+            ?.map(v => (
               <div
                 key={v.id}
                 className="bg-[#E02844] text-white text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
@@ -471,10 +505,12 @@ const Modal: React.FC<ModalProps> = ({
                       id: '0',
                       value: 'Нет',
                     },
-                    ...(categories?.map(category => ({
-                      id: category.id || 0,
-                      value: category.name,
-                    })) || []),
+                    ...(categories
+                      ?.filter(c => c?.id != data?.id)
+                      ?.map(category => ({
+                        id: category.id || 0,
+                        value: category.name,
+                      })) || []),
                   ]}
                   showSuggestions={false}
                   value={{
@@ -622,7 +658,7 @@ const Modal: React.FC<ModalProps> = ({
               Показывать на сайте
             </label>
 
-            {!data.parentId && (
+            {(!data.parentId || data.parentId === '0') && (
               <label className="flex items-center gap-[15px]">
                 <CustomSwitch
                   value={data.showInMenu}

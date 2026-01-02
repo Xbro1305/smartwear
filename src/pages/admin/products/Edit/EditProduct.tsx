@@ -281,6 +281,8 @@ export const EditProduct = () => {
   }
 
   const sendData = async () => {
+    console.log(item?.main.attributeValueIds)
+
     const simpleAttributeIds = item?.main.attributeValueIds?.map(av => Object.values(av)[0]) || []
 
     const data = {
@@ -409,7 +411,7 @@ export const EditProduct = () => {
       syncronize()
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      window.location.href = '/admin/products'
+      // window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }

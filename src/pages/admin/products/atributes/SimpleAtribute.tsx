@@ -237,7 +237,16 @@ export const SimpleAtribute = () => {
             </label>{' '}
             <label className={`w-[370px] ${styles.modal_body_label}`}>
               <p>Порядок сортировки</p>
-              <input type="text" value={attribute?.orderNum} placeholder="Порядок" />
+              <input
+                type="text"
+                value={attribute?.orderNum}
+                onChange={e =>
+                  setAttribute(prev =>
+                    prev ? { ...prev, orderNum: Number(e.target.value) } : null
+                  )
+                }
+                placeholder="Порядок"
+              />
             </label>
           </div>
           <div className="flex flex-col gap-[24px]">
@@ -500,7 +509,10 @@ export const SimpleAtribute = () => {
                 onClick={() => setCreatingValue(null)}
               ></button>
 
-              <form onSubmit={e => handleCreate(e)} className={`z-50 ${styles.modal_body}`}>
+              <form
+                onSubmit={e => handleCreate(e)}
+                className={`z-[50_!important] ${styles.modal_body}`}
+              >
                 <h2 id="h2">Добавление варианта атрибута</h2>
                 <label className={styles.modal_body_label}>
                   <p>Название</p>
