@@ -210,7 +210,7 @@ export const ProductCategories = () => {
 
     const data = editingItem
 
-    if (!data.orderNum && data.parentId && data.parentId !== '0')
+    if (!data.orderNum && (!data.parentId || data.parentId !== '0'))
       return toast.error('Введите порядковый номер!')
 
     if (!data) return
