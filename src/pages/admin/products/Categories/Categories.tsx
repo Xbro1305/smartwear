@@ -140,6 +140,8 @@ export const ProductCategories = () => {
 
     if (!data) return
 
+    if (!data.orderNum) return toast.error('Введите порядковый номер!')
+
     // если корневая категория
     if (data.parentId === '0') {
       delete data.parentId
@@ -206,6 +208,8 @@ export const ProductCategories = () => {
     if (!editingItem?.id) return
 
     const data = editingItem
+
+    if (!data.orderNum) return toast.error('Введите порядковый номер!')
 
     if (!data) return
 
