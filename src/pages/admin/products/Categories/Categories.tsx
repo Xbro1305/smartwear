@@ -217,7 +217,7 @@ export const ProductCategories = () => {
 
     // если корневая категория
     if (data.parentId === '0') {
-      delete data.parentId
+      data.parentId = null
     } else if (data.parentId) {
       const parent = categories.find(c => c.id == data.parentId)
 
