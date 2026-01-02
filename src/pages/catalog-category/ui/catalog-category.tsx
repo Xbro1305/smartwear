@@ -53,16 +53,12 @@ const Breadcrumbs = ({ data }: { data: any }) => {
 
   const categories = [...(data?.ancestors || []), data?.current]
 
-  let path = ''
-
   return (
     <nav className="flex gap-2 text-sm">
       {categories?.map((item, index) => {
-        path += `/${item?.slug}`
-
         return (
           <span key={item?.id} className="flex items-center gap-2">
-            <a href={path} className="text-blue-600 hover:underline">
+            <a href={item?.slug} className="text-blue-600 hover:underline">
               {item?.name}
             </a>
             {index < categories?.length - 1 && <span>&gt;</span>}
