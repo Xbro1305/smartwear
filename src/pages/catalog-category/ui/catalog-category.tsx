@@ -65,8 +65,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [category, setCategory] = useState<any>([])
   const [filters, setFilters] = useState<any>([])
   const [items, setItems] = useState<any>([])
-  const [maxPrice, setMaxPrice] = useState<any>([])
-  const [minPrice, setMinPrice] = useState<any>([])
+  const [maxPrice, setMaxPrice] = useState<number>(0)
+  const [minPrice, setMinPrice] = useState<number>(0)
 
   const toggleFilter = (id: number) =>
     setClosedFilters(prev =>
