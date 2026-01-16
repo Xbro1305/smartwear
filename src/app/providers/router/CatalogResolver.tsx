@@ -19,7 +19,9 @@ export const CatalogResolver = () => {
   const category = window.location.pathname
 
   const getCategoryBySlug = () =>
-    axios.get(`${baseUrl}/catalog/products?category=${category}`).then(r => r.data)
+    axios
+      .get(`${baseUrl}/catalog/products?category=${category}&attributeIds=25&priceTo=10000`)
+      .then(r => r.data)
 
   const getProductBySlug = () => axios.get(`${baseUrl}/products/slug/${slug}`).then(r => r.data)
 

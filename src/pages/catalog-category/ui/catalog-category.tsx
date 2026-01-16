@@ -2,24 +2,14 @@
 /* eslint-disable max-lines */
 import { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { FaChevronDown } from 'react-icons/fa'
-
 import banner from '@/assets/images/catalogBanner.svg'
-// import item from '@/assets/images/homeCatalog.jpeg'
 import heart from '@/assets/images/homeHeart.svg'
-import { ROUTER_PATHS } from '@/shared/config/routes'
-
 import styles from './catalog-category.module.scss'
 import axios from 'axios'
 import { IoMdSwitch } from 'react-icons/io'
 import { HiOutlineSwitchVertical } from 'react-icons/hi'
-
-type Color = {
-  border: string
-  name: string
-  value: string
-}
 
 interface Props {
   data: any
@@ -54,7 +44,7 @@ const Breadcrumbs = ({ data }: { data: any }) => {
   const categories = [...(data?.ancestors || []), data?.current]
 
   return (
-    <nav className="flex gap-2 text-sm">
+    <div className="flex gap-2 text-sm">
       {categories?.map((item, index) => {
         return (
           <span key={item?.id} className="flex items-center gap-2">
@@ -65,40 +55,79 @@ const Breadcrumbs = ({ data }: { data: any }) => {
           </span>
         )
       })}
-    </nav>
+    </div>
   )
 }
 
 export const CatalogCategory: React.FC<Props> = ({ data }) => {
-  const [open, setOpen] = useState({
-    category: true,
-    season: true,
-    brand: true,
-    color: true,
-    size: true,
-    cloth: true,
-    length: true,
-  })
-
-  const toggle = (key: keyof typeof open) => setOpen(prev => ({ ...prev, [key]: !prev[key] }))
-
-  const [price, setPrice] = useState<number>(100000)
-
-  const [brands, setBrands] = useState<{ id: number; name: string }[]>([])
-
-  const [colors, _] = useState<Color[]>([
-    { border: '#000', name: 'Черный', value: '#000000' },
-    { border: 'var(--service)', name: 'Белый', value: '#FFFFFF' },
-    { border: '#0000FF', name: 'Синий', value: '#0000FF' },
-    { border: '#008000', name: 'Зеленый', value: '#008000' },
-  ])
-  const [sizes, ___] = useState(['40', '42', '44', '46'])
-  const [clothes, __] = useState(['Вальтерм', 'Вальтерм + Файбертек', 'Файбертек', 'Гусиный пух'])
-  const [lengths, ____] = useState(['до 80 (10)', '80-90 (4)', '90-100 (26)', '100-110 (23)'])
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [category, setCategory] = useState<any>([])
+  const [filters, setFilters] = useState<any>([])
+  const [items, setItems] = useState<any>([])
+  const [maxPrice, setMaxPrice] = useState<any>([])
+  const [minPrice, setMinPrice] = useState<any>([])
+
+  const toggleFilter = (id: number) =>
+    setClosedFilters(prev =>
+      prev?.includes(id) ? prev.filter(n => n != id) : [...(prev || []), id]
+    )
+
+  const toggleFilterValue = (id: number) =>
+    setFilterIds(prev => (prev?.includes(id) ? prev.filter(n => n != id) : [...(prev || []), id]))
+
+  const [filterIds, setFilterIds] = useState<number[]>()
+  const [price, setPrice] = useState<number>(100000)
+  const [debouncedPrice, setDebouncedPrice] = useState(price)
+  const [closedFilters, setClosedFilters] = useState<number[]>()
 
   const url = window.location.pathname
+
+  useEffect(() => {
+    const ids = searchParams.get('attributeIds')
+
+    if (!ids) return
+
+    const parsed = ids.split(',').map(Number).filter(Boolean)
+
+    setFilterIds(parsed)
+  }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams)
+
+    if (filterIds?.length) {
+      params.set('attributeIds', filterIds.join(','))
+    } else {
+      params.delete('attributeIds')
+    }
+
+    params.set('priceTo', price.toString())
+
+    setSearchParams(params, { replace: true })
+  }, [filterIds, price])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedPrice(price)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [price])
+
+  useEffect(() => {
+    if (!category) return
+
+    const query = filterIds?.length ? `&attributeValueIds=${filterIds.join(',')}` : ''
+
+    axios
+      .get(
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${query}&priceTo=${debouncedPrice}`
+      )
+      .then(res => {
+        setItems(res.data.items)
+      })
+  }, [filterIds, debouncedPrice, category])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -109,14 +138,31 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       document.title = title
     })
 
-    const b = data?.items?.reduce((acc: { id: number; name: string }[], item: any) => {
-      if (!acc.some(brand => brand.id === item.brand.id)) {
-        acc.push(item.brand)
-      }
-      return acc
-    }, [])
+    setMaxPrice(data.facets.price.max)
+    setPrice(data.facets.price.max)
+    setMinPrice(data.facets.price.min)
 
-    setBrands(b)
+    setItems(data.items)
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes`)
+      .then(res => {
+        const attrs: any = res.data
+        const available = data?.facets?.available
+
+        const availableAttributes = attrs
+          .filter((attr: any) => available.some((a: any) => a.attributeId === attr.id))
+          .map((attr: any) => {
+            const availableAttr = available.find((a: any) => a.attributeId === attr.id)
+
+            return {
+              ...attr,
+              values: attr.values.filter((v: any) => availableAttr?.valueIds.includes(v.id)),
+            }
+          })
+
+        setFilters(availableAttributes)
+      })
+      .catch(err => console.log(err))
   }, [data])
 
   return (
@@ -135,45 +181,31 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       <div className={styles.catalog}>
         {/* LEFT */}
         <div className={styles.catalog_left}>
-          <FilterBlock title="Категория" isOpen={open.category} toggle={() => toggle('category')}>
-            {categories.map(i => (
-              <label key={i.category}>
-                <input type="checkbox" />
-                <p className="p1">{i.title}</p>
-              </label>
-            ))}
-          </FilterBlock>
-
-          <FilterBlock title="Сезон" isOpen={open.season} toggle={() => toggle('season')}>
-            {seasons.map(i => (
-              <label key={i}>
-                <input type="checkbox" />
-                <p className="p1">{i}</p>
-              </label>
-            ))}
-          </FilterBlock>
-
-          <FilterBlock title="Бренды" isOpen={open.brand} toggle={() => toggle('brand')}>
-            {brands.map(i => (
-              <label key={i.id}>
-                <input type="checkbox" />
-                <p className="p1">{i.name}</p>
-              </label>
-            ))}
-            {/* <span
-              className="p2"
-              style={{ color: 'var(--service)' }}
-              onClick={() => setBrands([...brands])}
-            >
-              Показать все{' '}
-              <span style={{ display: 'block', transform: 'rotate(90deg)' }}>{'>'}</span>
-            </span> */}
-          </FilterBlock>
+          {filters.slice(0, 2).map((attr: any) => (
+            <div key={attr.id}>
+              <FilterBlock
+                title={attr.name}
+                isOpen={!closedFilters?.includes(attr.id)}
+                toggle={() => toggleFilter(attr.id)}
+              >
+                {attr.values.map((i: any) => (
+                  <label key={i.id}>
+                    <input
+                      type="checkbox"
+                      checked={filterIds?.includes(i.id)}
+                      onChange={() => toggleFilterValue(i.id)}
+                    />
+                    <p className="p1">{i.value}</p>
+                  </label>
+                ))}
+              </FilterBlock>
+            </div>
+          ))}
 
           <FilterBlock title="Цена" isOpen>
             <section className={styles.catalog_filter_price}>
               <span className="p2" style={{ color: 'var(--service)' }}>
-                от <NumericFormat value={2500} displayType="text" thousandSeparator=" " />
+                от <NumericFormat value={minPrice} displayType="text" thousandSeparator=" " />
               </span>
               <span className="p2" style={{ color: 'var(--service)' }}>
                 до <NumericFormat value={price} displayType="text" thousandSeparator=" " />
@@ -181,8 +213,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             </section>
             <input
               type="range"
-              min={2500}
-              max={100000}
+              min={minPrice}
+              max={maxPrice}
               step={500}
               value={price}
               onChange={e => setPrice(Number(e.target.value))}
@@ -190,45 +222,26 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             />
           </FilterBlock>
 
-          <FilterBlock title="Цвет" isOpen={open.color} toggle={() => toggle('color')}>
-            {colors.map(i => (
-              <label key={i.name}>
-                <input type="checkbox" />
-                <div
-                  className={styles.catalog_filter_color}
-                  style={{ background: i.value, borderColor: i.border }}
-                />
-                <p className="p1">{i.name}</p>
-              </label>
-            ))}
-          </FilterBlock>
-
-          <FilterBlock title="Размер одежды" isOpen={open.size} toggle={() => toggle('size')}>
-            {sizes.map(i => (
-              <label key={i}>
-                <input type="checkbox" />
-                <p className="p1">{i}</p>
-              </label>
-            ))}
-          </FilterBlock>
-
-          <FilterBlock title="Утеплитель" isOpen={open.cloth} toggle={() => toggle('cloth')}>
-            {clothes.map(i => (
-              <label key={i}>
-                <input type="checkbox" />
-                <p className="p1">{i}</p>
-              </label>
-            ))}
-          </FilterBlock>
-
-          <FilterBlock title="Диапазон длины" isOpen={open.length} toggle={() => toggle('length')}>
-            {lengths.map(i => (
-              <label key={i}>
-                <input type="checkbox" />
-                <p className="p1">{i}</p>
-              </label>
-            ))}
-          </FilterBlock>
+          {filters.slice(2, filters.length).map((attr: any) => (
+            <div key={attr.id}>
+              <FilterBlock
+                title={attr.name}
+                isOpen={!closedFilters?.includes(attr.id)}
+                toggle={() => toggleFilter(attr.id)}
+              >
+                {attr.values.map((i: any) => (
+                  <label key={i.id}>
+                    <input
+                      type="checkbox"
+                      checked={filterIds?.includes(i.id)}
+                      onChange={() => toggleFilterValue(i.id)}
+                    />
+                    <p className="p1">{i.value}</p>
+                  </label>
+                ))}
+              </FilterBlock>
+            </div>
+          ))}
         </div>
 
         {/* RIGHT */}
@@ -266,7 +279,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             </div>
           </div>
           <div className={styles.catalog_wrapper}>
-            {data.items.map((i: any) => (
+            {items.map((i: any) => (
               <Link to={`/${i.slug}`} className={styles.catalog_item} key={i.name}>
                 <img src={i.imageUrl} alt="" />
                 <div className={styles.catalog_item_info}>
@@ -293,7 +306,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                       thousandSeparator=" "
                       suffix=" ₽"
                     />
-                    {i.oldPrice && i.oldPrice > 0 && (
+                    {i.oldPrice > 0 && (
                       <>
                         <NumericFormat
                           className="h5 text-[#B0B7BF_!important] text-[80%_!important] line-through"
@@ -325,23 +338,3 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     </div>
   )
 }
-
-/* ====== DATA ====== */
-
-// const recomendations = [
-//   {
-//     colors: ['#849051', '#EFC7BD'],
-//     img: item,
-//     price: '24150',
-//     oldPrice: '1500',
-//     name: 'Женская демисезонная куртка limolady 3279',
-//   },
-// ]
-
-const categories = [
-  { category: 'men', link: ROUTER_PATHS.MEN, title: 'Мужчинам' },
-  { category: 'women', link: ROUTER_PATHS.WOMEN, title: 'Женщинам' },
-  { category: 'acs', link: ROUTER_PATHS.ACS, title: 'Аксессуары' },
-]
-
-const seasons = ['Весна/лето', 'Демисезон', 'Зима']

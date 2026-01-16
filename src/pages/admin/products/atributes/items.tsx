@@ -14,6 +14,7 @@ import styles from './Atributes.module.scss'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { IoSettingsOutline } from 'react-icons/io5'
 import { ItemDependency } from './SimpleAtribute'
+import { CustomSwitch } from '../Components/CustomSwitch/switch'
 
 // ---- Cloth types ----
 
@@ -24,6 +25,7 @@ export const Types = () => {
   const [items, setItems] = useState<null | {
     name: string
     id: number | string
+    isFilter: boolean
     values: { value: string; id: number }[]
   }>(null)
 
@@ -36,7 +38,7 @@ export const Types = () => {
       },
     })
       .then(res => {
-        //отсортируй по алфавиту
+        // отсортируй по алфавиту
         const sortedValues = res.data.values.sort((a: any, b: any) =>
           a.value.localeCompare(b.value)
         )
@@ -109,9 +111,32 @@ export const Types = () => {
 
   return (
     <>
-      <button onClick={() => setCreating({ value: '' })} className="ml-auto" id="admin-button">
-        Добавить вид изделия
-      </button>
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-[10px]">
+          <CustomSwitch
+            onClick={value =>
+              axios(`${import.meta.env.VITE_APP_API_URL}/attributes/1`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data: {
+                  isFilter: value,
+                },
+              }).then(res => {
+                const isFilter = res.data.isFilter
+                setItems(prev => (prev ? { ...prev, isFilter } : null))
+              })
+            }
+            value={items?.isFilter || false}
+          />
+          Фильтр товаров
+        </label>
+        <button onClick={() => setCreating({ value: '' })} className="ml-auto" id="admin-button">
+          Добавить вид изделия
+        </button>
+      </div>
       <div className={styles.atributes_list}>
         <h3 id="h3">{items?.name}</h3>
         <div className={styles.atributes_list_items}>
@@ -200,6 +225,7 @@ export const SeasonAttrCase = () => {
   const [items, setItems] = useState<null | {
     name: string
     id: number
+    isFilter: boolean
     values: Season[]
   }>(null)
   const [deleting, setDeleting] = useState<null | Season>(null)
@@ -311,13 +337,36 @@ export const SeasonAttrCase = () => {
 
   return (
     <>
-      <button
-        className="ml-auto"
-        id="admin-button"
-        onClick={() => setCreating({ value: '', meta: { startDate: '' } })}
-      >
-        Добавить сезон
-      </button>
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-[10px]">
+          <CustomSwitch
+            onClick={value =>
+              axios(`${import.meta.env.VITE_APP_API_URL}/attributes/2`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data: {
+                  isFilter: value,
+                },
+              }).then(res => {
+                const isFilter = res.data.isFilter
+                setItems(prev => (prev ? { ...prev, isFilter } : null))
+              })
+            }
+            value={items?.isFilter || false}
+          />
+          Фильтр товаров
+        </label>
+        <button
+          className="ml-auto"
+          id="admin-button"
+          onClick={() => setCreating({ value: '', meta: { startDate: '' } })}
+        >
+          Добавить сезон
+        </button>
+      </div>
       <div className={styles.seasonAtributes_list}>
         <div className={styles.seasonAtributes_list_top}>
           <p>Сезон</p>
@@ -495,6 +544,7 @@ export const TargetGroups = () => {
   const [items, setItems] = useState<null | {
     name: string
     id: number
+    isFilter: boolean
     values: { value: string; id: number }[]
   }>(null)
 
@@ -578,9 +628,32 @@ export const TargetGroups = () => {
 
   return (
     <>
-      <button onClick={() => setCreating({ value: '' })} className="ml-auto" id="admin-button">
-        Добавить целевую группу
-      </button>
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-[10px]">
+          <CustomSwitch
+            onClick={value =>
+              axios(`${import.meta.env.VITE_APP_API_URL}/attributes/3`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data: {
+                  isFilter: value,
+                },
+              }).then(res => {
+                const isFilter = res.data.isFilter
+                setItems(prev => (prev ? { ...prev, isFilter } : null))
+              })
+            }
+            value={items?.isFilter || false}
+          />
+          Фильтр товаров
+        </label>
+        <button onClick={() => setCreating({ value: '' })} className="ml-auto" id="admin-button">
+          Добавить целевую группу
+        </button>
+      </div>
       <div className={styles.atributes_list}>
         <h3 id="h3">{items?.name}</h3>
         <div className={styles.atributes_list_items}>
@@ -676,6 +749,8 @@ export const Brands = () => {
   const [editing, setEditing] = useState<null | Brand>(null)
   const [deleting, setDeleting] = useState<null | Brand>(null)
   const [items, setItems] = useState<Brand[] | null>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [isFilter, setIsFilter] = useState<boolean>(false)
 
   const refresh = () => {
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/4`, {
@@ -697,6 +772,7 @@ export const Brands = () => {
           },
           id: item.id,
         }))
+        setIsFilter(res.data.isFilter)
         setItems(data)
       })
       .catch(err => {
@@ -720,6 +796,18 @@ export const Brands = () => {
       },
     }
 
+    const categoryData = {
+      name: item.value,
+      slug: item.meta.seoSlug,
+      showInMenu: false,
+      parentId: null,
+      showOnSite: true,
+      description,
+      metaTitle: item.meta.metaTitle,
+      metaDescription: item.meta.metaDescription,
+      discountMode: 'ALL',
+    }
+
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/4/values`, {
       method: 'POST',
       headers: {
@@ -728,7 +816,38 @@ export const Brands = () => {
       },
       data: item,
     })
-      .then(() => {
+      .then(res => {
+        const newBrand = res.data
+
+        // creating category
+
+        axios(`${import.meta.env.VITE_APP_API_URL}/categories`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          data: { ...categoryData, filters: { attributeValueIds: [newBrand.id] } },
+        }).then(() => {
+          if (!file) return
+
+          const formData = new FormData()
+          formData.append('file', file)
+
+          axios
+            .post(`${import.meta.env.VITE_APP_API_URL}/categories/${newBrand.id}/image`, formData, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+            })
+            .then(() => {
+              toast.success('Создано')
+              setFile(null)
+              refresh()
+            })
+            .catch(err => console.log(err))
+        })
+
         refresh()
         setDescription('')
         setCreating(null)
@@ -744,6 +863,18 @@ export const Brands = () => {
 
     const item = editing
 
+    const categoryData = {
+      name: item?.value,
+      slug: item?.meta.seoSlug,
+      showInMenu: false,
+      parentId: null,
+      showOnSite: true,
+      description,
+      metaTitle: item?.meta.metaTitle,
+      metaDescription: item?.meta.metaDescription,
+      discountMode: 'ALL',
+    }
+
     axios(`${import.meta.env.VITE_APP_API_URL}/attributes/values/${editing?.id}`, {
       method: 'PUT',
       headers: {
@@ -753,6 +884,14 @@ export const Brands = () => {
       data: item,
     })
       .then(() => {
+        axios(`${import.meta.env.VITE_APP_API_URL}/categories`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          data: { ...categoryData },
+        })
         refresh()
         setDescription('')
         setEditing(null)
@@ -785,25 +924,48 @@ export const Brands = () => {
   return (
     <>
       <div className={styles.brands}>
-        <button
-          onClick={() =>
-            setCreating({
-              value: '',
-              meta: {
-                description: '',
-                imageUrl: '',
-                seoSlug: '',
-                metaTitle: '',
-                metaDescription: '',
-              },
-              id: 0,
-            })
-          }
-          className="ml-auto"
-          id="admin-button"
-        >
-          Добавить бренд
-        </button>
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-[10px]">
+            <CustomSwitch
+              onClick={value =>
+                axios(`${import.meta.env.VITE_APP_API_URL}/attributes/4`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  },
+                  data: {
+                    isFilter: value,
+                  },
+                }).then(res => {
+                  const isFilter = res.data.isFilter
+                  setIsFilter(isFilter)
+                })
+              }
+              value={isFilter || false}
+            />
+            Фильтр товаров
+          </label>
+          <button
+            onClick={() =>
+              setCreating({
+                value: '',
+                meta: {
+                  description: '',
+                  imageUrl: '',
+                  seoSlug: '',
+                  metaTitle: '',
+                  metaDescription: '',
+                },
+                id: 0,
+              })
+            }
+            className="ml-auto"
+            id="admin-button"
+          >
+            Добавить бренд
+          </button>
+        </div>
 
         <div className={styles.brands_list}>
           {items?.map((item, index) => (
@@ -909,7 +1071,7 @@ export const Brands = () => {
               <FeatureEditor value={description} onChange={value => setDescription(value)} />
             </section>
             <label className={`${styles.modal_body_label}`}>
-              <p>Логотип (размеп 1:1)</p>
+              <p>Логотип (размеp 1:1)</p>
               <input
                 type="file"
                 accept="image/*"
@@ -929,6 +1091,8 @@ export const Brands = () => {
                       )
                     }
                     reader.readAsDataURL(file)
+
+                    setFile(file)
                   }
                 }}
               />
@@ -1163,7 +1327,12 @@ interface Color {
 }
 
 export const Colors = () => {
-  const [items, setItems] = useState<null | { name: string; id: number; values: Color[] }>(null)
+  const [items, setItems] = useState<null | {
+    name: string
+    id: number
+    isFilter: boolean
+    values: Color[]
+  }>(null)
   const [deleting, setDeleting] = useState<null | Color>(null)
   const [creating, setCreating] = useState<null | Color>(null)
   const [editing, setEditing] = useState<null | Color>(null)
@@ -1283,21 +1452,44 @@ export const Colors = () => {
 
   return (
     <>
-      <button
-        className="ml-auto"
-        id="admin-button"
-        onClick={() =>
-          setCreating({
-            value: '',
-            meta: {
-              colorCode: '#000000',
-              aliases: [],
-            },
-          })
-        }
-      >
-        Добавить группу цветов
-      </button>
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-[10px]">
+          <CustomSwitch
+            onClick={value =>
+              axios(`${import.meta.env.VITE_APP_API_URL}/attributes/5`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data: {
+                  isFilter: value,
+                },
+              }).then(res => {
+                const isFilter = res.data.isFilter
+                setItems(prev => (prev ? { ...prev, isFilter } : null))
+              })
+            }
+            value={items?.isFilter || false}
+          />
+          Фильтр товаров
+        </label>
+        <button
+          className="ml-auto"
+          id="admin-button"
+          onClick={() =>
+            setCreating({
+              value: '',
+              meta: {
+                colorCode: '#000000',
+                aliases: [],
+              },
+            })
+          }
+        >
+          Добавить группу цветов
+        </button>
+      </div>
       <div className={styles.colors}>
         <div className={styles.colorAtributes_list}>
           <div className={styles.colorAtributes_list_top}>
@@ -1778,7 +1970,7 @@ const SizeTypes = () => {
   const [editing, setEditing] = useState<null | SizeType>(null)
   const [adding, setAdding] = useState<null | { name: string; orderNum: number }>(null)
 
-  ///api/sizes/types
+  // /api/sizes/types
 
   const refresh = () => {
     axios(`${import.meta.env.VITE_APP_API_URL}/sizes/types`, {
@@ -4570,6 +4762,7 @@ export const Lengths = () => {
 export interface SimpleAttributeType {
   id?: number
   name: string
+  isFilter: boolean
   orderNum: number
   isSystem: boolean
   isFreeValue: boolean
@@ -4645,7 +4838,29 @@ export const SimpleAttributeList = ({ id, onDelete }: { id: number; onDelete: ()
 
   return (
     <>
-      <div className="flex ml-auto gap-[10px]">
+      <div className="flex gap-[10px]">
+        <label className="flex items-center gap-[10px] mr-auto">
+          <CustomSwitch
+            onClick={value =>
+              axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data: {
+                  isFilter: value,
+                },
+              }).then(res => {
+                const isFilter = res.data.isFilter
+                setAttribute(prev => (prev ? { ...prev, isFilter } : null))
+              })
+            }
+            value={attribute?.isFilter || false}
+          />
+          Фильтр товаров
+        </label>
+
         <Link to={`/admin/products/atributes/${id}`} id="admin-button">
           Редактировать атрибут
         </Link>

@@ -40,6 +40,7 @@ export interface Category {
 export const ProductCategories = () => {
   const [page, setPage] = useState<'all' | 'brands'>('all')
   const [data, setData] = useState<Category[]>([])
+  const [allData, setAllData] = useState<Category[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [closedIds, setClosedIds] = useState<number[]>([])
   const [deletingItem, setDeletingItem] = useState<Category | null>(null)
@@ -53,7 +54,7 @@ export const ProductCategories = () => {
 
   const refresh = () => {
     axios(`${baseUrl}/categories/tree`)
-      .then(res => setData(res.data))
+      .then(res => setAllData(res.data))
       .catch(err => console.log(err))
 
     axios(`${baseUrl}/categories/`)
@@ -68,6 +69,29 @@ export const ProductCategories = () => {
       .then(res => setAttributes(res.data))
       .catch(err => console.log(err))
   }, [])
+
+  useEffect(() => {
+    const brands: number[] = attributes
+      ?.find((a: any) => a.name === 'Бренд')
+      ?.values?.map((b: any) => b?.id)
+
+    console.log(brands)
+
+    if (!brands?.length) return
+
+    const hasBrand = (c: any, b: number) =>
+      Array.isArray(c?.filters?.attributeValueIds) && c.filters.attributeValueIds.includes(b)
+
+    if (page === 'all') {
+      const pageCategories = allData?.filter(c => !brands.some(b => hasBrand(c, b)))
+
+      setData(pageCategories)
+    } else {
+      const pageCategories = allData?.filter(c => brands.some(b => hasBrand(c, b)))
+
+      setData(pageCategories)
+    }
+  }, [allData, page, attributes])
 
   const toggle = (id: number) => {
     setClosedIds(prev => (prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]))
@@ -107,27 +131,27 @@ export const ProductCategories = () => {
           </p>
           <p className="text-[14px]">{level == 0 && (category.orderNum ?? '—')}</p>
           <p className="text-[14px]">{category.productsCount || 0}</p>
-          <div className="flex items-center gap-[10px] justify-end pr-[20px]">
-            {(page !== 'brands' || level != 0) && (
+          {(page !== 'brands' || level != 0) && (
+            <div className="flex items-center gap-[10px] justify-end pr-[20px]">
               <button
                 className="text-red text-[20px] cursor-pointer"
                 onClick={() => setDeletingItem(category)}
               >
                 <LuTrash2 />
               </button>
-            )}
-            <button
-              className="text-service text-[20px] cursor-pointer"
-              onClick={() =>
-                setEditingItem({
-                  ...category,
-                  slug: category.slug.split('/').pop() || category.slug,
-                })
-              }
-            >
-              <LuPencil />
-            </button>
-          </div>
+              <button
+                className="text-service text-[20px] cursor-pointer"
+                onClick={() =>
+                  setEditingItem({
+                    ...category,
+                    slug: category.slug.split('/').pop() || category.slug,
+                  })
+                }
+              >
+                <LuPencil />
+              </button>
+            </div>
+          )}
         </div>
 
         {opened && category?.children?.map(child => renderCategory(child, level + 1))}
@@ -165,8 +189,6 @@ export const ProductCategories = () => {
 
     // убираем двойные слэши
     data.slug = data.slug.replace(/\/+/g, '/')
-
-    console.log(data)
 
     axios(`${baseUrl}/categories`, {
       method: 'POST',
