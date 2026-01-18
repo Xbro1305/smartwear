@@ -250,7 +250,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             <div className={styles.catalog_right_top_header}>
               <div className={styles.catalog_right_top_title}>
                 <h2 className="h1">{category?.current?.name || 'Каталог'}</h2>
-                <p className="p1">{data.items.length} товара(ов)</p>
+                <p className="p1">{items.length} товара(ов)</p>
               </div>
               <div className={styles.catalog_right_top_mobile}>
                 <p className="p2">
@@ -280,7 +280,12 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           </div>
           <div className={styles.catalog_wrapper}>
             {items.map((i: any) => (
-              <Link to={`/${i.slug}`} className={styles.catalog_item} key={i.name}>
+              <Link
+                to={`/${i.slug}`}
+                state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
+                className={styles.catalog_item}
+                key={i.name}
+              >
                 <img src={i.imageUrl} alt="" />
                 <div className={styles.catalog_item_info}>
                   <div className={styles.catalog_item_top}>
@@ -317,7 +322,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                         />
                         <NumericFormat
                           className="h5 text-[var(--red)_!important]"
-                          value={-((i.oldPrice * 100) / i.price - 100)}
+                          value={-((i.oldPrice * 100) / i.price - 100).toFixed(0)}
                           displayType="text"
                           thousandSeparator=" "
                           suffix=" %"
@@ -326,7 +331,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                     )}
                   </div>
 
-                  <Link className="button" to={`/${i.slug}`}>
+                  <Link
+                    className="button"
+                    to={`/${i.slug}`}
+                    state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
+                  >
                     Подробнее
                   </Link>
                 </div>

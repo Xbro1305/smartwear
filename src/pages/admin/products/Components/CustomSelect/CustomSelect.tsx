@@ -124,7 +124,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
         }}
       >
         <p
-          className={`text-[14px] whitespace-nowrap max-w-[calc(100%-10px)] ${!value || value.id === 0 ? 'text-[#20222460]' : ''}`}
+          className={`text-[14px] text-left max-w-[calc(100%-10px)] ${!value || value.id === 0 ? 'text-[#20222460]' : ''}`}
         >
           {value && value.id !== 0 ? value.value : placeholder}
         </p>
@@ -145,7 +145,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
                 onChange(item.id, item.value)
                 setOpened(false)
               }}
-              className="p-[4px_16px] whitespace-nowrap cursor-pointer bg-[#F2F3F5] rounded-xl text-[13px] select-none"
+              className="p-[4px_16px] cursor-pointer bg-[#F2F3F5] rounded-xl text-[13px] select-none"
             >
               {item.value}
             </div>
@@ -170,19 +170,21 @@ export const CustomSelect: React.FC<SelectProps> = ({
               {data.length === 0 ? (
                 <div className="p-[12px_15px] text-[#777]">Нет данных</div>
               ) : (
-                data.map(item => (
-                  <div
-                    key={item.id}
-                    onClick={e => {
-                      e.stopPropagation()
-                      onChange(item.id, item.value)
-                      setOpened(false)
-                    }}
-                    className="p-[12px_15px] hover:bg-[#F2F3F5] cursor-pointer text-[14px] whitespace-nowrap select-none"
-                  >
-                    {item.value}
-                  </div>
-                ))
+                data
+                  .sort((a, b) => a.value .localeCompare(b.value , 'ru'))
+                  .map(item => (
+                    <div
+                      key={item.id}
+                      onClick={e => {
+                        e.stopPropagation()
+                        onChange(item.id, item.value)
+                        setOpened(false)
+                      }}
+                      className="p-[12px_15px] hover:bg-[#F2F3F5] cursor-pointer text-[14px] select-none"
+                    >
+                      {item.value}
+                    </div>
+                  ))
               )}
             </div>
           </div>,

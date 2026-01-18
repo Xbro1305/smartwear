@@ -637,3 +637,7 @@ input[type='search']::-webkit-search-results-decoration {
     @apply border-[1px] border-solid border-[#BDBFC7] rounded-[12px] p-[12px] h-[40px];
   }
 }
+
+.product_description * {
+  background: white !important;
+}

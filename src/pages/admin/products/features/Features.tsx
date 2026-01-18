@@ -152,24 +152,26 @@ export const ProductFeatures = () => {
         + Создать особенность
       </button>
       <div className={styles.features_list}>
-        {features.map(feature => (
-          <div key={feature.id} className={styles.features_item}>
-            <h2>{feature.name}</h2>
-            <button
-              onClick={() => {
-                setEditing(feature)
-                setName(feature.name)
-                setDescription(feature.description)
-              }}
-              className={styles.features_button}
-            >
-              <LuPencil />
-            </button>
-            <button onClick={() => setDeleting(feature)} className={styles.features_button}>
-              <LuTrash2 />
-            </button>
-          </div>
-        ))}
+        {[...features]
+          ?.sort((a, b) => a.name.localeCompare(b.name, 'ru'))
+          ?.map(feature => (
+            <div key={feature.id} className={styles.features_item}>
+              <h2>{feature.name}</h2>
+              <button
+                onClick={() => {
+                  setEditing(feature)
+                  setName(feature.name)
+                  setDescription(feature.description)
+                }}
+                className={styles.features_button}
+              >
+                <LuPencil />
+              </button>
+              <button onClick={() => setDeleting(feature)} className={styles.features_button}>
+                <LuTrash2 />
+              </button>
+            </div>
+          ))}
       </div>
       {editing && (
         <div className={`${styles.features_modal} flex`}>

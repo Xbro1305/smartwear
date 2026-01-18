@@ -277,7 +277,7 @@ export const EditProduct = () => {
         )
         setWarehouses(uniqueStores as Store[])
       })
-      .catch(err => toast.error(err.response.data.message))
+      .catch(err => console.error(err.response.data.message))
   }
 
   const sendData = async () => {
@@ -409,6 +409,10 @@ export const EditProduct = () => {
       }
 
       syncronize()
+
+      axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
+        method: 'POST',
+      }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
       window.location.href = '/admin/products'
@@ -981,9 +985,15 @@ export const EditProduct = () => {
             {attributes
               .filter(
                 attr =>
-                  !['Бренд', 'Сезон', 'Вид изделия', 'Вид утеплителя', 'Цвет', 'Размер'].includes(
-                    attr.name
-                  )
+                  ![
+                    'Бренд',
+                    'Сезон',
+                    'Вид изделия',
+                    'Вид утеплителя',
+                    'Цвет',
+                    'Размер',
+                    'Коллекция',
+                  ].includes(attr.name)
               )
               .filter(attr => attr.isSystem)
               .filter(
@@ -1117,7 +1127,8 @@ export const EditProduct = () => {
             <div className="flex flex-col gap-[10px]">
               <p className="text-[14px] font-medium">Все особенности</p>
               <div className="flex flex-wrap gap-[8px]">
-                {features
+                {[...features]
+                  .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
                   .filter(feature => !item?.main?.featureIds?.includes(feature.id))
                   .map(feature => (
                     <div
@@ -1147,7 +1158,8 @@ export const EditProduct = () => {
             <div className="flex flex-col gap-[10px]">
               <p className="text-[14px] font-medium">Выбранные особенности</p>
               <div className="flex flex-wrap gap-[8px]">
-                {features
+                {[...features]
+                  .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
                   .filter(feature => item?.main?.featureIds?.includes(feature.id))
                   .map(feature => (
                     <div
@@ -1311,7 +1323,7 @@ export const EditProduct = () => {
               <div className="flex justify-between">
                 {stock.length ? (
                   <p>
-                    Общее колличество
+                    Общее колличество:{' '}
                     {stock
                       ? stock.reduce((acc, cur) => {
                           return acc + cur.stores.reduce((sum, store) => sum + store.quantity, 0)
@@ -1540,7 +1552,7 @@ export const EditProduct = () => {
                       />
                     </div>
                     <div className="px-[5px] flex justify-center items-center text-center">
-                      {variant?.colorAttrValue.value || ' '}
+                      {variant?.colorAttrValue?.value || ' '}
                     </div>
                     <div className="flex items-center justify-center">
                       <span

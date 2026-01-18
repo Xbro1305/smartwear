@@ -1915,10 +1915,10 @@ interface SizeTableRow {
   sizeValueId: number
   orderNum: number
   sizeValue: { id?: number; typeId?: number; name: string; orderNum?: number }
-  chest: number
-  waist: number
-  hips: number
-  height: number
+  chest: number | string
+  waist: number | string
+  hips: number | string
+  height: number | string
 }
 
 interface SizeType {
@@ -2690,6 +2690,8 @@ const SizeTables = () => {
     setEditing(null)
   }
 
+  const onlyDigitsAndDash = (value: string) => value.replace(/[^0-9-]/g, '')
+
   return (
     <>
       <button
@@ -2894,10 +2896,13 @@ const SizeTables = () => {
                               </option>
                             ))}
                         </select>
-                        <NumericFormat
-                          value={value.height || ''}
-                          onChange={(e: { target: { value: string } }) => {
-                            const height = e.target.value === '' ? 0 : Number(e.target.value)
+                        <input
+                          type="text"
+                          value={value.height ?? ''}
+                          placeholder="Рост"
+                          onChange={e => {
+                            const height = onlyDigitsAndDash(e.target.value)
+
                             setCreating({
                               ...creating,
                               rows: creating.rows.map((i, idx) =>
@@ -2905,12 +2910,15 @@ const SizeTables = () => {
                               ),
                             })
                           }}
-                          placeholder="Рост"
                         />
-                        <NumericFormat
-                          value={value.chest || ''}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const chest: number = e.target.value === '' ? 0 : Number(e.target.value)
+
+                        <input
+                          type="text"
+                          value={value.chest ?? ''}
+                          placeholder="Обхват груди"
+                          onChange={e => {
+                            const chest = onlyDigitsAndDash(e.target.value)
+
                             setCreating({
                               ...creating,
                               rows: creating.rows.map((i, idx) =>
@@ -2918,13 +2926,15 @@ const SizeTables = () => {
                               ),
                             })
                           }}
-                          placeholder="Обхват груди"
                         />
 
-                        <NumericFormat
-                          value={value.waist || ''}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const waist = e.target.value === '' ? 0 : Number(e.target.value)
+                        <input
+                          type="text"
+                          value={value.waist ?? ''}
+                          placeholder="Обхват талии"
+                          onChange={e => {
+                            const waist = onlyDigitsAndDash(e.target.value)
+
                             setCreating({
                               ...creating,
                               rows: creating.rows.map((i, idx) =>
@@ -2932,12 +2942,15 @@ const SizeTables = () => {
                               ),
                             })
                           }}
-                          placeholder="Обхват талии"
                         />
-                        <NumericFormat
-                          value={value.hips || ''}
-                          onChange={(e: { target: { value: string } }) => {
-                            const hips = e.target.value === '' ? 0 : Number(e.target.value)
+
+                        <input
+                          type="text"
+                          value={value.hips ?? ''}
+                          placeholder="Обхват бедер"
+                          onChange={e => {
+                            const hips = onlyDigitsAndDash(e.target.value)
+
                             setCreating({
                               ...creating,
                               rows: creating.rows.map((i, idx) =>
@@ -2945,8 +2958,8 @@ const SizeTables = () => {
                               ),
                             })
                           }}
-                          placeholder="Обхват бедер"
                         />
+
                         <button
                           type="button"
                           onClick={() =>
@@ -3179,58 +3192,64 @@ const SizeTables = () => {
                         ))}
                     </select>
 
-                    <NumericFormat
-                      value={row.height || ''}
-                      onChange={(e: { target: { value: string } }) => {
-                        const height = e.target.value === '' ? 0 : Number(e.target.value)
-                        setEditing({
-                          ...editing,
-                          rows: editing.rows.map(i =>
-                            i.sizeValueId === row.sizeValueId ? { ...i, height } : i
-                          ),
-                        })
-                      }}
+                    <input
+                      type="text"
+                      value={row.height ?? ''}
                       placeholder="Рост"
-                    />
-                    <NumericFormat
-                      value={row.chest || ''}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const chest: number = e.target.value === '' ? 0 : Number(e.target.value)
+                      onChange={e => {
+                        const height = onlyDigitsAndDash(e.target.value)
+
                         setEditing({
                           ...editing,
-                          rows: editing.rows.map(i =>
-                            i.sizeValueId === row.sizeValueId ? { ...i, chest } : i
+                          rows: editing.rows.map((i, idx) =>
+                            idx === index ? { ...i, height } : i
                           ),
                         })
                       }}
+                    />
+
+                    <input
+                      type="text"
+                      value={row.chest ?? ''}
                       placeholder="Обхват груди"
-                    />
-                    <NumericFormat
-                      value={row.waist || ''}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const waist = e.target.value === '' ? 0 : Number(e.target.value)
+                      onChange={e => {
+                        const chest = onlyDigitsAndDash(e.target.value)
+
                         setEditing({
                           ...editing,
-                          rows: editing.rows.map(i =>
-                            i.sizeValueId === row.sizeValueId ? { ...i, waist } : i
-                          ),
+                          rows: editing.rows.map((i, idx) => (idx === index ? { ...i, chest } : i)),
                         })
                       }}
+                    />
+
+                    <input
+                      type="text"
+                      value={row.waist ?? ''}
                       placeholder="Обхват талии"
-                    />
-                    <NumericFormat
-                      value={row.hips || ''}
-                      onChange={(e: { target: { value: string } }) => {
-                        const hips = e.target.value === '' ? 0 : Number(e.target.value)
+                      onChange={e => {
+                        const waist = onlyDigitsAndDash(e.target.value)
+
                         setEditing({
                           ...editing,
-                          rows: editing.rows.map(i =>
-                            i.sizeValueId === row.sizeValueId ? { ...i, hips } : i
-                          ),
+                          rows: editing.rows.map((i, idx) => (idx === index ? { ...i, waist } : i)),
                         })
                       }}
-                      placeholder="Обхват бедер"
                     />
+
+                    <input
+                      type="text"
+                      value={row.hips ?? ''}
+                      placeholder="Обхват бедер"
+                      onChange={e => {
+                        const hips = onlyDigitsAndDash(e.target.value)
+
+                        setEditing({
+                          ...editing,
+                          rows: editing.rows.map((i, idx) => (idx === index ? { ...i, hips } : i)),
+                        })
+                      }}
+                    />
+
                     <button
                       type="button"
                       onClick={() =>

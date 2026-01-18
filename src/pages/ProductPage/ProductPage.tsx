@@ -1,7 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
-// import top from './assets/top.png'
-// import center from './assets/center.png'
-// import bottom from './assets/bottom.png'
+import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import img1 from '@/assets/images/homeAcs.png'
@@ -39,8 +36,17 @@ interface ProductPageProps {
   data: any
 }
 
+interface Breadcrumb {
+  id?: number
+  name: string
+  slug: string
+}
+
+interface LocationState {
+  breadcrumbs?: Breadcrumb[]
+}
+
 export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
-  const { id } = useParams()
   const [item, setItem] = useState<any>()
   const [selectedPhoto, setSelectedPhoto] = useState<any>()
   const [media, setMedia] = useState<Media[]>()
@@ -162,33 +168,40 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
     return qty
   }
 
-  const getAllQtyByVariant = () => {
-    const variant = item?.variants
-      .filter((v: any) => v.colorAttrValueId == selectedColor?.id)
-      .find((v: any) => v.sizeValueId == selectedSize?.id)
-
-    if (!variant) return 0
-    const qty = variant.codes.reduce((acc: any, cur: { stocks: any[] }) => {
-      const totalStock = cur.stocks.reduce((storeAcc: any, storeCur: { quantity: number }) => {
-        return storeAcc + storeCur.quantity
-      }, 0)
-      return acc + totalStock
-    }, 0)
-    return qty
-  }
+  const location = useLocation()
+  const state = location.state as LocationState
+  const breadcrumbs = state?.breadcrumbs || []
 
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
       {item && (
         <div className="flex flex-col gap-xl">
-          <p className="text-[16px] text-[#B0B7BF]">
-            Главная {'>'} {id}
-          </p>
+          <div className="flex items-center gap-[5px]">
+            <span className="text-[16px] text-[#B0B7BF]">
+              <Link to="/">Главная</Link> {'>'}
+            </span>
+            {breadcrumbs.map(cat => (
+              <span
+                className="text-[16px] text-[#B0B7BF] flex items-center gap-[5px]"
+                key={cat.id || cat.slug}
+              >
+                <Link to={cat.slug} className="hover:underline">
+                  {cat.name}
+                </Link>
+                <span className="text-[16px] text-[#B0B7BF]">{'>'}</span>
+              </span>
+            ))}
+            <span className="text-[16px] text-[#B0B7BF]">{item.articul}</span>
+          </div>
+
           <div className="flex flex-col lg:flex-row items-start gap-xl">
             <div className="lg:hidden flex flex-col gap-[20px]">
               <p className="text-base text-dark">Модель: {item.articul}</p>
               <h3 className="h1">{item.name}</h3>
-              <div className="p1" dangerouslySetInnerHTML={{ __html: item.description }}></div>
+              <div
+                className="p1 bg-[#fff_!important] product_description"
+                dangerouslySetInnerHTML={{ __html: item.description }}
+              ></div>
               <p className="p1 flex items-center gap-[5px]">
                 <HiThumbUp className="text-red" />
                 Купили более 100 раз
@@ -222,7 +235,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
             <div className="flex flex-col gap-[32px] w-full lg:w-[40%]">
               <div className="flex-col hidden lg:flex">
                 <h1 className="h1">{item.name}</h1>
-                <div dangerouslySetInnerHTML={{ __html: item.description }}></div>
+                <div
+                  dangerouslySetInnerHTML={{ __html: item.description }}
+                  className="bg-[#fff_!important] product_description"
+                ></div>
               </div>
               <div className="hidden lg:flex flex-col gap-[10px]">
                 <div className="flex flex-row items-end gap-[20px]">
@@ -287,34 +303,30 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
                         style={{
-                          backgroundColor: getAllQtyByVariant() >= 1 ? '#DC2A1F' : '#B0B7BF',
+                          backgroundColor: data.quantity >= 1 ? '#DC2A1F' : '#B0B7BF',
                         }}
                       ></span>
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
                         style={{
-                          backgroundColor: getAllQtyByVariant() > 3 ? '#DC2A1F' : '#B0B7BF',
+                          backgroundColor: data.quantity > 3 ? '#DC2A1F' : '#B0B7BF',
                         }}
                       ></span>
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
                         style={{
-                          backgroundColor: getAllQtyByVariant() > 11 ? '#DC2A1F' : '#B0B7BF',
+                          backgroundColor: data.quantity > 11 ? '#DC2A1F' : '#B0B7BF',
                         }}
                       ></span>
                     </div>
                     <span>
-                      {getAllQtyByVariant() >= 1
-                        ? 'Мало'
-                        : getAllQtyByVariant() > 3
-                          ? 'Достаточно'
-                          : 'Много'}
+                      {data.quantity < 1 ? 'Мало' : data.quantity <= 3 ? 'Достаточно' : 'Много'}
                     </span>
                   </p>
                 </div>
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-between">
-                    <p className="text-[22px]">Цвет: </p>
+                    <p className="text-[22px]">Выберите цвет: </p>
                     <p className="p1 flex items-center gap-[10px]">{selectedColor?.alias}</p>
                   </div>
                   <div className="flex gap-[10px]">
@@ -527,7 +539,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         <img
                           src={care.careIcon.imageUrl}
                           alt={care.careIcon.name}
-                          className="w-[20px] aspect-square grayscale"
+                          className="w-[20px] grayscale"
                         />
                         <p className="p1">{care.careIcon.name}</p>
                       </div>
@@ -552,6 +564,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 <ul className="flex list-disc ml-[27px] text-[22px] flex-col gap-[5px] text-[dark]">
                   {item.features.map((feature: any) => (
                     <li
+                      className="bg-[#fff_!important]"
                       dangerouslySetInnerHTML={{ __html: feature.feature.description }}
                       key={feature?.feature?.id}
                     ></li>
@@ -602,7 +615,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       <img
                         src={care.careIcon.imageUrl}
                         alt={care.careIcon.name}
-                        className="w-[25px] aspect-square grayscale"
+                        className="w-[25px] grayscale"
                       />
                       <p className="p1">{care.careIcon.name}</p>
                     </div>
