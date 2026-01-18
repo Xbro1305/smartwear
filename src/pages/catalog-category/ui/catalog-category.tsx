@@ -271,11 +271,13 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               </select>
             </div>
             <div className={styles.catalog_right_top_brands}>
-              {category?.descendants?.map((b: any) => (
-                <p key={b.id} className="p1">
-                  <Link to={b.slug}>{b.name}</Link>
-                </p>
-              ))}
+              {category?.descendants
+                ?.filter((c: any) => c.parentId == category.current?.id)
+                ?.map((b: any) => (
+                  <p key={b.id} className="p1">
+                    <Link to={b.slug}>{b.name}</Link>
+                  </p>
+                ))}
             </div>
           </div>
           <div className={styles.catalog_wrapper}>
