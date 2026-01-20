@@ -64,6 +64,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
   const [category, setCategory] = useState<any>([])
   const [filters, setFilters] = useState<any>([])
+  const [isSaled, setIsSaled] = useState<boolean>(false)
+  const [colorIds, setColorIds] = useState<any>()
+  const [sizeIds, setSizeIds] = useState<any>()
   const [items, setItems] = useState<any>([])
   const [maxPrice, setMaxPrice] = useState<number>(0)
   const [minPrice, setMinPrice] = useState<number>(0)
@@ -119,15 +122,18 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     if (!category) return
 
     const query = filterIds?.length ? `&attributeValueIds=${filterIds.join(',')}` : ''
+    const sizesQuery = sizeIds?.length ? `&sizeIds=${sizeIds.join(',')}` : ''
+    const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
+    const saled = isSaled ? '&isSaled=true' : ''
 
     axios
       .get(
-        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${query}&priceTo=${debouncedPrice}`
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}&priceTo=${debouncedPrice}${sizesQuery}${colorsQuery}`
       )
       .then(res => {
         setItems(res.data.items)
       })
-  }, [filterIds, debouncedPrice, category])
+  }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -150,6 +156,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         const available = data?.facets?.available
 
         const availableAttributes = attrs
+          .filter((attr: any) => attr.name != 'Коллекция')
           .filter((attr: any) => available.some((a: any) => a.attributeId === attr.id))
           .map((attr: any) => {
             const availableAttr = available.find((a: any) => a.attributeId === attr.id)
@@ -201,7 +208,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               </FilterBlock>
             </div>
           ))}
-
           <FilterBlock title="Цена" isOpen>
             <section className={styles.catalog_filter_price}>
               <span className="p2" style={{ color: 'var(--service)' }}>
@@ -220,8 +226,57 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               onChange={e => setPrice(Number(e.target.value))}
               className={styles.catalog_filter_price_slider}
             />
+            <label>
+              <input type="checkbox" checked={isSaled} onChange={() => setIsSaled(!isSaled)} />
+              <p className="p1">Со скидкой</p>
+            </label>
           </FilterBlock>
-
+          <FilterBlock
+            title="Размеры"
+            isOpen={!closedFilters?.includes(-2)}
+            toggle={() => toggleFilter(-2)}
+          >
+            {data.facets.sizes
+              .sort((a: any, b: any) => a.orderNum - b.orderNum)
+              .map((i: any) => (
+                <label key={i.id}>
+                  <input
+                    type="checkbox"
+                    checked={sizeIds?.includes(i.id)}
+                    onChange={() =>
+                      setSizeIds((prev: any) =>
+                        prev?.includes(i.id)
+                          ? prev.filter((n: any) => n != i.id)
+                          : [...(prev || []), i.id]
+                      )
+                    }
+                  />
+                  <p className="p1">{i.value}</p>
+                </label>
+              ))}
+          </FilterBlock>{' '}
+          <FilterBlock
+            title="Цвет изделия"
+            isOpen={!closedFilters?.includes(-2)}
+            toggle={() => toggleFilter(-2)}
+          >
+            {data.facets.colors.map((i: any) => (
+              <label key={i.id}>
+                <input
+                  type="checkbox"
+                  checked={colorIds?.includes(i.id)}
+                  onChange={() => {
+                    setColorIds((prev: any) =>
+                      prev?.includes(i.id)
+                        ? prev.filter((n: any) => n != i.id)
+                        : [...(prev || []), i.id]
+                    )
+                  }}
+                />
+                <p className="p1">{i.value}</p>
+              </label>
+            ))}
+          </FilterBlock>
           {filters.slice(2, filters.length).map((attr: any) => (
             <div key={attr.id}>
               <FilterBlock
@@ -242,6 +297,18 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               </FilterBlock>
             </div>
           ))}
+          <FilterBlock
+            title="Наличие в магазинах"
+            isOpen={!closedFilters?.includes(-1)}
+            toggle={() => toggleFilter(-1)}
+          >
+            {[].map(i => (
+              <label key={i}>
+                <input type="checkbox" />
+                <p className="p1">{i}</p>
+              </label>
+            ))}
+          </FilterBlock>
         </div>
 
         {/* RIGHT */}

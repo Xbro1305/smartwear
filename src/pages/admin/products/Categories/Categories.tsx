@@ -39,18 +39,28 @@ export interface Category {
 
 export const ProductCategories = () => {
   const [page, setPage] = useState<'all' | 'brands'>('all')
+
   const [data, setData] = useState<Category[]>([])
   const [allData, setAllData] = useState<Category[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+
   const [closedIds, setClosedIds] = useState<number[]>([])
+
   const [deletingItem, setDeletingItem] = useState<Category | null>(null)
   const [creatingItem, setCreatingItem] = useState<Category | null>(null)
   const [editingItem, setEditingItem] = useState<Category | null>(null)
+
   const [file, setFile] = useState<File | null>(null)
   const [attributes, setAttributes] = useState<any>(null)
 
   const baseUrl = import.meta.env.VITE_APP_API_URL
   const token = localStorage.getItem('token')
+
+  const brands: number[] = attributes
+    ?.find((a: any) => a.name === 'Бренд')
+    ?.values?.map((b: any) => b?.id)
+  const hasBrand = (c: any, b: number) =>
+    Array.isArray(c?.filters?.attributeValueIds) && c.filters.attributeValueIds.includes(b)
 
   const refresh = () => {
     axios(`${baseUrl}/categories/tree`)
@@ -71,16 +81,7 @@ export const ProductCategories = () => {
   }, [])
 
   useEffect(() => {
-    const brands: number[] = attributes
-      ?.find((a: any) => a.name === 'Бренд')
-      ?.values?.map((b: any) => b?.id)
-
-    console.log(brands)
-
     if (!brands?.length) return
-
-    const hasBrand = (c: any, b: number) =>
-      Array.isArray(c?.filters?.attributeValueIds) && c.filters.attributeValueIds.includes(b)
 
     if (page === 'all') {
       const pageCategories = allData?.filter(c => !brands.some(b => hasBrand(c, b)))
@@ -129,7 +130,7 @@ export const ProductCategories = () => {
           <p className="text-[14px]" onClick={() => hasChildren && toggle(category?.id || 0)}>
             {category.name}
           </p>
-          <p className="text-[14px]">{level == 0 && (category.orderNum ?? '—')}</p>
+          <p className="text-[14px]">{level == 0 && (category.orderNum ?? '')}</p>
           <p className="text-[14px]">{category.productsCount || 0}</p>
           {(page !== 'brands' || level != 0) && (
             <div className="flex items-center gap-[10px] justify-end pr-[20px]">
@@ -391,7 +392,11 @@ export const ProductCategories = () => {
         data={creatingItem}
         setData={setCreatingItem}
         handleSubmit={handleCreate}
-        categories={categories}
+        categories={
+          page == 'all'
+            ? categories?.filter(c => !brands?.some(b => hasBrand(c, b)))
+            : categories?.filter(c => brands?.some(b => hasBrand(c, b)))
+        }
         attributes={attributes}
         file={file}
         setFile={setFile}
@@ -400,7 +405,11 @@ export const ProductCategories = () => {
         data={editingItem}
         setData={setEditingItem}
         handleSubmit={handleEdit}
-        categories={categories}
+        categories={
+          page == 'all'
+            ? categories?.filter(c => !brands?.some(b => hasBrand(c, b)))
+            : categories?.filter(c => brands?.some(b => hasBrand(c, b)))
+        }
         attributes={attributes}
         file={file}
         setFile={setFile}
@@ -500,7 +509,6 @@ const Modal: React.FC<ModalProps> = ({
   setFile,
   isEdit = false,
 }) => {
-  console.log(data)
   return (
     <>
       {data && (

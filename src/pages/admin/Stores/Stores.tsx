@@ -28,8 +28,9 @@ export const AdminStores = () => {
   const [editing, setEditing] = useState<Store | null>(null)
 
   const passwordSecurityLevel = (password: string) => {
+    if (!password) return 0
     let level = 0
-    if (password.length >= 8) level++
+    if (password?.length >= 8) level++
     if (/[A-ZА-Я]/.test(password) && /[a-zа-я]/.test(password)) level++
     if (/[0-9]/.test(password)) level++
     if (/[!@#$%^&*.,]/.test(password)) level++
@@ -460,7 +461,7 @@ export const AdminStores = () => {
               </div>
               <div className="flex items-center gap-[12px]">
                 <span className="text-xl">
-                  {editing.passwordHash.length >= 8 ? <FaRegCheckCircle /> : <FaRegCircle />}
+                  {editing?.passwordHash?.length >= 8 ? <FaRegCheckCircle /> : <FaRegCircle />}
                 </span>
                 <p>Минимум 8 символов</p>
               </div>

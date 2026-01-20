@@ -287,14 +287,21 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-[22px]">Производитель: </p>
-                  <p className="p1 flex items-center gap-[10px]">
+                  <Link
+                    className="p1 flex items-center gap-[10px] hover:underline"
+                    to={
+                      item?.attributeValues?.find(
+                        (i: any) => i.attributeValue?.attribute?.name == 'Бренд'
+                      )?.attributeValue?.meta.seoSlug
+                    }
+                  >
                     {
                       item?.attributeValues?.find(
                         (i: any) => i.attributeValue?.attribute?.name == 'Бренд'
                       )?.attributeValue?.value
                     }
                     <BsQuestionCircle className="font-medium text-[#B0B7BF]" />
-                  </p>
+                  </Link>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-[22px]">В наличии: </p>

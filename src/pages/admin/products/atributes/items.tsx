@@ -798,7 +798,7 @@ export const Brands = () => {
 
     const categoryData = {
       name: item.value,
-      slug: item.meta.seoSlug,
+      slug: `/${item.meta.seoSlug}`,
       showInMenu: false,
       parentId: null,
       showOnSite: true,
@@ -865,7 +865,7 @@ export const Brands = () => {
 
     const categoryData = {
       name: item?.value,
-      slug: item?.meta.seoSlug,
+      slug: `/${item?.meta.seoSlug}`,
       showInMenu: false,
       parentId: null,
       showOnSite: true,
@@ -884,7 +884,7 @@ export const Brands = () => {
       data: item,
     })
       .then(() => {
-        axios(`${import.meta.env.VITE_APP_API_URL}/categories`, {
+        axios(`${import.meta.env.VITE_APP_API_URL}/categories/brand-categories/${item?.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
