@@ -83,6 +83,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [price, setPrice] = useState<number>(100000)
   const [debouncedPrice, setDebouncedPrice] = useState(price)
   const [closedFilters, setClosedFilters] = useState<number[]>()
+  const [sort, setSort] = useState<string>()
 
   const url = window.location.pathname
 
@@ -134,6 +135,25 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         setItems(res.data.items)
       })
   }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled])
+
+  useEffect(() => {
+    if (!category) return
+
+    const newItems = [...items]
+
+    if (sort === 'price_down') {
+      newItems.sort((a, b) => b.price - a.price)
+    } else if (sort === 'price_up') {
+      newItems.sort((a, b) => a.price - b.price)
+    } else if (sort === 'new_first') {
+      newItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    } else if (sort === 'old_first') {
+      newItems.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+    }
+    ``
+
+    setItems(newItems)
+  }, [sort])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -329,12 +349,15 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                 </p>
               </div>
 
-              <select>
+              <select
+                onChange={e => setSort(e.target.value)}
+                className={styles.catalog_right_top_sort}
+              >
                 <option value="">Популярное</option>
-                <option value="">Пo убыванию цены</option>
-                <option value="">По возрастанию цены</option>
-                <option value="">Сначала новые</option>
-                <option value="">Сначала старые</option>
+                <option value="price_down">Пo убыванию цены</option>
+                <option value="price_up">По возрастанию цены</option>
+                <option value="new_first">Сначала новые</option>
+                <option value="old_first">Сначала старые</option>
               </select>
             </div>
             <div className={styles.catalog_right_top_brands}>
@@ -348,68 +371,82 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             </div>
           </div>
           <div className={styles.catalog_wrapper}>
-            {items.map((i: any) => (
-              <Link
-                to={`/${i.slug}`}
-                state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
-                className={styles.catalog_item}
-                key={i.name}
-              >
-                <img src={i.imageUrl} alt="" />
-                <div className={styles.catalog_item_info}>
-                  <div className={styles.catalog_item_top}>
-                    <div className={styles.catalog_item_colors}>
-                      {i.colors.map((c: any) => (
-                        <div
-                          key={c.id}
-                          className={styles.catalog_item_color}
-                          style={{ background: c.hexCode || '#eee' }}
-                        ></div>
-                      ))}
+            {items.map((i: any) => {
+              const imageUrl = i.media.find((m: any) => m.kind === 'cover')?.url || ''
+
+              const colors = Object.values(
+                i.variants.reduce((acc: any, variant: any) => {
+                  const color = variant.colorAttrValue
+                  if (!color) return acc
+
+                  acc[color.id] = color
+                  return acc
+                }, {})
+              )
+
+              return (
+                <Link
+                  to={`/${i.seoSlug}`}
+                  state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
+                  className={styles.catalog_item}
+                  key={i.name}
+                >
+                  <img src={imageUrl} alt="" />
+                  <div className={styles.catalog_item_info}>
+                    <div className={styles.catalog_item_top}>
+                      <div className={styles.catalog_item_colors}>
+                        {colors?.map((c: any) => (
+                          <div
+                            key={c.id}
+                            className={styles.catalog_item_color}
+                            style={{ background: c.meta.colorCode || '#eee' }}
+                          ></div>
+                        ))}
+                      </div>
+                      <img className={styles.catalog_item_heart} src={heart} alt="" />
                     </div>
-                    <img className={styles.catalog_item_heart} src={heart} alt="" />
+
+                    <h5 className="h5">{i.name}</h5>
+
+                    <div className={`${styles.catalog_item_prices}`}>
+                      <NumericFormat
+                        className="h5"
+                        value={i.price}
+                        displayType="text"
+                        thousandSeparator=" "
+                        suffix=" ₽"
+                      />
+                      {i.oldPrice > 0 && (
+                        <>
+                          <NumericFormat
+                            className="h5 text-[#B0B7BF_!important] text-[80%_!important] line-through"
+                            value={i.oldPrice}
+                            displayType="text"
+                            thousandSeparator=" "
+                            suffix=" ₽"
+                          />
+                          <NumericFormat
+                            className="h5 text-[var(--red)_!important]"
+                            value={-((i.oldPrice * 100) / i.price - 100).toFixed(0)}
+                            displayType="text"
+                            thousandSeparator=" "
+                            suffix=" %"
+                          />
+                        </>
+                      )}
+                    </div>
+
+                    <Link
+                      className="button"
+                      to={`/${i.seoSlug}`}
+                      state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
+                    >
+                      Подробнее
+                    </Link>
                   </div>
-
-                  <h5 className="h5">{i.name}</h5>
-
-                  <div className={`${styles.catalog_item_prices}`}>
-                    <NumericFormat
-                      className="h5"
-                      value={i.price}
-                      displayType="text"
-                      thousandSeparator=" "
-                      suffix=" ₽"
-                    />
-                    {i.oldPrice > 0 && (
-                      <>
-                        <NumericFormat
-                          className="h5 text-[#B0B7BF_!important] text-[80%_!important] line-through"
-                          value={i.oldPrice}
-                          displayType="text"
-                          thousandSeparator=" "
-                          suffix=" ₽"
-                        />
-                        <NumericFormat
-                          className="h5 text-[var(--red)_!important]"
-                          value={-((i.oldPrice * 100) / i.price - 100).toFixed(0)}
-                          displayType="text"
-                          thousandSeparator=" "
-                          suffix=" %"
-                        />
-                      </>
-                    )}
-                  </div>
-
-                  <Link
-                    className="button"
-                    to={`/${i.slug}`}
-                    state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
-                  >
-                    Подробнее
-                  </Link>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
         </div>
       </div>
