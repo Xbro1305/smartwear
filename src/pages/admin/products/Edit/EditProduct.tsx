@@ -174,6 +174,15 @@ export const EditProduct = () => {
             )
           }
 
+          // you ned to remove stocks object from data.variants[x].codes[x]
+
+          const filteredVariants = data.variants.map(variant => {
+            return {
+              ...variant,
+              codes: variant.codes.map((codeObj: any) => ({ code: codeObj.code })),
+            }
+          })
+
           const product: Item = {
             main: {
               articul: data.articul || '',
@@ -208,7 +217,7 @@ export const EditProduct = () => {
               metaDescription: data.metaDescription || '',
               seoSlug: data.seoSlug || '',
             },
-            variantCodes: data.variants || [],
+            variantCodes: filteredVariants || [],
             prices: data.colorPrices,
           }
 
