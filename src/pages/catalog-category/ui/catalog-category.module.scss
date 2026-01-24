@@ -35,11 +35,11 @@
     top: 1px !important;
 
     @media (max-width: 1565px) {
-      min-width: 310px;
+      max-width: 310px;
     }
 
     @media (max-width: 1350px) {
-      min-width: 248px;
+      max-width: 248px;
     }
 
     @media (max-width: 1024px) {
@@ -92,7 +92,7 @@
 
         input:checked ~ p::after {
           background: var(--red);
-          content: '\2713';
+          content: url('./check.png');
           display: flex;
           align-items: center;
           justify-content: center;

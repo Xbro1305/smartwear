@@ -509,6 +509,23 @@ const Modal: React.FC<ModalProps> = ({
   setFile,
   isEdit = false,
 }) => {
+  const getCategoryPath = (categories: any[], categoryId: number): string => {
+    const path: string[] = []
+    let current = categories.find(c => c.id === categoryId)
+
+    while (current) {
+      path.unshift(current.name)
+
+      if (current.parentId === null) break
+
+      current = categories.find(c => c.id === current.parentId)
+    }
+
+    console.log(path)
+
+    return path.join(' - ')
+  }
+
   return (
     <>
       {data && (
@@ -545,13 +562,13 @@ const Modal: React.FC<ModalProps> = ({
                       ?.filter(c => c?.id != data?.id)
                       ?.map(category => ({
                         id: category.id || 0,
-                        value: category.name,
+                        value: getCategoryPath(categories, category.id),
                       })) || []),
                   ]}
                   showSuggestions={false}
                   value={{
                     id: data.parentId || 0,
-                    value: categories?.find(c => c.id == data.parentId)?.name || 'Нет',
+                    value: getCategoryPath(categories, data.parentId) || 'Нет',
                   }}
                   onChange={data => setData((prev: any) => prev && { ...prev, parentId: data })}
                   placeholder="Выберите категорию"

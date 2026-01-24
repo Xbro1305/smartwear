@@ -67,6 +67,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
     // 1. Уникальные размеры по name
     const sizesMap = new Map()
     data.variants.forEach((v: any) => {
+      // аналогично с цветами
+
       const size = v.sizeValue
       if (!sizesMap.has(size.name)) {
         sizesMap.set(size.name, size)
@@ -90,10 +92,18 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
     const colorsMap = new Map()
     data.variants.forEach((v: any) => {
       const color = v.colorAttrValue
-      if (!colorsMap.has(color.value)) {
-        colorsMap.set(color.value, { ...color, alias: v.colorAlias })
+      // if (!colorsMap.has(color.value)) {
+      //   colorsMap.set(color.value, { ...color, alias: v.colorAlias })
+      // }
+
+      // Исправлено: уникальные цвета по id и по alias
+
+      const key = `${color.id}-${v.colorAlias}`
+      if (!colorsMap.has(key)) {
+        colorsMap.set(key, { ...color, alias: v.colorAlias })
       }
     })
+
     const colors = Array.from(colorsMap.values()) as Color[]
 
     setSizes(sizes)
@@ -132,8 +142,17 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   const isSizeAvailableForColor = (sizeId: number) => {
     if (!selectedColor) return true
 
+    // return item.variants?.some(
+    //   (v: any) => v.colorAttrValueId === selectedColor.id && v.sizeValueId === sizeId
+    // )
+
+    // Исправлено: проверка наличия размера для выбранного цвета по alias
+
     return item.variants?.some(
-      (v: any) => v.colorAttrValueId === selectedColor.id && v.sizeValueId === sizeId
+      (v: any) =>
+        v.colorAttrValueId === selectedColor.id &&
+        v.sizeValueId === sizeId &&
+        v.colorAlias === selectedColor.alias
     )
   }
 
@@ -217,7 +236,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 {/* <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" /> */}
               </div>
               <div className="sm:grid lg:grid-cols-2 flex flex-row gap-[10px] xl:gap-[20px] w-full max-h-[200px] h-[200px] sm:h-auto sm:max-h-full lg:max-h-none overflow-y-auto lg:overflow-initial sm:w-[40%] lg:w-full">
-                {media?.map(m => (
+                {(media?.find((m: Media) => m.colorAttrValueId == selectedColor?.id)
+                  ? media.filter((m: Media) => m.colorAttrValueId == selectedColor?.id)
+                  : media || []
+                ).map(m => (
                   <img
                     key={m.id}
                     className="object-cover w-auto sm:w-full sm:h-auto h-full aspect-[3/4]"
@@ -226,10 +248,6 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     alt={item.name}
                   />
                 ))}
-                {/* <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
-                <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
-                <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" />
-                <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" /> */}
               </div>
             </div>
             <div className="flex flex-col gap-[32px] w-full lg:w-[40%]">
@@ -237,7 +255,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 <h1 className="h1">{item.name}</h1>
                 <div
                   dangerouslySetInnerHTML={{ __html: item.description }}
-                  className="bg-[#fff_!important] product_description"
+                  className="bg-[#fff_!important] product_description text-[22px]"
                 ></div>
               </div>
               <div className="hidden lg:flex flex-col gap-[10px]">
@@ -287,21 +305,23 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-[22px]">Производитель: </p>
-                  <Link
-                    className="p1 flex items-center gap-[10px] hover:underline"
-                    to={
-                      item?.attributeValues?.find(
-                        (i: any) => i.attributeValue?.attribute?.name == 'Бренд'
-                      )?.attributeValue?.meta.seoSlug
-                    }
-                  >
-                    {
-                      item?.attributeValues?.find(
-                        (i: any) => i.attributeValue?.attribute?.name == 'Бренд'
-                      )?.attributeValue?.value
-                    }
-                    <BsQuestionCircle className="font-medium text-[#B0B7BF]" />
-                  </Link>
+                  <div className="flex items-center gap-[10px]">
+                    <Link
+                      className="p1 flex items-center gap-[10px] underline"
+                      to={
+                        item?.attributeValues?.find(
+                          (i: any) => i.attributeValue?.attribute?.name == 'Бренд'
+                        )?.attributeValue?.meta.seoSlug
+                      }
+                    >
+                      {
+                        item?.attributeValues?.find(
+                          (i: any) => i.attributeValue?.attribute?.name == 'Бренд'
+                        )?.attributeValue?.value
+                      }
+                    </Link>
+                    <BsQuestionCircle className="font-medium text-[#B0B7BF] cursor-pointer" />
+                  </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-[22px]">В наличии: </p>
@@ -364,7 +384,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       ?.map(size => {
                         const isAvailable = isSizeAvailableForColor(size.id)
 
-                        return (
+                        return isAvailable ? (
                           <div
                             key={size.id}
                             className={`
@@ -383,7 +403,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                               <span className="absolute block border-b border-[1px] border-[#00000060] top-[50%] left-[0] rotate-[45deg] w-full" />
                             )}
                           </div>
-                        )
+                        ) : null
                       })}
                   </div>
                 </div>
@@ -449,12 +469,14 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 </span>
                 {selectedInfo == 'features' && (
                   <ul className="flex md:hidden list-disc ml-[27px] text-[22px] flex-col gap-[5px]">
-                    {item.features.map((feature: any) => (
-                      <li
-                        dangerouslySetInnerHTML={{ __html: feature.feature.description }}
-                        key={feature.feature.id}
-                      ></li>
-                    ))}
+                    {item.features
+                      .sort((a: any, b: any) => a.feature.name.localeCompare(b.feature.name))
+                      .map((feature: any) => (
+                        <li
+                          dangerouslySetInnerHTML={{ __html: feature.feature.description }}
+                          key={feature.feature.id}
+                        ></li>
+                      ))}
                   </ul>
                 )}
               </p>

@@ -1214,11 +1214,7 @@ export const EditProduct = () => {
                       }
                     }}
                   >
-                    <img
-                      src={care.imageUrl}
-                      alt={care.name}
-                      className="w-[30px] aspect-square grayscale"
-                    />
+                    <img src={care.imageUrl} alt={care.name} className="w-[30px] grayscale" />
                     <p>{care.name}</p>
                   </div>
                 ))}
@@ -1250,7 +1246,7 @@ export const EditProduct = () => {
                       <img
                         src={care.imageUrl}
                         alt={care.name}
-                        className="w-[30px] aspect-square grayscale brightness-0 invert"
+                        className="w-[30px] grayscale brightness-0 invert"
                       />
                       &times;
                       <p>{care.name}</p>
@@ -1399,7 +1395,6 @@ export const EditProduct = () => {
                       <NumericFormat
                         allowLeadingZeros={true}
                         type="text"
-                        autoFocus
                         className="admin-input max-w-full"
                         placeholder="123456789"
                         maxLength={9}

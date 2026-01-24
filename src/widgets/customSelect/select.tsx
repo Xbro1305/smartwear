@@ -4,6 +4,7 @@ import { FaChevronDown } from 'react-icons/fa'
 
 interface Option {
   options: any
+  onSelect?: (option: Option) => void
 }
 
 export const Select: React.FC<Option> = ({ options }) => {
@@ -39,12 +40,13 @@ export const Select: React.FC<Option> = ({ options }) => {
   )
 }
 
-export const CustomSelect: React.FC<Option> = ({ options }) => {
+export const CustomSelect: React.FC<Option> = ({ options, onSelect }) => {
   const [selectedOption, setSelectedOption] = useState<any>(options[0])
   const [isOpen, setIsOpen] = useState(false)
 
   const handleSelect = (option: Option) => {
     setSelectedOption(option)
+    onSelect?.(option)
     setIsOpen(false)
   }
 

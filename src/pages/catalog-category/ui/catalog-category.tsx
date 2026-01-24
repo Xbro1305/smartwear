@@ -10,6 +10,7 @@ import styles from './catalog-category.module.scss'
 import axios from 'axios'
 import { IoMdSwitch } from 'react-icons/io'
 import { HiOutlineSwitchVertical } from 'react-icons/hi'
+import { CustomSelect } from '@/widgets/customSelect/select'
 
 interface Props {
   data: any
@@ -84,8 +85,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [debouncedPrice, setDebouncedPrice] = useState(price)
   const [closedFilters, setClosedFilters] = useState<number[]>()
   const [sort, setSort] = useState<string>()
+  const [stores, setStores] = useState<any>()
 
   const url = window.location.pathname
+
+  // Get attribute ids from query
 
   useEffect(() => {
     const ids = searchParams.get('attributeIds')
@@ -96,6 +100,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
     setFilterIds(parsed)
   }, [])
+
+  // set attribute ids to query
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams)
@@ -111,6 +117,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     setSearchParams(params, { replace: true })
   }, [filterIds, price])
 
+  // parsing price
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedPrice(price)
@@ -119,13 +127,15 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     return () => clearTimeout(timer)
   }, [price])
 
+  // getting by filters
+
   useEffect(() => {
     if (!category) return
 
     const query = filterIds?.length ? `&attributeValueIds=${filterIds.join(',')}` : ''
     const sizesQuery = sizeIds?.length ? `&sizeIds=${sizeIds.join(',')}` : ''
     const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
-    const saled = isSaled ? '&isSaled=true' : ''
+    const saled = isSaled ? '&isDiscounted=true' : ''
 
     axios
       .get(
@@ -135,6 +145,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         setItems(res.data.items)
       })
   }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled])
+
+  // sorting by price/ date
 
   useEffect(() => {
     if (!category) return
@@ -150,10 +162,10 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     } else if (sort === 'old_first') {
       newItems.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     }
-    ``
-
     setItems(newItems)
   }, [sort])
+
+  // getting category information, attributes
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -188,6 +200,12 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           })
 
         setFilters(availableAttributes)
+      })
+      .catch(err => console.log(err))
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/stores`)
+      .then(res => {
+        setStores(res.data)
       })
       .catch(err => console.log(err))
   }, [data])
@@ -241,7 +259,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               type="range"
               min={minPrice}
               max={maxPrice}
-              step={500}
+              step={100}
               value={price}
               onChange={e => setPrice(Number(e.target.value))}
               className={styles.catalog_filter_price_slider}
@@ -322,12 +340,16 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             isOpen={!closedFilters?.includes(-1)}
             toggle={() => toggleFilter(-1)}
           >
-            {[].map(i => (
-              <label key={i}>
-                <input type="checkbox" />
-                <p className="p1">{i}</p>
-              </label>
-            ))}
+            {stores
+              ?.map((s: any) => ({ name: s.name, id: s.id, address: s.address }))
+              .map((i: any) => (
+                <label key={i.id}>
+                  <input type="checkbox" />
+                  <p className="p1">
+                    {i.name} - {i.address}
+                  </p>
+                </label>
+              ))}
           </FilterBlock>
         </div>
 
@@ -349,16 +371,31 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                 </p>
               </div>
 
-              <select
-                onChange={e => setSort(e.target.value)}
-                className={styles.catalog_right_top_sort}
-              >
-                <option value="">Популярное</option>
-                <option value="price_down">Пo убыванию цены</option>
-                <option value="price_up">По возрастанию цены</option>
-                <option value="new_first">Сначала новые</option>
-                <option value="old_first">Сначала старые</option>
-              </select>
+              <CustomSelect
+                options={[
+                  {
+                    id: '',
+                    value: 'Популярное',
+                  },
+                  {
+                    id: 'price_down',
+                    value: 'Пo убыванию цены',
+                  },
+                  {
+                    id: 'price_up',
+                    value: 'По возрастанию цены',
+                  },
+                  {
+                    id: 'new_first',
+                    value: 'Сначала новые',
+                  },
+                  {
+                    id: 'old_first',
+                    value: 'Сначала старые',
+                  },
+                ]}
+                onSelect={(option: any) => setSort(option.id)}
+              />
             </div>
             <div className={styles.catalog_right_top_brands}>
               {category?.descendants
