@@ -9,8 +9,7 @@ import heart from '@/assets/images/homeHeart.svg'
 import styles from './catalog-category.module.scss'
 import axios from 'axios'
 import { IoMdSwitch } from 'react-icons/io'
-import { HiOutlineSwitchVertical } from 'react-icons/hi'
-import { CustomSelect } from '@/widgets/customSelect/select'
+import { CustomSelect } from './CustomSelect'
 
 interface Props {
   data: any
@@ -210,6 +209,37 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       .catch(err => console.log(err))
   }, [data])
 
+  const Select = ({ cls }: { cls: string }) => (
+    <CustomSelect
+      className={cls}
+      placeholder="Сортировка"
+      options={[
+        {
+          id: '',
+          value: 'Популярное',
+        },
+        {
+          id: 'price_down',
+          value: 'Пo убыванию цены',
+        },
+        {
+          id: 'price_up',
+          value: 'По возрастанию цены',
+        },
+        {
+          id: 'new_first',
+          value: 'Сначала новые',
+        },
+        {
+          id: 'old_first',
+          value: 'Сначала старые',
+        },
+      ]}
+      onChange={(option: any) => setSort(option)}
+      value={sort}
+    />
+  )
+
   return (
     <div className={styles.catalog_page}>
       <div className={styles.catalog_top}>
@@ -345,9 +375,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               .map((i: any) => (
                 <label key={i.id}>
                   <input type="checkbox" />
-                  <p className="p1">
-                    {i.name} - {i.address}
-                  </p>
+                  <p className="p1">{i.name}</p>
                 </label>
               ))}
           </FilterBlock>
@@ -365,37 +393,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                 <p className="p2">
                   <IoMdSwitch /> Фильтры
                 </p>
-                <p className="p2">
-                  <HiOutlineSwitchVertical />
-                  Популярное
-                </p>
+                <Select cls="flex lg:hidden w-[240px]" />
               </div>
-
-              <CustomSelect
-                options={[
-                  {
-                    id: '',
-                    value: 'Популярное',
-                  },
-                  {
-                    id: 'price_down',
-                    value: 'Пo убыванию цены',
-                  },
-                  {
-                    id: 'price_up',
-                    value: 'По возрастанию цены',
-                  },
-                  {
-                    id: 'new_first',
-                    value: 'Сначала новые',
-                  },
-                  {
-                    id: 'old_first',
-                    value: 'Сначала старые',
-                  },
-                ]}
-                onSelect={(option: any) => setSort(option.id)}
-              />
+              <Select cls="hidden lg:flex w-[230px]" />
             </div>
             <div className={styles.catalog_right_top_brands}>
               {category?.descendants
@@ -443,7 +443,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                       <img className={styles.catalog_item_heart} src={heart} alt="" />
                     </div>
 
-                    <h5 className="h5">{i.name}</h5>
+                    <h5 className="h5 font-[400_!important]">{i.name}</h5>
 
                     <div className={`${styles.catalog_item_prices}`}>
                       <NumericFormat

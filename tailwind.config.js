@@ -31,6 +31,7 @@ export default {
     colors: {
       red: '#DC2A1F',
       white: '#fff',
+      service: '#B0B7BF',
     },
     extend: {
       animation: {

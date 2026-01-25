@@ -156,12 +156,37 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
     )
   }
 
+  const checkStockForSize = (sizeId: number): number => {
+    if (!selectedColor) return 0
+
+    const variant = item.variants?.find(
+      (v: any) =>
+        v.colorAttrValueId === selectedColor.id &&
+        v.sizeValueId === sizeId &&
+        v.colorAlias === selectedColor.alias
+    )
+
+    if (!variant) return 0
+
+    const stock = variant.codes.reduce((total: number, code: any) => {
+      const codeStock =
+        code.stocks?.reduce((sum: number, stock: any) => sum + (stock.quantity || 0), 0) || 0
+
+      return total + codeStock
+    }, 0)
+
+    return stock
+  }
+
   useEffect(() => {
     if (!selectedColor || !sizes?.length) return
 
     const firstAvailableSize = sizes.find(size =>
       item.variants?.some(
-        (v: any) => v.colorAttrValueId === selectedColor.id && v.sizeValueId === size.id
+        (v: any) =>
+          v.colorAttrValueId === selectedColor.id &&
+          v.sizeValueId === size.id &&
+          checkStockForSize(size.id)
       )
     )
 
@@ -384,12 +409,14 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       ?.map(size => {
                         const isAvailable = isSizeAvailableForColor(size.id)
 
+                        const stock = checkStockForSize(size.id)
+
                         return isAvailable ? (
                           <div
                             key={size.id}
                             className={`
                               relative text-[23px] p-[10px] cursor-pointer
-                              ${!isAvailable ? 'text-[#00000060] cursor-not-allowed' : ''}
+                              ${!stock ? 'text-[#00000060] cursor-not-allowed' : ''}
                               ${selectedSize?.id === size.id ? 'bg-[#F2F2F2]' : ''}
                             `}
                             onClick={() => {
@@ -399,7 +426,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                           >
                             {size.name}
 
-                            {!isAvailable && (
+                            {!stock && (
                               <span className="absolute block border-b border-[1px] border-[#00000060] top-[50%] left-[0] rotate-[45deg] w-full" />
                             )}
                           </div>
@@ -470,7 +497,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 {selectedInfo == 'features' && (
                   <ul className="flex md:hidden list-disc ml-[27px] text-[22px] flex-col gap-[5px]">
                     {item.features
-                      .sort((a: any, b: any) => a.feature.name.localeCompare(b.feature.name))
+                      .sort((a: any, b: any) =>
+                        a.feature.description.localeCompare(b.feature.description)
+                      )
                       .map((feature: any) => (
                         <li
                           dangerouslySetInnerHTML={{ __html: feature.feature.description }}

@@ -35,11 +35,11 @@
     top: 1px !important;
 
     @media (max-width: 1565px) {
-      max-width: 310px;
+      min-width: 310px;
     }
 
     @media (max-width: 1350px) {
-      max-width: 248px;
+      min-width: 248px;
     }
 
     @media (max-width: 1024px) {

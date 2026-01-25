@@ -290,9 +290,13 @@ export const EditProduct = () => {
   }
 
   const sendData = async () => {
-    console.log(item?.main.attributeValueIds)
-
     const simpleAttributeIds = item?.main.attributeValueIds?.map(av => Object.values(av)[0]) || []
+
+    const collectionIds =
+      attributes.find(attr => attr.name === 'Коллекция')?.values.map(v => v.id) || []
+
+    // Remove collection IDs from simpleAttributeIds
+    const filteredSimpleAttributeIds = simpleAttributeIds.filter(id => !collectionIds.includes(id))
 
     const data = {
       name: item?.main?.name,
@@ -313,7 +317,7 @@ export const EditProduct = () => {
         item?.main.seasonId,
         item?.main.typeId,
         item?.main.materialId,
-        ...simpleAttributeIds,
+        ...filteredSimpleAttributeIds,
       ].filter(id => id != null),
       quantity: 1,
       seoSlug: item?.seo.seoSlug,
@@ -1204,29 +1208,31 @@ export const EditProduct = () => {
             <div className="flex flex-col gap-[10px]">
               <p className="text-[14px] font-medium">Все рекомендации</p>
               <div className="flex flex-wrap gap-[8px]">
-                {cares.map(care => (
-                  <div
-                    key={care.id}
-                    className="relative care bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
-                    onClick={() => {
-                      if (!item?.main.careIds?.includes(care.id)) {
-                        setItem(
-                          prev =>
-                            ({
-                              ...prev,
-                              main: {
-                                ...prev?.main,
-                                careIds: [...(prev?.main.careIds || []), care.id],
-                              },
-                            }) as Item
-                        )
-                      }
-                    }}
-                  >
-                    <img src={care.imageUrl} alt={care.name} className="w-[30px] grayscale" />
-                    <p>{care.name}</p>
-                  </div>
-                ))}
+                {cares
+                  .filter(care => !item?.main?.careIds?.includes(care.id))
+                  .map(care => (
+                    <div
+                      key={care.id}
+                      className="relative care bg-[#F2F3F5] text-[#636363] text-[16px] px-[16px] py-[4px] rounded-[8px] cursor-pointer"
+                      onClick={() => {
+                        if (!item?.main.careIds?.includes(care.id)) {
+                          setItem(
+                            prev =>
+                              ({
+                                ...prev,
+                                main: {
+                                  ...prev?.main,
+                                  careIds: [...(prev?.main.careIds || []), care.id],
+                                },
+                              }) as Item
+                          )
+                        }
+                      }}
+                    >
+                      <img src={care.imageUrl} alt={care.name} className="w-[30px] grayscale" />
+                      <p>{care.name}</p>
+                    </div>
+                  ))}
               </div>
             </div>
             <span className="block h-full w-[1px] bg-[#20222420]"></span>
