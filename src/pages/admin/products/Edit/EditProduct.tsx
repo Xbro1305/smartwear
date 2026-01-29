@@ -428,7 +428,7 @@ export const EditProduct = () => {
       }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      window.location.href = '/admin/products'
+      // window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
@@ -1230,7 +1230,7 @@ export const EditProduct = () => {
                       }}
                     >
                       <img src={care.imageUrl} alt={care.name} className="w-[30px] grayscale" />
-                      <p>{care.name}</p>
+                      <p>{care.name?.replace('температура', 'температура ')?.split(' или')?.[0]}</p>
                     </div>
                   ))}
               </div>
@@ -1264,7 +1264,7 @@ export const EditProduct = () => {
                         className="w-[30px] grayscale brightness-0 invert"
                       />
                       &times;
-                      <p>{care.name}</p>
+                      <p>{care.name?.replace('температура', 'температура ')?.split(' или')?.[0]}</p>
                     </div>
                   ))}
               </div>

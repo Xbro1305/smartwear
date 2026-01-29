@@ -1149,7 +1149,7 @@ export const CreateProduct = () => {
                         className="w-[30px] grayscale huerotate"
                       />
 
-                      <p>{care.name}</p>
+                      <p>{care.name?.replace('температура', 'температура ')?.split(' или')?.[0]}</p>
                     </div>
                   ))}
               </div>
@@ -1183,7 +1183,7 @@ export const CreateProduct = () => {
                         className="w-[30px] grayscale brightness-0 invert"
                       />
                       &times;
-                      <p>{care.name}</p>
+                      <p>{care.name?.replace('температура', 'температура ')?.split(' или')?.[0]}</p>
                     </div>
                   ))}
               </div>

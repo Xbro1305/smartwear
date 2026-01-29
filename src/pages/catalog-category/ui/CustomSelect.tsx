@@ -45,12 +45,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       </div>
       {isOpen && (
         <div
-          className={`absolute mt-[4px] bg-white top-[47px] border border-service flex flex-col rounded-[8px] z-10 max-h-[250px] overflow-y-auto ${className}`}
+          className={`absolute mt-[4px] bg-white top-[47px] flex flex-col rounded-[8px] z-10 max-h-[250px] overflow-y-auto ${className} [box-shadow:4px_4px_30px_0px_#00000026]`}
         >
           {options?.map(option => (
             <div
               key={option.id}
-              className="px-[16px] py-[8px] hover:bg-gray-100 cursor-pointer"
+              className={`px-[16px] py-[8px] hover:bg-gray-100 cursor-pointer ${option.id == value && 'text-red'}`}
               onClick={() => {
                 onChange && onChange(option.id)
                 setIsOpen(false)

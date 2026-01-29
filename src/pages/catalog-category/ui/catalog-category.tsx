@@ -80,10 +80,10 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     setFilterIds(prev => (prev?.includes(id) ? prev.filter(n => n != id) : [...(prev || []), id]))
 
   const [filterIds, setFilterIds] = useState<number[]>()
-  const [price, setPrice] = useState<number>(100000)
+  const [price, setPrice] = useState<number>()
   const [debouncedPrice, setDebouncedPrice] = useState(price)
   const [closedFilters, setClosedFilters] = useState<number[]>()
-  const [sort, setSort] = useState<string>()
+  const [sort, setSort] = useState<string>('')
   const [stores, setStores] = useState<any>()
 
   const url = window.location.pathname
@@ -111,7 +111,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       params.delete('attributeIds')
     }
 
-    params.set('priceTo', price.toString())
+    params.set('priceTo', price?.toString() || '0')
 
     setSearchParams(params, { replace: true })
   }, [filterIds, price])
@@ -142,6 +142,16 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       )
       .then(res => {
         setItems(res.data.items)
+
+        const maximalPriceInRes = res.data.items.sort((a: any, b: any) => b.price - a.price)[0]
+          .price
+        const minimalPriceInRes = res.data.items.sort((a: any, b: any) => a.price - b.price)[0]
+          .price
+
+        setMaxPrice(maximalPriceInRes)
+        setMinPrice(minimalPriceInRes)
+
+        price && price > maximalPriceInRes && setPrice(maximalPriceInRes)
       })
   }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled])
 

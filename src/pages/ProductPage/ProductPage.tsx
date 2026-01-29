@@ -357,22 +357,23 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         style={{
                           backgroundColor: data.quantity >= 1 ? '#DC2A1F' : '#B0B7BF',
                         }}
-                      ></span>
+                      />
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
                         style={{
-                          backgroundColor: data.quantity > 3 ? '#DC2A1F' : '#B0B7BF',
+                          backgroundColor: data.quantity >= 3 ? '#DC2A1F' : '#B0B7BF',
                         }}
-                      ></span>
+                      />
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
                         style={{
-                          backgroundColor: data.quantity > 11 ? '#DC2A1F' : '#B0B7BF',
+                          backgroundColor: data.quantity >= 12 ? '#DC2A1F' : '#B0B7BF',
                         }}
-                      ></span>
+                      />
                     </div>
+
                     <span>
-                      {data.quantity < 1 ? 'Мало' : data.quantity <= 3 ? 'Достаточно' : 'Много'}
+                      {data.quantity < 3 ? 'Мало' : data.quantity < 12 ? 'Достаточно' : 'Много'}
                     </span>
                   </p>
                 </div>
@@ -599,7 +600,13 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                           alt={care.careIcon.name}
                           className="w-[20px] grayscale"
                         />
-                        <p className="p1">{care.careIcon.name}</p>
+                        <p>
+                          {
+                            care?.careIcon.name
+                              ?.replace('температура', 'температура ')
+                              ?.split(' или')?.[0]
+                          }
+                        </p>
                       </div>
                     ))}
 
@@ -675,7 +682,13 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         alt={care.careIcon.name}
                         className="w-[25px] grayscale"
                       />
-                      <p className="p1">{care.careIcon.name}</p>
+                      <p>
+                        {
+                          care?.careIcon.name
+                            ?.replace('температура', 'температура ')
+                            ?.split(' или')?.[0]
+                        }
+                      </p>
                     </div>
                   ))}
 

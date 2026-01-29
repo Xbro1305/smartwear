@@ -30,16 +30,16 @@
   &_left {
     display: flex;
     flex-direction: column;
-    min-width: 390px;
+    max-width: 390px;
     position: sticky;
     top: 1px !important;
 
     @media (max-width: 1565px) {
-      min-width: 310px;
+      max-width: 310px;
     }
 
     @media (max-width: 1350px) {
-      min-width: 248px;
+      max-width: 248px;
     }
 
     @media (max-width: 1024px) {
