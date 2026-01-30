@@ -85,6 +85,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [closedFilters, setClosedFilters] = useState<number[]>()
   const [sort, setSort] = useState<string>('')
   const [stores, setStores] = useState<any>()
+  const [storeIds, setStoreIds] = useState<number[]>([])
 
   const url = window.location.pathname
 
@@ -135,10 +136,13 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const sizesQuery = sizeIds?.length ? `&sizeIds=${sizeIds.join(',')}` : ''
     const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
     const saled = isSaled ? '&isDiscounted=true' : ''
+    const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
+
+    // /api/catalog/products?category=/men&storeIds=2&storeIds=3
 
     axios
       .get(
-        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}&priceTo=${debouncedPrice}${sizesQuery}${colorsQuery}`
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}&priceTo=${debouncedPrice}${sizesQuery}${colorsQuery}${storeQuery}`
       )
       .then(res => {
         setItems(res.data.items)
@@ -153,7 +157,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
         price && price > maximalPriceInRes && setPrice(maximalPriceInRes)
       })
-  }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled])
+  }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled, storeIds])
 
   // sorting by price/ date
 
@@ -384,7 +388,17 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               ?.map((s: any) => ({ name: s.name, id: s.id, address: s.address }))
               .map((i: any) => (
                 <label key={i.id}>
-                  <input type="checkbox" />
+                  <input
+                    type="checkbox"
+                    checked={storeIds?.includes(i.id)}
+                    onChange={() => {
+                      setStoreIds((prev: any) =>
+                        prev?.includes(i.id)
+                          ? prev.filter((n: any) => n != i.id)
+                          : [...(prev || []), i.id]
+                      )
+                    }}
+                  />
                   <p className="p1">{i.name}</p>
                 </label>
               ))}
