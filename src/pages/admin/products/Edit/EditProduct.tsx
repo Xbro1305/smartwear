@@ -174,14 +174,24 @@ export const EditProduct = () => {
             )
           }
 
-          // you ned to remove stocks object from data.variants[x].codes[x]
+          const stocksFormatted = data.variants.flatMap(v =>
+            v.codes
+              .filter((c: any) => c.code && c.code.trim() !== '') // ← проверка code
+              .map((c: any) => ({
+                code: c.code,
+                stores: c.stocks.map((s: any) => ({
+                  storeId: s.storeId,
+                  name: s.store?.name,
+                  shortName: s.store?.shortName,
+                  quantity: s.quantity,
+                })),
+              }))
+          )
 
-          const filteredVariants = data.variants.map(variant => {
-            return {
-              ...variant,
-              codes: variant.codes.map((codeObj: any) => ({ code: codeObj.code })),
-            }
-          })
+          const stocks = stocksFormatted
+          setStock(stocks)
+
+          console.log(stocks, data.variants)
 
           const product: Item = {
             main: {
@@ -217,7 +227,7 @@ export const EditProduct = () => {
               metaDescription: data.metaDescription || '',
               seoSlug: data.seoSlug || '',
             },
-            variantCodes: filteredVariants || [],
+            variantCodes: data.variants || [],
             prices: data.colorPrices,
           }
 
@@ -297,6 +307,12 @@ export const EditProduct = () => {
 
     // Remove collection IDs from simpleAttributeIds
     const filteredSimpleAttributeIds = simpleAttributeIds.filter(id => !collectionIds.includes(id))
+    const filteredVariants = item?.variantCodes?.map(variant => {
+      return {
+        ...variant,
+        codes: variant.codes.map((codeObj: any) => ({ code: codeObj.code })),
+      }
+    })
 
     const data = {
       name: item?.main?.name,
@@ -311,7 +327,7 @@ export const EditProduct = () => {
       oldPrice: item?.main?.oldPrice,
       careRecommendation: item?.main?.careRecommendation,
       careIconIds: item?.main?.careIds,
-      variantCodes: item?.variantCodes,
+      variantCodes: filteredVariants || [],
       attributeValueIds: [
         item?.main.brandId,
         item?.main.seasonId,
@@ -428,7 +444,7 @@ export const EditProduct = () => {
       }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      // window.location.href = '/admin/products'
+      window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
@@ -1336,8 +1352,8 @@ export const EditProduct = () => {
                   <p>
                     Общее колличество:{' '}
                     {stock
-                      ? stock.reduce((acc, cur) => {
-                          return acc + cur.stores.reduce((sum, store) => sum + store.quantity, 0)
+                      ? stock?.reduce((acc, cur) => {
+                          return acc + cur.stores?.reduce((sum, store) => sum + store.quantity, 0)
                         }, 0)
                       : 0}
                   </p>
@@ -1576,7 +1592,7 @@ export const EditProduct = () => {
                       const quantity = stock
                         .filter(s => variant.codes.some(vc => vc.code === s.code))
                         .filter(s => s.stores.some(st => st.storeId === warehouse.storeId))
-                        .reduce((acc, s) => {
+                        ?.reduce((acc, s) => {
                           const store = s.stores.find(st => st.storeId === warehouse.storeId)
                           return acc + (store ? store.quantity : 0)
                         }, 0)

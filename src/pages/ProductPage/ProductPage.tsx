@@ -361,19 +361,19 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
                         style={{
-                          backgroundColor: data.quantity >= 3 ? '#DC2A1F' : '#B0B7BF',
+                          backgroundColor: data.quantity >= 8 ? '#DC2A1F' : '#B0B7BF',
                         }}
                       />
                       <span
                         className="block w-[12px] h-[16px] rounded-[5px]"
                         style={{
-                          backgroundColor: data.quantity >= 12 ? '#DC2A1F' : '#B0B7BF',
+                          backgroundColor: data.quantity >= 16 ? '#DC2A1F' : '#B0B7BF',
                         }}
                       />
                     </div>
 
                     <span>
-                      {data.quantity < 3 ? 'Мало' : data.quantity < 12 ? 'Достаточно' : 'Много'}
+                      {data.quantity < 8 ? 'Мало' : data.quantity < 16 ? 'Достаточно' : 'Много'}
                     </span>
                   </p>
                 </div>
