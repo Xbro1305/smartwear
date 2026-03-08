@@ -139,7 +139,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
-    const productLengthQuery = lengthIds?.length ? `&lengthIds=${lengthIds.join('&lengthId=')}` : ''
+    const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
 
     axios
       .get(
