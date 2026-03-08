@@ -5,12 +5,16 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 import styles from './Header.module.scss'
 import { MdMenu, MdClose } from 'react-icons/md'
 import logo from '../../../assets/images/logo.png'
-import profile from '../../../assets/images/svg (1).svg'
+
 import cart from '../../../assets/images/svg (2).svg'
 import search from '../../../assets/images/svg.svg'
 import { useEffect, useState } from 'react'
-import { FaHeart, FaHome, FaSearch, FaShoppingBag, FaUser } from 'react-icons/fa'
 import axios from 'axios'
+import home from '../icons/home.svg'
+import catalog from '../icons/catalog.svg'
+import saved from '../icons/saved.svg'
+import basket from '../icons/basket.svg'
+import profile from '../icons/profile.svg'
 
 // interface MenuItem {
 //   title: string
@@ -45,7 +49,8 @@ export const Header: React.FC = () => {
   // const closeMenuTimer = useRef<NodeJS.Timeout | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [categories, setCategories] = useState<any>(null)
-
+  const cartLength = (localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [])
+    .length
   const main = document?.querySelector('main')
 
   isOpen && main && main.addEventListener('click', () => setIsOpen(false))
@@ -53,23 +58,6 @@ export const Header: React.FC = () => {
   const location = useLocation()
   const redirectUrl = location.pathname + location.search
   const searchParams = new URLSearchParams(location.search)
-
-  // const handleMouseLeave = () => {
-  //   closeMenuTimer.current = setTimeout(() => setActiveColumn(0), 0)
-  // }
-
-  // const handleMouseEnter = () => {
-  //   if (closeMenuTimer.current) {
-  //     clearTimeout(closeMenuTimer.current)
-  //     closeMenuTimer.current = null
-  //   }
-  // }
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    alert('Токен удалён!')
-    window.location.reload()
-  }
 
   const [width, setWidth] = useState(window.innerWidth)
 
@@ -192,7 +180,7 @@ export const Header: React.FC = () => {
 
         {categories &&
           categories.map((category: any) => (
-            <Link key={category.id} to={`${ROUTER_PATHS.CATALOG}${category.slug}`}>
+            <Link key={category.id} to={`${category.slug}`}>
               {category.name}
             </Link>
           ))}
@@ -219,8 +207,13 @@ export const Header: React.FC = () => {
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
 
-        <Link to={ROUTER_PATHS.CART} className={styles.header_button} onClick={handleLogout}>
+        <Link to={ROUTER_PATHS.CART} className={styles.header_button}>
           <img alt="Cart" src={cart} />
+          {cartLength > 0 && (
+            <div className="absolute bottom-[10px] -right-[3px] bg-red text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[12px]">
+              {cartLength}
+            </div>
+          )}
         </Link>
       </div>
       <button className={styles.header_menu} onClick={() => setIsOpen(!isOpen)}>
@@ -252,23 +245,28 @@ export const Header: React.FC = () => {
 
       <div className={styles.mob_navigation}>
         <Link className="p2" to={ROUTER_PATHS.HOME}>
-          <FaHome style={{ fontSize: '20px' }} />
+          <img src={home} alt="" />
           Главная
         </Link>
         <Link className="p2" to={ROUTER_PATHS.CATALOG}>
-          <FaSearch style={{ fontSize: '20px' }} />
+          <img src={catalog} alt="" />
           Каталог
         </Link>
         <Link className="p2" to={'/cart'}>
-          <FaHeart style={{ fontSize: '20px' }} />
+          <img src={saved} alt="" />
           Избранное
         </Link>
-        <Link className="p2" to={'/cart'}>
-          <FaShoppingBag style={{ fontSize: '20px' }} />
+        <Link className="p2 relative" to={'/cart'}>
+          <img src={basket} alt="" />
           Корзина
+          {cartLength > 0 && (
+            <div className="absolute bottom-[18px] right-[5px] bg-red text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">
+              {cartLength}
+            </div>
+          )}
         </Link>
         <Link className="p2" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
-          <FaUser style={{ fontSize: '20px' }} />
+          <img src={profile} alt="" />
           {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
         </Link>
       </div>

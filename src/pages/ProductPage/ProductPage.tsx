@@ -5,12 +5,16 @@ import img1 from '@/assets/images/homeAcs.png'
 import { HiThumbUp } from 'react-icons/hi'
 import { NumericFormat } from 'react-number-format'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
-import { CgRuler } from 'react-icons/cg'
+import { CgClose, CgRuler } from 'react-icons/cg'
 import { BsHeart, BsQuestionCircle } from 'react-icons/bs'
 import styles from '@/pages/home/home.module.scss'
 import heart from '@/assets/images/homeHeart.svg'
 import catalog from '@/assets/images/homeCatalog.jpeg'
 import Slider from 'react-slick'
+import top from './assets/top.png'
+import center from './assets/center.png'
+import bottom from './assets/bottom.png'
+import mobile from './assets/mobile.png'
 
 interface Media {
   url: string
@@ -55,9 +59,11 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   const [colors, setColors] = useState<Color[] | null>()
   const [sizes, setSizes] = useState<Size[] | undefined>()
   const [stores, setStores] = useState<Size[] | undefined>()
-  const [selectedInfo, setSelectedInfo] = useState<'features' | 'info' | 'shops' | 'care'>(
+  const [isTableOpened, setIsTableOpened] = useState(false)
+  const [selectedInfo, setSelectedInfo] = useState<'features' | 'info' | 'shops' | 'care' | ''>(
     'features'
   )
+  const [sizeTable, setSizeTable] = useState<any>({})
 
   useEffect(() => {
     if (!data) return
@@ -126,6 +132,13 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
 
     axios(`${import.meta.env.VITE_APP_API_URL}/stores`)
       .then(res => setStores(res.data))
+      .catch(err => console.log(err))
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/sizes/tables`)
+      .then(res => {
+        const table = res.data.find((t: any) => t.type.id == data.sizeTypeId)
+        setSizeTable(table)
+      })
       .catch(err => console.log(err))
   }, [data])
 
@@ -216,10 +229,45 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   const state = location.state as LocationState
   const breadcrumbs = state?.breadcrumbs || []
 
+  const addToCart = () => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+
+    const existingItemIndex = cart.findIndex((item: any) => item.id === data.id)
+
+    if (cart.length >= 2) {
+      alert('В корзине уже есть 2 товара. Удалите что-то, чтобы добавить новый товар.')
+    }
+
+    if (existingItemIndex !== -1) {
+      cart[existingItemIndex].quantity += 1
+    } else {
+      cart.push({
+        id: data.id,
+        name: data.name,
+        price: price,
+        oldPrice: oldPrice,
+        color: selectedColor,
+        size: selectedSize,
+        quantity: 1,
+        colorAlias: selectedColor?.alias,
+        imageUrl:
+          (
+            media?.find(
+              (m: Media) => m.kind == 'cover' || m.colorAttrValueId == selectedColor?.id
+            ) || media?.[0]
+          )?.url || '',
+        articul: data.articul,
+      })
+
+      localStorage.setItem('cart', JSON.stringify(cart))
+    }
+  }
+
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
       {item && (
         <div className="flex flex-col gap-xl">
+          {isTableOpened && <SizeTable size={sizeTable} onClose={() => setIsTableOpened(false)} />}
           <div className="flex items-center gap-[5px]">
             <span className="text-[16px] text-[#B0B7BF]">
               <Link to="/">Главная</Link> {'>'}
@@ -313,12 +361,15 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     </>
                   )}
                 </div>
-                <a
-                  href="#info"
+                <button
+                  onClick={() => {
+                    const el = document.getElementById('info')
+                    el?.scrollIntoView({ behavior: 'smooth' })
+                  }}
                   className="px-[20px] text-[19px] py-[10px] flex items-center gap-[10px] bg-[#FAFAFA] rounded-[30px] w-fit cursor-pointer"
                 >
                   Подробнее о модели <FaChevronRight />
-                </a>
+                </button>
               </div>
               <div className="flex flex-col gap-[20px]">
                 <div className="hidden lg:flex items-center justify-between">
@@ -399,7 +450,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-between">
                     <p className="text-[22px]">Выберите размер: </p>
-                    <p className="p1 flex items-center gap-[10px] text-[#DC2A1F_!important] cursor-pointer">
+                    <p
+                      className="p1 flex items-center gap-[10px] text-[#DC2A1F_!important] cursor-pointer"
+                      onClick={() => setIsTableOpened(true)}
+                    >
                       <CgRuler />
                       Таблица размеров
                     </p>
@@ -466,7 +520,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 </div>
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-center lg:justify-start gap-[10px]">
-                    <button className="bg-red text-white rounded-[8px] w-[300px] px-[18px] h-[40px] lg:h-[60px] flex items-center justify-center">
+                    <button
+                      className="bg-red text-white rounded-[8px] w-[300px] px-[18px] h-[40px] lg:h-[60px] flex items-center justify-center"
+                      onClick={addToCart}
+                    >
                       Добавить в корзину
                     </button>
                     <button className="w-[40px] lg:w-[60px] h-[40px] lg:h-[60px] flex items-center lg:text-xl justify-center text-red bg-[#F2F2F2] rounded-[8px]">
@@ -485,7 +542,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'features' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo('features')}
+                onClick={() => setSelectedInfo(selectedInfo !== 'features' ? 'features' : '')}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -513,7 +570,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'info' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo('info')}
+                onClick={() => setSelectedInfo(selectedInfo !== 'info' ? 'info' : '')}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -543,7 +600,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'shops' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo('shops')}
+                onClick={() => setSelectedInfo(selectedInfo !== 'shops' ? 'shops' : '')}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -581,7 +638,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'care' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo('care')}
+                onClick={() => setSelectedInfo(selectedInfo !== 'care' ? 'care' : '')}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -793,6 +850,134 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   )
 }
 
+interface SizeRow {
+  sizeValue: { name: string }
+  height: string
+  chest: string
+  waist: string
+  hips: string
+}
+
+interface SizeTableProps {
+  size: {
+    rows: SizeRow[]
+  }
+  onClose: () => void
+}
+
+const SizeTable = ({ size, onClose }: SizeTableProps) => {
+  return (
+    <div className="fixed inset-0 z-[50] flex items-center justify-center bg-[#3535354D]">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-transparent" onClick={onClose} />
+
+      {/* Modal */}
+      <div
+        className="relative z-[60] w-[80%] max-h-[80vh] overflow-y-auto rounded-[12px] bg-white p-[32px] flex flex-col gap-[32px]"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between w-full">
+          <h3 className="h3">Таблица размеров</h3>
+          <button onClick={onClose} className="text-[30px] text-[#282B32]">
+            <CgClose />
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="w-full hidden md:flex items-start justify-center">
+          <div className="flex min-w-full">
+            <div className="flex flex-col items-center">
+              <p className="p2 p-[14px] whitespace-nowrap">Российский размер</p>
+              <p className="p2 p-[14px] whitespace-nowrap">Рост (см)</p>
+              <p className="p2 p-[14px] whitespace-nowrap">Обхват груди (см)</p>
+              <p className="p2 p-[14px] whitespace-nowrap">Обхват талии (см)</p>
+              <p className="p2 p-[14px] whitespace-nowrap">Обхват бёдер (см)</p>
+            </div>
+
+            {size?.rows?.map((row, index) => (
+              <div key={index} className="flex flex-col items-center bg-[#F7F7F7] flex-1">
+                <p className="p2 p-[14px] whitespace-nowrap">{row.sizeValue.name}</p>
+                <p className="p2 p-[14px] whitespace-nowrap">{row.height}</p>
+                <p className="p2 p-[14px] whitespace-nowrap">{row.chest}</p>
+                <p className="p2 p-[14px] whitespace-nowrap">{row.waist}</p>
+                <p className="p2 p-[14px] whitespace-nowrap">{row.hips}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <table className="block md:hidden bg-[#F7F7F7]">
+          <thead>
+            <tr>
+              <th className="text-[12px] py-[10px] px-[3px]">Ru размер</th>
+              <th className="text-[12px] py-[10px] px-[3px]">Рост (см)</th>
+              <th className="text-[12px] py-[10px] px-[3px]">Обхват груди (см)</th>
+              <th className="text-[12px] py-[10px] px-[3px]">Обхват талии (см)</th>
+              <th className="text-[12px] py-[10px] px-[3px]">Обхват бёдер (см)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {size?.rows?.map((row, index) => (
+              <tr key={index}>
+                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap font-[600_!important]">
+                  {row.sizeValue.name}
+                </td>
+                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                  {row.height}
+                </td>
+                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                  {row.chest}
+                </td>
+                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                  {row.waist}
+                </td>
+                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                  {row.hips}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* How to measure */}
+        <h4 className="h4">Как снять мерки</h4>
+
+        <div className="gap-[16px] hidden md:flex">
+          <img src={top} className="min-w-[195px] w-[195px] aspect-square" alt="Обхват груди" />
+          <div className="flex flex-col gap-[4px]">
+            <h5 className="h5">Обхват груди</h5>
+            <p className="p1">
+              Измеряется по самым выступающим точкам. Рекомендуем снимать мерки в белье.
+            </p>
+          </div>
+        </div>
+
+        <div className="gap-[16px] hidden md:flex">
+          <img src={center} className="min-w-[195px] w-[195px] aspect-square" alt="Обхват талии" />
+          <div className="flex flex-col gap-[4px]">
+            <h5 className="h5">Обхват талии (см)</h5>
+            <p className="p1">
+              Оберните сантиметровую ленту вокруг талии. Лента должна лежать параллельно полу и
+              плотно облегать талию, но не врезаться в кожу.
+            </p>
+          </div>
+        </div>
+
+        <div className="gap-[16px] hidden md:flex">
+          <img src={bottom} className="min-w-[195px] w-[195px] aspect-square" alt="Обхват бёдер" />
+          <div className="flex flex-col gap-[4px]">
+            <h5 className="h5">Обхват бёдер (см)</h5>
+            <p className="p1">Измеряется по самым выпуклым точкам ягодиц.</p>
+          </div>
+        </div>
+        <img src={mobile} className="flex md:hidden" alt="" />
+      </div>
+    </div>
+  )
+}
+
+export default SizeTable
 const settings = {
   infinite: true,
   nextArrow: <SampleNextArrow />,

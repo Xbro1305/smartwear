@@ -4,6 +4,7 @@ import axios from 'axios'
 
 import { CatalogCategory } from '@/pages/catalog-category'
 import { ProductPage } from '@/pages/ProductPage/ProductPage'
+import { NotFound } from '@/pages/NotFound/NotFound'
 
 type EntityType = 'category' | 'product' | 'loading' | 'not-found'
 
@@ -51,7 +52,7 @@ export const CatalogResolver = () => {
   }, [slug])
 
   if (type === 'loading') return <div>Загрузка...</div>
-  if (type === 'not-found') return <div>Ничего не найдено</div>
+  if (type === 'not-found') return <NotFound />
 
   if (type === 'category') return <CatalogCategory data={data} />
   if (type === 'product') return <ProductPage data={data} />

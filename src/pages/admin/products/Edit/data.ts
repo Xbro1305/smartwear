@@ -1,4 +1,5 @@
 export interface Product {
+  lengthValue: number | undefined
   id: number
   name: string
   description: string

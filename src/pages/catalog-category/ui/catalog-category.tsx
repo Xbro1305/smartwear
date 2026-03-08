@@ -64,6 +64,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
   const [category, setCategory] = useState<any>([])
   const [filters, setFilters] = useState<any>([])
+  const [lengths, setLengths] = useState<any>([])
+  const [lengthIds, setLengthIds] = useState<any>([])
   const [isSaled, setIsSaled] = useState<boolean>(false)
   const [colorIds, setColorIds] = useState<any>()
   const [sizeIds, setSizeIds] = useState<any>()
@@ -137,12 +139,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
-
-    // /api/catalog/products?category=/men&storeIds=2&storeIds=3
+    const productLengthQuery = lengthIds?.length ? `&lengthIds=${lengthIds.join('&lengthId=')}` : ''
 
     axios
       .get(
-        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}&priceTo=${debouncedPrice}${sizesQuery}${colorsQuery}${storeQuery}`
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}&priceTo=${debouncedPrice}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
       )
       .then(res => {
         setItems(res.data.items)
@@ -157,7 +158,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
         price && price > maximalPriceInRes && setPrice(maximalPriceInRes)
       })
-  }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled, storeIds])
+  }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled, storeIds, lengthIds])
 
   // sorting by price/ date
 
@@ -219,6 +220,12 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     axios(`${import.meta.env.VITE_APP_API_URL}/stores`)
       .then(res => {
         setStores(res.data)
+      })
+      .catch(err => console.log(err))
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/product/lengths`)
+      .then(res => {
+        setLengths(res.data)
       })
       .catch(err => console.log(err))
   }, [data])
@@ -379,6 +386,28 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               </FilterBlock>
             </div>
           ))}
+          <FilterBlock
+            title="Длина изделия"
+            isOpen={!closedFilters?.includes(-1)}
+            toggle={() => toggleFilter(-1)}
+          >
+            {lengths.map((i: any) => (
+              <label key={i.id}>
+                <input
+                  type="checkbox"
+                  checked={lengthIds?.includes(i.id)}
+                  onChange={() => {
+                    setLengthIds((prev: any) =>
+                      prev?.includes(i.id)
+                        ? prev.filter((n: any) => n != i.id)
+                        : [...(prev || []), i.id]
+                    )
+                  }}
+                />
+                <p className="p1">{i.name}</p>
+              </label>
+            ))}
+          </FilterBlock>{' '}
           <FilterBlock
             title="Наличие в магазинах"
             isOpen={!closedFilters?.includes(-1)}

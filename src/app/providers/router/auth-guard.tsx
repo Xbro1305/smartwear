@@ -1,6 +1,7 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useGetMeQuery } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { enqueueSnackbar } from 'notistack'
 
 export const AuthGuard = () => {
   const { data: userData, error, isLoading } = useGetMeQuery()
@@ -13,14 +14,11 @@ export const AuthGuard = () => {
   }
 
   if (error || !userData) {
-    console.error('Ошибка при загрузке данных пользователя:', error)
+    enqueueSnackbar('Пожалуйста, войдите в систему, чтобы получить доступ к этой странице.', {
+      variant: 'warning',
+    })
     const redirectUrl = location.pathname + location.search
     return <Navigate to={`${ROUTER_PATHS.SIGN_IN}?redirectUrl=${redirectUrl}`} replace />
-  }
-
-  console.log(`Проверка аутентификации пользователя. Аутентифицирован: ${!!userData}`)
-  if (userData) {
-    console.log(`Данные пользователя:`, userData)
   }
 
   return <Outlet />

@@ -30,6 +30,7 @@ interface Item {
     sizeTypeId?: number
     careIds?: number[]
     careRecommendation?: string
+    lengthValue?: number
   }
   seo: {
     seoSlug?: string
@@ -275,6 +276,7 @@ export const CreateProduct = () => {
       seoSlug: item?.seo.seoSlug,
       metaTitle: item?.seo.metaTitle,
       metaDescription: item?.seo.metaDescription,
+      lengthValue: item?.main?.lengthValue,
     }
 
     const prices = [...(item?.prices || [])]
@@ -908,6 +910,30 @@ export const CreateProduct = () => {
                 }
               />
             </div>
+            <div className="flex flex-col gap-sm">
+              <p className="font-semibold text-[14px]">Длина изделия</p>
+              <NumericFormat
+                className="admin-input w-[372px]"
+                placeholder="Длина изделия"
+                required
+                onValueChange={({ floatValue }) => {
+                  setItem(
+                    prev =>
+                      ({
+                        ...prev,
+                        main: {
+                          ...prev?.main,
+                          lengthValue: Number(floatValue),
+                        },
+                      }) as Item
+                  )
+                }}
+                value={item?.main?.lengthValue || ''}
+                thousandSeparator=" "
+                suffix=" см"
+              />
+            </div>
+
             {attributes
               .filter(
                 attr =>

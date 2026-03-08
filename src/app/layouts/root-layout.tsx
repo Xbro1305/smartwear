@@ -61,7 +61,7 @@ export const RootLayout = () => {
   }, [data])
 
   if (isLoading) {
-    return <div>Проверка ваших полномочий...</div>
+    return <div>Загрузка...</div>
   }
 
   const renderMain = (

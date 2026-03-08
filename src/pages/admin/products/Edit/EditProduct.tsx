@@ -31,6 +31,7 @@ interface Item {
     sizeTypeId?: number
     careIds?: number[]
     careRecommendation?: string
+    lengthValue?: number
   }
   seo: {
     seoSlug?: string
@@ -210,6 +211,7 @@ export const EditProduct = () => {
               seasonId: getAttr('Сезон')?.attributeValueId || 0,
               typeId: getAttr('Вид изделия')?.attributeValueId || 0,
               materialId: getAttr('Вид утеплителя')?.attributeValueId || 0,
+              lengthValue: data.lengthValue,
               attributeValueIds: [
                 ...(data.attributeValues
                   .map(a =>
@@ -339,6 +341,7 @@ export const EditProduct = () => {
       seoSlug: item?.seo.seoSlug,
       metaTitle: item?.seo.metaTitle,
       metaDescription: item?.seo.metaDescription,
+      lengthValue: item?.main.lengthValue,
     }
 
     try {
@@ -1009,6 +1012,29 @@ export const EditProduct = () => {
                     value: '',
                   }
                 }
+              />
+            </div>
+            <div className="flex flex-col gap-sm">
+              <p className="font-semibold text-[14px]">Длина изделия</p>
+              <NumericFormat
+                className="admin-input w-[372px]"
+                placeholder="Длина изделия"
+                required
+                onValueChange={({ floatValue }) => {
+                  setItem(
+                    prev =>
+                      ({
+                        ...prev,
+                        main: {
+                          ...prev?.main,
+                          lengthValue: Number(floatValue),
+                        },
+                      }) as Item
+                  )
+                }}
+                value={item?.main?.lengthValue || ''}
+                thousandSeparator=" "
+                suffix=" см"
               />
             </div>
             {attributes

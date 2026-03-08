@@ -15,9 +15,10 @@ import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CatalogResolver } from './CatalogResolver'
+import { Cart } from '@/pages/cart/cart'
 
 const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN } = ROUTER_PATHS
-const { ARTICLES, NEWS, SIGN_UP, USER_ARTICLE } = ROUTER_PATHS
+const { ARTICLES, NEWS, SIGN_UP, USER_ARTICLE, CART } = ROUTER_PATHS
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -35,6 +36,7 @@ export const publicRoutes: RouteObject[] = [
       { element: <AboutPage />, path: ABOUT },
       { element: <ContactPage />, path: CONTACTS },
       { element: <DeliveryPage />, path: DELIVERY },
+      { element: <Cart />, path: CART },
       { element: <CatalogResolver />, path: `/*` },
     ],
   },
