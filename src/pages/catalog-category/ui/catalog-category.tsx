@@ -148,15 +148,15 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       .then(res => {
         setItems(res.data.items)
 
-        const maximalPriceInRes = res.data.items.sort((a: any, b: any) => b.price - a.price)[0]
-          .price
-        const minimalPriceInRes = res.data.items.sort((a: any, b: any) => a.price - b.price)[0]
-          .price
+        // const maximalPriceInRes = res.data.items.sort((a: any, b: any) => b.price - a.price)[0]
+        //   .price
+        // const minimalPriceInRes = res.data.items.sort((a: any, b: any) => a.price - b.price)[0]
+        //   .price
 
-        setMaxPrice(maximalPriceInRes)
-        setMinPrice(minimalPriceInRes)
+        // setMaxPrice(maximalPriceInRes)
+        // setMinPrice(minimalPriceInRes)
 
-        price && price > maximalPriceInRes && setPrice(maximalPriceInRes)
+        // price && price > maximalPriceInRes && setPrice(maximalPriceInRes)
       })
   }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled, storeIds, lengthIds])
 

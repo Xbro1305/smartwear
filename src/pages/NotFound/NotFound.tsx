@@ -30,7 +30,7 @@ export const NotFound = () => {
               <a
                 key={cat.id}
                 href={`${cat.slug}`}
-                className={`px-[24px] py-[12px] text-[#fff] ${index % 2 ? 'bg-[#DC2A1F]' : 'bg-[#282B32]'} rounded-[8px] text-[#333333] hover:bg-[#E0E0E0]`}
+                className={`px-[24px] py-[12px] text-[#fff] ${index % 2 ? 'bg-[#DC2A1F] hover:text-[#DC2A1F]' : 'bg-[#282B32] hover:text-[#282B32]'} rounded-[8px] text-[#333333] hover:bg-[#E0E0E0]`}
               >
                 {cat.name}
               </a>

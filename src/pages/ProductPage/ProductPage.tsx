@@ -15,6 +15,8 @@ import top from './assets/top.png'
 import center from './assets/center.png'
 import bottom from './assets/bottom.png'
 import mobile from './assets/mobile.png'
+import { useDispatch } from 'react-redux'
+import { addToCart } from '@/app/store/cart'
 
 interface Media {
   url: string
@@ -64,6 +66,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
     'features'
   )
   const [sizeTable, setSizeTable] = useState<any>({})
+
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (!data) return
@@ -136,7 +140,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
 
     axios(`${import.meta.env.VITE_APP_API_URL}/sizes/tables`)
       .then(res => {
-        const table = res.data.find((t: any) => t.type.id == data.sizeTypeId)
+        const itemBrandId = data.attributeValues?.find(
+          (i: any) => i.attributeValue?.attribute?.name == 'Бренд'
+        )?.attributeValue?.id
+        const table = res.data.find((t: any) => t.brandId == itemBrandId)
         setSizeTable(table)
       })
       .catch(err => console.log(err))
@@ -210,6 +217,14 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
     }
   }, [selectedColor])
 
+  useEffect(() => {
+    const handleClick = () => setSelectedInfo('')
+
+    document.addEventListener('click', handleClick)
+
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
+
   const getQty = (store: any) => {
     const variant = item?.variants
       .filter((v: any) => v.colorAttrValueId == selectedColor?.id)
@@ -229,45 +244,36 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   const state = location.state as LocationState
   const breadcrumbs = state?.breadcrumbs || []
 
-  const addToCart = () => {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+  const addCart = () => {
+    if (checkStockForSize(selectedSize?.id ?? 0) <= 0) return
 
-    const existingItemIndex = cart.findIndex((item: any) => item.id === data.id)
-
-    if (cart.length >= 2) {
-      alert('В корзине уже есть 2 товара. Удалите что-то, чтобы добавить новый товар.')
+    const product = {
+      id: data.id,
+      name: data.name,
+      price,
+      oldPrice,
+      color: selectedColor,
+      size: selectedSize,
+      quantity: 1,
+      colorAlias: selectedColor?.alias,
+      imageUrl:
+        (
+          media?.find(
+            (m: Media) => m.kind === 'cover' || m.colorAttrValueId === selectedColor?.id
+          ) || media?.[0]
+        )?.url || '',
+      articul: data.articul,
     }
 
-    if (existingItemIndex !== -1) {
-      cart[existingItemIndex].quantity += 1
-    } else {
-      cart.push({
-        id: data.id,
-        name: data.name,
-        price: price,
-        oldPrice: oldPrice,
-        color: selectedColor,
-        size: selectedSize,
-        quantity: 1,
-        colorAlias: selectedColor?.alias,
-        imageUrl:
-          (
-            media?.find(
-              (m: Media) => m.kind == 'cover' || m.colorAttrValueId == selectedColor?.id
-            ) || media?.[0]
-          )?.url || '',
-        articul: data.articul,
-      })
-
-      localStorage.setItem('cart', JSON.stringify(cart))
-    }
+    dispatch(addToCart(product))
   }
-
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
       {item && (
         <div className="flex flex-col gap-xl">
-          {isTableOpened && <SizeTable size={sizeTable} onClose={() => setIsTableOpened(false)} />}
+          {sizeTable && isTableOpened && (
+            <SizeTable size={sizeTable} onClose={() => setIsTableOpened(false)} />
+          )}
           <div className="flex items-center gap-[5px]">
             <span className="text-[16px] text-[#B0B7BF]">
               <Link to="/">Главная</Link> {'>'}
@@ -424,7 +430,13 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     </div>
 
                     <span>
-                      {data.quantity < 8 ? 'Мало' : data.quantity < 16 ? 'Достаточно' : 'Много'}
+                      {data.quantity == 0
+                        ? 'Нет в наличии'
+                        : data.quantity < 8
+                          ? 'Мало'
+                          : data.quantity < 16
+                            ? 'Достаточно'
+                            : 'Много'}
                     </span>
                   </p>
                 </div>
@@ -440,7 +452,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         className={`block w-[27px] h-[27px] rounded-[50%] cursor-pointer`}
                         style={{
                           background: color.meta.colorCode,
-                          border: selectedColor?.id == color.id ? '1px solid black' : '',
+                          border:
+                            selectedColor?.id == color.id && selectedColor.alias == color.alias
+                              ? '1px solid black'
+                              : '',
                         }}
                         onClick={() => setSelectedColor(color)}
                       ></span>
@@ -450,13 +465,17 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-between">
                     <p className="text-[22px]">Выберите размер: </p>
-                    <p
-                      className="p1 flex items-center gap-[10px] text-[#DC2A1F_!important] cursor-pointer"
-                      onClick={() => setIsTableOpened(true)}
-                    >
-                      <CgRuler />
-                      Таблица размеров
-                    </p>
+                    {sizeTable && (
+                      <>
+                        <p
+                          className="p1 flex items-center gap-[10px] text-[#DC2A1F_!important] cursor-pointer"
+                          onClick={() => setIsTableOpened(true)}
+                        >
+                          <CgRuler />
+                          Таблица размеров
+                        </p>
+                      </>
+                    )}
                   </div>
                   <div className="flex gap-[10px]">
                     {sizes
@@ -521,10 +540,16 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-center lg:justify-start gap-[10px]">
                     <button
-                      className="bg-red text-white rounded-[8px] w-[300px] px-[18px] h-[40px] lg:h-[60px] flex items-center justify-center"
-                      onClick={addToCart}
+                      className=" text-white rounded-[8px] w-[300px] px-[18px] h-[40px] lg:h-[60px] flex items-center justify-center"
+                      style={{
+                        backgroundColor:
+                          checkStockForSize(selectedSize?.id ?? 0) > 0 ? '#DC2A1F' : '#B0B7BF',
+                      }}
+                      onClick={addCart}
                     >
-                      Добавить в корзину
+                      {checkStockForSize(selectedSize?.id ?? 0) > 0
+                        ? 'Добавить в корзину'
+                        : 'Нет в наличии'}{' '}
                     </button>
                     <button className="w-[40px] lg:w-[60px] h-[40px] lg:h-[60px] flex items-center lg:text-xl justify-center text-red bg-[#F2F2F2] rounded-[8px]">
                       <BsHeart />
@@ -542,7 +567,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'features' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo(selectedInfo !== 'features' ? 'features' : '')}
+                onClick={e => {
+                  e.stopPropagation()
+                  setSelectedInfo('features')
+                }}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -570,7 +598,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'info' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo(selectedInfo !== 'info' ? 'info' : '')}
+                onClick={e => {
+                  e.stopPropagation()
+                  setSelectedInfo('info')
+                }}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -587,6 +618,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         (a: any, b: any) =>
                           a.attributeValue.attributeId - b.attributeValue.attributeId
                       )
+                      .filter(
+                        (attr: any) =>
+                          !['Длина изделия'].includes(attr.attributeValue.attribute.name)
+                      )
                       .map((attr: any) => (
                         <div className="flex items-end gap-[10px] w-full text-[#878787] text-[18px]">
                           <p>{attr.attributeValue.attribute.name}</p>
@@ -600,7 +635,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'shops' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo(selectedInfo !== 'shops' ? 'shops' : '')}
+                onClick={e => {
+                  e.stopPropagation()
+                  setSelectedInfo('shops')
+                }}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -638,7 +676,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <p
                 className="py-[20px] flex md:items-center md:justify-center px-[20px] flex-col gap-[20px] rounded-[8px] cursor-pointer"
                 style={{ background: selectedInfo == 'care' ? '#FAFAFA' : '' }}
-                onClick={() => setSelectedInfo(selectedInfo !== 'care' ? 'care' : '')}
+                onClick={e => {
+                  e.stopPropagation()
+                  setSelectedInfo('care')
+                }}
               >
                 <span className="flex items-center justify-between">
                   {' '}
@@ -695,16 +736,27 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               )}
               {selectedInfo == 'info' && (
                 <div className="flex flex-col gap-[10px] w-full">
-                  {item.attributeValues.map((attr: any) => (
-                    <div
-                      className="flex items-end gap-[10px] w-full text-[#878787] text-[22px]"
-                      key={attr.id}
-                    >
-                      <p>{attr.attributeValue.attribute.name}</p>
+                  {item.attributeValues
+                    .filter(
+                      (attr: any) => !['Длина изделия'].includes(attr.attributeValue.attribute.name)
+                    )
+                    .map((attr: any) => (
+                      <div
+                        className="flex items-end gap-[10px] w-full text-[#878787] text-[22px]"
+                        key={attr.id}
+                      >
+                        <p>{attr.attributeValue.attribute.name}</p>
+                        <div className="flex-1 border-b border-dotted border-[#878787]"></div>
+                        <p>{attr.attributeValue.value}</p>
+                      </div>
+                    ))}
+                  {item.lengthValue && (
+                    <div className="flex items-end gap-[10px] w-full text-[#878787] text-[22px]">
+                      <p>Длина изделия</p>
                       <div className="flex-1 border-b border-dotted border-[#878787]"></div>
-                      <p>{attr.attributeValue.value}</p>
+                      <p>{item.lengthValue} см.</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
               {selectedInfo == 'shops' && (
@@ -895,15 +947,17 @@ const SizeTable = ({ size, onClose }: SizeTableProps) => {
               <p className="p2 p-[14px] whitespace-nowrap">Обхват бёдер (см)</p>
             </div>
 
-            {size?.rows?.map((row, index) => (
-              <div key={index} className="flex flex-col items-center bg-[#F7F7F7] flex-1">
-                <p className="p2 p-[14px] whitespace-nowrap">{row.sizeValue.name}</p>
-                <p className="p2 p-[14px] whitespace-nowrap">{row.height}</p>
-                <p className="p2 p-[14px] whitespace-nowrap">{row.chest}</p>
-                <p className="p2 p-[14px] whitespace-nowrap">{row.waist}</p>
-                <p className="p2 p-[14px] whitespace-nowrap">{row.hips}</p>
-              </div>
-            ))}
+            {size?.rows
+              ?.sort((a: any, b: any) => a.sizeValue.orderNum - b.sizeValue.orderNum)
+              ?.map((row, index) => (
+                <div key={index} className="flex flex-col items-center bg-[#F7F7F7] flex-1">
+                  <p className="p2 p-[14px] whitespace-nowrap">{row.sizeValue.name}</p>
+                  <p className="p2 p-[14px] whitespace-nowrap">{row.height}</p>
+                  <p className="p2 p-[14px] whitespace-nowrap">{row.chest}</p>
+                  <p className="p2 p-[14px] whitespace-nowrap">{row.waist}</p>
+                  <p className="p2 p-[14px] whitespace-nowrap">{row.hips}</p>
+                </div>
+              ))}
           </div>
         </div>
 
@@ -918,25 +972,27 @@ const SizeTable = ({ size, onClose }: SizeTableProps) => {
             </tr>
           </thead>
           <tbody>
-            {size?.rows?.map((row, index) => (
-              <tr key={index}>
-                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap font-[600_!important]">
-                  {row.sizeValue.name}
-                </td>
-                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
-                  {row.height}
-                </td>
-                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
-                  {row.chest}
-                </td>
-                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
-                  {row.waist}
-                </td>
-                <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
-                  {row.hips}
-                </td>
-              </tr>
-            ))}
+            {size?.rows
+              ?.sort((a: any, b: any) => a.sizeValue.orderNum - b.sizeValue.orderNum)
+              ?.map((row, index) => (
+                <tr key={index}>
+                  <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap font-[600_!important]">
+                    {row.sizeValue.name}
+                  </td>
+                  <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                    {row.height}
+                  </td>
+                  <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                    {row.chest}
+                  </td>
+                  <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                    {row.waist}
+                  </td>
+                  <td className="text-[12px] text-center py-[10px] px-[3px] whitespace-nowrap">
+                    {row.hips}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
 

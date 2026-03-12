@@ -1,9 +1,11 @@
 import { baseApi } from '@/shared/api'
 import { combineSlices, configureStore } from '@reduxjs/toolkit'
 import attributePageReducer from './attributePageSlice'
+import cartReducer from './cart'
 
 const rootReducer = combineSlices(baseApi, {
   attributePage: attributePageReducer,
+  cart: cartReducer,
 })
 
 export const store = configureStore({

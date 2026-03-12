@@ -2150,7 +2150,10 @@ const SizeTypes = () => {
         <div className={`${styles.modal} flex p-[10px] `}>
           <button
             className="z-40 absolute w-full h-screen opacity-0"
-            onClick={() => setCreating(null)}
+            onClick={() => {
+              setCreating(null)
+              setAdding(null)
+            }}
           ></button>
           <form onSubmit={handleCreate} className={styles.modal_body}>
             <h2 id="h2">Добавление вида размера</h2>

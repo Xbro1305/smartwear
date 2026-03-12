@@ -149,8 +149,8 @@ export const Profile_profile = () => {
     })
       .then(() => {
         refresh()
-        !isEmailConfirmed && handleConfirmEmail()
-        !isPhoneComfirmed && getCode()
+        // !isEmailConfirmed && handleConfirmEmail()
+        // !isPhoneComfirmed && getCode()
         setIsProfileEdited(false)
       })
       .catch(err => console.log(err))

@@ -15,6 +15,7 @@ import catalog from '../icons/catalog.svg'
 import saved from '../icons/saved.svg'
 import basket from '../icons/basket.svg'
 import profile from '../icons/profile.svg'
+import { useSelector } from 'react-redux'
 
 // interface MenuItem {
 //   title: string
@@ -47,10 +48,11 @@ export const Header: React.FC = () => {
   // const [activeSecondColumn, setActiveSecondColumn] = useState<string | null>(null)
   // const [activeColumn, setActiveColumn] = useState(0)
   // const closeMenuTimer = useRef<NodeJS.Timeout | null>(null)
+
+  const cartLength = useSelector((state: any) => state.cart.items.length)
+
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [categories, setCategories] = useState<any>(null)
-  const cartLength = (localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [])
-    .length
   const main = document?.querySelector('main')
 
   isOpen && main && main.addEventListener('click', () => setIsOpen(false))
@@ -226,20 +228,17 @@ export const Header: React.FC = () => {
         id="mob_header"
         style={width <= 1214 && isOpen ? {} : { top: '-100%' }}
       >
-        <Link onClick={() => setIsOpen(false)} to={ROUTER_PATHS.CATALOG}>
-          Каталог
-        </Link>
-        <Link onClick={() => setIsOpen(false)} to="/about">
-          О нас
+        <Link onClick={() => setIsOpen(false)} to={ROUTER_PATHS.ARTICLES}>
+          Статьи
         </Link>
         <Link onClick={() => setIsOpen(false)} to="/contacts">
           Контакты
         </Link>
-        <Link onClick={() => setIsOpen(false)} to={ROUTER_PATHS.ARTICLES}>
-          Статьи
-        </Link>
         <Link onClick={() => setIsOpen(false)} to="/delivery">
           Доставка
+        </Link>
+        <Link onClick={() => setIsOpen(false)} to="/about">
+          О нас
         </Link>
       </div>
 
