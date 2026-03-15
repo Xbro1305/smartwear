@@ -130,6 +130,11 @@ main {
   padding-bottom: calc(70px + env(safe-area-inset-bottom));
 }
 
+input[type='date'] {
+  text-align: left; /* пытаемся выровнять слева */
+  padding-left: 10px; /* добавляем отступ */
+}
+
 /* fonts */
 /*  */
 /*  */

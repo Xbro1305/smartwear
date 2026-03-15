@@ -380,14 +380,14 @@ export const Profile_profile = () => {
                 onChange={e => {
                   const value = e.target.value
                   setBirthday(value)
-                  initialData.birthday != value
-                    ? setIsProfileEdited(true)
-                    : setIsProfileEdited(false)
+                  setIsProfileEdited(initialData.birthday !== value)
                 }}
-                placeholder="дд.мм.гггг"
-                name={'birthday'}
-                onFocus={e => (e.target.type = 'date')}
-                // onBlur={e => (e.target.type = 'text')}
+                onFocus={e => {
+                  e.currentTarget.showPicker?.() // новый стандарт HTML на некоторых браузерах
+                }}
+                name="birthday"
+                placeholder="дд.мм.гггг" // не всегда видно на iOS, но оставим для UX
+                max={new Date().toISOString().split('T')[0]} // чтобы нельзя было выбрать будущую дату
               />
             </label>
             <div className={styles.profile_form_gender}>
