@@ -13,7 +13,12 @@ const cartSlice = createSlice({
   },
   reducers: {
     addToCart: (state, action) => {
-      const existingItemIndex = state.items.findIndex((item: any) => item.id === action.payload.id)
+      const existingItemIndex = state.items.findIndex(
+        (item: any) =>
+          item.id === action.payload.id &&
+          item.size.name === action.payload.size.name &&
+          item.color.alias === action.payload.color.alias
+      )
 
       if (state.items.length >= 2 && existingItemIndex === -1) {
         toast.error('В корзине уже есть 2 товара. Удалите что-то, чтобы добавить новый товар.')

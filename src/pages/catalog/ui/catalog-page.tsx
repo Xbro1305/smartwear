@@ -6,33 +6,31 @@ import axios from 'axios'
 
 export const CatalogPage = () => {
   const [categories, setCategories] = useState<any>(null)
-  const [brandIds, setBrandIds] = useState<number[]>([])
+
+  const hasBrand = (c: any, b: number) =>
+    Array.isArray(c?.filters?.attributeValueIds) && c.filters.attributeValueIds.includes(b)
 
   useEffect(() => {
-    // api / attributes / 4
+    ;(async () => {
+      await axios(`${import.meta.env.VITE_APP_API_URL}/attributes/4`)
+        .then(res => {
+          const data = res?.data?.values
+          const ids = data.map((item: any) => item.id)
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/4`)
-      .then(res => {
-        const data = res?.data?.values
-        const ids = data.map((item: any) => item.id)
-        setBrandIds(ids)
-      })
-      .catch(err => {
-        console.error('Ошибка при запросе к API /attributes/4:', err)
-      })
+          axios(`${import.meta.env.VITE_APP_API_URL}/categories`)
+            .then(res => {
+              const data = res?.data
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/categories`)
-      .then(res => {
-        const data = res?.data
-          ?.filter((cat: any) => cat.showOnSite)
-          .filter((cat: any) => cat.parentId === null)
-          .filter((cat: any) =>
-            cat.filters.attributeValueIds.some((attr: any) => !brandIds.includes(attr))
-          )
+              const cats = data?.filter((c: any) => !ids.some((b: number) => hasBrand(c, b)))
 
-        setCategories(data)
-      })
-      .catch(() => setCategories([]))
+              setCategories(cats)
+            })
+            .catch(() => setCategories([]))
+        })
+        .catch(err => {
+          console.error('Ошибка при запросе к API /attributes/4:', err)
+        })
+    })()
   }, [])
 
   return (

@@ -56,7 +56,6 @@ export const Header: React.FC = () => {
     }
   }, [])
 
-  // В Header или в App
   useEffect(() => {
     const setVh = () => {
       let vh = window.innerHeight * 0.01
