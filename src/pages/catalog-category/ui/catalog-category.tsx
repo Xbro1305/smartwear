@@ -203,6 +203,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
         const availableAttributes = attrs
           .filter((attr: any) => attr.name != 'Коллекция')
+          .filter((attr: any) => attr.name != 'Длина изделия')
           .filter((attr: any) => available.some((a: any) => a.attributeId === attr.id))
           .map((attr: any) => {
             const availableAttr = available.find((a: any) => a.attributeId === attr.id)

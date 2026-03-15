@@ -188,7 +188,7 @@
     align-items: center;
     gap: 24px;
     position: fixed;
-    bottom: 0;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
     left: 0;
     z-index: 4;
     width: 100%;

@@ -754,7 +754,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     <div className="flex items-end gap-[10px] w-full text-[#878787] text-[22px]">
                       <p>Длина изделия</p>
                       <div className="flex-1 border-b border-dotted border-[#878787]"></div>
-                      <p>{item.lengthValue} см.</p>
+                      <p>{item.lengthValue} см</p>
                     </div>
                   )}
                 </div>

@@ -2180,7 +2180,8 @@ const SizeTypes = () => {
                       <span>{value.name}</span>
                       <button
                         type="button"
-                        onClick={() =>
+                        onClick={e => {
+                          e.stopPropagation()
                           setCreating(
                             !creating
                               ? null
@@ -2189,7 +2190,7 @@ const SizeTypes = () => {
                                   values: creating.values.filter((_, i) => i !== index),
                                 }
                           )
-                        }
+                        }}
                         className="flex items-center justify-center"
                       >
                         <AiOutlineClose />
@@ -2203,105 +2204,118 @@ const SizeTypes = () => {
                 </p>
               )}
               {adding != null ? (
-                <section className="flex items-center gap-[10px] mb-[10px] border-[#BDBFC7] border-solid border-[1px] p-[32px] rounded-[12px]">
-                  <div
-                    onSubmit={e => e.preventDefault()}
-                    className="gap-[24px] flex flex-col w-full"
+                <>
+                  <button
+                    className="absolute z-[50] w-full h-screen bg-[transparent] border-none top-[0] left-[0]"
+                    onClick={() => setAdding(null)}
                   >
-                    <h3>Добавление размера</h3>
-                    <div className=" grid grid-cols-2 w-100 flex-row gap-[24px]">
-                      <label>
-                        <p>Название</p>
-                        <input
-                          autoFocus
-                          value={adding.name}
-                          onChange={e => setAdding({ ...adding, name: e.target.value })}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault()
-                              if (adding?.name?.trim() === '') {
-                                toast.error('Название варианта не может быть пустым')
-                                return
-                              }
-                              if (creating?.values.find(i => i.name === adding.name.trim())) {
-                                toast.error('Такой вариант уже существует')
-                                return
-                              }
-                              setCreating(
-                                !creating
-                                  ? null
-                                  : {
-                                      ...creating,
-                                      values: [
-                                        ...creating.values,
-                                        {
-                                          name: adding.name.trim(),
-                                          orderNum: adding.orderNum,
-                                        },
-                                      ],
-                                    }
-                              )
-                              const temp = adding.orderNum
-                              setAdding(null)
-                              setAdding({ name: '', orderNum: temp + 1 })
-                            }
-                          }}
-                          type="text"
-                        />
-                      </label>
-                      <label>
-                        <p>Сортировочное значение</p>
-                        <input
-                          value={adding.orderNum}
-                          onChange={e => setAdding({ ...adding, orderNum: Number(e.target.value) })}
-                          type="text"
-                        />
-                      </label>
-                    </div>
-                    <div className="flex gap-[10px] ml-auto">
-                      <button
-                        type="button"
-                        onClick={() => setAdding(null)}
-                        className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
-                      >
-                        Отмена
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (adding?.name?.trim() === '') {
-                            toast.error('Название варианта не может быть пустым')
-                            return
-                          }
-                          if (creating?.values.find(i => i.name === adding.name.trim())) {
-                            toast.error('Такой вариант уже существует')
-                            return
-                          }
-                          setCreating(
-                            !creating
-                              ? null
-                              : {
-                                  ...creating,
-                                  values: [
-                                    ...creating.values,
-                                    {
-                                      name: adding.name.trim(),
-                                      orderNum: adding.orderNum,
-                                    },
-                                  ],
+                    {' '}
+                  </button>
+                  <section className="relative z-[60] flex items-center gap-[10px] mb-[10px] border-[#BDBFC7] border-solid border-[1px] p-[32px] rounded-[12px]">
+                    <div
+                      onSubmit={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                      className="gap-[24px] flex flex-col w-full"
+                    >
+                      <h3>Добавление размера</h3>
+                      <div className=" grid grid-cols-2 w-100 flex-row gap-[24px]">
+                        <label>
+                          <p>Название</p>
+                          <input
+                            autoFocus
+                            value={adding.name}
+                            onChange={e => setAdding({ ...adding, name: e.target.value })}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault()
+                                if (adding?.name?.trim() === '') {
+                                  toast.error('Название варианта не может быть пустым')
+                                  return
                                 }
-                          )
-                          const temp = adding.orderNum
-                          setAdding(null)
-                          setAdding({ name: '', orderNum: temp + 1 })
-                        }}
-                        type="button"
-                        id="admin-button"
-                      >
-                        Добавить
-                      </button>
+                                if (creating?.values.find(i => i.name === adding.name.trim())) {
+                                  toast.error('Такой вариант уже существует')
+                                  return
+                                }
+                                setCreating(
+                                  !creating
+                                    ? null
+                                    : {
+                                        ...creating,
+                                        values: [
+                                          ...creating.values,
+                                          {
+                                            name: adding.name.trim(),
+                                            orderNum: adding.orderNum,
+                                          },
+                                        ],
+                                      }
+                                )
+                                const temp = adding.orderNum
+                                setAdding(null)
+                                setAdding({ name: '', orderNum: temp + 1 })
+                              }
+                            }}
+                            type="text"
+                          />
+                        </label>
+                        <label>
+                          <p>Сортировочное значение</p>
+                          <input
+                            value={adding.orderNum}
+                            onChange={e =>
+                              setAdding({ ...adding, orderNum: Number(e.target.value) })
+                            }
+                            type="text"
+                          />
+                        </label>
+                      </div>
+                      <div className="flex gap-[10px] ml-auto">
+                        <button
+                          type="button"
+                          onClick={() => setAdding(null)}
+                          className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                        >
+                          Отмена
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (adding?.name?.trim() === '') {
+                              toast.error('Название варианта не может быть пустым')
+                              return
+                            }
+                            if (creating?.values.find(i => i.name === adding.name.trim())) {
+                              toast.error('Такой вариант уже существует')
+                              return
+                            }
+                            setCreating(
+                              !creating
+                                ? null
+                                : {
+                                    ...creating,
+                                    values: [
+                                      ...creating.values,
+                                      {
+                                        name: adding.name.trim(),
+                                        orderNum: adding.orderNum,
+                                      },
+                                    ],
+                                  }
+                            )
+                            const temp = adding.orderNum
+                            setAdding(null)
+                            setAdding({ name: '', orderNum: temp + 1 })
+                          }}
+                          type="button"
+                          id="admin-button"
+                        >
+                          Добавить
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </section>
+                  </section>
+                </>
               ) : (
                 <button
                   type="button"
@@ -2382,105 +2396,115 @@ const SizeTypes = () => {
                 </p>
               )}
               {adding != null ? (
-                <section className="flex items-center gap-[10px] mb-[10px] border-[#BDBFC7] border-solid border-[1px] p-[32px] rounded-[12px]">
-                  <div
-                    onSubmit={e => e.preventDefault()}
-                    className="gap-[24px] flex flex-col w-full"
+                <>
+                  <button
+                    className="absolute z-[50] w-full h-screen bg-[transparent] border-none top-[0] left-[0]"
+                    onClick={() => setAdding(null)}
                   >
-                    <h3>Добавление размера</h3>
-                    <div className=" grid grid-cols-2 w-100 flex-row gap-[24px]">
-                      <label>
-                        <p>Название</p>
-                        <input
-                          autoFocus
-                          value={adding.name}
-                          type="text"
-                          onChange={e => setAdding({ ...adding, name: e.target.value })}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault()
-                              if (adding?.name?.trim() === '') {
-                                toast.error('Название варианта не может быть пустым')
-                                return
-                              }
-                              if (editing?.values.find(i => i.name === adding.name.trim())) {
-                                toast.error('Такой вариант уже существует')
-                                return
-                              }
-                              setEditing(
-                                !editing
-                                  ? null
-                                  : {
-                                      ...editing,
-                                      values: [
-                                        ...editing.values,
-                                        {
-                                          name: adding.name.trim(),
-                                          orderNum: adding.orderNum,
-                                        },
-                                      ],
-                                    }
-                              )
-                              const temp = adding.orderNum
-                              setAdding(null)
-                              setAdding({ name: '', orderNum: temp + 1 })
-                            }
-                          }}
-                        />
-                      </label>
-                      <label>
-                        <p>Сортировочное значение</p>
-                        <input
-                          value={adding.orderNum}
-                          onChange={e => setAdding({ ...adding, orderNum: Number(e.target.value) })}
-                          type="text"
-                        />
-                      </label>
-                    </div>
-                    <div className="flex gap-[10px] ml-auto">
-                      <button
-                        type="button"
-                        onClick={() => setAdding(null)}
-                        className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
-                      >
-                        Отмена
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (adding?.name?.trim() === '') {
-                            toast.error('Название варианта не может быть пустым')
-                            return
-                          }
-                          if (editing?.values.find(i => i.name === adding.name.trim())) {
-                            toast.error('Такой вариант уже существует')
-                            return
-                          }
-                          setEditing(
-                            !editing
-                              ? null
-                              : {
-                                  ...editing,
-                                  values: [
-                                    ...editing.values,
-                                    {
-                                      name: adding.name.trim(),
-                                      orderNum: adding.orderNum,
-                                    },
-                                  ],
+                    {' '}
+                  </button>
+                  <section className="flex items-center gap-[10px] mb-[10px] border-[#BDBFC7] border-solid border-[1px] p-[32px] rounded-[12px]">
+                    <div
+                      onSubmit={e => e.preventDefault()}
+                      className="gap-[24px] flex flex-col w-full"
+                    >
+                      <h3>Добавление размера</h3>
+                      <div className=" grid grid-cols-2 w-100 flex-row gap-[24px]">
+                        <label>
+                          <p>Название</p>
+                          <input
+                            autoFocus
+                            value={adding.name}
+                            type="text"
+                            onChange={e => setAdding({ ...adding, name: e.target.value })}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault()
+                                if (adding?.name?.trim() === '') {
+                                  toast.error('Название варианта не может быть пустым')
+                                  return
                                 }
-                          )
-                          const temp = adding.orderNum
-                          setAdding(null)
-                          setAdding({ name: '', orderNum: temp + 1 })
-                        }}
-                        type="button"
-                        id="admin-button"
-                      >
-                        Добавить
-                      </button>
+                                if (editing?.values.find(i => i.name === adding.name.trim())) {
+                                  toast.error('Такой вариант уже существует')
+                                  return
+                                }
+                                setEditing(
+                                  !editing
+                                    ? null
+                                    : {
+                                        ...editing,
+                                        values: [
+                                          ...editing.values,
+                                          {
+                                            name: adding.name.trim(),
+                                            orderNum: adding.orderNum,
+                                          },
+                                        ],
+                                      }
+                                )
+                                const temp = adding.orderNum
+                                setAdding(null)
+                                setAdding({ name: '', orderNum: temp + 1 })
+                              }
+                            }}
+                          />
+                        </label>
+                        <label>
+                          <p>Сортировочное значение</p>
+                          <input
+                            value={adding.orderNum}
+                            onChange={e =>
+                              setAdding({ ...adding, orderNum: Number(e.target.value) })
+                            }
+                            type="text"
+                          />
+                        </label>
+                      </div>
+                      <div className="flex gap-[10px] ml-auto">
+                        <button
+                          type="button"
+                          onClick={() => setAdding(null)}
+                          className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                        >
+                          Отмена
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (adding?.name?.trim() === '') {
+                              toast.error('Название варианта не может быть пустым')
+                              return
+                            }
+                            if (editing?.values.find(i => i.name === adding.name.trim())) {
+                              toast.error('Такой вариант уже существует')
+                              return
+                            }
+                            setEditing(
+                              !editing
+                                ? null
+                                : {
+                                    ...editing,
+                                    values: [
+                                      ...editing.values,
+                                      {
+                                        name: adding.name.trim(),
+                                        orderNum: adding.orderNum,
+                                      },
+                                    ],
+                                  }
+                            )
+                            const temp = adding.orderNum
+                            setAdding(null)
+                            setAdding({ name: '', orderNum: temp + 1 })
+                          }}
+                          type="button"
+                          id="admin-button"
+                        >
+                          Добавить
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </section>
+                  </section>
+                </>
               ) : (
                 <button
                   type="button"
@@ -2854,133 +2878,135 @@ const SizeTables = () => {
                       <p>Обхват бедер</p>
                       <p></p>
                     </div>
-                    {creating.rows.map((value, index) => (
-                      <div
-                        key={index}
-                        className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
-                      >
-                        <select
-                          value={value.sizeValue.id}
-                          onChange={e => {
-                            if (e.target.value === '0') {
-                              toast.error('Выберите размер')
-                              return
-                            }
-                            const size = sizeTypes
+                    {creating.rows
+                      .sort((a: any, b: any) => a?.sizeValue?.orderNum - b?.sizeValue?.orderNum)
+                      .map((value, index) => (
+                        <div
+                          key={index}
+                          className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
+                        >
+                          <select
+                            value={value.sizeValue.id}
+                            onChange={e => {
+                              if (e.target.value === '0') {
+                                toast.error('Выберите размер')
+                                return
+                              }
+                              const size = sizeTypes
+                                ?.find(i => i.id === creating.type.id)
+                                ?.values.find(i => i.id === Number(e.target.value))
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map((i, idx) =>
+                                  idx === index
+                                    ? {
+                                        ...i,
+                                        sizeValueId: Number(e.target.value),
+                                        sizeValue: size!,
+                                      }
+                                    : i
+                                ),
+                              })
+                            }}
+                          >
+                            <option value={0}>Выберите размер</option>
+                            {sizeTypes
                               ?.find(i => i.id === creating.type.id)
-                              ?.values.find(i => i.id === Number(e.target.value))
-                            setCreating({
-                              ...creating,
-                              rows: creating.rows.map((i, idx) =>
-                                idx === index
-                                  ? {
-                                      ...i,
-                                      sizeValueId: Number(e.target.value),
-                                      sizeValue: size!,
+                              ?.values.filter(
+                                size =>
+                                  !creating.rows
+                                    .filter(r => r.sizeValue.id !== value.sizeValue.id) // исключаем текущий редактируемый элемент
+                                    .map(r => r.sizeValue.id)
+                                    .includes(size.id)
+                              ) // фильтруем
+                              .map((size, idx) => (
+                                <option key={idx} value={size.id}>
+                                  {size.name}
+                                </option>
+                              ))}
+                          </select>
+                          <input
+                            type="text"
+                            value={value.height ?? ''}
+                            placeholder="Рост"
+                            onChange={e => {
+                              const height = onlyDigitsAndDash(e.target.value)
+
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map((i, idx) =>
+                                  idx === index ? { ...i, height } : i
+                                ),
+                              })
+                            }}
+                          />
+
+                          <input
+                            type="text"
+                            value={value.chest ?? ''}
+                            placeholder="Обхват груди"
+                            onChange={e => {
+                              const chest = onlyDigitsAndDash(e.target.value)
+
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map((i, idx) =>
+                                  idx === index ? { ...i, chest } : i
+                                ),
+                              })
+                            }}
+                          />
+
+                          <input
+                            type="text"
+                            value={value.waist ?? ''}
+                            placeholder="Обхват талии"
+                            onChange={e => {
+                              const waist = onlyDigitsAndDash(e.target.value)
+
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map((i, idx) =>
+                                  idx === index ? { ...i, waist } : i
+                                ),
+                              })
+                            }}
+                          />
+
+                          <input
+                            type="text"
+                            value={value.hips ?? ''}
+                            placeholder="Обхват бедер"
+                            onChange={e => {
+                              const hips = onlyDigitsAndDash(e.target.value)
+
+                              setCreating({
+                                ...creating,
+                                rows: creating.rows.map((i, idx) =>
+                                  idx === index ? { ...i, hips } : i
+                                ),
+                              })
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCreating(
+                                !creating
+                                  ? null
+                                  : {
+                                      ...creating,
+                                      rows: creating.rows.filter((_, i) => i !== index),
                                     }
-                                  : i
-                              ),
-                            })
-                          }}
-                        >
-                          <option value={0}>Выберите размер</option>
-                          {sizeTypes
-                            ?.find(i => i.id === creating.type.id)
-                            ?.values.filter(
-                              size =>
-                                !creating.rows
-                                  .filter(r => r.sizeValue.id !== value.sizeValue.id) // исключаем текущий редактируемый элемент
-                                  .map(r => r.sizeValue.id)
-                                  .includes(size.id)
-                            ) // фильтруем
-                            .map((size, idx) => (
-                              <option key={idx} value={size.id}>
-                                {size.name}
-                              </option>
-                            ))}
-                        </select>
-                        <input
-                          type="text"
-                          value={value.height ?? ''}
-                          placeholder="Рост"
-                          onChange={e => {
-                            const height = onlyDigitsAndDash(e.target.value)
-
-                            setCreating({
-                              ...creating,
-                              rows: creating.rows.map((i, idx) =>
-                                idx === index ? { ...i, height } : i
-                              ),
-                            })
-                          }}
-                        />
-
-                        <input
-                          type="text"
-                          value={value.chest ?? ''}
-                          placeholder="Обхват груди"
-                          onChange={e => {
-                            const chest = onlyDigitsAndDash(e.target.value)
-
-                            setCreating({
-                              ...creating,
-                              rows: creating.rows.map((i, idx) =>
-                                idx === index ? { ...i, chest } : i
-                              ),
-                            })
-                          }}
-                        />
-
-                        <input
-                          type="text"
-                          value={value.waist ?? ''}
-                          placeholder="Обхват талии"
-                          onChange={e => {
-                            const waist = onlyDigitsAndDash(e.target.value)
-
-                            setCreating({
-                              ...creating,
-                              rows: creating.rows.map((i, idx) =>
-                                idx === index ? { ...i, waist } : i
-                              ),
-                            })
-                          }}
-                        />
-
-                        <input
-                          type="text"
-                          value={value.hips ?? ''}
-                          placeholder="Обхват бедер"
-                          onChange={e => {
-                            const hips = onlyDigitsAndDash(e.target.value)
-
-                            setCreating({
-                              ...creating,
-                              rows: creating.rows.map((i, idx) =>
-                                idx === index ? { ...i, hips } : i
-                              ),
-                            })
-                          }}
-                        />
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setCreating(
-                              !creating
-                                ? null
-                                : {
-                                    ...creating,
-                                    rows: creating.rows.filter((_, i) => i !== index),
-                                  }
-                            )
-                          }
-                          className="flex items-center justify-center text-[#E02844] ml-auto bg-[#FFF3F3] w-[36px] h-[36px] rounded-[12px]"
-                        >
-                          <LuTrash2 />
-                        </button>
-                      </div>
-                    ))}
+                              )
+                            }
+                            className="flex items-center justify-center text-[#E02844] ml-auto bg-[#FFF3F3] w-[36px] h-[36px] rounded-[12px]"
+                          >
+                            <LuTrash2 />
+                          </button>
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
@@ -3148,129 +3174,137 @@ const SizeTables = () => {
                   <p>Обхват бедер</p>
                   <p></p>
                 </div>
-                {editing.rows.map((row, index) => (
-                  <div
-                    key={index}
-                    className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
-                  >
-                    <select
-                      value={row.sizeValue.id}
-                      onChange={e => {
-                        if (e.target.value === '0') {
-                          toast.error('Выберите размер')
-                          return
-                        }
-                        const size = sizeTypes
+                {editing.rows
+                  .sort((a: any, b: any) => a?.sizeValue?.orderNum - b?.sizeValue?.orderNum)
+                  .map((row, index) => (
+                    <div
+                      key={index}
+                      className="grid p-[10px] grid-cols-[140px_140px_140px_140px_140px_1fr_!important] items-center gap-[10px] mb-[10px]"
+                    >
+                      <select
+                        value={row.sizeValue.id}
+                        onChange={e => {
+                          if (e.target.value === '0') {
+                            toast.error('Выберите размер')
+                            return
+                          }
+                          const size = sizeTypes
+                            ?.find(i => i.id === editing.type.id)
+                            ?.values.find(i => i.id === Number(e.target.value))
+                          setEditing({
+                            ...editing,
+                            rows: editing.rows.map(i =>
+                              i.sizeValueId === row.sizeValueId
+                                ? {
+                                    ...i,
+                                    sizeValueId: Number(e.target.value),
+                                    sizeValue: size!,
+                                  }
+                                : i
+                            ),
+                          })
+                        }}
+                      >
+                        <option value={0}>Выберите размер</option>
+
+                        {sizeTypes
                           ?.find(i => i.id === editing.type.id)
-                          ?.values.find(i => i.id === Number(e.target.value))
-                        setEditing({
-                          ...editing,
-                          rows: editing.rows.map(i =>
-                            i.sizeValueId === row.sizeValueId
-                              ? {
-                                  ...i,
-                                  sizeValueId: Number(e.target.value),
-                                  sizeValue: size!,
+                          ?.values.filter(
+                            size =>
+                              !editing.rows
+                                .filter(r => r.sizeValue.id !== row.sizeValue.id) // исключаем текущий редактируемый элемент
+                                .map(r => r.sizeValue.id)
+                                .includes(size.id)
+                          ) // фильтруем
+                          .map((size, idx) => (
+                            <option key={idx} value={size.id}>
+                              {size.name}
+                            </option>
+                          ))}
+                      </select>
+
+                      <input
+                        type="text"
+                        value={row.height ?? ''}
+                        placeholder="Рост"
+                        onChange={e => {
+                          const height = onlyDigitsAndDash(e.target.value)
+
+                          setEditing({
+                            ...editing,
+                            rows: editing.rows.map((i, idx) =>
+                              idx === index ? { ...i, height } : i
+                            ),
+                          })
+                        }}
+                      />
+
+                      <input
+                        type="text"
+                        value={row.chest ?? ''}
+                        placeholder="Обхват груди"
+                        onChange={e => {
+                          const chest = onlyDigitsAndDash(e.target.value)
+
+                          setEditing({
+                            ...editing,
+                            rows: editing.rows.map((i, idx) =>
+                              idx === index ? { ...i, chest } : i
+                            ),
+                          })
+                        }}
+                      />
+
+                      <input
+                        type="text"
+                        value={row.waist ?? ''}
+                        placeholder="Обхват талии"
+                        onChange={e => {
+                          const waist = onlyDigitsAndDash(e.target.value)
+
+                          setEditing({
+                            ...editing,
+                            rows: editing.rows.map((i, idx) =>
+                              idx === index ? { ...i, waist } : i
+                            ),
+                          })
+                        }}
+                      />
+
+                      <input
+                        type="text"
+                        value={row.hips ?? ''}
+                        placeholder="Обхват бедер"
+                        onChange={e => {
+                          const hips = onlyDigitsAndDash(e.target.value)
+
+                          setEditing({
+                            ...editing,
+                            rows: editing.rows.map((i, idx) =>
+                              idx === index ? { ...i, hips } : i
+                            ),
+                          })
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditing(
+                            !editing
+                              ? null
+                              : {
+                                  ...editing,
+                                  rows: editing.rows.filter(i => i.sizeValueId !== row.sizeValueId),
                                 }
-                              : i
-                          ),
-                        })
-                      }}
-                    >
-                      <option value={0}>Выберите размер</option>
-
-                      {sizeTypes
-                        ?.find(i => i.id === editing.type.id)
-                        ?.values.filter(
-                          size =>
-                            !editing.rows
-                              .filter(r => r.sizeValue.id !== row.sizeValue.id) // исключаем текущий редактируемый элемент
-                              .map(r => r.sizeValue.id)
-                              .includes(size.id)
-                        ) // фильтруем
-                        .map((size, idx) => (
-                          <option key={idx} value={size.id}>
-                            {size.name}
-                          </option>
-                        ))}
-                    </select>
-
-                    <input
-                      type="text"
-                      value={row.height ?? ''}
-                      placeholder="Рост"
-                      onChange={e => {
-                        const height = onlyDigitsAndDash(e.target.value)
-
-                        setEditing({
-                          ...editing,
-                          rows: editing.rows.map((i, idx) =>
-                            idx === index ? { ...i, height } : i
-                          ),
-                        })
-                      }}
-                    />
-
-                    <input
-                      type="text"
-                      value={row.chest ?? ''}
-                      placeholder="Обхват груди"
-                      onChange={e => {
-                        const chest = onlyDigitsAndDash(e.target.value)
-
-                        setEditing({
-                          ...editing,
-                          rows: editing.rows.map((i, idx) => (idx === index ? { ...i, chest } : i)),
-                        })
-                      }}
-                    />
-
-                    <input
-                      type="text"
-                      value={row.waist ?? ''}
-                      placeholder="Обхват талии"
-                      onChange={e => {
-                        const waist = onlyDigitsAndDash(e.target.value)
-
-                        setEditing({
-                          ...editing,
-                          rows: editing.rows.map((i, idx) => (idx === index ? { ...i, waist } : i)),
-                        })
-                      }}
-                    />
-
-                    <input
-                      type="text"
-                      value={row.hips ?? ''}
-                      placeholder="Обхват бедер"
-                      onChange={e => {
-                        const hips = onlyDigitsAndDash(e.target.value)
-
-                        setEditing({
-                          ...editing,
-                          rows: editing.rows.map((i, idx) => (idx === index ? { ...i, hips } : i)),
-                        })
-                      }}
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setEditing(
-                          !editing
-                            ? null
-                            : {
-                                ...editing,
-                                rows: editing.rows.filter(i => i.sizeValueId !== row.sizeValueId),
-                              }
-                        )
-                      }
-                      className="flex items-center justify-center text-[#E02844] ml-auto bg-[#FFF3F3] w-[36px] h-[36px] rounded-[12px]"
-                    >
-                      <LuTrash2 />
-                    </button>
-                  </div>
-                ))}
+                          )
+                        }
+                        className="flex items-center justify-center text-[#E02844] ml-auto bg-[#FFF3F3] w-[36px] h-[36px] rounded-[12px]"
+                      >
+                        <LuTrash2 />
+                      </button>
+                    </div>
+                  ))}
               </div>
             </div>
             <section className="ml-auto flex gap-[10px] mt-[20px]">
