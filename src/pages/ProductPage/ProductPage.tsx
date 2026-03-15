@@ -118,8 +118,39 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
 
     setSizes(sizes)
     setColors(colors)
-    setSelectedColor(colors[0])
-    setSelectedSize(sizes[0])
+    // Найти первый цвет, для которого есть хотя бы один размер в наличии
+    const availableColor =
+      colors.find(color =>
+        sizes.some(size =>
+          data.variants.some(
+            (v: any) =>
+              v.colorAttrValueId === color.id &&
+              v.sizeValueId === size.id &&
+              v.colorAlias === color.alias &&
+              v.codes.some((code: any) =>
+                code.stocks?.some((stock: any) => (stock.quantity || 0) > 0)
+              )
+          )
+        )
+      ) || colors[0]
+
+    setSelectedColor(availableColor)
+
+    // Найти первый размер для выбранного цвета, который есть в наличии
+    const availableSize =
+      sizes.find(size =>
+        data.variants.some(
+          (v: any) =>
+            v.colorAttrValueId === availableColor.id &&
+            v.sizeValueId === size.id &&
+            v.colorAlias === availableColor.alias &&
+            v.codes.some((code: any) =>
+              code.stocks?.some((stock: any) => (stock.quantity || 0) > 0)
+            )
+        )
+      ) || sizes[0]
+
+    setSelectedSize(availableSize)
 
     axios(`${import.meta.env.VITE_APP_API_URL}/media/${data.id}`)
       .then(res => {
@@ -569,7 +600,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'features' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo('features')
+                  setSelectedInfo(selectedInfo == 'features' ? '' : 'features')
                 }}
               >
                 <span className="flex items-center justify-between">
@@ -600,7 +631,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'info' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo('info')
+                  setSelectedInfo(selectedInfo == 'info' ? '' : 'info')
                 }}
               >
                 <span className="flex items-center justify-between">
@@ -637,7 +668,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'shops' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo('shops')
+                  setSelectedInfo(selectedInfo == 'shops' ? '' : 'shops')
                 }}
               >
                 <span className="flex items-center justify-between">
@@ -678,7 +709,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'care' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo('care')
+                  setSelectedInfo(selectedInfo == 'care' ? '' : 'care')
                 }}
               >
                 <span className="flex items-center justify-between">

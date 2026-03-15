@@ -37,7 +37,7 @@ export const SignInPage: React.FC = () => {
         setTimer(tm)
       }, 1000)
 
-      setTimeout(() => clearInterval(interval), 30000)
+      setTimeout(() => clearInterval(interval), 30100)
     } catch (error: any) {
       if (error?.data?.message === 'User not found') {
         alert('Пользователь с таким номером телефона не наиден')
@@ -142,10 +142,11 @@ export const SignInPage: React.FC = () => {
             <button
               className={styles.signup_form_againButton}
               disabled={timer > 0}
+              style={{ textDecoration: timer > 0 ? 'none' : 'underline' }}
               onClick={requestCodeAgain}
               type={'button'}
             >
-              Отправить повторно {timer !== 0 ? 'через ' + timer : ''}
+              Отправить повторно {timer > 0 ? 'через ' + timer : ''}
             </button>
           </p>
           <label className={styles.signup_form_label}>
@@ -153,10 +154,14 @@ export const SignInPage: React.FC = () => {
             <PatternFormat
               allowEmptyFormatting
               autoFocus
-              format={'#####'}
-              mask={'-'}
-              name={'code'}
+              format="#####"
+              mask="-"
+              name="code"
               required
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="one-time-code"
             />
           </label>
           <button className={styles.signup_form_button} type={'submit'}>

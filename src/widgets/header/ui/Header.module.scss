@@ -188,11 +188,16 @@
     align-items: center;
     gap: 24px;
     position: fixed;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
+
+    transition: bottom 0.25s ease;
+
+    bottom: env(safe-area-inset-bottom, 0px); /* добавляем безопасную зону */
+    padding-bottom: 100px;
     left: 0;
     z-index: 4;
     width: 100%;
-    height: 70px;
+    height: 170px;
+    margin-bottom: -100px;
     background: var(--white);
 
     a {

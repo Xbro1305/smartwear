@@ -126,6 +126,9 @@ input[type='search']::-webkit-search-results-decoration {
 [id] {
   scroll-margin-top: 100px;
 }
+main {
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+}
 
 /* fonts */
 /*  */

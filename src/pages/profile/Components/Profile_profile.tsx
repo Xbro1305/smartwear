@@ -242,7 +242,7 @@ export const Profile_profile = () => {
       .then(() => {
         refresh()
         setPhoneConfirm(false)
-        toast.success("Номер телефона подтвержден успешно!")
+        toast.success('Номер телефона подтвержден успешно!')
       })
       .catch(() => toast.error('Неправильный код или что-то пошло не так'))
   }
@@ -375,7 +375,7 @@ export const Profile_profile = () => {
             <label className={`${styles.profile_form_label} ${styles.profile_form_label_active}`}>
               <p>Дата рождения</p>
               <input
-                type="text"
+                type="date"
                 value={birthday}
                 onChange={e => {
                   const value = e.target.value
@@ -385,8 +385,9 @@ export const Profile_profile = () => {
                     : setIsProfileEdited(false)
                 }}
                 placeholder="дд.мм.гггг"
+                name={'birthday'}
                 onFocus={e => (e.target.type = 'date')}
-                onBlur={e => (e.target.type = 'text')}
+                // onBlur={e => (e.target.type = 'text')}
               />
             </label>
             <div className={styles.profile_form_gender}>
