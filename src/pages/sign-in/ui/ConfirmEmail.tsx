@@ -1,10 +1,11 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 export const ConfirmEmail = () => {
   const [searchParams] = useSearchParams()
   const code = searchParams.get('code')
+  const navigate = useNavigate()
 
   const [message, setMessage] = useState('Загрузка...')
 
@@ -25,7 +26,12 @@ export const ConfirmEmail = () => {
           data: { code },
         })
           .then(() => {
-            setMessage('E-mail подтевржден успешно!')
+            setMessage(
+              'E-mail подтевржден успешно!, Вы будете перенаправлены в профиль через 5 секунд.'
+            )
+            setTimeout(() => {
+              navigate('/profile')
+            }, 5000)
           })
           .catch(err => {
             console.log(err)

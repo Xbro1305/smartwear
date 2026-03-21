@@ -21,7 +21,9 @@ export const CatalogPage = () => {
             .then(res => {
               const data = res?.data
 
-              const cats = data?.filter((c: any) => !ids.some((b: number) => hasBrand(c, b)))
+              const cats = data
+                ?.filter((c: any) => !ids.some((b: number) => hasBrand(c, b)))
+                .filter((c: any) => c.parentId === null)
 
               setCategories(cats)
             })

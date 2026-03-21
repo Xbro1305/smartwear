@@ -27,7 +27,7 @@ export const AdminGuard = () => {
   }
 
   if (isLoading) {
-    return <div>Загрузка...</div>
+    return <div></div>
   }
 
   const isAdmin = userData?.role === 'ADMIN'

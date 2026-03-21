@@ -10,10 +10,6 @@ import cart from '../../../assets/images/svg (2).svg'
 import search from '../../../assets/images/svg.svg'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import home from '../icons/home.svg'
-import catalog from '../icons/catalog.svg'
-import saved from '../icons/saved.svg'
-import basket from '../icons/basket.svg'
 import profile from '../icons/profile.svg'
 import { useSelector } from 'react-redux'
 
@@ -139,33 +135,6 @@ export const Header: React.FC = () => {
           </Link>
         </div>
       </header>
-      <div className={styles.mob_navigation}>
-        <Link className="p2" to={ROUTER_PATHS.HOME}>
-          <img src={home} alt="" />
-          Главная
-        </Link>
-        <Link className="p2" to={ROUTER_PATHS.CATALOG}>
-          <img src={catalog} alt="" />
-          Каталог
-        </Link>
-        <Link className="p2" to={'/cart'}>
-          <img src={saved} alt="" />
-          Избранное
-        </Link>
-        <Link className="p2 relative" to={'/cart'}>
-          <img src={basket} alt="" />
-          Корзина
-          {cartLength > 0 && (
-            <div className="absolute bottom-[18px] right-[5px] bg-red text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">
-              {cartLength}
-            </div>
-          )}
-        </Link>
-        <Link className="p2" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
-          <img src={profile} alt="" />
-          {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
-        </Link>
-      </div>
     </>
   )
 }

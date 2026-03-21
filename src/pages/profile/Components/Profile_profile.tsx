@@ -377,6 +377,7 @@ export const Profile_profile = () => {
               <input
                 type="date"
                 value={birthday}
+                className="w-[fit-content_!important]"
                 onChange={e => {
                   const value = e.target.value
                   setBirthday(value)

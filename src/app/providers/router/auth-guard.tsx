@@ -9,7 +9,7 @@ export const AuthGuard = () => {
   if (isLoading) {
     console.log('Загрузка данных пользователя...')
 
-    return <div>Загрузка...</div>
+    return <div></div>
   }
 
   if (error || !userData) {

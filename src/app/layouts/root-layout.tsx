@@ -1,43 +1,42 @@
 import { useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
 import { Modal } from '@/pages/home/ui/Modal'
 import { Footer } from '@/widgets/footer'
 import { Header } from '@/widgets/header'
+import { BottomBar } from '@/widgets/bottomBar/bottomBar'
 
 export const RootLayout = () => {
-  const { data, isError, isLoading } = useGetMeQuery()
+  const { isError, isLoading } = useGetMeQuery()
+  const location = useLocation()
+
   const isAuthenticated = !isError && !isLoading
 
   useEffect(() => {
-    localStorage.setItem('isActive', 'true')
-    let closeTimeout: any
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [location.pathname])
+
+  useEffect(() => {
+    let closeTimeout: ReturnType<typeof setTimeout>
 
     const markActive = () => {
-      localStorage.setItem('isActive', 'true')
-      clearTimeout(closeTimeout)
       localStorage.setItem('lastActivity', Date.now().toString())
     }
 
     const checkInactivity = () => {
-      const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0', 10)
+      const last = Number(localStorage.getItem('lastActivity') || 0)
       const now = Date.now()
-      const timeout = 30 * 60 * 1000
 
-      if (now - lastActivity > timeout) {
+      if (now - last > 30 * 60 * 1000) {
         localStorage.removeItem('token')
         window.location.reload()
       }
     }
 
     const handleBeforeUnload = () => {
-      localStorage.setItem('isActive', '')
-
       closeTimeout = setTimeout(() => {
-        if (!localStorage.getItem('isActive')) {
-          localStorage.removeItem('token')
-        }
+        localStorage.removeItem('token')
       }, 5000)
     }
 
@@ -55,41 +54,26 @@ export const RootLayout = () => {
       window.removeEventListener('mousedown', markActive)
       window.removeEventListener('scroll', markActive)
       window.removeEventListener('beforeunload', handleBeforeUnload)
+
       clearInterval(interval)
       clearTimeout(closeTimeout)
     }
-  }, [data])
+  }, [])
 
-  if (isLoading) {
-    return <div>Загрузка...</div>
-  }
-
-  const renderMain = (
-    <main>
-      <Outlet />
-      <Modal />
-    </main>
-  )
-
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (isAuthenticated) {
-    return (
-      <>
-        <Header />
-        <div>{renderMain}</div>
-        <Footer />
-      </>
-    )
-  }
+  if (isLoading) return null
 
   return (
-    <div>
+    <div className="flex flex-col min-h-[100dvh]">
       <Header />
-      {!isLoading && renderMain}
+
+      <main className="flex-1">
+        <Outlet />
+        <Modal />
+      </main>
+
       <Footer />
+
+      {!isAuthenticated && <BottomBar />}
     </div>
   )
 }

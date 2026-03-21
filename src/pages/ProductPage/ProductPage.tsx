@@ -600,10 +600,12 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'features' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo(selectedInfo == 'features' ? '' : 'features')
                 }}
               >
-                <span className="flex items-center justify-between">
+                <span
+                  className="flex items-center justify-between"
+                  onClick={() => setSelectedInfo(selectedInfo == 'features' ? '' : 'features')}
+                >
                   {' '}
                   Особенности{' '}
                   <FaChevronDown
@@ -631,10 +633,12 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'info' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo(selectedInfo == 'info' ? '' : 'info')
                 }}
               >
-                <span className="flex items-center justify-between">
+                <span
+                  className="flex items-center justify-between"
+                  onClick={() => setSelectedInfo(selectedInfo == 'info' ? '' : 'info')}
+                >
                   {' '}
                   Характеристики{' '}
                   <FaChevronDown
@@ -668,10 +672,12 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'shops' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo(selectedInfo == 'shops' ? '' : 'shops')
                 }}
               >
-                <span className="flex items-center justify-between">
+                <span
+                  className="flex items-center justify-between"
+                  onClick={() => setSelectedInfo(selectedInfo == 'shops' ? '' : 'shops')}
+                >
                   {' '}
                   В магазинах{' '}
                   <FaChevronDown
@@ -709,10 +715,12 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 style={{ background: selectedInfo == 'care' ? '#FAFAFA' : '' }}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelectedInfo(selectedInfo == 'care' ? '' : 'care')
                 }}
               >
-                <span className="flex items-center justify-between">
+                <span
+                  className="flex items-center justify-between"
+                  onClick={() => setSelectedInfo(selectedInfo == 'care' ? '' : 'care')}
+                >
                   {' '}
                   Как стирать{' '}
                   <FaChevronDown

@@ -1,38 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import { AdminHeader } from '@/widgets/adminHeader/adminHeader'
 import { SideBar } from '@/widgets/adminSidebar/sidebar'
+
 export const AdminLayout = () => {
-  const [page, setPage] = useState<string>('Главная')
-
   const location = useLocation()
-
-  useEffect(() => {
-    const path = location.pathname.split('/admin/')[1]?.split('/')[0] || 'home'
-    setPage(path)
-  }, [location.pathname])
+  const { ADMINLOGIN } = ROUTER_PATHS
 
   const { data } = useGetMeQuery()
 
+  const page = useMemo(() => {
+    return location.pathname.split('/admin/')[1]?.split('/')[0] || 'home'
+  }, [location.pathname])
+
   useEffect(() => {
-    localStorage.setItem('isActive', 'true')
-    let closeTimeout: any
+    let closeTimeout: ReturnType<typeof setTimeout>
 
     const markActive = () => {
       localStorage.setItem('isActive', 'true')
-      clearTimeout(closeTimeout)
       localStorage.setItem('lastActivity', Date.now().toString())
+      clearTimeout(closeTimeout)
     }
 
     const checkInactivity = () => {
-      const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0', 10)
+      const last = Number(localStorage.getItem('lastActivity') || 0)
       const now = Date.now()
-      const timeout = 30 * 60 * 1000
 
-      if (now - lastActivity > timeout) {
+      if (now - last > 30 * 60 * 1000) {
         localStorage.removeItem('token')
         window.location.reload()
       }
@@ -62,56 +59,28 @@ export const AdminLayout = () => {
       window.removeEventListener('mousedown', markActive)
       window.removeEventListener('scroll', markActive)
       window.removeEventListener('beforeunload', handleBeforeUnload)
+
       clearInterval(interval)
       clearTimeout(closeTimeout)
     }
   }, [data])
 
-  const { ADMINLOGIN } = ROUTER_PATHS
-
-  const renderMain = (
-    <main>
-      <Outlet />
-    </main>
-  )
-
-  if (window.location.pathname == ADMINLOGIN) {
-    return (
-      <>
-        <div>{renderMain}</div>
-      </>
-    )
-  } else if (window.location.pathname == ADMINLOGIN + '/') {
-    return (
-      <>
-        <div>{renderMain}</div>
-      </>
-    )
-  } else {
-    return (
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '300px calc(100% - 300px)', width: '100%' }}
-      >
-        <SideBar redirectingPage={page} />
-        <main
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <AdminHeader page={page} setPage={setPage} />
-          <div
-            onClick={() => {
-              const path = location.pathname.split('/admin/')[1]?.split('/')[0] || 'home'
-              if (path && path != page) {
-                setPage(path)
-              }
-            }}
-          >
-            <Outlet />
-          </div>
-        </main>
-      </div>
-    )
+  // ✅ логин-страница без layout
+  if (location.pathname === ADMINLOGIN || location.pathname === `${ADMINLOGIN}/`) {
+    return <Outlet />
   }
+
+  return (
+    <div className="grid grid-cols-[300px_1fr] w-full min-h-[100dvh]">
+      <SideBar redirectingPage={page} />
+
+      <main className="flex flex-col">
+        <AdminHeader page={page} setPage={() => {}} />
+
+        <div className="flex-1">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  )
 }

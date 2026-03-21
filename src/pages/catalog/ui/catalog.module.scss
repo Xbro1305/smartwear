@@ -15,7 +15,7 @@
   &_wrapper {
     padding: var(--top-padding) var(--sides-padding);
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: 20px;
 
     @media (max-width: 768px) {

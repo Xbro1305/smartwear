@@ -22,6 +22,7 @@ export const Cart = () => {
       .catch(() => setCategories([]))
 
     document.title = `Корзина (${cart?.length} товар${cart?.length === 1 ? '' : 'ов'})`
+    window.scrollTo(0, 0)
   }, [])
 
   const totalProductsPrice = cart.reduce((sum: number, item: any) => {
