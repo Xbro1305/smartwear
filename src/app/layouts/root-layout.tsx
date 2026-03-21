@@ -64,16 +64,15 @@ export const RootLayout = () => {
 
   return (
     <div className="flex flex-col min-h-[100dvh]">
-      <Header />
-
-      <main className="flex-1">
-        <Outlet />
-        <Modal />
-      </main>
-
-      <Footer />
-
-      {!isAuthenticated && <BottomBar />}
+      <div className="max-h-[calc(100dvh-70px)] xl:max-h-[100dvh] flex-1 flex flex-col overflow-y-auto">
+        <Header />
+        <main>
+          <Outlet />
+          <Modal />
+        </main>
+        <Footer />
+      </div>
+      <BottomBar />
     </div>
   )
 }
