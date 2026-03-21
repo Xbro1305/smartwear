@@ -151,17 +151,14 @@ export const SignInPage: React.FC = () => {
           </p>
           <label className={styles.signup_form_label}>
             <p>Введите смс код</p>
-            <PatternFormat
-              allowEmptyFormatting
+            <input
               autoFocus
-              format="#####"
-              mask="-"
-              name="code"
-              required
-              type="tel"
+              type="text"
               inputMode="numeric"
               pattern="[0-9]*"
               autoComplete="one-time-code"
+              maxLength={5}
+              name="code"
             />
           </label>
           <button className={styles.signup_form_button} type={'submit'}>

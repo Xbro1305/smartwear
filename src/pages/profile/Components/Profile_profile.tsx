@@ -67,7 +67,7 @@ export const Profile_profile = () => {
         setName(response.name || '')
         setMiddlename(response.middleName || '')
         setEmail(response.email || '')
-        setPhone(response.phone || '')
+        setPhone(response.phone.replace(/^\++/, '+') || '')
         setGender(response.gender || '')
         setIsSubscribed(response.isSubscribed || '')
         setCity(response.city || '')
@@ -78,7 +78,7 @@ export const Profile_profile = () => {
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
 
-        if (phone.startsWith('8')) {
+        if (phone.startsWith('8') || phone.startsWith('+8')) {
           setPrefix('')
         } else {
           setPrefix('+')
@@ -173,13 +173,15 @@ export const Profile_profile = () => {
   }
 
   const getCode = () => {
+    const number = `${prefix}${phone}`.replace(/^\++/, '+')
+
     axios(`${baseUrl}/users/request-confirm-phone/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      data: { phone },
+      data: { phone: number },
     })
       .then(() => {
         setTimer(30)
@@ -200,13 +202,15 @@ export const Profile_profile = () => {
   }
 
   const getCodeAgain = () => {
+    const number = `${prefix}${phone}`.replace(/^\++/, '+')
+
     axios(`${baseUrl}/users/resend-phone-code/${initialData.id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      data: { phone },
+      data: { phone: number },
     })
       .then(() => {
         setTimer(30)
@@ -482,17 +486,19 @@ export const Profile_profile = () => {
                     format={'# (###) ### ##-##'}
                     mask={'X'}
                     name={'phone'}
-                    onChange={(e: any) => {
-                      if (e.target.value.startsWith(9)) {
+                    onValueChange={(e: any) => {
+                      console.log(e)
+
+                      if (e.formattedValue.startsWith(9)) {
                         setPrefix('+')
-                      } else if (e.target.value.startsWith(8)) {
+                      } else if (e.formattedValue.startsWith(8)) {
                         setPrefix('')
                       } else {
                         setPrefix('+')
                       }
-                      setPhone(e.target.value)
+                      setPhone(e.floatValue ? String(e.floatValue) : '')
 
-                      const value = e.target.value
+                      const value = e.formattedValue
                       initialData.phone != value
                         ? setIsProfileEdited(true)
                         : setIsProfileEdited(false)

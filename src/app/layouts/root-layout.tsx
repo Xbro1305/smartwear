@@ -62,7 +62,7 @@ export const RootLayout = () => {
 
   return (
     <div className="flex flex-col min-h-[100dvh]">
-      <div className="max-h-[calc(100dvh-70px)] xl:max-h-[100dvh] flex-1 flex flex-col overflow-y-auto">
+      <div className="main-container flex-1 flex flex-col overflow-y-auto">
         <Header />
         <main>
           <Outlet />

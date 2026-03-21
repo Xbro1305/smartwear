@@ -135,6 +135,15 @@ input[type='date'] {
   padding-left: 10px; /* добавляем отступ */
 }
 
+.main-container {
+  max-height: 100dvh;
+}
+@media screen and (max-width: 1215px) {
+  .main-container {
+    max-height: calc(100dvh - 70px);
+  }
+}
+
 /* fonts */
 /*  */
 /*  */
