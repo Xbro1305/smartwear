@@ -478,7 +478,13 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               return (
                 <Link
                   to={`/${i.seoSlug}`}
-                  state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
+                  state={{
+                    breadcrumbs: [...(category?.ancestors || []), category?.current],
+                    fromCatalog: true,
+                  }}
+                  onClick={() => {
+                    localStorage.setItem('lastProductPage', `/${i.seoSlug}`)
+                  }}
                   className={styles.catalog_item}
                   key={i.name}
                 >
