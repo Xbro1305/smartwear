@@ -8,10 +8,8 @@ import { Header } from '@/widgets/header'
 import { BottomBar } from '@/widgets/bottomBar/bottomBar'
 
 export const RootLayout = () => {
-  const { isError, isLoading } = useGetMeQuery()
+  const { isLoading } = useGetMeQuery()
   const location = useLocation()
-
-  const isAuthenticated = !isError && !isLoading
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
