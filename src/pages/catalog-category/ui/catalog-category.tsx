@@ -94,6 +94,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   // Get attribute ids from query
 
   useEffect(() => {
+    localStorage.setItem('lastProductPage', `${url}`)
+
     const ids = searchParams.get('attributeIds')
 
     if (!ids) return
@@ -481,9 +483,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                   state={{
                     breadcrumbs: [...(category?.ancestors || []), category?.current],
                     fromCatalog: true,
-                  }}
-                  onClick={() => {
-                    localStorage.setItem('lastProductPage', `/${i.seoSlug}`)
                   }}
                   className={styles.catalog_item}
                   key={i.name}

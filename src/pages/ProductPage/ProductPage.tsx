@@ -68,11 +68,17 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   const [sizeTable, setSizeTable] = useState<any>({})
 
   const dispatch = useDispatch()
+  const location = useLocation()
+  const state = location.state as LocationState
+  const breadcrumbs = state?.breadcrumbs || []
+
+  const pathname = location.pathname
 
   useEffect(() => {
     if (!data) return
 
     setItem(data)
+    localStorage.setItem('lastProductPage', `${pathname}`)
 
     // 1. Уникальные размеры по name
     const sizesMap = new Map()
@@ -270,10 +276,6 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
 
     return qty
   }
-
-  const location = useLocation()
-  const state = location.state as LocationState
-  const breadcrumbs = state?.breadcrumbs || []
 
   const addCart = () => {
     if (checkStockForSize(selectedSize?.id ?? 0) <= 0) return

@@ -203,7 +203,8 @@
 
     background: var(--white);
 
-    a {
+    a,
+    button {
       display: flex;
       flex-direction: column;
       align-items: center;

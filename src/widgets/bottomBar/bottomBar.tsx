@@ -14,6 +14,17 @@ export const BottomBar = () => {
 
   const cartLength = useSelector((state: any) => state.cart.items.length)
 
+  // универсальный state
+  const getState = () => ({
+    ...location.state,
+    from: location.pathname,
+  })
+
+  // универсальный navigate
+  const navigateWithState = (path: string) => {
+    navigate(path, { state: getState() })
+  }
+
   const handleCatalogClick = () => {
     const lastProduct = localStorage.getItem('lastProductPage')
 
@@ -21,27 +32,30 @@ export const BottomBar = () => {
 
     if (isFromCartOrProfile && lastProduct) {
       localStorage.removeItem('lastProductPage')
-      navigate(lastProduct)
+      navigateWithState(lastProduct)
     } else {
-      navigate(ROUTER_PATHS.CATALOG)
+      navigateWithState(ROUTER_PATHS.CATALOG)
     }
   }
 
   return (
-    <div className={styles.mob_navigation}>
-      <Link className="p2" to={ROUTER_PATHS.HOME}>
+    <div className={`navigation ${styles.mob_navigation}`}>
+      <Link className="p2" to={ROUTER_PATHS.HOME} state={getState()}>
         <img src={home} alt="" />
         Главная
       </Link>
-      <a className="p2 cursor-pointer" onClick={handleCatalogClick}>
+
+      <button className="p2 cursor-pointer" onClick={handleCatalogClick}>
         <img src={catalog} alt="" />
         Каталог
-      </a>
-      <Link className="p2" to={'/cart'}>
+      </button>
+
+      <Link className="p2" to={'/favorites'} state={getState()}>
         <img src={saved} alt="" />
         Избранное
       </Link>
-      <Link className="p2 relative" to={'/cart'}>
+
+      <Link className="p2 relative" to={'/cart'} state={getState()}>
         <img src={basket} alt="" />
         Корзина
         {cartLength > 0 && (
@@ -50,7 +64,8 @@ export const BottomBar = () => {
           </div>
         )}
       </Link>
-      <Link className="p2" to={ROUTER_PATHS.PROFILE} state={{ from: location.pathname }}>
+
+      <Link className="p2" to={ROUTER_PATHS.PROFILE} state={getState()}>
         <img src={profile} alt="" />
         {localStorage.getItem('token') ? 'Профиль' : 'Войти'}
       </Link>

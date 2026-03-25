@@ -13,6 +13,8 @@ export const Cart = () => {
   const cart = useSelector((state: any) => state.cart.items)
   const [categories, setCategories] = useState<any>(null)
 
+  const pathname = location.pathname
+
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/categories`)
       .then(res => {
@@ -24,6 +26,12 @@ export const Cart = () => {
     document.title = `Корзина (${cart?.length} товар${cart?.length === 1 ? '' : 'ов'})`
     window.scrollTo(0, 0)
   }, [])
+
+  useEffect(() => {
+    setTimeout(() => {
+      document.querySelector('.main-container')?.scrollTo(0, 0)
+    }, 1)
+  }, [pathname])
 
   const totalProductsPrice = cart.reduce((sum: number, item: any) => {
     const price = item.oldPrice && item.oldPrice > 0 ? item.oldPrice : item.price
@@ -78,7 +86,7 @@ export const Cart = () => {
 
 const CartPage = ({ cart, dispatch }: any) => {
   return (
-    <div className="flex flex-col lg:flex-row gap-[20px] lg:justify-between">
+    <div className="cart flex flex-col lg:flex-row gap-[20px] lg:justify-between">
       <div className="flex flex-col gap-[20px] w-full">
         {cart.map((item: any, index: number) => (
           <CartItem key={index} item={item} index={index} dispatch={dispatch} />

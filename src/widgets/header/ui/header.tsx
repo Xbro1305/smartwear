@@ -26,15 +26,18 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     const main = document.querySelector('main')
+    const navigation = document.querySelector('.navigation')!
 
     const close = () => setIsOpen(false)
 
     if (isOpen && main) {
       main.addEventListener('click', close)
+      navigation?.addEventListener('click', close)
     }
 
     return () => {
       if (main) main.removeEventListener('click', close)
+      if (navigation) navigation?.removeEventListener('click', close)
     }
   }, [isOpen])
 
