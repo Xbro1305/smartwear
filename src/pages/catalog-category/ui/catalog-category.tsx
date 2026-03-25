@@ -10,6 +10,8 @@ import styles from './catalog-category.module.scss'
 import axios from 'axios'
 import { IoMdSwitch } from 'react-icons/io'
 import { CustomSelect } from './CustomSelect'
+import { IoSad } from 'react-icons/io5'
+import { HiOutlineEmojiSad } from 'react-icons/hi'
 
 interface Props {
   data: any
@@ -463,87 +465,94 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                 ))}
             </div>
           </div>
-          <div className={styles.catalog_wrapper}>
-            {items.map((i: any) => {
-              const imageUrl = i.media.find((m: any) => m.kind === 'cover')?.url || ''
+          {items.length ? (
+            <div className={styles.catalog_wrapper}>
+              {items.map((i: any) => {
+                const imageUrl = i.media.find((m: any) => m.kind === 'cover')?.url || ''
 
-              const colors = Object.values(
-                i.variants.reduce((acc: any, variant: any) => {
-                  const color = variant.colorAttrValue
-                  if (!color) return acc
+                const colors = Object.values(
+                  i.variants.reduce((acc: any, variant: any) => {
+                    const color = variant.colorAttrValue
+                    if (!color) return acc
 
-                  acc[color.id] = color
-                  return acc
-                }, {})
-              )
+                    acc[color.id] = color
+                    return acc
+                  }, {})
+                )
 
-              return (
-                <Link
-                  to={`/${i.seoSlug}`}
-                  state={{
-                    breadcrumbs: [...(category?.ancestors || []), category?.current],
-                    fromCatalog: true,
-                  }}
-                  className={styles.catalog_item}
-                  key={i.name}
-                >
-                  <img src={imageUrl} alt="" />
-                  <div className={styles.catalog_item_info}>
-                    <div className={styles.catalog_item_top}>
-                      <div className={styles.catalog_item_colors}>
-                        {colors?.map((c: any) => (
-                          <div
-                            key={c.id}
-                            className={styles.catalog_item_color}
-                            style={{ background: c.meta.colorCode || '#eee' }}
-                          ></div>
-                        ))}
+                return (
+                  <Link
+                    to={`/${i.seoSlug}`}
+                    state={{
+                      breadcrumbs: [...(category?.ancestors || []), category?.current],
+                      fromCatalog: true,
+                    }}
+                    className={styles.catalog_item}
+                    key={i.name}
+                  >
+                    <img src={imageUrl} alt="" />
+                    <div className={styles.catalog_item_info}>
+                      <div className={styles.catalog_item_top}>
+                        <div className={styles.catalog_item_colors}>
+                          {colors?.map((c: any) => (
+                            <div
+                              key={c.id}
+                              className={styles.catalog_item_color}
+                              style={{ background: c.meta.colorCode || '#eee' }}
+                            ></div>
+                          ))}
+                        </div>
+                        <img className={styles.catalog_item_heart} src={heart} alt="" />
                       </div>
-                      <img className={styles.catalog_item_heart} src={heart} alt="" />
+
+                      <h5 className="h5 font-[400_!important]">{i.name}</h5>
+
+                      <div className={`${styles.catalog_item_prices}`}>
+                        <NumericFormat
+                          className="h5"
+                          value={i.price}
+                          displayType="text"
+                          thousandSeparator=" "
+                          suffix=" ₽"
+                        />
+                        {i.oldPrice > 0 && (
+                          <>
+                            <NumericFormat
+                              className="h5 text-[#B0B7BF_!important] text-[80%_!important] line-through"
+                              value={i.oldPrice}
+                              displayType="text"
+                              thousandSeparator=" "
+                              suffix=" ₽"
+                            />
+                            <NumericFormat
+                              className="h5 text-[var(--red)_!important]"
+                              value={-((i.oldPrice * 100) / i.price - 100).toFixed(0)}
+                              displayType="text"
+                              thousandSeparator=" "
+                              suffix=" %"
+                            />
+                          </>
+                        )}
+                      </div>
+
+                      <Link
+                        className="button"
+                        to={`/${i.seoSlug}`}
+                        state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
+                      >
+                        Подробнее
+                      </Link>
                     </div>
-
-                    <h5 className="h5 font-[400_!important]">{i.name}</h5>
-
-                    <div className={`${styles.catalog_item_prices}`}>
-                      <NumericFormat
-                        className="h5"
-                        value={i.price}
-                        displayType="text"
-                        thousandSeparator=" "
-                        suffix=" ₽"
-                      />
-                      {i.oldPrice > 0 && (
-                        <>
-                          <NumericFormat
-                            className="h5 text-[#B0B7BF_!important] text-[80%_!important] line-through"
-                            value={i.oldPrice}
-                            displayType="text"
-                            thousandSeparator=" "
-                            suffix=" ₽"
-                          />
-                          <NumericFormat
-                            className="h5 text-[var(--red)_!important]"
-                            value={-((i.oldPrice * 100) / i.price - 100).toFixed(0)}
-                            displayType="text"
-                            thousandSeparator=" "
-                            suffix=" %"
-                          />
-                        </>
-                      )}
-                    </div>
-
-                    <Link
-                      className="button"
-                      to={`/${i.seoSlug}`}
-                      state={{ breadcrumbs: [...(category?.ancestors || []), category?.current] }}
-                    >
-                      Подробнее
-                    </Link>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col w-full h-full max-h-[calc(100vh-500px)] min-h-[300px] items-center justify-center gap-[20px]">
+              <HiOutlineEmojiSad className="text-[48px] lg:text-[72px]" />
+              <p>По вашему запросу ничего не найдено</p>{' '}
+            </div>
+          )}
         </div>
       </div>
     </div>
