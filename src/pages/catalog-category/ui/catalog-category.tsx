@@ -10,7 +10,6 @@ import styles from './catalog-category.module.scss'
 import axios from 'axios'
 import { IoMdSwitch } from 'react-icons/io'
 import { CustomSelect } from './CustomSelect'
-import { IoSad } from 'react-icons/io5'
 import { HiOutlineEmojiSad } from 'react-icons/hi'
 
 interface Props {
