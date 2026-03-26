@@ -173,7 +173,25 @@ export const Profile_profile = () => {
   }
 
   const getCode = () => {
-    const number = `${prefix}${phone}`.replace(/^\++/, '+')
+    let number = `${prefix}${phone}`.replace(/^\++/, '+')
+
+    const formattedPhone = phone.replace(/\D/g, '') // Удаляем все нецифровые символы
+
+    // надо что бы номер всегда отправлялся в формате +7XXXXXXXXXX
+    if (formattedPhone.length === 10) {
+      number = '+7' + formattedPhone
+    } else if (formattedPhone.length === 11 && formattedPhone.startsWith('8')) {
+      number = '+7' + formattedPhone.slice(1)
+    } else if (formattedPhone.length === 11 && formattedPhone.startsWith('7')) {
+      number = '+' + formattedPhone
+    } else if (formattedPhone.length === 12 && formattedPhone.startsWith('7')) {
+      number = '+' + formattedPhone
+    } else if (formattedPhone.length === 12 && formattedPhone.startsWith('8')) {
+      number = '+7' + formattedPhone.slice(1)
+    } else {
+      alert('Пожалуйста, введите корректный номер телефона')
+      return
+    }
 
     axios(`${baseUrl}/users/request-confirm-phone/${initialData.id}`, {
       method: 'POST',
@@ -202,7 +220,25 @@ export const Profile_profile = () => {
   }
 
   const getCodeAgain = () => {
-    const number = `${prefix}${phone}`.replace(/^\++/, '+')
+    let number = `${prefix}${phone}`.replace(/^\++/, '+')
+
+    const formattedPhone = phone.replace(/\D/g, '') // Удаляем все нецифровые символы
+
+    // надо что бы номер всегда отправлялся в формате +7XXXXXXXXXX
+    if (formattedPhone.length === 10) {
+      number = '+7' + formattedPhone
+    } else if (formattedPhone.length === 11 && formattedPhone.startsWith('8')) {
+      number = '+7' + formattedPhone.slice(1)
+    } else if (formattedPhone.length === 11 && formattedPhone.startsWith('7')) {
+      number = '+' + formattedPhone
+    } else if (formattedPhone.length === 12 && formattedPhone.startsWith('7')) {
+      number = '+' + formattedPhone
+    } else if (formattedPhone.length === 12 && formattedPhone.startsWith('8')) {
+      number = '+7' + formattedPhone.slice(1)
+    } else {
+      alert('Пожалуйста, введите корректный номер телефона')
+      return
+    }
 
     axios(`${baseUrl}/users/resend-phone-code/${initialData.id}`, {
       method: 'POST',

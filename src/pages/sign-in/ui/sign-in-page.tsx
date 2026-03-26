@@ -28,6 +28,26 @@ export const SignInPage: React.FC = () => {
   const [login] = useLoginMutation()
 
   const getCode = async (phone: string) => {
+    const formattedPhone = phone.replace(/\D/g, '') // Удаляем все нецифровые символы
+
+    // надо что бы номер всегда отправлялся в формате +7XXXXXXXXXX
+    if (formattedPhone.length === 10) {
+      phone = '+7' + formattedPhone
+    } else if (formattedPhone.length === 11 && formattedPhone.startsWith('8')) {
+      phone = '+7' + formattedPhone.slice(1)
+    } else if (formattedPhone.length === 11 && formattedPhone.startsWith('7')) {
+      phone = '+' + formattedPhone
+    } else if (formattedPhone.length === 12 && formattedPhone.startsWith('7')) {
+      phone = '+' + formattedPhone
+    } else if (formattedPhone.length === 12 && formattedPhone.startsWith('8')) {
+      phone = '+7' + formattedPhone.slice(1)
+    } else {
+      alert('Пожалуйста, введите корректный номер телефона')
+      return
+    }
+
+    console.log(phone)
+
     try {
       await requestCode({ phone }).unwrap()
       setStage(2)
