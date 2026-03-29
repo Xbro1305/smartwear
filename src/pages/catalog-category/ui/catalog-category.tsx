@@ -191,45 +191,24 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       document.title = title
     })
 
-    setMaxPrice(data.facets.price.max)
-    setPrice(data.facets.price.max)
-    setMinPrice(data.facets.price.min)
+    axios(`${import.meta.env.VITE_APP_API_URL}/catalog/available-filters?category=${url}`)
+      .then(res => {
+        //attributes
+        const attrs = res.data.attributes
+        setFilters(attrs)
+
+        //stores
+        const stores = res.data.stores
+        setStores(stores)
+
+        //lengths
+
+        const lengths = res.data.lengths
+        setLengths(lengths)
+      })
+      .catch(err => console.log(err))
 
     setItems(data.items)
-
-    axios(`${import.meta.env.VITE_APP_API_URL}/attributes`)
-      .then(res => {
-        const attrs: any = res.data
-        const available = data?.facets?.available
-
-        const availableAttributes = attrs
-          .filter((attr: any) => attr.name != 'Коллекция')
-          .filter((attr: any) => attr.name != 'Длина изделия')
-          .filter((attr: any) => available.some((a: any) => a.attributeId === attr.id))
-          .map((attr: any) => {
-            const availableAttr = available.find((a: any) => a.attributeId === attr.id)
-
-            return {
-              ...attr,
-              values: attr.values.filter((v: any) => availableAttr?.valueIds.includes(v.id)),
-            }
-          })
-
-        setFilters(availableAttributes)
-      })
-      .catch(err => console.log(err))
-
-    axios(`${import.meta.env.VITE_APP_API_URL}/stores`)
-      .then(res => {
-        setStores(res.data)
-      })
-      .catch(err => console.log(err))
-
-    axios(`${import.meta.env.VITE_APP_API_URL}/product/lengths`)
-      .then(res => {
-        setLengths(res.data)
-      })
-      .catch(err => console.log(err))
   }, [data])
 
   const Select = ({ cls }: { cls: string }) => (
@@ -280,11 +259,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         {/* LEFT */}
         <div className={styles.catalog_left}>
           {filters.slice(0, 2).map((attr: any) => (
-            <div key={attr.id}>
+            <div key={attr.attributeId}>
               <FilterBlock
-                title={attr.name}
-                isOpen={!closedFilters?.includes(attr.id)}
-                toggle={() => toggleFilter(attr.id)}
+                title={attr.attributeName}
+                isOpen={!closedFilters?.includes(attr.attributeId)}
+                toggle={() => toggleFilter(attr.attributeId)}
               >
                 {attr.values.map((i: any) => (
                   <label key={i.id}>
@@ -369,11 +348,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             ))}
           </FilterBlock>
           {filters.slice(2, filters.length).map((attr: any) => (
-            <div key={attr.id}>
+            <div key={attr.attributeId}>
               <FilterBlock
-                title={attr.name}
-                isOpen={!closedFilters?.includes(attr.id)}
-                toggle={() => toggleFilter(attr.id)}
+                title={attr.attributeName}
+                isOpen={!closedFilters?.includes(attr.attributeId)}
+                toggle={() => toggleFilter(attr.attributeId)}
               >
                 {attr.values.map((i: any) => (
                   <label key={i.id}>
