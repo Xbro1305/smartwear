@@ -151,8 +151,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       .then(res => {
         setItems(res.data.items)
 
-        const maximalPriceInRes = res.data.facets.prices.max
-        const minimalPriceInRes = res.data.facets.prices.min
+        const maximalPriceInRes = res.data.facets.price.max
+        const minimalPriceInRes = res.data.facets.price.min
 
         setMaxPrice(maximalPriceInRes)
         setMinPrice(minimalPriceInRes)
@@ -190,6 +190,10 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       const title = res.data.current.metaTitle
       document.title = title
     })
+
+    setMaxPrice(data.facets.price.max)
+    setPrice(data.facets.price.max)
+    setMinPrice(data.facets.price.min)
 
     axios(`${import.meta.env.VITE_APP_API_URL}/catalog/available-filters?category=${url}`)
       .then(res => {
@@ -327,8 +331,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           </FilterBlock>{' '}
           <FilterBlock
             title="Цвет изделия"
-            isOpen={!closedFilters?.includes(-2)}
-            toggle={() => toggleFilter(-2)}
+            isOpen={!closedFilters?.includes(-3)}
+            toggle={() => toggleFilter(-3)}
           >
             {data.facets.colors.map((i: any) => (
               <label key={i.id}>
@@ -391,8 +395,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           </FilterBlock>{' '}
           <FilterBlock
             title="Наличие в магазинах"
-            isOpen={!closedFilters?.includes(-1)}
-            toggle={() => toggleFilter(-1)}
+            isOpen={!closedFilters?.includes(0)}
+            toggle={() => toggleFilter(0)}
           >
             {stores
               ?.map((s: any) => ({ name: s.name, id: s.id, address: s.address }))
