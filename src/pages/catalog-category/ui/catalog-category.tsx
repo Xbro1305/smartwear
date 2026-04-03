@@ -77,8 +77,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [minPrice, setMinPrice] = useState<number>(0)
   const [availableSizes, setAvailableSizes] = useState<any>([])
   const [availableColors, setAvailableColors] = useState<any>([])
-  const [availableLengths, setAvailableLengths] = useState<any>([])
-  const [availableStores, setAvailableStores] = useState<any>([])
   const [availableAttributes, setAvailableAttributes] = useState<any>([])
 
   const toggleFilter = (id: number) =>
