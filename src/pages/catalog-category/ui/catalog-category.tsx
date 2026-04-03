@@ -69,10 +69,17 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [lengthIds, setLengthIds] = useState<any>([])
   const [isSaled, setIsSaled] = useState<boolean>(false)
   const [colorIds, setColorIds] = useState<any>()
+  const [colors, setColors] = useState<any>()
   const [sizeIds, setSizeIds] = useState<any>()
+  const [sizes, setSizes] = useState<any>()
   const [items, setItems] = useState<any>([])
   const [maxPrice, setMaxPrice] = useState<number>(0)
   const [minPrice, setMinPrice] = useState<number>(0)
+  const [availableSizes, setAvailableSizes] = useState<any>([])
+  const [availableColors, setAvailableColors] = useState<any>([])
+  const [availableLengths, setAvailableLengths] = useState<any>([])
+  const [availableStores, setAvailableStores] = useState<any>([])
+  const [availableAttributes, setAvailableAttributes] = useState<any>([])
 
   const toggleFilter = (id: number) =>
     setClosedFilters(prev =>
@@ -155,9 +162,40 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         const minimalPriceInRes = res.data.facets.price.min
 
         setMaxPrice(maximalPriceInRes)
+        setPrice(maximalPriceInRes)
         setMinPrice(minimalPriceInRes)
 
-        price && price > maximalPriceInRes && setPrice(maximalPriceInRes)
+        const availableSizesInRes = res.data.facets.sizes.map((s: any) => s.id)
+        const availableColorsInRes = res.data.facets.colors.map((c: any) => c.id)
+
+        // "available": [
+        //     {
+        //         "attributeId": 4,
+        //         "valueIds": [
+        //             25,
+        //             34
+        //         ]
+        //     },
+        //     {
+        //         "attributeId": 7,
+        //         "valueIds": [
+        //             20,
+        //             22
+        //         ]
+        //     }
+        // ],
+
+        //array of only ids, not objects, so we need to find them in filters
+
+        const availableAttributesInRes = res.data.facets.available.flatMap((a: any) =>
+          a.valueIds.map((v: number) => v)
+        )
+
+        console.log(availableAttributesInRes)
+
+        setAvailableSizes(availableSizesInRes)
+        setAvailableColors(availableColorsInRes)
+        setAvailableAttributes(availableAttributesInRes)
       })
   }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled, storeIds, lengthIds])
 
@@ -192,7 +230,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     })
 
     setMaxPrice(data.facets.price.max)
-    setPrice(data.facets.price.max)
     setMinPrice(data.facets.price.min)
 
     axios(`${import.meta.env.VITE_APP_API_URL}/catalog/available-filters?category=${url}`)
@@ -209,6 +246,16 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
         const lengths = res.data.lengths
         setLengths(lengths)
+
+        //sizes
+
+        const sizes = res.data.sizes
+        setSizes(sizes)
+
+        //colors
+
+        const colors = res.data.colors
+        setColors(colors)
       })
       .catch(err => console.log(err))
 
@@ -275,8 +322,19 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                       type="checkbox"
                       checked={filterIds?.includes(i.id)}
                       onChange={() => toggleFilterValue(i.id)}
+                      disabled={!availableAttributes?.includes(i.id) && !filterIds?.includes(i.id)}
                     />
-                    <p className="p1">{i.value}</p>
+                    <p
+                      className="p1"
+                      style={{
+                        color:
+                          !availableAttributes?.includes(i.id) && !filterIds?.includes(i.id)
+                            ? 'var(--service)'
+                            : 'inherit',
+                      }}
+                    >
+                      {i.value}
+                    </p>
                   </label>
                 ))}
               </FilterBlock>
@@ -310,13 +368,14 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             isOpen={!closedFilters?.includes(-2)}
             toggle={() => toggleFilter(-2)}
           >
-            {data.facets.sizes
-              .sort((a: any, b: any) => a.orderNum - b.orderNum)
-              .map((i: any) => (
+            {sizes
+              ?.sort((a: any, b: any) => a.orderNum - b.orderNum)
+              ?.map((i: any) => (
                 <label key={i.id}>
                   <input
                     type="checkbox"
                     checked={sizeIds?.includes(i.id)}
+                    disabled={!availableSizes?.includes(i.id) && !sizeIds?.includes(i.id)}
                     onChange={() =>
                       setSizeIds((prev: any) =>
                         prev?.includes(i.id)
@@ -325,7 +384,17 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                       )
                     }
                   />
-                  <p className="p1">{i.value}</p>
+                  <p
+                    className="p1"
+                    style={{
+                      color:
+                        !availableSizes?.includes(i.id) && !sizeIds?.includes(i.id)
+                          ? 'var(--service)'
+                          : 'inherit',
+                    }}
+                  >
+                    {i.value}
+                  </p>
                 </label>
               ))}
           </FilterBlock>{' '}
@@ -334,11 +403,12 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             isOpen={!closedFilters?.includes(-3)}
             toggle={() => toggleFilter(-3)}
           >
-            {data.facets.colors.map((i: any) => (
+            {colors?.map((i: any) => (
               <label key={i.id}>
                 <input
                   type="checkbox"
                   checked={colorIds?.includes(i.id)}
+                  disabled={!availableColors?.includes(i.id) && !colorIds?.includes(i.id)}
                   onChange={() => {
                     setColorIds((prev: any) =>
                       prev?.includes(i.id)
@@ -347,7 +417,17 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                     )
                   }}
                 />
-                <p className="p1">{i.value}</p>
+                <p
+                  className="p1"
+                  style={{
+                    color:
+                      !availableColors?.includes(i.id) && !colorIds?.includes(i.id)
+                        ? 'var(--service)'
+                        : 'inherit',
+                  }}
+                >
+                  {i.value}
+                </p>
               </label>
             ))}
           </FilterBlock>
