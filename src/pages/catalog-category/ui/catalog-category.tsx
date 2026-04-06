@@ -148,10 +148,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
     const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
+    const priceQuery = price == maxPrice ? '' : price != 0 ? `&priceTo=${debouncedPrice}` : ''
 
     axios
       .get(
-        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}&priceTo=${debouncedPrice}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${priceQuery}${saled}${query}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
       )
       .then(res => {
         setItems(res.data.items)
@@ -165,25 +166,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
 
         const availableSizesInRes = res.data.facets.sizes.map((s: any) => s.id)
         const availableColorsInRes = res.data.facets.colors.map((c: any) => c.id)
-
-        // "available": [
-        //     {
-        //         "attributeId": 4,
-        //         "valueIds": [
-        //             25,
-        //             34
-        //         ]
-        //     },
-        //     {
-        //         "attributeId": 7,
-        //         "valueIds": [
-        //             20,
-        //             22
-        //         ]
-        //     }
-        // ],
-
-        //array of only ids, not objects, so we need to find them in filters
 
         const availableAttributesInRes = res.data.facets.available.flatMap((a: any) =>
           a.valueIds.map((v: number) => v)
