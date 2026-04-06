@@ -148,11 +148,10 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
     const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
-    const priceQuery = price == maxPrice ? '' : price != 0 ? `&priceTo=${debouncedPrice}` : ''
 
     axios
       .get(
-        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${priceQuery}${saled}${query}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
       )
       .then(res => {
         setItems(res.data.items)
@@ -177,7 +176,46 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         setAvailableColors(availableColorsInRes)
         setAvailableAttributes(availableAttributesInRes)
       })
-  }, [filterIds, debouncedPrice, category, sizeIds, colorIds, isSaled, storeIds, lengthIds])
+  }, [filterIds, category, sizeIds, colorIds, isSaled, storeIds, lengthIds])
+
+  useEffect(() => {
+    if (!category) return
+
+    const query = filterIds?.length ? `&attributeValueIds=${filterIds.join(',')}` : ''
+    const sizesQuery = sizeIds?.length ? `&sizeIds=${sizeIds.join(',')}` : ''
+    const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
+    const saled = isSaled ? '&isDiscounted=true' : ''
+    const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
+    const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
+    const priceQuery = price ? `&priceTo=${price}` : ''
+
+    axios
+      .get(
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${priceQuery}${saled}${query}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
+      )
+      .then(res => {
+        setItems(res.data.items)
+
+        const maximalPriceInRes = res.data.facets.price.max
+        const minimalPriceInRes = res.data.facets.price.min
+
+        setMaxPrice(maximalPriceInRes)
+        setMinPrice(minimalPriceInRes)
+
+        price && maximalPriceInRes < price && setPrice(maximalPriceInRes)
+
+        const availableSizesInRes = res.data.facets.sizes.map((s: any) => s.id)
+        const availableColorsInRes = res.data.facets.colors.map((c: any) => c.id)
+
+        const availableAttributesInRes = res.data.facets.available.flatMap((a: any) =>
+          a.valueIds.map((v: number) => v)
+        )
+
+        setAvailableSizes(availableSizesInRes)
+        setAvailableColors(availableColorsInRes)
+        setAvailableAttributes(availableAttributesInRes)
+      })
+  }, [debouncedPrice])
 
   // sorting by price/ date
 
