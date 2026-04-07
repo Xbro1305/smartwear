@@ -191,13 +191,15 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   useEffect(() => {
     if (!category) return
 
-    const query = filterIds?.length ? `&attributeValueIds=${filterIds.join(',')}` : ''
+    const query = filterIds?.length
+      ? `&attributeValueIds=${filterIds.join('&attributeValueIds=')}`
+      : ''
     const sizesQuery = sizeIds?.length ? `&sizeIds=${sizeIds.join(',')}` : ''
     const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
     const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
-    const priceQuery = price ? `&priceTo=${price}` : ''
+    const priceQuery = price && price != 0 ? `&priceTo=${price}` : ''
 
     axios
       .get(
