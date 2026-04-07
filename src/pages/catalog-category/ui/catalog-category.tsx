@@ -78,6 +78,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [availableSizes, setAvailableSizes] = useState<any>([])
   const [availableColors, setAvailableColors] = useState<any>([])
   const [availableAttributes, setAvailableAttributes] = useState<any>([])
+  const [availableStores, setAvailableStores] = useState<any>([])
+  const [availableLengths, setAvailableLengths] = useState<any>([])
 
   const toggleFilter = (id: number) =>
     setClosedFilters(prev =>
@@ -170,11 +172,17 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           a.valueIds.map((v: number) => v)
         )
 
+        const availableStoresInRes = res.data.facets.stores.map((s: any) => s.id)
+
+        const availableLengthsInRes = res.data.facets.lengths.map((l: any) => l.id)
+
         console.log(availableAttributesInRes)
 
         setAvailableSizes(availableSizesInRes)
         setAvailableColors(availableColorsInRes)
         setAvailableAttributes(availableAttributesInRes)
+        setAvailableStores(availableStoresInRes)
+        setAvailableLengths(availableLengthsInRes)
       })
   }, [filterIds, category, sizeIds, colorIds, isSaled, storeIds, lengthIds])
 
@@ -486,8 +494,19 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                         : [...(prev || []), i.id]
                     )
                   }}
+                  disabled={!availableLengths?.includes(i.id) && !lengthIds?.includes(i.id)}
                 />
-                <p className="p1">{i.name}</p>
+                <p
+                  className="p1"
+                  style={{
+                    color:
+                      !availableLengths?.includes(i.id) && !lengthIds?.includes(i.id)
+                        ? 'var(--service)'
+                        : 'inherit',
+                  }}
+                >
+                  {i.name}
+                </p>
               </label>
             ))}
           </FilterBlock>{' '}
@@ -510,8 +529,19 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                           : [...(prev || []), i.id]
                       )
                     }}
+                    disabled={!availableStores?.includes(i.id) && !storeIds?.includes(i.id)}
                   />
-                  <p className="p1">{i.name}</p>
+                  <p
+                    className="p1"
+                    style={{
+                      color:
+                        !availableStores?.includes(i.id) && !storeIds?.includes(i.id)
+                          ? 'var(--service)'
+                          : 'inherit',
+                    }}
+                  >
+                    {i.name}
+                  </p>
                 </label>
               ))}
           </FilterBlock>
