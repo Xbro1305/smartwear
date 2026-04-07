@@ -144,7 +144,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   useEffect(() => {
     if (!category) return
 
-    const query = filterIds?.length ? `&attributeValueIds=${filterIds.join(',')}` : ''
+    const query = filterIds?.length
+      ? `&attributeValueIds=${filterIds.join('&attributeValueIds=')}`
+      : ''
     const sizesQuery = sizeIds?.length ? `&sizeIds=${sizeIds.join(',')}` : ''
     const colorsQuery = colorIds?.length ? `&colorIds=${colorIds.join(',')}` : ''
     const saled = isSaled ? '&isDiscounted=true' : ''
