@@ -25,6 +25,7 @@ export default {
         xl: '1215px',
         '2xl': '1215px',
         '3xl': '1400px',
+        '4xl': '1565px',
       },
     },
 

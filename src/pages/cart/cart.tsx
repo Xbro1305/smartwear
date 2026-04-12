@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { removeFromCart } from '@/app/store/cart'
 import { Link } from 'react-router-dom'
 import { FaChevronRight } from 'react-icons/fa'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const Cart = () => {
   const dispatch = useDispatch()
@@ -56,7 +57,7 @@ export const Cart = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-[20px]">
-        <div className="flex flex-col gap-[12px] lg:gap-[20px]">
+        <div className="flex flex-col gap-[12px] lg:gap-[20px] w-full">
           <div className="flex flex-col gap-[8px] border-b-[var(--gray)] pb-[20px] border-solid border-b-[3px]">
             <h1 className="h1">Корзина</h1>
             {cart.length > 0 && (
@@ -97,6 +98,8 @@ const CartPage = ({ cart, dispatch }: any) => {
 }
 
 const CartSideBar = ({ totalProductsPrice, totalDiscount, totalPrice, cart }: any) => {
+  const { ORDER } = ROUTER_PATHS
+
   return (
     <div className="flex flex-col gap-[18px] xl:gap-[30px] w-full lg:w-[34%] bg-[var(--gray)] rounded-[12px] py-[12px] px-[16px] 2xl:p-[45px] h-fit xl:min-w-[408px] lg:min-w-[337px]">
       <p className="p2 xl:max-w-[430px] text-center xl:text-left">
@@ -148,7 +151,9 @@ const CartSideBar = ({ totalProductsPrice, totalDiscount, totalPrice, cart }: an
         />
       </div>
 
-      <button className="button">Перейти к оформлению</button>
+      <Link to={ORDER} className="button text-center">
+        Перейти к оформлению
+      </Link>
     </div>
   )
 }
@@ -206,7 +211,7 @@ const CartItem = ({ item, index, dispatch }: any) => {
               {' '}
               <span
                 className="block min-w-[24px] h-[24px] rounded-[50%] mr-[8px]"
-                style={{ background: item.color.meta.colorCode }}
+                style={{ background: item?.color?.meta.colorCode }}
               ></span>{' '}
               {item.colorAlias ? item.colorAlias : 'Без цвета'}
             </p>

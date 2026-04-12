@@ -625,7 +625,7 @@ input[type='date'] {
 }
 
 @media (max-width: 1000px) {
-  .inputs-label {
+  .inputs-label:not(.order-inputs) {
     z-index: 499;
     position: absolute;
     background: #fff;
@@ -636,6 +636,14 @@ input[type='date'] {
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
   }
+}
+
+.leaflet-pane {
+  z-index: 0 !important;
+}
+
+.leaflet-top {
+  z-index: 1 !important;
 }
 
 .leaflet-control-attribution.leaflet-control {

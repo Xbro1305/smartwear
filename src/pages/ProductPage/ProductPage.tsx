@@ -296,6 +296,12 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
           ) || media?.[0]
         )?.url || '',
       articul: data.articul,
+      variantId: item.variants?.find(
+        (v: any) =>
+          v.colorAttrValueId === selectedColor?.id &&
+          v.sizeValueId === selectedSize?.id &&
+          v.colorAlias === selectedColor?.alias
+      )?.id,
     }
 
     dispatch(addToCart(product))

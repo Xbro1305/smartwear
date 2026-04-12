@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvent } from 'react-leaflet'
 import * as L from 'leaflet'
-import { motion } from 'framer-motion'
+
 import axios from 'axios'
 import 'leaflet/dist/leaflet.css'
 import { InputLabel } from '@/widgets/InputLabel/InputLabel'
-import cdekIconUrl from '@/assets/images/marker.png' //
-import { IoArrowBack } from 'react-icons/io5'
+import cdekIconUrl from '@/assets/images/marker.png'
 
 function RecenterMap({ center }: { center: [number, number] }) {
   const map = useMap()
@@ -34,18 +33,13 @@ export default function PvzMapWidget({
   const [city, setCity] = useState<string>('')
   const [pvzList, setPvzList] = useState<Pvz[]>([])
   const [selectedPvz, setSelectedPvz] = useState<Pvz | null>(null)
-  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(true)
   const [mapCenter, setMapCenter] = useState<[number, number]>([53.35, 83.75])
   const listRef = useRef<HTMLDivElement | null>(null)
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
   const [deliveryType, setDeliveryType] = useState<'PVZ' | 'DELIVERY'>('PVZ')
   const [deliveryCoords, setDeliveryCoords] = useState<[number, number]>([53.35, 83.75])
   const [deliveryAddr, setDeliveryAddr] = useState<string>('')
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [dragY, setDragY] = useState(0)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  const isTinyScreen = window.innerWidth < 1000
 
   useEffect(() => {
     defalultDeliveryAddress && setDeliveryAddr(defalultDeliveryAddress)
@@ -176,70 +170,22 @@ export default function PvzMapWidget({
 
   return (
     <>
-      {isEditing ? (
-        <button
-          onClick={() => setIsOpen(true)}
-          style={{ background: 'var(--dark)', marginLeft: '20px' }}
-          className="button"
-        >
-          Изменить адрес
-        </button>
-      ) : (
-        <Button onClick={() => setIsOpen(true)}>+ Добавить адрес доставки</Button>
-      )}
       <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={''}>
         <>
-          <motion.div
-            ref={menuRef}
-            initial={{ y: '100%' }}
-            animate={{ y: isMenuOpen ? 0 : isTinyScreen ? 90 : 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            drag="y"
-            dragConstraints={
-              isTinyScreen
-                ? { top: 0, bottom: deliveryType == 'PVZ' ? 320 : 460 }
-                : { top: 0, bottom: 0 }
-            }
-            dragElastic={0.2}
-            style={{ touchAction: 'none' }}
-            onDrag={(_: any, info: any) => setDragY(info.point.y)}
-            onDragEnd={() => {
-              if (dragY > 50) {
-                setIsMenuOpen(false)
-              }
-            }}
-            className={'flex inputs-label flex-col gap-4 mt-5 p-[30px] min-w-[400px] w-[40%]'}
-          >
-            <h2 className="h2">Способ доставки</h2>
-            <div className="pvzTypeSelector">
-              <div
-                className={`button ${deliveryType == 'PVZ' && 'active'}`}
-                onClick={() => setDeliveryType('PVZ')}
-              >
-                Самовывоз
-              </div>
-              <div
-                className={`button ${deliveryType == 'DELIVERY' && 'active'}`}
-                onClick={() => setDeliveryType('DELIVERY')}
-              >
-                Курьером
-              </div>
-            </div>
+          <div className={'flex inputs-label order-inputs flex-col gap-4 min-w-[400px] md:w-[40%]'}>
             {deliveryType == 'PVZ' && (
               <>
-                <h4 className="h4">Куда доставить заказ?</h4>
-                <span className="p2 mt-[-10px]" style={{ color: 'var(--service)' }}>
-                  Укажите адрес доставки
-                </span>
-                <InputLabel
-                  name="city"
-                  title="Город"
-                  onChange={e => setCity(e.target.value)}
-                  value={city}
-                />
+                <div className="min-h-[48px]">
+                  <InputLabel
+                    name="city"
+                    title="Искать на карте"
+                    onChange={e => setCity(e.target.value)}
+                    value={city}
+                  />
+                </div>
                 <div
                   ref={listRef}
-                  className={'w-full max-h-[400px] overflow-auto border p-2 rounded-lg'}
+                  className={'w-full md:max-h-[400px] overflow-auto border p-2 rounded-lg'}
                 >
                   {pvzList.length === 0 ? (
                     <p>{city ? 'Загрузка...' : 'Введите город для поиска ПВЗ'}</p>
@@ -297,14 +243,12 @@ export default function PvzMapWidget({
                 />
               </>
             )}
-          </motion.div>
+          </div>
           <div
-            className={
-              'w-full max-w[calc(100%-550px)] h-[calc(100vh-105px)] overflow-hidden border'
-            }
+            className={'w-full max-w[calc(100%-550px)] h-[444px] overflow-hidden rounded-[12px]'}
           >
             {deliveryType == 'PVZ' && (
-              <MapContainer center={mapCenter} className={'w-full h-[calc(100vh-105px)]'} zoom={12}>
+              <MapContainer center={mapCenter} className={'w-full h-[444px]'} zoom={12}>
                 <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
                 <RecenterMap center={mapCenter} />
                 {pvzList.map(pvz => (
@@ -334,7 +278,7 @@ export default function PvzMapWidget({
               </MapContainer>
             )}
             {deliveryType == 'DELIVERY' && (
-              <MapContainer center={mapCenter} className={'w-full h-[calc(100vh-105px)]'} zoom={12}>
+              <MapContainer center={mapCenter} className={'w-full h-[444px]'} zoom={12}>
                 <TileLayer url={'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} />
                 <RecenterMap center={mapCenter} />
                 <LiveMapCenterLogger onCenterChange={setMapCenter} />
@@ -442,7 +386,7 @@ function AddressInput({
         required={true}
       />
       {suggestions.length > 0 && (
-        <ul className="absolute max-h-[400px] overflow-auto bg-white border rounded w-full shadow-md z-10 top-[70px]">
+        <ul className="absolute md:max-h-[400px] overflow-auto bg-white border rounded w-full shadow-md top-[70px] z-10">
           {suggestions.map(suggestion => (
             <li
               key={suggestion.place_id}
@@ -545,28 +489,14 @@ interface DialogProps {
   title: string
 }
 
-function Dialog({ children, onClose, open, title }: DialogProps) {
+function Dialog({ children, open }: DialogProps) {
   if (!open) return null
 
   return (
-    <div
-      className={
-        'fixed inset-0 flex flex-row items-center justify-center bg-black bg-opacity-50 z-50'
-      }
-    >
+    <div className={'inset-0 flex flex-row items-center justify-center bg-black bg-opacity-50 '}>
       <div className={'bg-white w-full h-full'}>
-        <h2 className={'text-lg p-[30px]'}>
-          {' '}
-          <button
-            className={'flex flex-row items-center gap-[10px] text-white'}
-            style={{ color: 'var(--red)' }}
-            onClick={onClose}
-          >
-            <IoArrowBack /> Назад
-          </button>
-          {title}
-        </h2>
-        <div className={'mt-4 flex gap-[20px] h-[calc(100vh-105px)]'}>{children}</div>
+        {' '}
+        <div className={'mt-4 flex gap-[20px] h-[444px] flex flex-col md:flex-row'}>{children}</div>
       </div>
     </div>
   )
