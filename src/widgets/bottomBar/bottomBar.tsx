@@ -12,7 +12,7 @@ export const BottomBar = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const cartLength = useSelector((state: any) => state.cart.items.length)
+  const cartLength = useSelector((state: any) => state.cartCount)
 
   // универсальный state
   const getState = () => ({

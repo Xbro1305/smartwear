@@ -14,7 +14,7 @@ import profile from '../icons/profile.svg'
 import { useSelector } from 'react-redux'
 
 export const Header: React.FC = () => {
-  const cartLength = useSelector((state: any) => state.cart.items.length)
+  const cartLength = useSelector((state: any) => state.cartCount)
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [categories, setCategories] = useState<any>(null)
@@ -54,6 +54,12 @@ export const Header: React.FC = () => {
       window.removeEventListener('resize', handleResize)
     }
   }, [])
+
+  useEffect(() => {
+    setTimeout(() => {
+      document.querySelector('.main-container')?.scrollTo(0, 0)
+    }, 1)
+  }, [window.location.pathname])
 
   useEffect(() => {
     const setVh = () => {

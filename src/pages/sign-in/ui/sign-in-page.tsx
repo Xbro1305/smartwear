@@ -8,6 +8,8 @@ import { useLoginMutation, useRequestCodeMutation } from '@/entities/auth'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
 import styles from '../../sign-up/Signup.module.scss'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 export const SignInPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
@@ -105,6 +107,32 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('usermiddlename', user.middleName)
         localStorage.setItem('useremail', user.email)
         localStorage.setItem('userphone', user.phone)
+
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+        if (cart.length > 0) {
+          axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${access_token}`,
+            },
+            data: cart.map((item: any) => ({
+              variantId: item.variantId,
+              quantity: 1,
+            })),
+          }).catch(error => {
+            console.log('Ошибка при отправке корзины:', error)
+            toast.error('Не удалось синхронизировать корзину. Пожалуйста, попробуйте снова.', {
+              position: 'top-right',
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            })
+          })
+        }
 
         navigate(`${from}`, { replace: true })
         window.location.reload()

@@ -15,7 +15,10 @@ import top from './assets/top.png'
 import center from './assets/center.png'
 import bottom from './assets/bottom.png'
 import mobile from './assets/mobile.png'
+import { toast } from 'react-toastify'
 import { useDispatch } from 'react-redux'
+// import { useDispatch } from 'react-redux'
+import { setCartCount } from '@/app/store/cartCount'
 import { addToCart } from '@/app/store/cart'
 
 interface Media {
@@ -278,33 +281,69 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   }
 
   const addCart = () => {
+    const token = localStorage.getItem('token')
+
     if (checkStockForSize(selectedSize?.id ?? 0) <= 0) return
 
-    const product = {
-      id: data.id,
-      name: data.name,
-      price,
-      oldPrice,
-      color: selectedColor,
-      size: selectedSize,
-      quantity: 1,
-      colorAlias: selectedColor?.alias,
-      imageUrl:
-        (
-          media?.find(
-            (m: Media) => m.kind === 'cover' || m.colorAttrValueId === selectedColor?.id
-          ) || media?.[0]
-        )?.url || '',
-      articul: data.articul,
-      variantId: item.variants?.find(
+    const cartCount = Number(localStorage.getItem('cartCount') || '0')
+
+    if (!token) {
+      const product = {
+        id: data.id,
+        name: data.name,
+        price,
+        oldPrice,
+        color: selectedColor,
+        colorCode: selectedColor?.meta.colorCode,
+        colorAlias: selectedColor?.alias,
+        size: selectedSize ? { name: selectedSize.name } : { name: '' },
+        imageUrl:
+          (
+            media?.find(
+              (m: Media) => m.kind === 'cover' || m.colorAttrValueId === selectedColor?.id
+            ) || media?.[0]
+          )?.url || '',
+        articul: data.articul,
+        variantId: item.variants?.find(
+          (v: any) =>
+            v.colorAttrValueId === selectedColor?.id &&
+            v.sizeValueId === selectedSize?.id &&
+            v.colorAlias === selectedColor?.alias
+        )?.id,
+      }
+
+      dispatch(setCartCount(cartCount + 1))
+      dispatch(addToCart(product as unknown as any))
+    } else {
+      const variantId = item.variants?.find(
         (v: any) =>
           v.colorAttrValueId === selectedColor?.id &&
           v.sizeValueId === selectedSize?.id &&
           v.colorAlias === selectedColor?.alias
-      )?.id,
-    }
+      )?.id
 
-    dispatch(addToCart(product))
+      const data = [{ variantId, quantity: 1 }]
+
+      axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        data: data,
+      })
+        .then(() => {
+          toast.success('Товар добавлен в корзину')
+          const cartCount = Number(localStorage.getItem('cartCount') || '0')
+          dispatch(setCartCount(cartCount + 1))
+        })
+        .catch(err =>
+          toast.error(
+            err.response.data.message == 'max 2 items'
+              ? 'В корзину нельзя добавить более 2 товаров одновременно!'
+              : err.response.data.message || 'Что-то пошло не так'
+          )
+        )
+    }
   }
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">

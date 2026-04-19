@@ -1,9 +1,19 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { toast } from 'react-toastify'
 
-const getInitialCart = () => {
+type CartItem = {
+  id: number
+  size: { name: string }
+  color: { alias: string }
+}
+
+const getInitialCart = (): CartItem[] => {
   const stored = localStorage.getItem('cart')
   return stored ? JSON.parse(stored) : []
+}
+
+const saveCart = (items: CartItem[]) => {
+  localStorage.setItem('cart', JSON.stringify(items))
 }
 
 const cartSlice = createSlice({
@@ -12,39 +22,53 @@ const cartSlice = createSlice({
     items: getInitialCart(),
   },
   reducers: {
-    addToCart: (state, action) => {
-      const existingItemIndex = state.items.findIndex(
-        (item: any) =>
+    addToCart: (state, action: PayloadAction<CartItem>) => {
+      const exists = state.items.find(
+        item =>
           item.id === action.payload.id &&
           item.size.name === action.payload.size.name &&
           item.color.alias === action.payload.color.alias
       )
 
-      if (state.items.length >= 2 && existingItemIndex === -1) {
+      if (state.items.length >= 2 && !exists) {
         toast.error('В корзине уже есть 2 товара. Удалите что-то, чтобы добавить новый товар.')
         return
       }
 
-      if (existingItemIndex !== -1) {
-        state.items[existingItemIndex].quantity += 1
-      } else {
-        state.items.push(action.payload)
+      if (exists) {
+        toast.info('Этот товар уже в корзине')
+        return
       }
 
-      localStorage.setItem('cart', JSON.stringify(state.items))
+      state.items.push(action.payload)
+      saveCart(state.items)
+      toast.success('Товар добавлен в корзину')
     },
 
-    removeFromCart: (state, action) => {
-      state.items.splice(action.payload, 1)
-      localStorage.setItem('cart', JSON.stringify(state.items))
+    removeFromCart: (state, action: PayloadAction<CartItem>) => {
+      state.items = state.items.filter(
+        item =>
+          !(
+            item.id === action.payload.id &&
+            item.size.name === action.payload.size.name &&
+            item.color.alias === action.payload.color.alias
+          )
+      )
+
+      saveCart(state.items)
     },
 
-    setCart: (state, action) => {
+    setCart: (state, action: PayloadAction<CartItem[]>) => {
       state.items = action.payload
-      localStorage.setItem('cart', JSON.stringify(state.items))
+      saveCart(state.items)
+    },
+
+    clearCart: state => {
+      state.items = []
+      saveCart([])
     },
   },
 })
 
-export const { addToCart, removeFromCart, setCart } = cartSlice.actions
+export const { addToCart, removeFromCart, setCart, clearCart } = cartSlice.actions
 export default cartSlice.reducer

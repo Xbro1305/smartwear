@@ -1,27 +1,62 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { NumericFormat, PatternFormat } from 'react-number-format'
-import { useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
-import { FaChevronRight } from 'react-icons/fa'
+import { Link, useNavigate } from 'react-router-dom'
+import { FaChevronRight, FaPlus } from 'react-icons/fa'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 import PvzMapWidget from './pvz/PvzMapWidget'
 import locationMark from './local-two.svg'
 import { BsCheck } from 'react-icons/bs'
+import { CgChevronRight, CgClose } from 'react-icons/cg'
+import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { setCartCount } from '@/app/store/cartCount'
 
 export const Order = () => {
-  const cart = useSelector((state: any) => state.cart.items)
+  const [cart, setCart] = useState([])
   const [deliveryType, setDeliveryType] = useState<'Самовывоз' | 'До пункта выдачи' | 'Курьером'>(
     'Самовывоз'
   )
   const [selectedAddress, setSelectedAddress] = useState<any>()
-  const [promo, setPromo] = useState('')
+  const [promo, setPromo] = useState<string>('')
   const [user, setUser] = useState<any>(null)
-  const { CART } = ROUTER_PATHS
-
+  const [addressModalOpened, setAddressModalOpened] = useState<boolean>(false)
+  const [isAddressSelected, setIsAddressSelected] = useState<boolean>(false)
+  const [isDefaultAddress, setIsDefaultAddress] = useState<boolean>(false)
+  const [payRulesAgreed, setPayRulesAgreed] = useState<boolean>(false)
+  const [personalDataAgreed, setPersonalDataAgreed] = useState<boolean>(false)
+  const [paymentType, setPaymentType] = useState<'ONLINE' | 'OFFLINE'>('ONLINE')
+  const { CART, ORDER } = ROUTER_PATHS
   const pathname = location.pathname
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   useEffect(() => {
+    document.title = `Оформление заказа - Умная одежда`
+    window.scrollTo(0, 0)
+
+    if (!localStorage.getItem('token')) {
+      const localCart = localStorage.getItem('cart')
+      if (localCart) {
+        setCart(JSON.parse(localCart))
+      }
+      return
+    }
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        res.data?.items && setCart(res.data.items)
+        localStorage.setItem('cartCount', String(res.data?.items?.length || 0))
+      })
+      .catch(err => {
+        console.error('Error fetching cart:', err)
+        setCart([]) // Set cart to empty array on error
+      })
+
     axios(`${import.meta.env.VITE_APP_API_URL}/users/me`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -31,18 +66,18 @@ export const Order = () => {
       const defaultAddress = res.data.addresses.find((address: any) => address.isDefault)
       if (defaultAddress) {
         setSelectedAddress({
-          location: {
-            address_full: defaultAddress.fullAddress,
-          },
+          ...defaultAddress,
+          location: { address_full: defaultAddress.fullAddress },
         })
         defaultAddress.type === 'PVZ'
           ? setDeliveryType('До пункта выдачи')
           : setDeliveryType('Курьером')
+
+        setIsDefaultAddress(true)
+
+        defaultAddress.type !== 'PVZ' && setIsAddressSelected(true)
       }
     })
-
-    document.title = `Оформление заказа - Умная одежда`
-    window.scrollTo(0, 0)
   }, [])
 
   useEffect(() => {
@@ -64,6 +99,85 @@ export const Order = () => {
     return sum + +item.price
   }, 0)
 
+  const handleSubmit = () => {
+    if (!payRulesAgreed || !personalDataAgreed)
+      return alert(
+        'Вы должны согласиться с правилами оплаты и политикой обработки персональных данных'
+      )
+
+    if (!isDefaultAddress) {
+      const address =
+        deliveryType === 'Курьером'
+          ? {
+              city: selectedAddress?.location?.city || '',
+              apartment: selectedAddress?.apartment || '',
+              entrance: selectedAddress?.entrance || '',
+              floor: selectedAddress?.floor || '',
+              intercom: selectedAddress?.intercom || '',
+              comment: selectedAddress?.comment || '',
+              latitude: String(selectedAddress?.location?.latitude) || '',
+              longitude: String(selectedAddress?.location?.longitude) || '',
+              fullAddress: selectedAddress?.location?.address_full || '',
+            }
+          : {
+              city: selectedAddress?.location?.city || '',
+              fullAddress: selectedAddress?.location?.address_full || '',
+              latitude: String(selectedAddress?.location?.latitude) || '',
+              longitude: String(selectedAddress?.location?.longitude) || '',
+            }
+
+      return axios(`${import.meta.env.VITE_APP_API_URL}/users/add-address/${user?.id}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+
+        data: {
+          ...address,
+          type: deliveryType === 'До пункта выдачи' ? 'PVZ' : 'DELIVERY',
+        },
+      })
+        .then(res => {
+          console.log('Address saved:', res.data)
+          createOrder(res.data?.id)
+        })
+        .catch(err => {
+          console.error('Error saving address:', err)
+          toast.error('Не удалось сохранить адрес. Пожалуйста, попробуйте снова.')
+        })
+    }
+    selectedAddress?.id && createOrder(selectedAddress?.id)
+  }
+
+  const createOrder = (addressId: any) => {
+    const data = {
+      addressId: addressId || '',
+      paymentType,
+      promoCode: promo,
+      comment: selectedAddress.comment || '',
+    }
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/orders`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      data,
+    })
+      .then(res => {
+        console.log('Order created:', res.data)
+        localStorage.removeItem('cart')
+        dispatch(setCartCount(0))
+        navigate(`${ORDER}/${res.data.id}`)
+      })
+      .catch(err => {
+        console.error('Error saving address:', err)
+        toast.error('Не удалось создать заказ. Пожалуйста, попробуйте снова.')
+      })
+  }
+
   const SideBar = ({ cls }: any) => (
     <CartSideBar
       totalProductsPrice={totalProductsPrice}
@@ -74,6 +188,11 @@ export const Order = () => {
       promo={promo}
       changePromo={setPromo}
       cls={cls}
+      payRulesAgreed={payRulesAgreed}
+      setPayRulesAgreed={setPayRulesAgreed}
+      personalDataAgreed={personalDataAgreed}
+      setPersonalDataAgreed={setPersonalDataAgreed}
+      handleSubmit={handleSubmit}
     />
   )
 
@@ -137,7 +256,7 @@ export const Order = () => {
           </div>
         </div>
 
-        {cart.length > 0 && <SideBar cls="hidden xl:flex" />}
+        {cart.length > 0 && <SideBar cls="hidden 2xl:flex" />}
       </div>
       <div className="flex flex-col gap-[16px] lg:gap-[30px] pt-[20px]">
         {deliveryType == 'До пункта выдачи' &&
@@ -158,19 +277,13 @@ export const Order = () => {
                   </button>
                 </div>
               </div>
-              {/* <p className="p1">Время работы:</p> */}
-              {/* {selectedAddress.work_time_list?.map((time: any, index: number) => (
-              <p key={index} className="p1">
-                {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'][index]}:{' '}
-                {time.time.replace('00:00', 'круглосуточно').replace('/', ' - ')}
-              </p>
-            ))} */}
             </div>
           ) : (
             <PvzMapWidget
               onSelect={pvz => {
                 setSelectedAddress(pvz)
                 console.log(pvz)
+                setIsDefaultAddress(false)
               }}
               type="PVZ"
             />
@@ -184,6 +297,7 @@ export const Order = () => {
             onChange={() => {
               setDeliveryType('Курьером')
               setSelectedAddress(null)
+              setIsAddressSelected(false)
             }}
           />
           <div className="flex flex-col gap-[5px] -mt-[3px]">
@@ -192,36 +306,127 @@ export const Order = () => {
           </div>
         </label>
         {deliveryType == 'Курьером' &&
-          (selectedAddress ? (
-            <div className="flex flex-col gap-[10px] pl-[30px]">
-              <div className="flex gap-[10px] items-start mb-[10px]">
-                <img src={locationMark} alt="" />
-                <div className="flex flex-col gap-[10px]">
-                  <h5 className="h5 flex gap-[10px] items-center">
-                    {selectedAddress.location.address_full}
-                  </h5>
-                  <p className="p1 text-[var(--service)_!important]">
-                    {selectedAddress?.entrance && `${selectedAddress?.entrance} Подъезд,`}{' '}
-                    {selectedAddress?.floor && `${selectedAddress?.floor} этаж,`}{' '}
-                    {selectedAddress?.comment && `${selectedAddress?.comment}`}{' '}
-                  </p>
-                  <button
-                    className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
-                    onClick={() => setSelectedAddress(null)}
-                  >
-                    Изменить адрес
-                  </button>
+          (isAddressSelected ? (
+            selectedAddress ? (
+              <div className="flex flex-col gap-[10px] pl-[30px]">
+                <div className="flex gap-[10px] items-start mb-[10px]">
+                  <img src={locationMark} alt="" />
+                  <div className="flex flex-col gap-[10px]">
+                    <h5 className="h5 flex gap-[10px] items-center">
+                      {selectedAddress.location.address_full}
+                    </h5>
+                    <p className="p1 text-[var(--service)_!important]">
+                      {selectedAddress?.entrance && `${selectedAddress?.entrance} Подъезд,`}{' '}
+                      {selectedAddress?.floor && `${selectedAddress?.floor} этаж,`}{' '}
+                      {selectedAddress?.comment && `${selectedAddress?.comment}`}{' '}
+                    </p>
+                    <button
+                      className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
+                      onClick={() => {
+                        setSelectedAddress(null)
+                        setAddressModalOpened(true)
+                      }}
+                    >
+                      Изменить адрес
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : addressModalOpened &&
+              user?.addresses?.filter((address: any) => address.type !== 'PVZ').length ? (
+              <>
+                <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
+                  <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
+                    <div className="flex items-center justify-center relative">
+                      <h2 className="h2 text-center">Выберите адрес доставки</h2>
+                      <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
+                        <CgClose
+                          className="h2"
+                          onClick={() => {
+                            setIsAddressSelected(false)
+                            setAddressModalOpened(false)
+                          }}
+                        />
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-[10px] max-h-[300px] w-full justify-center items-center overflow-y-auto">
+                      {user?.addresses
+                        ?.filter((address: any) => address.type !== 'PVZ')
+                        ?.map((address: any, index: number) => (
+                          <>
+                            <div
+                              key={index}
+                              className="flex gap-[10px] items-start mb-[10px] cursor-pointer border-solid border-[var(--service)] border-[1px] rounded-[12px] p-[10px] max-w-[700px]"
+                              onClick={() => {
+                                setSelectedAddress({
+                                  location: {
+                                    address_full: address.fullAddress,
+                                  },
+                                  entrance: address.entrance,
+                                  floor: address.floor,
+                                  comment: address.comment,
+                                })
+                                setIsAddressSelected(true)
+                                setAddressModalOpened(false)
+                                setIsDefaultAddress(true)
+                              }}
+                            >
+                              <img src={locationMark} alt="" />
+                              <div className="flex flex-col gap-[10px]">
+                                <h5 className="h5 flex gap-[10px] items-center">
+                                  {address.fullAddress}
+                                </h5>
+                                <p className="p1 text-[var(--service)_!important]">
+                                  {address.entrance && `${address.entrance} Подъезд,`}{' '}
+                                  {address.floor && `${address.floor} этаж,`}{' '}
+                                  {address.comment && `${address.comment}`}{' '}
+                                </p>
+                              </div>
+                            </div>
+                          </>
+                        ))}
+                    </div>
+                    <button
+                      id="admin-button"
+                      className="w-fit mx-[auto] flex gap-[10px] items-center"
+                      onClick={() => setAddressModalOpened(false)}
+                    >
+                      <FaPlus /> Добавить адрес
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <PvzMapWidget
+                  onSelect={pvz => {
+                    setSelectedAddress(pvz)
+                    setIsDefaultAddress(false)
+                  }}
+                  type="DELIVERY"
+                />
+              </>
+            )
           ) : (
-            <PvzMapWidget
-              onSelect={pvz => {
-                console.log(pvz)
-                setSelectedAddress(pvz)
-              }}
-              type="DELIVERY"
-            />
+            <>
+              <div className="flex flex-col gap-[10px] pl-[30px]">
+                <div
+                  className="flex gap-[10px] items-center mb-[10px] cursor-pointer"
+                  onClick={() => {
+                    setIsAddressSelected(true)
+                    setSelectedAddress(null)
+                    setAddressModalOpened(true)
+                  }}
+                >
+                  <img src={locationMark} alt="" />
+                  <div className="flex flex-col gap-[10px]">
+                    <h5 className="h5 flex gap-[10px] items-center">Адрес доставки не добавлен</h5>
+                    <p className="p1 text-[var(--service)_!important]">Нажмите чтобы добавить</p>
+                  </div>
+                  <CgChevronRight className="ml-auto text-[24px]" />
+                </div>
+              </div>
+            </>
           ))}
       </div>
       <div className="flex flex-col gap-[30px]">
@@ -323,21 +528,33 @@ export const Order = () => {
       <div className="flex flex-col gap-[16px] lg:gap-[30px]">
         <h3 className="h3">3. Способ оплаты</h3>
         <label className="flex gap-[10px]">
-          <input type="radio" className="radio" name="payment" checked={true} readOnly />
+          <input
+            type="radio"
+            className="radio"
+            name="payment"
+            checked={paymentType == 'OFFLINE'}
+            onChange={() => setPaymentType('OFFLINE')}
+          />
           <div className="flex flex-col gap-[10px]">
             <p className="h5">При получении</p>
             <p className="p1">Картой или наличными</p>
           </div>
         </label>{' '}
         <label className="flex gap-[10px]">
-          <input type="radio" className="radio" name="payment" checked={true} readOnly />
+          <input
+            type="radio"
+            className="radio"
+            name="payment"
+            checked={paymentType == 'ONLINE'}
+            onChange={() => setPaymentType('ONLINE')}
+          />
           <div className="flex flex-col gap-[10px]">
             <p className="h5">Онлайн</p>
             <p className="p1">Картой на сайте, с помощью платежных систем</p>
           </div>
         </label>
       </div>
-      {cart.length > 0 && <SideBar cls="flex xl:hidden w-[100%_!important]" />}
+      {cart.length > 0 && <SideBar cls="flex 2xl:hidden w-[100%_!important]" />}
     </div>
   )
 }
@@ -363,9 +580,12 @@ const CartSideBar = ({
   promo,
   cls,
   changePromo,
+  payRulesAgreed,
+  setPayRulesAgreed,
+  personalDataAgreed,
+  setPersonalDataAgreed,
+  handleSubmit,
 }: any) => {
-  const [payRulesAgreed, setPayRulesAgreed] = useState(false)
-  const [personalDataAgreed, setPersonalDataAgreed] = useState(false)
   const [promoCode, setPromoCode] = useState(promo)
 
   return (
@@ -389,6 +609,7 @@ const CartSideBar = ({
             <p className="p2">Скидка</p>
             <NumericFormat
               value={totalDiscount}
+              allowNegative={false}
               suffix=" ₽"
               prefix="-"
               className="p1"
@@ -434,14 +655,16 @@ const CartSideBar = ({
           displayType="text"
         />
       </div>
-      <button className="button">Оформить заказ</button>
+      <button className="button" onClick={handleSubmit}>
+        Оформить заказ
+      </button>
       <div className="flex flex-col gap-[15px] xl:gap-[30px]">
         <label className="flex gap-[10px]">
           <input
             type="checkbox"
             className="checkbox"
             checked={payRulesAgreed}
-            onChange={() => setPayRulesAgreed(prev => !prev)}
+            onChange={() => setPayRulesAgreed((prev: any) => !prev)}
           />
           <p className="p2">
             Я соглашаюсь с&nbsp;
@@ -455,7 +678,7 @@ const CartSideBar = ({
             type="checkbox"
             className="checkbox"
             checked={personalDataAgreed}
-            onChange={() => setPersonalDataAgreed(prev => !prev)}
+            onChange={() => setPersonalDataAgreed((prev: any) => !prev)}
           />
           <p className="p2">
             Я соглашаюсь с&nbsp;
@@ -500,10 +723,10 @@ const CartItem = ({ item, index }: any) => {
                   value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
                   suffix="%"
                   prefix="-"
+                  allowNegative={false}
                   className="text-[var(--red)_!important] p1"
                   thousandSeparator=" "
                   displayType="text"
-                  allowNegative={false}
                 />
               </>
             ) : null}
@@ -522,7 +745,7 @@ const CartItem = ({ item, index }: any) => {
               {' '}
               <span
                 className="block min-w-[24px] h-[24px] rounded-[50%] mr-[8px]"
-                style={{ background: item.color.meta.colorCode }}
+                style={{ background: item.colorCode }}
               ></span>{' '}
               {item.colorAlias ? item.colorAlias : 'Без цвета'}
             </p>
