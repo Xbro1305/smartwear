@@ -6,6 +6,7 @@ import axios from 'axios'
 import 'leaflet/dist/leaflet.css'
 import { InputLabel } from '@/widgets/InputLabel/InputLabel'
 import cdekIconUrl from '@/assets/images/marker.png'
+import { CgChevronRight } from 'react-icons/cg'
 
 function RecenterMap({ center }: { center: [number, number] }) {
   const map = useMap()
@@ -172,36 +173,52 @@ export default function PvzMapWidget({
     <>
       <Dialog onClose={() => setIsOpen(false)} open={isOpen} title={''}>
         <>
-          <div className={'flex inputs-label order-inputs flex-col gap-4 min-w-[400px] md:w-[40%]'}>
+          <div
+            className={
+              'flex inputs-label order-inputs flex-col gap-[10px] min-w-[400px] md:w-[40%]'
+            }
+          >
             {deliveryType == 'PVZ' && (
               <>
                 <div className="min-h-[48px]">
                   <InputLabel
                     name="city"
-                    title="Искать на карте"
+                    title="Введите город"
                     onChange={e => setCity(e.target.value)}
                     value={city}
                   />
                 </div>
+                <div className="w-full border-solid border-[1px] border-[#DDE1E6] mt-[10px]"></div>
                 <div
                   ref={listRef}
-                  className={'w-full md:max-h-[400px] overflow-auto border p-2 rounded-lg'}
+                  className={
+                    'w-full md:max-h-[400px] overflow-auto flex flex-col gap-[20px] rounded-lg'
+                  }
                 >
                   {pvzList.length === 0 ? (
-                    <p>{city ? 'Загрузка...' : 'Введите город для поиска ПВЗ'}</p>
+                    <p>{city ? 'Загрузка...' : 'Введите город для поиска'}</p>
                   ) : (
                     pvzList.map(pvz => (
                       <div
                         id={`pvz-${pvz.code}`}
-                        className={`p-2 cursor-pointer rounded-md ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
+                        className={`cursor-pointer rounded-md flex flex-col gap-[12px] ${selectedPvz?.code === pvz.code ? 'bg-gray-200' : ''}`}
                         key={pvz.code}
                         onClick={() => {
                           setSelectedPvz(pvz)
                           setMapCenter([pvz.location.latitude, pvz.location.longitude])
                         }}
                       >
-                        <p className={'font-semibold'}>{pvz.location.address}</p>
-                        <p className={'text-sm text-gray-500'}>{pvz.work_time}</p>
+                        <div className="flex items-center justify-between">
+                          <h3 className="h3">Пункт {pvz.owner_code}</h3>
+                          <h3 className="h3">
+                            <CgChevronRight />
+                          </h3>
+                        </div>
+                        <p className={'p2 text-[#94A3B8_!important]'}>{pvz.location.address}</p>
+                        <p className={'p2'}>{pvz.work_time}</p>
+                        <button id="admin-button" className="w-fit px-[40px_!important]">
+                          Выбрать
+                        </button>
                       </div>
                     ))
                   )}
@@ -238,6 +255,7 @@ export default function PvzMapWidget({
                       entrance: data?.deliveryEntrance,
                       floor: data?.deliveryFloor,
                       intercom: data?.deliveryIntercom,
+                      owner_code: '',
                     })
                   }}
                 />
@@ -455,7 +473,7 @@ function AddressInput({
         className="w-full"
         value={comment}
         onChange={e => setComment(e.target.value)}
-        title="Комментарий курьеру"
+        title="Комментарий для курьера"
         name="comment"
       />
       <button
@@ -463,7 +481,7 @@ function AddressInput({
         className={'mt-4 w-full px-4 py-2 text-white rounded-[8px]'}
         style={{ background: 'var(--red)' }}
       >
-        Готово{' '}
+        Добавить адрес
       </button>
     </form>
   )
@@ -512,6 +530,7 @@ interface Location {
 }
 
 export interface Pvz {
+  owner_code: any
   code: string
 
   location: Location
