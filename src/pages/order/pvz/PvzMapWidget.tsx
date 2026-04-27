@@ -175,7 +175,7 @@ export default function PvzMapWidget({
         <>
           <div
             className={
-              'flex inputs-label order-inputs flex-col gap-[10px] min-w-[400px] md:w-[40%]'
+              'flex inputs-label order-inputs flex-col gap-[10px] md:min-w-[400px] md:w-[40%]'
             }
           >
             {deliveryType == 'PVZ' && (
