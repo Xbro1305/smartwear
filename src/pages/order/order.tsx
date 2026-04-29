@@ -186,7 +186,9 @@ export const Order = () => {
         if (err.response?.data?.message == 'not enough stock')
           toast.error('Товара(ов) нет в наличии')
 
-        toast.error('Не удалось создать заказ. Пожалуйста, попробуйте снова.')
+        toast.error(
+          err.response.data.message || 'Не удалось создать заказ. Пожалуйста, попробуйте снова.'
+        )
       })
   }
 
