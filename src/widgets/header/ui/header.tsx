@@ -5,13 +5,13 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 import styles from './Header.module.scss'
 import { MdMenu, MdClose } from 'react-icons/md'
 import logo from '../../../assets/images/logo.png'
-
+import { setCartCount } from '@/app/store/cartCount'
 import cart from '../../../assets/images/svg (2).svg'
 import search from '../../../assets/images/svg.svg'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import profile from '../icons/profile.svg'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 export const Header: React.FC = () => {
   const cartLength = useSelector((state: any) => state.cartCount)
@@ -22,6 +22,7 @@ export const Header: React.FC = () => {
 
   const location = useLocation()
   const redirectUrl = location.pathname + location.search
+  const dispatch = useDispatch()
   const searchParams = new URLSearchParams(location.search)
 
   useEffect(() => {
@@ -46,6 +47,29 @@ export const Header: React.FC = () => {
       const data = res?.data?.filter((cat: any) => cat.showInMenu)
       setCategories(data)
     })
+
+    if (!localStorage.getItem('token')) {
+      const localCart = localStorage.getItem('cart')
+      if (localCart) {
+        const items = JSON.parse(localCart)
+
+        localStorage.setItem('cartCount', String(items.length))
+        dispatch(setCartCount(items.length))
+      }
+      return
+    }
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        localStorage.setItem('cartCount', String(res.data?.items?.length || 0))
+        dispatch(setCartCount(res.data?.items?.length || 0))
+      })
+      .catch(err => console.error('Error fetching cart:', err))
 
     const handleResize = () => setWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)

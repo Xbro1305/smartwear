@@ -249,7 +249,7 @@ const CartItem = ({ item, index, removeItem }: any) => {
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p2 text-[15px] md:text-[18px] w-[90px]">Размер:</p>
-            <p className="p2 text-[15px] md:text-[18px] w-[90px]">{item.size?.name}</p>
+            <p className="p2 text-[15px] md:text-[18px] w-[90px]">{item.size}</p>
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p2 text-[15px] md:text-[18px] w-[90px]">Цвет:</p>
