@@ -173,12 +173,7 @@ export const Order = () => {
 
     // we need to put deliveryFrom and deliveryTo in data, but they have different values for different delivery types
     //put current date
-    const dates = {
-      deliveryFrom:
-        deliveryType == 'Курьером' ? selectedDeliveryDate.deliveryFrom : new Date().getDate(),
-      deliveryTo:
-        deliveryType == 'Курьером' ? selectedDeliveryDate.deliveryTo : new Date().getDate(),
-    }
+   
 
     axios(`${import.meta.env.VITE_APP_API_URL}/orders`, {
       method: 'POST',
