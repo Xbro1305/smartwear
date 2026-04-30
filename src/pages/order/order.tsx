@@ -167,6 +167,10 @@ export const Order = () => {
       comment: selectedAddress.comment || '',
     }
 
+    if (deliveryType === 'Курьером' && !selectedDeliveryDate.deliveryFrom) {
+      return toast.error('Пожалуйста, выберите дату доставки')
+    }
+
     axios(`${import.meta.env.VITE_APP_API_URL}/orders`, {
       method: 'POST',
       headers: {
