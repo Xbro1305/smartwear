@@ -171,13 +171,29 @@ export const Order = () => {
       return toast.error('Пожалуйста, выберите дату доставки')
     }
 
+    // we need to put deliveryFrom and deliveryTo in data, but they have different values for different delivery types
+    //put current date
+    const dates = {
+      deliveryFrom:
+        deliveryType == 'Курьером' ? selectedDeliveryDate.deliveryFrom : new Date().getDate(),
+      deliveryTo:
+        deliveryType == 'Курьером' ? selectedDeliveryDate.deliveryTo : new Date().getDate(),
+    }
+
     axios(`${import.meta.env.VITE_APP_API_URL}/orders`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json',
       },
-      data: deliveryType == 'Курьером' ? { ...data, ...selectedDeliveryDate } : data,
+      data:
+        deliveryType == 'Курьером'
+          ? { ...data, ...selectedDeliveryDate }
+          : {
+              ...data,
+              deliveryFrom: '2026-05-03T00:00:00.000Z',
+              deliveryTo: '2026-05-07T00:00:00.000Z',
+            },
     })
       .then(res => {
         console.log('Order created:', res.data)
