@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import styles from './Profile.module.scss'
-import { FaCube, FaHeart, FaTag, FaUser } from 'react-icons/fa'
+import { FaCube, FaUser } from 'react-icons/fa'
 import { Profile_profile } from '../Components/Profile_profile'
 import { Orders } from '../Components/Orders'
 
