@@ -74,7 +74,7 @@ export const OrderDetails = () => {
         </div>
         <div className="flex items-center gap-[5px]">
           <h5 className="h5">Статус оплаты:</h5>
-          <p className="p1">Оплачено</p>
+          <p className="p1">Не оплачено</p>
         </div>
         <button className="bg-[transparent] border-none p-[10px] cursor-pointer p1 flex items-center gap-[5px]">
           <MdOutlineLocalPrintshop />

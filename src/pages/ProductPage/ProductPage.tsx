@@ -258,6 +258,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
   }, [selectedColor])
 
   useEffect(() => {
+    if (window.innerWidth >= 768) return
+
     const handleClick = () => setSelectedInfo('')
 
     document.addEventListener('click', handleClick)
@@ -296,7 +298,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
         color: selectedColor,
         colorCode: selectedColor?.meta.colorCode,
         colorAlias: selectedColor?.alias,
-        size: selectedSize ? { name: selectedSize.name } : { name: '' },
+        size: selectedSize?.name,
         imageUrl:
           (
             media?.find(
@@ -336,13 +338,17 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
           const cartCount = Number(localStorage.getItem('cartCount') || '0')
           dispatch(setCartCount(cartCount + 1))
         })
-        .catch(err =>
+        .catch(err => {
           toast.error(
             err.response.data.message == 'max 2 items'
               ? 'В корзину нельзя добавить более 2 товаров одновременно!'
-              : err.response.data.message || 'Что-то пошло не так'
+              : err.response.data.message == 'Invalid token'
+                ? 'Токен не действителен, пожалуйста, авторизуйтесь или нажмите кнопку заново'
+                : err.response.data.message || 'Что-то пошло не так'
           )
-        )
+
+          err.response.data.message == 'Invalid token' && localStorage.removeItem('token')
+        })
     }
   }
   return (

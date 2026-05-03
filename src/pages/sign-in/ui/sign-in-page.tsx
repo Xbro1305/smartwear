@@ -100,7 +100,7 @@ export const SignInPage: React.FC = () => {
 
     login({ code: value.code! })
       .unwrap()
-      .then(({ access_token, user }) => {
+      .then(async ({ access_token, user }) => {
         localStorage.setItem('token', access_token)
         localStorage.setItem('username', user.name)
         localStorage.setItem('usersurname', user.surName)
@@ -109,8 +109,9 @@ export const SignInPage: React.FC = () => {
         localStorage.setItem('userphone', user.phone)
 
         const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+
         if (cart.length > 0) {
-          axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
+          await axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

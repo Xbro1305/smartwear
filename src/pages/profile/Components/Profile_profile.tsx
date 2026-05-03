@@ -1,6 +1,6 @@
-import sale from '../../../assets/images/sale.png'
-import { NumericFormat, PatternFormat } from 'react-number-format'
-import { Link } from 'react-router-dom'
+// import sale from '../../../assets/images/sale.png'
+import { PatternFormat } from 'react-number-format'
+// import { Link } from 'react-router-dom'
 import styles from './Components.module.scss'
 import { useEffect, useState } from 'react'
 import { FaCheck, FaPen } from 'react-icons/fa'
@@ -26,9 +26,9 @@ interface InitialData {
 export const Profile_profile = () => {
   const getByKey = (key: string) => localStorage.getItem(key) || ''
 
-  const current = 17200
-  const next = 30000
-  const percent = (current * 100) / next
+  // const current = 17200
+  // const next = 30000
+  // const percent = (current * 100) / next
   const [surname, setSurname] = useState<string>('')
   const [name, setName] = useState<string>('')
   const [prefix, setPrefix] = useState<any>('+7')
@@ -317,7 +317,7 @@ export const Profile_profile = () => {
           <h5 className={`${styles.profile_top_title} h3`}>
             {surname} {name} {middlename}
           </h5>
-          <span style={{ color: 'var(--service)' }} className="p2">
+          {/* <span style={{ color: 'var(--service)' }} className="p2">
             Совершайте покупки и мы вернем вам от 3 до 15% стоимости заказа
           </span>
           <div className={styles.profile_top_sale}>
@@ -362,7 +362,7 @@ export const Profile_profile = () => {
               <p className="p2">Заказали товаров</p>
               <NumericFormat className="h5" value={15} thousandSeparator=" " displayType="text" />
             </div>
-          </div>
+          </div> */}
         </div>
         <div className={styles.profile_personality}>
           <h5 className="h5">Контактные данные</h5>

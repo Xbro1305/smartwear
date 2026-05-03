@@ -78,6 +78,7 @@ export const Order = () => {
           : setDeliveryType('Курьером')
 
         setIsDefaultAddress(true)
+        setIsAddressSelected(true)
 
         defaultAddress.type !== 'PVZ' && setIsAddressSelected(true)
       }
@@ -157,7 +158,14 @@ export const Order = () => {
     selectedAddress?.id && createOrder(selectedAddress?.id)
   }
 
-  const formatDate = (date: any) => date?.split('T')[0]
+  const formatDate = (date: any) => {
+    if (!date) return ''
+    const d = typeof date === 'string' ? new Date(date) : date
+    return d.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+    })
+  }
 
   const createOrder = (addressId: any) => {
     let data = {
@@ -173,7 +181,6 @@ export const Order = () => {
 
     // we need to put deliveryFrom and deliveryTo in data, but they have different values for different delivery types
     //put current date
-   
 
     axios(`${import.meta.env.VITE_APP_API_URL}/orders`, {
       method: 'POST',
@@ -206,6 +213,8 @@ export const Order = () => {
         )
       })
   }
+
+  console.log(selectedAddress)
 
   useEffect(() => {
     if (deliveryType === 'Курьером' && selectedAddress?.id) {
@@ -320,484 +329,492 @@ export const Order = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-[20px] 2xl:max-w-[calc(100%-470px)]">
-        <div className="flex flex-col gap-[16px] lg:gap-[30px] w-full">
-          <div className="flex flex-col gap-[8px] border-b-[var(--gray)] pb-[20px] border-solid border-b-[3px]">
-            <h1 className="h2">Оформление заказа</h1>
-          </div>{' '}
-          {cart.length > 0 && <CartPage cart={cart} />}
-        </div>
-        <div className="flex flex-col gap-[16px] lg:gap-[30px] pt-[20px]">
-          <h3 className="h3">1. Способ доставки</h3>
+      <div className="flex flex-col gap-[20px] 2xl:flex-row">
+        <div className="flex flex-col gap-[20px] w-full 2xl:w-[calc(100%-540px)]">
+          <div className="flex flex-col gap-[16px] lg:gap-[30px] w-full">
+            <div className="flex flex-col gap-[8px] border-b-[var(--gray)] pb-[20px] border-solid border-b-[3px]">
+              <h1 className="h1">Оформление заказа</h1>
+            </div>{' '}
+            {cart.length > 0 && <CartPage cart={cart} />}
+          </div>
           <div className="flex flex-col gap-[16px] lg:gap-[30px] pt-[20px]">
+            <h4 className="h4">1. Способ доставки</h4>
+            <div className="flex flex-col gap-[16px] lg:gap-[30px] pt-[20px]">
+              <label className="flex gap-[10px]">
+                <input
+                  type="radio"
+                  className="radio"
+                  name="delivery"
+                  checked={deliveryType == 'До пункта выдачи'}
+                  onChange={() => {
+                    setDeliveryType('До пункта выдачи')
+                    setSelectedAddress(null)
+                    setIsAddressSelected(false)
+                    setAddressModalOpened(false)
+                  }}
+                />
+                <div className="flex flex-col gap-[5px] -mt-[3px]">
+                  <h5 className="h5">До пункта выдачи</h5>
+                  <p className="p1">
+                    Бесплатная доставка с примеркой до пункта выдачи СДЭК (ближайшего к адресу,
+                    который вы укажете)
+                  </p>
+                </div>
+              </label>
+            </div>
+            {deliveryType == 'До пункта выдачи' &&
+              (isAddressSelected ? (
+                selectedAddress ? (
+                  <div className="flex flex-col gap-[10px] pl-[30px]">
+                    <div className="flex gap-[10px] items-start mb-[10px]">
+                      <img src={locationMark} alt="" />
+                      <div className="flex flex-col gap-[10px]">
+                        <h5 className="h5 flex gap-[10px] items-center">
+                          {selectedAddress.location?.address_full}
+                        </h5>
+                        <p className="p1 text-[var(--service)_!important]">
+                          {selectedAddress?.note}
+                        </p>
+                        <button
+                          className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
+                          onClick={() => {
+                            setSelectedAddress(null)
+                            setAddressModalOpened(true)
+                          }}
+                        >
+                          Изменить адрес
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : addressModalOpened &&
+                  user?.addresses?.filter((address: any) => address.type === 'PVZ').length ? (
+                  <>
+                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
+                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
+                        <div className="flex items-center justify-center relative">
+                          <h2 className="h2 text-center">Выберите адрес доставки</h2>
+                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
+                            <CgClose
+                              className="h2"
+                              onClick={() => {
+                                setIsAddressSelected(false)
+                                setAddressModalOpened(false)
+                              }}
+                            />
+                          </button>
+                        </div>
+                        <div className="flex flex-col gap-[10px] max-h-[300px] w-full items-center overflow-y-auto">
+                          {user?.addresses
+                            ?.filter((address: any) => address.type === 'PVZ')
+                            ?.map((address: any, index: number) => (
+                              <>
+                                <div
+                                  key={index}
+                                  className="flex gap-[10px] mb-[10px] cursor-pointer border-solid border-[var(--service)] border-[1px] rounded-[12px] p-[10px] max-w-[700px] w-full"
+                                  onClick={() => {
+                                    setSelectedAddress({
+                                      id: address.id,
+                                      location: { address_full: address.fullAddress },
+                                    })
+                                    setIsAddressSelected(true)
+                                    setAddressModalOpened(false)
+                                    setIsDefaultAddress(true)
+
+                                    console.log({
+                                      id: address.id,
+                                      location: {
+                                        address_full: address.fullAddress,
+                                      },
+                                    })
+                                  }}
+                                >
+                                  <img src={locationMark} alt="" />
+                                  <div className="flex flex-col gap-[10px]">
+                                    <h5 className="h5 flex gap-[10px] items-center">
+                                      {address.fullAddress}
+                                    </h5>
+                                    <p className="p1 text-[var(--service)_!important]">
+                                      {address.entrance && `${address.entrance} Подъезд,`}{' '}
+                                      {address.floor && `${address.floor} этаж,`}{' '}
+                                      {address.comment && `${address.comment}`}{' '}
+                                    </p>
+                                  </div>
+                                </div>
+                              </>
+                            ))}
+                        </div>
+                        <button
+                          id="admin-button"
+                          className="w-[700px] text-center flex justify-center py-[20px_!important] items-center mx-[auto] flex gap-[10px] items-center"
+                          onClick={() => setAddressModalOpened(false)}
+                        >
+                          <FaPlus /> Добавить адрес
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
+                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
+                        <div className="flex items-center justify-center relative">
+                          <h2 className="h2 text-center">Новый адрес доставки</h2>
+                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
+                            <CgClose
+                              className="h2"
+                              onClick={() => {
+                                setIsAddressSelected(false)
+                                setSelectedAddress({})
+                                setAddressModalOpened(false)
+                              }}
+                            />
+                          </button>
+                        </div>
+                        <PvzMapWidget
+                          onSelect={pvz => {
+                            setSelectedAddress(pvz)
+                            setIsDefaultAddress(false)
+                          }}
+                          type="PVZ"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )
+              ) : (
+                <>
+                  <div className="flex flex-col gap-[10px] pl-[30px]">
+                    <div
+                      className="flex gap-[10px] items-center mb-[10px] cursor-pointer"
+                      onClick={() => {
+                        setIsAddressSelected(true)
+                        setSelectedAddress(null)
+                        setAddressModalOpened(true)
+                      }}
+                    >
+                      <img src={locationMark} alt="" />
+                      <div className="flex flex-col gap-[10px]">
+                        <h5 className="h5 flex gap-[10px] items-center">
+                          Адрес доставки не добавлен
+                        </h5>
+                        <p className="p1 text-[var(--service)_!important]">
+                          Нажмите чтобы добавить
+                        </p>
+                      </div>
+                      <CgChevronRight className="ml-auto text-[24px]" />
+                    </div>
+                  </div>
+                </>
+              ))}
             <label className="flex gap-[10px]">
               <input
                 type="radio"
                 className="radio"
                 name="delivery"
-                checked={deliveryType == 'До пункта выдачи'}
+                checked={deliveryType == 'Курьером'}
                 onChange={() => {
-                  setDeliveryType('До пункта выдачи')
+                  setDeliveryType('Курьером')
                   setSelectedAddress(null)
                   setIsAddressSelected(false)
                   setAddressModalOpened(false)
                 }}
               />
               <div className="flex flex-col gap-[5px] -mt-[3px]">
-                <h5 className="h5">До пункта выдачи</h5>
-                <p className="p1">
-                  Бесплатная доставка с примеркой до пункта выдачи СДЭК (ближайшего к адресу,
-                  который вы укажете)
-                </p>
+                <h5 className="h5">Курьером</h5>
+                <p className="p1">Бесплатная доставка курьером СДЭК до дома (с примеркой)</p>
+              </div>
+            </label>
+            {deliveryType == 'Курьером' &&
+              (isAddressSelected ? (
+                selectedAddress ? (
+                  <>
+                    <div className="flex flex-col gap-[10px] pl-[30px]">
+                      <div className="flex gap-[10px] items-start mb-[10px]">
+                        <img src={locationMark} alt="" />
+                        <div className="flex flex-col gap-[10px]">
+                          <h5 className="h5 flex gap-[10px] items-center">
+                            {selectedAddress.location?.address_full}
+                          </h5>
+                          <p className="p1 text-[var(--service)_!important]">
+                            {selectedAddress?.entrance && `${selectedAddress?.entrance} Подъезд,`}{' '}
+                            {selectedAddress?.floor && `${selectedAddress?.floor} этаж,`}{' '}
+                            {selectedAddress?.comment && `${selectedAddress?.comment}`}{' '}
+                          </p>
+                          <button
+                            className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
+                            onClick={() => {
+                              setSelectedAddress(null)
+                              setAddressModalOpened(true)
+                            }}
+                          >
+                            Изменить адрес
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    {deliveryDates.length ? (
+                      <div className="flex flex-col gap-[20px]">
+                        <h2 className="h2">Дата доставки</h2>
+                        <div className="flex items-center gap-[8px]">
+                          {deliveryDates?.map((d: any, index: number) => (
+                            <div
+                              key={index}
+                              className="p-[12px] rounded-[4px] border-solid border-[1px] border-[var(--service)]"
+                              style={{
+                                background:
+                                  selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
+                                    ? 'var(--gray)'
+                                    : '',
+                              }}
+                              onClick={() => setSelectedDeliveryDate(d)}
+                            >
+                              {formatDate(d.deliveryFrom)}
+                              {' - '}
+                              {formatDate(d.deliveryTo)}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      ''
+                    )}
+                  </>
+                ) : addressModalOpened &&
+                  user?.addresses?.filter((address: any) => address.type !== 'PVZ').length ? (
+                  <>
+                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
+                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
+                        <div className="flex items-center justify-center relative">
+                          <h2 className="h2 text-center">Выберите адрес доставки</h2>
+                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
+                            <CgClose
+                              className="h2"
+                              onClick={() => {
+                                setIsAddressSelected(false)
+                                setAddressModalOpened(false)
+                              }}
+                            />
+                          </button>
+                        </div>
+                        <div className="flex flex-col gap-[10px] max-h-[300px] w-full items-center overflow-y-auto">
+                          {user?.addresses
+                            ?.filter((address: any) => address.type !== 'PVZ')
+                            ?.map((address: any, index: number) => (
+                              <>
+                                <div
+                                  key={index}
+                                  className="flex gap-[10px] items-start mb-[10px] cursor-pointer border-solid border-[var(--service)] border-[1px] rounded-[12px] p-[10px] max-w-[700px] w-full"
+                                  onClick={() => {
+                                    setSelectedAddress({
+                                      id: address.id,
+                                      location: {
+                                        address_full: address.fullAddress,
+                                      },
+                                      entrance: address.entrance,
+                                      floor: address.floor,
+                                      comment: address.comment,
+                                    })
+
+                                    setIsAddressSelected(true)
+                                    setAddressModalOpened(false)
+                                    setIsDefaultAddress(true)
+                                  }}
+                                >
+                                  <img src={locationMark} alt="" />
+                                  <div className="flex flex-col gap-[10px]">
+                                    <h5 className="h5 flex gap-[10px] items-center">
+                                      {address.fullAddress}
+                                    </h5>
+                                    <p className="p1 text-[var(--service)_!important]">
+                                      {address.entrance && `${address.entrance} Подъезд,`}{' '}
+                                      {address.floor && `${address.floor} этаж,`}{' '}
+                                      {address.comment && `${address.comment}`}{' '}
+                                    </p>
+                                  </div>
+                                </div>
+                              </>
+                            ))}
+                        </div>
+                        <button
+                          id="admin-button"
+                          className="w-[700px] text-center flex justify-center py-[20px_!important] items-center mx-[auto] flex gap-[10px] items-center"
+                          onClick={() => setAddressModalOpened(false)}
+                        >
+                          <FaPlus /> Добавить адрес
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
+                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
+                        <div className="flex items-center justify-center relative">
+                          <h2 className="h2 text-center">Новый адрес доставки</h2>
+                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
+                            <CgClose
+                              className="h2"
+                              onClick={() => {
+                                setIsAddressSelected(false)
+                                setAddressModalOpened(false)
+                              }}
+                            />
+                          </button>
+                        </div>
+                        <PvzMapWidget
+                          onSelect={pvz => {
+                            setSelectedAddress(pvz)
+                            setIsDefaultAddress(false)
+                          }}
+                          type="DELIVERY"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )
+              ) : (
+                <>
+                  <div className="flex flex-col gap-[10px] pl-[30px]">
+                    <div
+                      className="flex gap-[10px] items-center mb-[10px] cursor-pointer"
+                      onClick={() => {
+                        setIsAddressSelected(true)
+                        setSelectedAddress(null)
+                        setAddressModalOpened(true)
+                      }}
+                    >
+                      <img src={locationMark} alt="" />
+                      <div className="flex flex-col gap-[10px]">
+                        <h5 className="h5 flex gap-[10px] items-center">
+                          Адрес доставки не добавлен
+                        </h5>
+                        <p className="p1 text-[var(--service)_!important]">
+                          Нажмите чтобы добавить
+                        </p>
+                      </div>
+                      <CgChevronRight className="ml-auto text-[24px]" />
+                    </div>
+                  </div>
+                </>
+              ))}
+          </div>
+          <div className="flex flex-col gap-[30px]">
+            <h4 className="h4">2. Ваши данные</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[16px]">
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Имя</p>
+                <input
+                  type="text"
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={user?.name || ''}
+                  onChange={e => setUser((prev: any) => ({ ...prev, name: e.target.value }))}
+                />
+              </label>{' '}
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Фамилия</p>
+                <input
+                  type="text"
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={user?.surName || ''}
+                  onChange={e => setUser((prev: any) => ({ ...prev, surName: e.target.value }))}
+                />
+              </label>
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Отчество</p>
+                <input
+                  type="text"
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={user?.middleName || ''}
+                  onChange={e => setUser((prev: any) => ({ ...prev, middleName: e.target.value }))}
+                />
+              </label>
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Email</p>
+                <input
+                  type="text"
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={user?.email || ''}
+                  onChange={e => setUser((prev: any) => ({ ...prev, email: e.target.value }))}
+                />
+              </label>
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Телефон</p>
+                <PatternFormat
+                  format="+7 (###) ###-##-##"
+                  type="text"
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={user?.phone || ''}
+                  onChange={e => setUser((prev: any) => ({ ...prev, phone: e.target.value }))}
+                />
+              </label>
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Адрес</p>
+                <textarea
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={selectedAddress?.location?.address_full || ''}
+                  style={{ height: 'fit-content', minHeight: '40px', maxHeight: '120px' }}
+                />
+              </label>{' '}
+              {deliveryType === 'Курьером' && (
+                <>
+                  <label>
+                    <p className="p2 text-[var(--service)_!important]">Подъезд</p>
+                    <input
+                      type="text"
+                      className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                      value={selectedAddress?.entrance || ''}
+                      onChange={e =>
+                        setSelectedAddress((prev: any) => ({ ...prev, entrance: e.target.value }))
+                      }
+                    />
+                  </label>
+                  <label>
+                    <p className="p2 text-[var(--service)_!important]">Этаж</p>
+                    <input
+                      type="text"
+                      className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                      value={selectedAddress?.floor || ''}
+                      onChange={e =>
+                        setSelectedAddress((prev: any) => ({ ...prev, floor: e.target.value }))
+                      }
+                    />
+                  </label>
+                </>
+              )}
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Комментарий</p>
+                <input
+                  type="text"
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={selectedAddress?.comment || ''}
+                  onChange={e =>
+                    setSelectedAddress((prev: any) => ({ ...prev, comment: e.target.value }))
+                  }
+                />
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-col gap-[16px] lg:gap-[30px]">
+            <h3 className="h3">3. Способ оплаты</h3>
+            <label className="flex gap-[10px]">
+              <input
+                type="radio"
+                className="radio"
+                name="payment"
+                checked={paymentType == 'OFFLINE'}
+                onChange={() => setPaymentType('OFFLINE')}
+              />
+              <div className="flex flex-col gap-[10px]">
+                <p className="h5">При получении</p>
+                <p className="p1">Картой или наличными</p>
               </div>
             </label>
           </div>
-          {deliveryType == 'До пункта выдачи' &&
-            (isAddressSelected ? (
-              selectedAddress ? (
-                <div className="flex flex-col gap-[10px] pl-[30px]">
-                  <div className="flex gap-[10px] items-start mb-[10px]">
-                    <img src={locationMark} alt="" />
-                    <div className="flex flex-col gap-[10px]">
-                      <h5 className="h5 flex gap-[10px] items-center">
-                        {selectedAddress.location?.address_full}
-                      </h5>
-                      <p className="p1 text-[var(--service)_!important]">{selectedAddress?.note}</p>
-                      <button
-                        className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
-                        onClick={() => {
-                          setSelectedAddress(null)
-                          setAddressModalOpened(true)
-                        }}
-                      >
-                        Изменить адрес
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : addressModalOpened &&
-                user?.addresses?.filter((address: any) => address.type === 'PVZ').length ? (
-                <>
-                  <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                    <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                      <div className="flex items-center justify-center relative">
-                        <h2 className="h2 text-center">Выберите адрес доставки</h2>
-                        <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                          <CgClose
-                            className="h2"
-                            onClick={() => {
-                              setIsAddressSelected(false)
-                              setAddressModalOpened(false)
-                            }}
-                          />
-                        </button>
-                      </div>
-                      <div className="flex flex-col gap-[10px] max-h-[300px] w-full items-center overflow-y-auto">
-                        {user?.addresses
-                          ?.filter((address: any) => address.type === 'PVZ')
-                          ?.map((address: any, index: number) => (
-                            <>
-                              <div
-                                key={index}
-                                className="flex gap-[10px] mb-[10px] cursor-pointer border-solid border-[var(--service)] border-[1px] rounded-[12px] p-[10px] max-w-[700px] w-full"
-                                onClick={() => {
-                                  setSelectedAddress({
-                                    id: address.id,
-                                    location: { address_full: address.fullAddress },
-                                  })
-                                  setIsAddressSelected(true)
-                                  setAddressModalOpened(false)
-                                  setIsDefaultAddress(true)
-
-                                  console.log({
-                                    id: address.id,
-                                    location: {
-                                      address_full: address.fullAddress,
-                                    },
-                                  })
-                                }}
-                              >
-                                <img src={locationMark} alt="" />
-                                <div className="flex flex-col gap-[10px]">
-                                  <h5 className="h5 flex gap-[10px] items-center">
-                                    {address.fullAddress}
-                                  </h5>
-                                  <p className="p1 text-[var(--service)_!important]">
-                                    {address.entrance && `${address.entrance} Подъезд,`}{' '}
-                                    {address.floor && `${address.floor} этаж,`}{' '}
-                                    {address.comment && `${address.comment}`}{' '}
-                                  </p>
-                                </div>
-                              </div>
-                            </>
-                          ))}
-                      </div>
-                      <button
-                        id="admin-button"
-                        className="w-[700px] text-center flex justify-center py-[20px_!important] items-center mx-[auto] flex gap-[10px] items-center"
-                        onClick={() => setAddressModalOpened(false)}
-                      >
-                        <FaPlus /> Добавить адрес
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                    <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                      <div className="flex items-center justify-center relative">
-                        <h2 className="h2 text-center">Новый адрес доставки</h2>
-                        <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                          <CgClose
-                            className="h2"
-                            onClick={() => {
-                              setIsAddressSelected(false)
-                              setSelectedAddress({})
-                              setAddressModalOpened(false)
-                            }}
-                          />
-                        </button>
-                      </div>
-                      <PvzMapWidget
-                        onSelect={pvz => {
-                          setSelectedAddress(pvz)
-                          setIsDefaultAddress(false)
-                        }}
-                        type="PVZ"
-                      />
-                    </div>
-                  </div>
-                </>
-              )
-            ) : (
-              <>
-                <div className="flex flex-col gap-[10px] pl-[30px]">
-                  <div
-                    className="flex gap-[10px] items-center mb-[10px] cursor-pointer"
-                    onClick={() => {
-                      setIsAddressSelected(true)
-                      setSelectedAddress(null)
-                      setAddressModalOpened(true)
-                    }}
-                  >
-                    <img src={locationMark} alt="" />
-                    <div className="flex flex-col gap-[10px]">
-                      <h5 className="h5 flex gap-[10px] items-center">
-                        Адрес доставки не добавлен
-                      </h5>
-                      <p className="p1 text-[var(--service)_!important]">Нажмите чтобы добавить</p>
-                    </div>
-                    <CgChevronRight className="ml-auto text-[24px]" />
-                  </div>
-                </div>
-              </>
-            ))}
-          <label className="flex gap-[10px]">
-            <input
-              type="radio"
-              className="radio"
-              name="delivery"
-              checked={deliveryType == 'Курьером'}
-              onChange={() => {
-                setDeliveryType('Курьером')
-                setSelectedAddress(null)
-                setIsAddressSelected(false)
-                setAddressModalOpened(false)
-              }}
-            />
-            <div className="flex flex-col gap-[5px] -mt-[3px]">
-              <h5 className="h5">Курьером</h5>
-              <p className="p1">Бесплатная доставка курьером СДЭК до дома (с примеркой)</p>
-            </div>
-          </label>
-          {deliveryType == 'Курьером' &&
-            (isAddressSelected ? (
-              selectedAddress ? (
-                <div className="flex flex-col gap-[10px] pl-[30px]">
-                  <div className="flex gap-[10px] items-start mb-[10px]">
-                    <img src={locationMark} alt="" />
-                    <div className="flex flex-col gap-[10px]">
-                      <h5 className="h5 flex gap-[10px] items-center">
-                        {selectedAddress.location?.address_full}
-                      </h5>
-                      <p className="p1 text-[var(--service)_!important]">
-                        {selectedAddress?.entrance && `${selectedAddress?.entrance} Подъезд,`}{' '}
-                        {selectedAddress?.floor && `${selectedAddress?.floor} этаж,`}{' '}
-                        {selectedAddress?.comment && `${selectedAddress?.comment}`}{' '}
-                      </p>
-                      <button
-                        className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
-                        onClick={() => {
-                          setSelectedAddress(null)
-                          setAddressModalOpened(true)
-                        }}
-                      >
-                        Изменить адрес
-                      </button>
-                    </div>
-                  </div>
-                  {deliveryDates.length ? (
-                    <div className="flex flex-col gap-[20px]">
-                      <h2 className="h2">Дата доставки</h2>
-                      <div className="flex items-center gap-[8px]">
-                        {deliveryDates?.map((d: any, index: number) => (
-                          <div
-                            key={index}
-                            className="p-[12px] rounded-[4px] border-solid border-[1px] border-[var(--service)]"
-                            style={{
-                              background:
-                                selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
-                                  ? 'var(--gray)'
-                                  : '',
-                            }}
-                            onClick={() => setSelectedDeliveryDate(d)}
-                          >
-                            {formatDate(d.deliveryFrom)}
-                            {' - '}
-                            {formatDate(d.deliveryTo)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    ''
-                  )}
-                </div>
-              ) : addressModalOpened &&
-                user?.addresses?.filter((address: any) => address.type !== 'PVZ').length ? (
-                <>
-                  <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                    <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                      <div className="flex items-center justify-center relative">
-                        <h2 className="h2 text-center">Выберите адрес доставки</h2>
-                        <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                          <CgClose
-                            className="h2"
-                            onClick={() => {
-                              setIsAddressSelected(false)
-                              setAddressModalOpened(false)
-                            }}
-                          />
-                        </button>
-                      </div>
-                      <div className="flex flex-col gap-[10px] max-h-[300px] w-full items-center overflow-y-auto">
-                        {user?.addresses
-                          ?.filter((address: any) => address.type !== 'PVZ')
-                          ?.map((address: any, index: number) => (
-                            <>
-                              <div
-                                key={index}
-                                className="flex gap-[10px] items-start mb-[10px] cursor-pointer border-solid border-[var(--service)] border-[1px] rounded-[12px] p-[10px] max-w-[700px] w-full"
-                                onClick={() => {
-                                  setSelectedAddress({
-                                    id: address.id,
-                                    location: {
-                                      address_full: address.fullAddress,
-                                    },
-                                    entrance: address.entrance,
-                                    floor: address.floor,
-                                    comment: address.comment,
-                                  })
-
-                                  setIsAddressSelected(true)
-                                  setAddressModalOpened(false)
-                                  setIsDefaultAddress(true)
-                                }}
-                              >
-                                <img src={locationMark} alt="" />
-                                <div className="flex flex-col gap-[10px]">
-                                  <h5 className="h5 flex gap-[10px] items-center">
-                                    {address.fullAddress}
-                                  </h5>
-                                  <p className="p1 text-[var(--service)_!important]">
-                                    {address.entrance && `${address.entrance} Подъезд,`}{' '}
-                                    {address.floor && `${address.floor} этаж,`}{' '}
-                                    {address.comment && `${address.comment}`}{' '}
-                                  </p>
-                                </div>
-                              </div>
-                            </>
-                          ))}
-                      </div>
-                      <button
-                        id="admin-button"
-                        className="w-[700px] text-center flex justify-center py-[20px_!important] items-center mx-[auto] flex gap-[10px] items-center"
-                        onClick={() => setAddressModalOpened(false)}
-                      >
-                        <FaPlus /> Добавить адрес
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                    <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                      <div className="flex items-center justify-center relative">
-                        <h2 className="h2 text-center">Новый адрес доставки</h2>
-                        <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                          <CgClose
-                            className="h2"
-                            onClick={() => {
-                              setIsAddressSelected(false)
-                              setAddressModalOpened(false)
-                            }}
-                          />
-                        </button>
-                      </div>
-                      <PvzMapWidget
-                        onSelect={pvz => {
-                          setSelectedAddress(pvz)
-                          setIsDefaultAddress(false)
-                        }}
-                        type="DELIVERY"
-                      />
-                    </div>
-                  </div>
-                </>
-              )
-            ) : (
-              <>
-                <div className="flex flex-col gap-[10px] pl-[30px]">
-                  <div
-                    className="flex gap-[10px] items-center mb-[10px] cursor-pointer"
-                    onClick={() => {
-                      setIsAddressSelected(true)
-                      setSelectedAddress(null)
-                      setAddressModalOpened(true)
-                    }}
-                  >
-                    <img src={locationMark} alt="" />
-                    <div className="flex flex-col gap-[10px]">
-                      <h5 className="h5 flex gap-[10px] items-center">
-                        Адрес доставки не добавлен
-                      </h5>
-                      <p className="p1 text-[var(--service)_!important]">Нажмите чтобы добавить</p>
-                    </div>
-                    <CgChevronRight className="ml-auto text-[24px]" />
-                  </div>
-                </div>
-              </>
-            ))}
-        </div>
-        <div className="flex flex-col gap-[30px]">
-          <h3 className="h3">2. Ваши данные</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[16px]">
-            <label>
-              <p>Имя</p>
-              <input
-                type="text"
-                className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                value={user?.name || ''}
-                onChange={e => setUser((prev: any) => ({ ...prev, name: e.target.value }))}
-              />
-            </label>{' '}
-            <label>
-              <p>Фамилия</p>
-              <input
-                type="text"
-                className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                value={user?.surName || ''}
-                onChange={e => setUser((prev: any) => ({ ...prev, surName: e.target.value }))}
-              />
-            </label>
-            <label>
-              <p>Отчество</p>
-              <input
-                type="text"
-                className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                value={user?.middleName || ''}
-                onChange={e => setUser((prev: any) => ({ ...prev, middleName: e.target.value }))}
-              />
-            </label>
-            <label>
-              <p>Email</p>
-              <input
-                type="text"
-                className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                value={user?.email || ''}
-                onChange={e => setUser((prev: any) => ({ ...prev, email: e.target.value }))}
-              />
-            </label>
-            <label>
-              <p>Телефон</p>
-              <PatternFormat
-                format="+7 (###) ###-##-##"
-                type="text"
-                className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                value={user?.phone || ''}
-                onChange={e => setUser((prev: any) => ({ ...prev, phone: e.target.value }))}
-              />
-            </label>
-            <label>
-              <p>Адрес</p>
-              <input
-                type="text"
-                className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                value={selectedAddress?.location?.address || ''}
-              />
-            </label>{' '}
-            {deliveryType === 'Курьером' && (
-              <>
-                <label>
-                  <p>Подъезд</p>
-                  <input
-                    type="text"
-                    className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                    value={selectedAddress?.entrance || ''}
-                    onChange={e =>
-                      setSelectedAddress((prev: any) => ({ ...prev, entrance: e.target.value }))
-                    }
-                  />
-                </label>
-                <label>
-                  <p>Этаж</p>
-                  <input
-                    type="text"
-                    className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                    value={selectedAddress?.floor || ''}
-                    onChange={e =>
-                      setSelectedAddress((prev: any) => ({ ...prev, floor: e.target.value }))
-                    }
-                  />
-                </label>
-                <label>
-                  <p>Комментарий</p>
-                  <input
-                    type="text"
-                    className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px]"
-                    value={selectedAddress?.comment || ''}
-                    onChange={e =>
-                      setSelectedAddress((prev: any) => ({ ...prev, comment: e.target.value }))
-                    }
-                  />
-                </label>
-              </>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-col gap-[16px] lg:gap-[30px]">
-          <h3 className="h3">3. Способ оплаты</h3>
-          <label className="flex gap-[10px]">
-            <input
-              type="radio"
-              className="radio"
-              name="payment"
-              checked={paymentType == 'OFFLINE'}
-              onChange={() => setPaymentType('OFFLINE')}
-            />
-            <div className="flex flex-col gap-[10px]">
-              <p className="h5">При получении</p>
-              <p className="p1">Картой или наличными</p>
-            </div>
-          </label>
         </div>
 
         {cart.length > 0 && (
-          <div className="w-fit h-fit relative">
-            <SideBar cls="hidden 2xl:flex right-[var(--sides-padding)] max-w-[450px] fixed top-[100px] right-[var(--sides-padding)]" />
-          </div>
+          <SideBar cls="hidden 2xl:flex right-[var(--sides-padding)] max-w-[450px] sticky top-[100px] right-[var(--sides-padding)]" />
         )}
       </div>
 
@@ -838,7 +855,7 @@ const CartSideBar = ({
 
   return (
     <div
-      className={`flex flex-col gap-[18px] xl:gap-[30px] w-full lg:w-[34%] bg-[var(--gray)] rounded-[12px] py-[12px] px-[16px] 2xl:p-[45px] h-fit xl:min-w-[408px] lg:min-w-[337px] 2xl:w-[500px] ${cls}`}
+      className={`flex flex-col gap-[18px] xl:gap-[30px] w-full lg:w-[34%] bg-[var(--gray)] rounded-[12px] py-[12px] px-[16px] 2xl:px-[32px] 2xl:pt-[52px] 2xl:pb-[32px] h-fit xl:min-w-[408px] lg:min-w-[337px] 2xl:min-w-[520px] ${cls}`}
     >
       <div className="flex flex-col gap-[16px]">
         <div className="flex items-center justify-between pt-[10px] xl:pt-[20px]">
@@ -854,7 +871,7 @@ const CartSideBar = ({
 
         {totalDiscount > 0 && (
           <div className="flex items-center justify-between">
-            <p className="p2">Скидка</p>
+            <p className="p1">Скидка</p>
             <NumericFormat
               value={totalDiscount}
               allowNegative={false}
@@ -869,7 +886,7 @@ const CartSideBar = ({
 
         {promoDiscount && (
           <div className="flex items-center justify-between">
-            <p className="p2">Промокод</p>
+            <p className="p1">Промокод</p>
             <NumericFormat
               value={promoDiscount}
               allowNegative={false}
@@ -883,8 +900,8 @@ const CartSideBar = ({
         )}
 
         <div className="flex items-center justify-between">
-          <p className="p2">Доставка</p>
-          <div className="flex items-center gap-[10px]">
+          <p className="p1">Доставка</p>
+          <div className="flex items-center gap-[10px] p1">
             {deliveryType}
             {', '}
             {deliveryType === 'Курьером' ? (
@@ -975,7 +992,7 @@ const CartItem = ({ item, index }: any) => {
       <img src={item?.imageUrl} className="w-[120px] aspect-[12/17] object-cover" alt="" />
       <div className="flex flex-row w-full justify-between gap-[16px] md:gap-[24px]">
         <div className="flex flex-col gap-[16px] md:gap-[20px]">
-          <h5 className="h3 -mb-[10px] md:mb-0">{item?.name}</h5>
+          <h5 className="h5 -mb-[10px] md:mb-0">{item?.name}</h5>
           <div className="flex sm:hidden gap-[8px]">
             <NumericFormat
               allowNegative={false}
@@ -1009,16 +1026,16 @@ const CartItem = ({ item, index }: any) => {
             ) : null}
           </div>
           <div className="flex items-center gap-[16px]">
-            <p className="p2 text-[15px] md:text-[18px] w-[90px]">Модель:</p>
-            <p className="p2 text-[15px] md:text-[18px] w-[90px]">{item.articul}</p>
+            <p className="p1 text-[15px] md:text-[18px] w-[90px]">Модель:</p>
+            <p className="p1 text-[15px] md:text-[18px] w-[90px]">{item.articul}</p>
           </div>
           <div className="flex items-center gap-[16px]">
-            <p className="p2 text-[15px] md:text-[18px] w-[90px]">Размер:</p>
-            <p className="p2 text-[15px] md:text-[18px] w-[90px]">{item.size}</p>
+            <p className="p1 text-[15px] md:text-[18px] w-[90px]">Размер:</p>
+            <p className="p1 text-[15px] md:text-[18px] w-[90px]">{item.size}</p>
           </div>
           <div className="flex items-center gap-[16px]">
-            <p className="p2 text-[15px] md:text-[18px] w-[90px]">Цвет:</p>
-            <p className="p2 text-[15px] md:text-[18px] w-[90px] flex items-center">
+            <p className="p1 text-[15px] md:text-[18px] w-[90px]">Цвет:</p>
+            <p className="p1 text-[15px] md:text-[18px] w-[90px] flex items-center">
               {' '}
               <span
                 className="block min-w-[24px] h-[24px] rounded-[50%] mr-[8px]"

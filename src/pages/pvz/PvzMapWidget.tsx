@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css'
 import { InputLabel } from '@/widgets/InputLabel/InputLabel'
 import cdekIconUrl from '@/assets/images/marker.png' //
 import { IoArrowBack } from 'react-icons/io5'
+import { toast } from 'react-toastify'
 
 function RecenterMap({ center }: { center: [number, number] }) {
   const map = useMap()
@@ -93,7 +94,7 @@ export default function PvzMapWidget({
   }
 
   function showError() {
-    alert('Не удалось получить местоположение.')
+    toast.error('Не удалось получить местоположение для добавления адреса.')
   }
 
   useEffect(() => {
