@@ -63,7 +63,9 @@ export const OrderDetails = () => {
           </p>
         </div>
         <div className="flex items-center gap-[5px]">
-          <h5 className="h5">Адрес доставки:</h5>
+          <h5 className="h5">
+            Адрес {order?.deliveryType == 'PVZ' ? 'пункта выдачи' : 'доставки'}:
+          </h5>
           <p className="p1">{order?.address}</p>
         </div>
       </div>{' '}
