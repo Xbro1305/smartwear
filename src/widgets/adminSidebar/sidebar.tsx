@@ -91,4 +91,5 @@ const menuItems: MenuItems = {
     { name: 'Особенности', icon: <FaQuestion />, path: rp.ADMINPRODUCTS_FEATURES, end: false },
     { name: 'Цены', icon: <IoCard />, path: rp.ADMINPRODUCTS_PRICES, end: false },
   ],
+  orders: [{ name: 'Новые заказы', icon: <FaList />, path: rp.ADMINORDERS, end: true }],
 }
