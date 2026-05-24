@@ -20,6 +20,7 @@ export default {
       center: true,
       padding: '2rem',
       screens: {
+        sm: '420px',
         md: '768px',
         lg: '1024px',
         xl: '1215px',

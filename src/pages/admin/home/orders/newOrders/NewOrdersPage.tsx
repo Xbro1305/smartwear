@@ -103,6 +103,7 @@ export default function NewOrdersPage() {
   const [openedOrderId, setOpenedOrderId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null)
 
   const fetchOrders = async () => {
     try {
@@ -127,6 +128,8 @@ export default function NewOrdersPage() {
 
   useEffect(() => {
     fetchOrders()
+    window.scrollTo(0, 0)
+    window.document.title = 'Новые заказы - Умная одежда'
   }, [])
 
   return (
@@ -222,6 +225,7 @@ export default function NewOrdersPage() {
                       <button
                         type="button"
                         className="flex h-[46px] text-[12px] whitespace-nowrap min-w-[150px] items-center justify-center gap-[8px] rounded-[12px] bg-[#4B4B4D] font-[600] text-[#FFFFFF]"
+                        onClick={() => window.open(`/admin/orders/${order.id}`, '_blank')}
                       >
                         Просмотр заказа
                       </button>
@@ -230,6 +234,7 @@ export default function NewOrdersPage() {
                         type="button"
                         className="flex h-[46px] w-[46px] items-center justify-center rounded-[12px] bg-[#FFF1F3] text-[22px] text-[#EF233C]"
                         aria-label="Удалить заказ"
+                        onClick={() => setDeletingOrderId(order.id)}
                       >
                         <FiTrash2 />
                       </button>
@@ -266,6 +271,49 @@ export default function NewOrdersPage() {
             })}
         </div>
       </div>
+      {deletingOrderId && (
+        <div className="fixed inset-0 z-[10] flex items-center justify-center bg-[#00000080]">
+          <div className="flex w-[680px] flex-col items-center gap-[24px] rounded-[12px] bg-[#FFFFFF] px-[32px] py-[40px] text-center">
+            <p className="text-[18px] font-[600] text-left " id="h2">
+              Вы уверены, что хотите удалить заказ №
+              {orders.find(o => o.id === deletingOrderId)?.orderNumber}?
+            </p>
+
+            <div className="flex w-full items-center justify-end gap-[16px]">
+              <button
+                type="button"
+                className="w-fit h-[42px] rounded-[12px] bg-[var(--service)] px-[22px] text-[14px] font-[600] text-[#FFFFFF]"
+                onClick={() => setDeletingOrderId(null)}
+              >
+                Отмена
+              </button>
+
+              <button
+                type="button"
+                className="w-fit h-[42px] rounded-[12px] bg-[#E02844] px-[22px] text-[14px] font-[600] text-[#FFFFFF]"
+                onClick={() => {
+                  axios(`${import.meta.env.VITE_APP_API_URL}/orders/${deletingOrderId}`, {
+                    method: 'DELETE',
+                    headers: {
+                      Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                  })
+                    .then(() => {
+                      setOrders(prev => prev.filter(o => o.id !== deletingOrderId))
+                      setDeletingOrderId(null)
+                    })
+                    .catch(() => {
+                      alert('Не удалось удалить заказ')
+                      setDeletingOrderId(null)
+                    })
+                }}
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

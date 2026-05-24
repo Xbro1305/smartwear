@@ -48,4 +48,5 @@ export const ROUTER_PATHS = {
   WOMEN: '/women',
   ADMIN_COLLECTION: '/admin/products/atributes/collections',
   ADMINORDERS: '/admin/orders',
+  ORDERPROFILE: '/profile/orders',
 } as const

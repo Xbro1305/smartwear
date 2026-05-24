@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Заказ отправлен — Умная Одежда</title>
+  <style>
+    /* ── Reset ── */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #F2F2F2;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #1A1A1A;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* ── Wrapper ── */
+    .wrapper {
+      max-width: 560px;
+      margin: 32px auto;
+      padding: 0 16px 40px;
+    }
+
+    /* ── Logo block ── */
+    .logo-block {
+      background: #fff;
+      border-radius: 12px 12px 0 0;
+      padding: 28px 32px 24px;
+      border-bottom: 1px solid #EBEBEB;
+    }
+    .logo-block img {
+      height: 52px;
+      width: auto;
+      display: block;
+    }
+
+    /* ── Hero card (red gradient strip + content) ── */
+    .hero-card {
+      background: #fff;
+      padding: 32px 32px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      border-radius: 0;
+    }
+    .hero-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1A1A1A;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    /* ORDER_NUMBER is dynamic */
+    .hero-text h1 .order-num { color: #D42B2B; }
+    .hero-text p {
+      font-size: 13px;
+      color: #6B6B6B;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .btn-order {
+      display: inline-block;
+      background: #D42B2B;
+      color: #fff !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      letter-spacing: 0.1px;
+    }
+    .hero-icon img {
+      width: 110px;
+      height: auto;
+      flex-shrink: 0;
+    }
+
+    /* ── Divider ── */
+    .divider-card {
+      background: #fff;
+      height: 1px;
+      margin: 0;
+      border: none;
+    }
+
+    /* ── Details card ── */
+    .details-card {
+      background: #fff;
+      padding: 28px 32px 32px;
+      border-radius: 0 0 12px 12px;
+    }
+    .details-card h2 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1A1A1A;
+      text-align: center;
+      margin-bottom: 20px;
+      letter-spacing: -0.2px;
+    }
+    .section-label {
+      font-size: 12px;
+      color: #9B9B9B;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #EBEBEB;
+    }
+
+    /* ── Order item row ── */
+    .item-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid #F2F2F2;
+    }
+    .item-row:last-of-type { border-bottom: none; }
+    .item-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1;
+    }
+    .item-img {
+      width: 52px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+      background: #F2F2F2;
+    }
+    .item-desc {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #1A1A1A;
+    }
+    .item-right {
+      text-align: right;
+      flex-shrink: 0;
+      min-width: 140px;
+    }
+    .tracking-label {
+      font-size: 12px;
+      color: #6B6B6B;
+      margin-bottom: 4px;
+    }
+    .tracking-label a {
+      color: #D42B2B;
+      text-decoration: underline;
+    }
+    .tracking-number {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Footer note ── */
+    .footer-note {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #EBEBEB;
+      font-size: 12px;
+      color: #9B9B9B;
+      line-height: 1.6;
+    }
+    .footer-links {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .footer-links a {
+      font-size: 12px;
+      color: #9B9B9B;
+      text-decoration: underline;
+    }
+
+    /* ── Email footer ── */
+    .email-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: #BBBBBB;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- ═══════════════════════════════════════════════
+         LOGO
+    ═══════════════════════════════════════════════ -->
+    <div class="logo-block">
+      <img src="data:image/png;base64,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" alt="Умная Одежда" />
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         HERO — динамические места:
+
+    ═══════════════════════════════════════════════ -->
+    <div class="hero-card">
+      <div class="hero-text">
+        <h1>Заказ&nbsp;<span class="order-num">№{{ORDER_NUMBER}}</span> выдан на доставку</h1>
+        <p>После отправки заказа его отмена невозможна</p>
+        <a href="{{ORDER_URL}}" class="btn-order">Страница заказа</a>
+      </div>
+      <div class="hero-icon">
+        <img src="/delivery-box.png" alt="">
+      </div>
+    </div>
+
+    <div style="background:#fff; height:1px; border-top:1px solid #EBEBEB;"></div>
+
+  
+    <div class="details-card">
+      <h2>Детали заказа №{{ORDER_NUMBER}}</h2>
+
+      <p class="section-label">Состав&nbsp; заказа и номера отслеживания</p>
+
+      <!-- ── ITEM 1 (пример / шаблон для повторения) ── -->
+      <div class="item-row">
+        <div class="item-left">
+          <img
+            src="{{ITEM_IMAGE_URL}}"
+            alt="{{ITEM_NAME}}"
+            class="item-img"
+          />
+          <div class="item-desc">
+            ({{ITEM_ARTICUL}}) {{ITEM_NAME}},<br />
+            цвет: {{ITEM_COLOR}}, размер: {{ITEM_SIZE}} = {{ITEM_PRICE}}&nbsp;руб.
+          </div>
+        </div>
+        <div class="item-right">
+          <div class="tracking-label">
+            Отследить на <a href="https://cdek.ru/tracking?order_id={{ITEM_TRACKING_NUMBER}}" target="_blank">cdek.ru</a>:
+          </div>
+          <div class="tracking-number">{{ITEM_TRACKING_NUMBER}}</div>
+        </div>
+      </div>
+
+      <!-- ── ITEM 2 (второй товар в заказе — повторяется столько раз, сколько товаров) ── -->
+      <div class="item-row">
+        <div class="item-left">
+          <img
+            src="{{ITEM_IMAGE_URL_2}}"
+            alt="{{ITEM_NAME_2}}"
+            class="item-img"
+          />
+          <div class="item-desc">
+            ({{ITEM_ARTICUL_2}}) {{ITEM_NAME_2}},<br />
+            цвет: {{ITEM_COLOR_2}}, размер: {{ITEM_SIZE_2}} = {{ITEM_PRICE_2}}&nbsp;руб.
+          </div>
+        </div>
+        <div class="item-right">
+          <div class="tracking-label">
+            Отследить на <a href="https://cdek.ru/tracking?order_id={{ITEM_TRACKING_NUMBER_2}}" target="_blank">cdek.ru</a>:
+          </div>
+          <div class="tracking-number">{{ITEM_TRACKING_NUMBER_2}}</div>
+        </div>
+      </div>
+      <!-- /ITEMS -->
+
+      <!-- ── Footer note ── -->
+      <div class="footer-note">
+        <p>После отправки заказа его отмена невозможна.</p>
+        <div class="footer-links">
+          <a href="https://test.maxiscomfort.ru/politics">Политика конфиденциальности</a>
+          <a href="https://test.maxiscomfort.ru/delivery">Правила доставки</a>
+          <a href="https://test.maxiscomfort.ru/return">Как мы принимаем заказы и возвраты</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         EMAIL FOOTER
+    ═══════════════════════════════════════════════ -->
+    <div class="email-footer">
+      <p>© 2026 Умная Одежда. Все права защищены.</p>
+      <p style="margin-top:4px;">Вы получили это письмо, потому что оформили заказ на нашем сайте.</p>
+    </div>
+
+  </div>
+</body>
+</html>

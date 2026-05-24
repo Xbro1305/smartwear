@@ -1,998 +1,245 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { NumericFormat, PatternFormat } from 'react-number-format'
-import { Link, useNavigate } from 'react-router-dom'
-import { FaChevronRight, FaPlus } from 'react-icons/fa'
+import { useParams, Link } from 'react-router-dom'
+import axios from 'axios'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import PvzMapWidget from './pvz/PvzMapWidget'
-import locationMark from './local-two.svg'
-import { BsCheck } from 'react-icons/bs'
-import { CgChevronRight, CgClose } from 'react-icons/cg'
-import { toast } from 'react-toastify'
-import { useDispatch } from 'react-redux'
-import { setCartCount } from '@/app/store/cartCount'
 
-export const Order = () => {
-  const [cart, setCart] = useState([])
-  const [deliveryType, setDeliveryType] = useState<'Самовывоз' | 'До пункта выдачи' | 'Курьером'>(
-    'Самовывоз'
-  )
-  const [selectedAddress, setSelectedAddress] = useState<any>()
-  const [promo, setPromo] = useState<string>('')
-  const [user, setUser] = useState<any>(null)
-  const [addressModalOpened, setAddressModalOpened] = useState<boolean>(false)
-  const [isAddressSelected, setIsAddressSelected] = useState<boolean>(false)
-  const [isDefaultAddress, setIsDefaultAddress] = useState<boolean>(false)
-  const [payRulesAgreed, setPayRulesAgreed] = useState<boolean>(false)
-  const [personalDataAgreed, setPersonalDataAgreed] = useState<boolean>(false)
-  const [paymentType, setPaymentType] = useState<'ONLINE' | 'OFFLINE'>('OFFLINE')
-  const [promoDiscount, setPromoDiscount] = useState<string>()
-  const [deliveryDates, setDeliveryDates] = useState<any>([])
-  const [selectedDeliveryDate, setSelectedDeliveryDate] = useState<any>()
+import handed from './handed.png'
+import packing from './packing.png'
+import processing from './processing.png'
+import shipping from './shipping.png'
+import { NumericFormat } from 'react-number-format'
 
-  const { CART, ORDER } = ROUTER_PATHS
-  const pathname = location.pathname
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+const API_URL = import.meta.env.VITE_APP_API_URL
 
-  useEffect(() => {
-    document.title = `Оформление заказа - Умная одежда`
-    window.scrollTo(0, 0)
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-    if (!localStorage.getItem('token')) {
-      const localCart = localStorage.getItem('cart')
-      if (localCart) {
-        setCart(JSON.parse(localCart))
-      }
-      return
+interface OrderItem {
+  id: number
+  orderId: number
+  variantId: number
+  quantity: number
+  price: string
+  colorAlias: string | null
+  markingCode: string | null
+  deliveryStatus: 'NOT_DELIVERED' | 'DELIVERED' | 'RETURNED'
+  variant: {
+    id: number
+    colorAlias: string | null
+    sizeValue: { id: number; name: string } | null
+    colorAttrValue: {
+      id: number
+      value: string
+      meta?: { colorCode?: string }
+    } | null
+    product: {
+      id: number
+      name: string
+      articul: string
+      imageUrl: string | null
+      media: { id: number; url: string; kind: string; colorAttrValueId: number | null }[]
+      oldPrice: string | null
     }
+  }
+}
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then(res => {
-        res.data?.items && setCart(res.data.items)
-        localStorage.setItem('cartCount', String(res.data?.items?.length || 0))
-      })
-      .catch(err => {
-        console.error('Error fetching cart:', err)
-        setCart([]) // Set cart to empty array on error
-      })
+interface Order {
+  id: number
+  orderNumber: string
+  orderGroup: string
+  status: 'NEW' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
+  adminStatus: string
+  totalAmount: string
+  promoCodeId: number | null
+  paymentType: string
+  deliveryFrom: string | null
+  deliveryTo: string | null
+  trackingNumber: string | null
+  trackingUrl: string | null
+  invoiceNumber: string | null
+  createdAt: string
+  address: {
+    fullAddress: string
+    city: string
+    type: 'PVZ' | 'DELIVERY'
+  }
+  items: OrderItem[]
+}
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    }).then(res => {
-      setUser(res.data)
-      const defaultAddress = res.data.addresses.find((address: any) => address.isDefault)
-      if (defaultAddress) {
-        setSelectedAddress({
-          ...defaultAddress,
-          location: { address_full: defaultAddress.fullAddress },
-        })
-        defaultAddress.type === 'PVZ'
-          ? setDeliveryType('До пункта выдачи')
-          : setDeliveryType('Курьером')
+interface User {
+  name: string
+  middleName: string
+  surName: string
+  phone: string
+  email: string
+}
 
-        setIsDefaultAddress(true)
-        setIsAddressSelected(true)
+// ─── Constants ────────────────────────────────────────────────────────────────
 
-        defaultAddress.type !== 'PVZ' && setIsAddressSelected(true)
-      }
-    })
-  }, [])
+const STATUS_CONFIG: Record<string, { label: string; step: number; color: string }> = {
+  NEW: { label: 'В сборке', step: 1, color: '#D42B2B' },
+  PROCESSING: { label: 'В сборке', step: 1, color: '#D42B2B' },
+  SHIPPED: { label: 'Отправлен', step: 2, color: '#D42B2B' },
+  DELIVERED: { label: 'Доставлен', step: 3, color: '#22C55E' },
+  CANCELLED: { label: 'Отменён', step: 0, color: '#9B9B9B' },
+}
 
-  useEffect(() => {
-    setTimeout(() => {
-      document.querySelector('.main-container')?.scrollTo(0, 0)
-    }, 1)
-  }, [pathname])
+const PAYMENT_LABELS: Record<string, string> = {
+  OFFLINE: 'Сдэк',
+  ONLINE: 'Онлайн',
+  CASH: 'Наличными',
+  CARD: 'Картой',
+}
 
-  const totalProductsPrice = cart.reduce((sum: number, item: any) => {
-    const price = item.oldPrice && item.oldPrice > 0 ? item.oldPrice : item.price
-    return sum + +price
-  }, 0)
+const { PROFILE } = ROUTER_PATHS
 
-  const totalDiscount = cart.reduce((sum: number, item: any) => {
-    return sum + +(item.oldPrice && item.oldPrice > 0 ? item.oldPrice - item.price : 0)
-  }, 0)
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  const totalPrice =
-    cart.reduce((sum: number, item: any) => {
-      return sum + +item.price
-    }, 0) -
-    (promoDiscount ? +promoDiscount : 0) +
-    (deliveryType === 'Курьером' ? 1000 : 0)
+const fmt = (date?: string | null) => {
+  if (!date) return '—'
+  return new Date(date).toLocaleDateString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
 
-  const handleSubmit = () => {
-    if (!payRulesAgreed || !personalDataAgreed)
-      return alert(
-        'Вы должны согласиться с правилами оплаты и политикой обработки персональных данных'
-      )
+const fmtMoney = (val?: string | number | null) => {
+  if (val === null || val === undefined || val === '') return '—'
+  return Number(val).toLocaleString('ru-RU') + ' ₽'
+}
 
-    if (!isDefaultAddress) {
-      const address =
-        deliveryType === 'Курьером'
-          ? {
-              city: selectedAddress?.location?.city || '',
-              apartment: selectedAddress?.apartment || '',
-              entrance: selectedAddress?.entrance || '',
-              floor: selectedAddress?.floor || '',
-              intercom: selectedAddress?.intercom || '',
-              comment: selectedAddress?.comment || '',
-              latitude: String(selectedAddress?.location?.latitude) || '',
-              longitude: String(selectedAddress?.location?.longitude) || '',
-              fullAddress: selectedAddress?.location?.address_full || '',
-            }
-          : {
-              city: selectedAddress?.location?.city || '',
-              fullAddress: selectedAddress?.location?.address_full || '',
-              latitude: String(selectedAddress?.location?.latitude) || '',
-              longitude: String(selectedAddress?.location?.longitude) || '',
-            }
+const getProductImage = (item: OrderItem): string | null => {
+  const media = item.variant.product.media
+  // prefer photo matching variant color, then any photo, then cover
+  const colorId = item.variant.colorAttrValue?.id
+  const match = media.find(m => m.kind === 'photo' && m.colorAttrValueId === colorId)
+  const anyPhoto = media.find(m => m.kind === 'photo')
+  const cover = media.find(m => m.kind === 'cover')
+  return match?.url || anyPhoto?.url || cover?.url || item.variant.product.imageUrl || null
+}
 
-      return axios(`${import.meta.env.VITE_APP_API_URL}/users/add-address/${user?.id}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
+// ─── Status Progress Bar ──────────────────────────────────────────────────────
 
-        data: {
-          ...address,
-          type: deliveryType === 'До пункта выдачи' ? 'PVZ' : 'DELIVERY',
-        },
-      })
-        .then(res => {
-          console.log('Address saved:', res.data)
-          createOrder(res.data?.id)
-        })
-        .catch(err => {
-          console.error('Error saving address:', err)
-          toast.error('Не удалось сохранить адрес. Пожалуйста, попробуйте снова.')
-        })
-    }
-    selectedAddress?.id && createOrder(selectedAddress?.id)
+const steps = [
+  { label: 'Принят', image: <img src={processing} /> },
+  { label: 'В сборке', image: <img src={packing} /> },
+  { label: 'Отправлен', image: <img src={shipping} /> },
+  { label: 'Доставлен', image: <img src={handed} /> },
+]
+
+const StatusBar = ({ status }: { status: string }) => {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.NEW
+
+  if (status === 'CANCELLED') {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="inline-block rounded-full bg-[#F2F2F2] px-3 py-1 text-[13px] font-semibold text-[#9B9B9B]">
+          Отменён
+        </span>
+      </div>
+    )
   }
 
-  const formatDate = (date: any) => {
-    if (!date) return ''
-    const d = typeof date === 'string' ? new Date(date) : date
-    return d.toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'long',
-    })
-  }
-
-  const createOrder = (addressId: any) => {
-    let data = {
-      addressId: addressId || '',
-      paymentType,
-      promoCode: promo,
-      comment: selectedAddress.comment || '',
-    }
-
-    if (deliveryType === 'Курьером' && !selectedDeliveryDate.deliveryFrom) {
-      return toast.error('Пожалуйста, выберите дату доставки')
-    }
-
-    // we need to put deliveryFrom and deliveryTo in data, but they have different values for different delivery types
-    //put current date
-
-    axios(`${import.meta.env.VITE_APP_API_URL}/orders`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-      data:
-        deliveryType == 'Курьером'
-          ? { ...data, ...selectedDeliveryDate }
-          : {
-              ...data,
-              deliveryFrom: '2026-05-03T00:00:00.000Z',
-              deliveryTo: '2026-05-07T00:00:00.000Z',
-            },
-    })
-      .then(res => {
-        console.log('Order created:', res.data)
-        localStorage.removeItem('cart')
-        dispatch(setCartCount(0))
-        navigate(`${ORDER}/${res.data.id}`)
-      })
-      .catch(err => {
-        console.error('Error saving address:', err)
-        if (err.response?.data?.message == 'not enough stock')
-          toast.error('Товара(ов) нет в наличии')
-
-        toast.error(
-          err.response.data.message || 'Не удалось создать заказ. Пожалуйста, попробуйте снова.'
-        )
-      })
-  }
-
-  console.log(selectedAddress)
-
-  useEffect(() => {
-    if (deliveryType === 'Курьером' && selectedAddress?.id) {
-      axios(`${import.meta.env.VITE_APP_API_URL}/orders/delivery-dates`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        method: 'POST',
-        data: {
-          addressId: selectedAddress?.id || '',
-        },
-      })
-        .then(res => {
-          const dates = res.data
-
-          const addBusinessDays = (date: Date, days: number) => {
-            const result = new Date(date)
-
-            while (days > 0) {
-              result.setDate(result.getDate() + 1)
-
-              const day = result.getDay()
-              if (day !== 0 && day !== 6) {
-                days--
-              }
-            }
-
-            return result
-          }
-
-          const deliveryFrom = new Date(dates.deliveryFrom)
-          const deliveryTo = new Date(dates.deliveryTo)
-
-          console.log(deliveryFrom, deliveryTo)
-
-          const formatDate = (date: any) => date?.toISOString()?.split('T')[0]
-
-          const options = [
-            {
-              deliveryFrom: dates.deliveryFrom,
-              deliveryTo: dates.deliveryTo,
-            },
-            {
-              deliveryFrom: formatDate(addBusinessDays(deliveryFrom, 1)),
-              deliveryTo: formatDate(addBusinessDays(deliveryTo, 1)),
-            },
-            {
-              deliveryFrom: formatDate(addBusinessDays(deliveryFrom, 2)),
-              deliveryTo: formatDate(addBusinessDays(deliveryTo, 2)),
-            },
-          ]
-          setDeliveryDates(options)
-        })
-        .catch(err => {
-          console.error('Error fetching delivery dates:', err)
-          setDeliveryDates([])
-        })
-    }
-  }, [deliveryType, selectedAddress])
-
-  useEffect(() => {
-    if (promo.length === 0) return
-    axios(`${import.meta.env.VITE_APP_API_URL}/cart/apply-promo`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-      data: { code: promo },
-    })
-      .then(res => {
-        toast.success('Промокод применён')
-        // discount
-        setPromoDiscount(res.data.discount)
-      })
-      .catch(err => {
-        console.error('Error applying promo code:', err)
-        toast.error('Промокод недействителен')
-      })
-  }, [promo])
-
-  const SideBar = ({ cls }: any) => (
-    <CartSideBar
-      totalProductsPrice={totalProductsPrice}
-      totalDiscount={totalDiscount}
-      totalPrice={totalPrice}
-      cart={cart}
-      deliveryType={deliveryType}
-      promo={promo}
-      changePromo={setPromo}
-      cls={cls}
-      payRulesAgreed={payRulesAgreed}
-      setPayRulesAgreed={setPayRulesAgreed}
-      personalDataAgreed={personalDataAgreed}
-      setPersonalDataAgreed={setPersonalDataAgreed}
-      handleSubmit={handleSubmit}
-      promoDiscount={promoDiscount}
-    />
-  )
+  const currentIdx = cfg.step - 1
+  const nextStep = currentIdx + 1 < steps.length ? steps[currentIdx + 1] : null
 
   return (
-    <div className="flex flex-col w-full gap-[16px] lg:gap-[30px] py-[12px] px-[var(--sides-padding)_!important] w-full">
-      <div className="hidden py-[30px] lg:flex items-center gap-[20px] text-[var(--service)_!important] text-[22px] w-full">
-        <Link to="/" className="cursor-pointer">
-          Главная
-        </Link>{' '}
-        <Link to={CART} className="whitespace-nowrap cursor-pointer flex gap-[20px] items-center">
-          <FaChevronRight className="text-[18px]" /> <p>Корзина</p>
-        </Link>
-        <div className="whitespace-nowrap cursor-pointer flex gap-[20px] items-center">
-          <FaChevronRight className="text-[18px]" /> <p>Оформление заказа</p>
+    <>
+      {/* sm: вертикально */}
+      <div className="flex flex-col sm:hidden">
+        <div className="flex items-center gap-[12px]">
+          <div className="h-[30px] min-w-[40px]">{steps[currentIdx].image}</div>
+          <span className="text-[11px] font-medium whitespace-nowrap text-[#D42B2B]">
+            {steps[currentIdx].label}
+          </span>
         </div>
+
+        {nextStep && (
+          <>
+            <div className="w-[2px] h-[24px] bg-[#D42B2B] mx-auto" />
+            <div className="flex items-center gap-[12px]">
+              <div className="h-[30px] min-w-[40px] opacity-35">{nextStep.image}</div>
+              <span className="text-[11px] font-medium whitespace-nowrap text-[#9B9B9B]">
+                {nextStep.label}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="flex flex-col gap-[20px] 2xl:flex-row">
-        <div className="flex flex-col gap-[20px] w-full 2xl:w-[calc(100%-540px)]">
-          <div className="flex flex-col gap-[16px] lg:gap-[30px] w-full">
-            <div className="flex flex-col gap-[8px] border-b-[var(--gray)] pb-[20px] border-solid border-b-[3px]">
-              <h1 className="h1">Оформление заказа</h1>
-            </div>{' '}
-            {cart.length > 0 && <CartPage cart={cart} />}
-          </div>
-          <div className="flex flex-col gap-[16px] lg:gap-[30px] pt-[20px]">
-            <h4 className="h4">1. Способ доставки</h4>
-            <div className="flex flex-col gap-[16px] lg:gap-[30px] pt-[20px]">
-              <label className="flex gap-[10px]">
-                <input
-                  type="radio"
-                  className="radio"
-                  name="delivery"
-                  checked={deliveryType == 'До пункта выдачи'}
-                  onChange={() => {
-                    setDeliveryType('До пункта выдачи')
-                    setSelectedAddress(null)
-                    setIsAddressSelected(false)
-                    setAddressModalOpened(false)
-                  }}
-                />
-                <div className="flex flex-col gap-[5px] -mt-[3px]">
-                  <h5 className="h5">До пункта выдачи</h5>
-                  <p className="p1">
-                    Бесплатная доставка с примеркой до пункта выдачи СДЭК (ближайшего к адресу,
-                    который вы укажете)
-                  </p>
-                </div>
-              </label>
+      {/* sm → lg: текущий и следующий горизонтально с полоской между */}
+      <div className="hidden sm:flex lg:hidden items-center gap-[16px]">
+        {/* Текущий */}
+        <div className="flex items-center gap-[12px] shrink-0">
+          <div className="h-[30px] min-w-[40px]">{steps[currentIdx].image}</div>
+          <span className="text-[11px] font-medium whitespace-nowrap text-[#D42B2B]">
+            {steps[currentIdx].label}
+          </span>
+        </div>
+
+        {/* Полоска */}
+        {nextStep && (
+          <>
+            <div className="h-[2px] flex-1 bg-[#D42B2B]" />
+
+            {/* Следующий */}
+            <div className="flex items-center gap-[12px] shrink-0">
+              <div className="h-[30px] min-w-[40px] opacity-35">{nextStep.image}</div>
+              <span className="text-[11px] font-medium whitespace-nowrap text-[#9B9B9B]">
+                {nextStep.label}
+              </span>
             </div>
-            {deliveryType == 'До пункта выдачи' &&
-              (isAddressSelected ? (
-                selectedAddress ? (
-                  <div className="flex flex-col gap-[10px] pl-[30px]">
-                    <div className="flex gap-[10px] items-start mb-[10px]">
-                      <img src={locationMark} alt="" />
-                      <div className="flex flex-col gap-[10px]">
-                        <h5 className="h5 flex gap-[10px] items-center">
-                          {selectedAddress.location?.address_full}
-                        </h5>
-                        <p className="p1 text-[var(--service)_!important]">
-                          {selectedAddress?.note}
-                        </p>
-                        <button
-                          className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
-                          onClick={() => {
-                            setSelectedAddress(null)
-                            setAddressModalOpened(true)
-                          }}
-                        >
-                          Изменить адрес
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : addressModalOpened &&
-                  user?.addresses?.filter((address: any) => address.type === 'PVZ').length ? (
-                  <>
-                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                        <div className="flex items-center justify-center relative">
-                          <h2 className="h2 text-center">Выберите адрес доставки</h2>
-                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                            <CgClose
-                              className="h2"
-                              onClick={() => {
-                                setIsAddressSelected(false)
-                                setAddressModalOpened(false)
-                              }}
-                            />
-                          </button>
-                        </div>
-                        <div className="flex flex-col gap-[10px] max-h-[300px] w-full items-center overflow-y-auto">
-                          {user?.addresses
-                            ?.filter((address: any) => address.type === 'PVZ')
-                            ?.map((address: any, index: number) => (
-                              <>
-                                <div
-                                  key={index}
-                                  className="flex gap-[10px] mb-[10px] cursor-pointer border-solid border-[var(--service)] border-[1px] rounded-[12px] p-[10px] max-w-[700px] w-full"
-                                  onClick={() => {
-                                    setSelectedAddress({
-                                      id: address.id,
-                                      location: { address_full: address.fullAddress },
-                                    })
-                                    setIsAddressSelected(true)
-                                    setAddressModalOpened(false)
-                                    setIsDefaultAddress(true)
+          </>
+        )}
+      </div>
 
-                                    console.log({
-                                      id: address.id,
-                                      location: {
-                                        address_full: address.fullAddress,
-                                      },
-                                    })
-                                  }}
-                                >
-                                  <img src={locationMark} alt="" />
-                                  <div className="flex flex-col gap-[10px]">
-                                    <h5 className="h5 flex gap-[10px] items-center">
-                                      {address.fullAddress}
-                                    </h5>
-                                    <p className="p1 text-[var(--service)_!important]">
-                                      {address.entrance && `${address.entrance} Подъезд,`}{' '}
-                                      {address.floor && `${address.floor} этаж,`}{' '}
-                                      {address.comment && `${address.comment}`}{' '}
-                                    </p>
-                                  </div>
-                                </div>
-                              </>
-                            ))}
-                        </div>
-                        <button
-                          id="admin-button"
-                          className="w-[700px] text-center flex justify-center py-[20px_!important] items-center mx-[auto] flex gap-[10px] items-center"
-                          onClick={() => setAddressModalOpened(false)}
-                        >
-                          <FaPlus /> Добавить адрес
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                        <div className="flex items-center justify-center relative">
-                          <h2 className="h2 text-center">Новый адрес доставки</h2>
-                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                            <CgClose
-                              className="h2"
-                              onClick={() => {
-                                setIsAddressSelected(false)
-                                setSelectedAddress({})
-                                setAddressModalOpened(false)
-                              }}
-                            />
-                          </button>
-                        </div>
-                        <PvzMapWidget
-                          onSelect={pvz => {
-                            setSelectedAddress(pvz)
-                            setIsDefaultAddress(false)
-                          }}
-                          type="PVZ"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )
-              ) : (
-                <>
-                  <div className="flex flex-col gap-[10px] pl-[30px]">
-                    <div
-                      className="flex gap-[10px] items-center mb-[10px] cursor-pointer"
-                      onClick={() => {
-                        setIsAddressSelected(true)
-                        setSelectedAddress(null)
-                        setAddressModalOpened(true)
-                      }}
-                    >
-                      <img src={locationMark} alt="" />
-                      <div className="flex flex-col gap-[10px]">
-                        <h5 className="h5 flex gap-[10px] items-center">
-                          Адрес доставки не добавлен
-                        </h5>
-                        <p className="p1 text-[var(--service)_!important]">
-                          Нажмите чтобы добавить
-                        </p>
-                      </div>
-                      <CgChevronRight className="ml-auto text-[24px]" />
-                    </div>
-                  </div>
-                </>
-              ))}
-            <label className="flex gap-[10px]">
-              <input
-                type="radio"
-                className="radio"
-                name="delivery"
-                checked={deliveryType == 'Курьером'}
-                onChange={() => {
-                  setDeliveryType('Курьером')
-                  setSelectedAddress(null)
-                  setIsAddressSelected(false)
-                  setAddressModalOpened(false)
-                }}
-              />
-              <div className="flex flex-col gap-[5px] -mt-[3px]">
-                <h5 className="h5">Курьером</h5>
-                <p className="p1">Бесплатная доставка курьером СДЭК до дома (с примеркой)</p>
+      {/* lg+: все 4 шага горизонтально */}
+      <div className="hidden lg:grid grid-cols-4">
+        {steps.map((step, i) => {
+          const stepNum = i + 1
+          const active = cfg.step >= stepNum
+          const isLast = i === steps.length - 1
+          return (
+            <div key={step.label} className="flex items-center gap-[16px]">
+              <div className="flex items-center gap-[12px]">
+                <div className="h-[30px] min-w-[40px]">{step.image}</div>
+                <span
+                  className="text-[11px] font-medium whitespace-nowrap transition-colors"
+                  style={{ color: active ? '#D42B2B' : '#9B9B9B' }}
+                >
+                  {step.label}
+                </span>
               </div>
-            </label>
-            {deliveryType == 'Курьером' &&
-              (isAddressSelected ? (
-                selectedAddress ? (
-                  <>
-                    <div className="flex flex-col gap-[10px] pl-[30px]">
-                      <div className="flex gap-[10px] items-start mb-[10px]">
-                        <img src={locationMark} alt="" />
-                        <div className="flex flex-col gap-[10px]">
-                          <h5 className="h5 flex gap-[10px] items-center">
-                            {selectedAddress.location?.address_full}
-                          </h5>
-                          <p className="p1 text-[var(--service)_!important]">
-                            {selectedAddress?.entrance && `${selectedAddress?.entrance} Подъезд,`}{' '}
-                            {selectedAddress?.floor && `${selectedAddress?.floor} этаж,`}{' '}
-                            {selectedAddress?.comment && `${selectedAddress?.comment}`}{' '}
-                          </p>
-                          <button
-                            className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
-                            onClick={() => {
-                              setSelectedAddress(null)
-                              setAddressModalOpened(true)
-                            }}
-                          >
-                            Изменить адрес
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    {deliveryDates.length ? (
-                      <div className="flex flex-col gap-[20px]">
-                        <h2 className="h2">Дата доставки</h2>
-                        <div className="flex items-center gap-[8px]">
-                          {deliveryDates?.map((d: any, index: number) => (
-                            <div
-                              key={index}
-                              className="p-[12px] rounded-[4px] border-solid border-[1px] border-[var(--service)]"
-                              style={{
-                                background:
-                                  selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
-                                    ? 'var(--gray)'
-                                    : '',
-                              }}
-                              onClick={() => setSelectedDeliveryDate(d)}
-                            >
-                              {formatDate(d.deliveryFrom)}
-                              {' - '}
-                              {formatDate(d.deliveryTo)}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      ''
-                    )}
-                  </>
-                ) : addressModalOpened &&
-                  user?.addresses?.filter((address: any) => address.type !== 'PVZ').length ? (
-                  <>
-                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                        <div className="flex items-center justify-center relative">
-                          <h2 className="h2 text-center">Выберите адрес доставки</h2>
-                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                            <CgClose
-                              className="h2"
-                              onClick={() => {
-                                setIsAddressSelected(false)
-                                setAddressModalOpened(false)
-                              }}
-                            />
-                          </button>
-                        </div>
-                        <div className="flex flex-col gap-[10px] max-h-[300px] w-full items-center overflow-y-auto">
-                          {user?.addresses
-                            ?.filter((address: any) => address.type !== 'PVZ')
-                            ?.map((address: any, index: number) => (
-                              <>
-                                <div
-                                  key={index}
-                                  className="flex gap-[10px] items-start mb-[10px] cursor-pointer border-solid border-[var(--service)] border-[1px] rounded-[12px] p-[10px] max-w-[700px] w-full"
-                                  onClick={() => {
-                                    setSelectedAddress({
-                                      id: address.id,
-                                      location: {
-                                        address_full: address.fullAddress,
-                                      },
-                                      entrance: address.entrance,
-                                      floor: address.floor,
-                                      comment: address.comment,
-                                    })
-
-                                    setIsAddressSelected(true)
-                                    setAddressModalOpened(false)
-                                    setIsDefaultAddress(true)
-                                  }}
-                                >
-                                  <img src={locationMark} alt="" />
-                                  <div className="flex flex-col gap-[10px]">
-                                    <h5 className="h5 flex gap-[10px] items-center">
-                                      {address.fullAddress}
-                                    </h5>
-                                    <p className="p1 text-[var(--service)_!important]">
-                                      {address.entrance && `${address.entrance} Подъезд,`}{' '}
-                                      {address.floor && `${address.floor} этаж,`}{' '}
-                                      {address.comment && `${address.comment}`}{' '}
-                                    </p>
-                                  </div>
-                                </div>
-                              </>
-                            ))}
-                        </div>
-                        <button
-                          id="admin-button"
-                          className="w-[700px] text-center flex justify-center py-[20px_!important] items-center mx-[auto] flex gap-[10px] items-center"
-                          onClick={() => setAddressModalOpened(false)}
-                        >
-                          <FaPlus /> Добавить адрес
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="z-[50] flex items-center justify-center fixed top-[0] left-[0] w-full h-screen bg-[#00000080]">
-                      <div className="flex flex-col gap-[24px] p-[20px] rounded-[12px] bg-[#fff] w-[990px] max-w-[90%]">
-                        <div className="flex items-center justify-center relative">
-                          <h2 className="h2 text-center">Новый адрес доставки</h2>
-                          <button className="absolute right-[0] top-[3px] bg-[transparent] border-none">
-                            <CgClose
-                              className="h2"
-                              onClick={() => {
-                                setIsAddressSelected(false)
-                                setAddressModalOpened(false)
-                              }}
-                            />
-                          </button>
-                        </div>
-                        <PvzMapWidget
-                          onSelect={pvz => {
-                            setSelectedAddress(pvz)
-                            setIsDefaultAddress(false)
-                          }}
-                          type="DELIVERY"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )
-              ) : (
-                <>
-                  <div className="flex flex-col gap-[10px] pl-[30px]">
-                    <div
-                      className="flex gap-[10px] items-center mb-[10px] cursor-pointer"
-                      onClick={() => {
-                        setIsAddressSelected(true)
-                        setSelectedAddress(null)
-                        setAddressModalOpened(true)
-                      }}
-                    >
-                      <img src={locationMark} alt="" />
-                      <div className="flex flex-col gap-[10px]">
-                        <h5 className="h5 flex gap-[10px] items-center">
-                          Адрес доставки не добавлен
-                        </h5>
-                        <p className="p1 text-[var(--service)_!important]">
-                          Нажмите чтобы добавить
-                        </p>
-                      </div>
-                      <CgChevronRight className="ml-auto text-[24px]" />
-                    </div>
-                  </div>
-                </>
-              ))}
-          </div>
-          <div className="flex flex-col gap-[30px]">
-            <h4 className="h4">2. Ваши данные</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[16px]">
-              <label>
-                <p className="p2 text-[var(--service)_!important]">Имя</p>
-                <input
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={user?.name || ''}
-                  onChange={e => setUser((prev: any) => ({ ...prev, name: e.target.value }))}
+              {!isLast && (
+                <div
+                  className="h-[2px] w-full shrink-1 transition-colors mr-[16px]"
+                  style={{ background: cfg.step > stepNum ? '#D42B2B' : '#D9D9D9' }}
                 />
-              </label>{' '}
-              <label>
-                <p className="p2 text-[var(--service)_!important]">Фамилия</p>
-                <input
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={user?.surName || ''}
-                  onChange={e => setUser((prev: any) => ({ ...prev, surName: e.target.value }))}
-                />
-              </label>
-              <label>
-                <p className="p2 text-[var(--service)_!important]">Отчество</p>
-                <input
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={user?.middleName || ''}
-                  onChange={e => setUser((prev: any) => ({ ...prev, middleName: e.target.value }))}
-                />
-              </label>
-              <label>
-                <p className="p2 text-[var(--service)_!important]">Email</p>
-                <input
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={user?.email || ''}
-                  onChange={e => setUser((prev: any) => ({ ...prev, email: e.target.value }))}
-                />
-              </label>
-              <label>
-                <p className="p2 text-[var(--service)_!important]">Телефон</p>
-                <PatternFormat
-                  format="+7 (###) ###-##-##"
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={user?.phone || ''}
-                  onChange={e => setUser((prev: any) => ({ ...prev, phone: e.target.value }))}
-                />
-              </label>
-              <label>
-                <p className="p2 text-[var(--service)_!important]">Адрес</p>
-                <textarea
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={selectedAddress?.location?.address_full || ''}
-                  style={{ height: 'fit-content', minHeight: '40px', maxHeight: '120px' }}
-                />
-              </label>{' '}
-              {deliveryType === 'Курьером' && (
-                <>
-                  <label>
-                    <p className="p2 text-[var(--service)_!important]">Подъезд</p>
-                    <input
-                      type="text"
-                      className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                      value={selectedAddress?.entrance || ''}
-                      onChange={e =>
-                        setSelectedAddress((prev: any) => ({ ...prev, entrance: e.target.value }))
-                      }
-                    />
-                  </label>
-                  <label>
-                    <p className="p2 text-[var(--service)_!important]">Этаж</p>
-                    <input
-                      type="text"
-                      className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                      value={selectedAddress?.floor || ''}
-                      onChange={e =>
-                        setSelectedAddress((prev: any) => ({ ...prev, floor: e.target.value }))
-                      }
-                    />
-                  </label>
-                </>
               )}
-              <label>
-                <p className="p2 text-[var(--service)_!important]">Комментарий</p>
-                <input
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={selectedAddress?.comment || ''}
-                  onChange={e =>
-                    setSelectedAddress((prev: any) => ({ ...prev, comment: e.target.value }))
-                  }
-                />
-              </label>
             </div>
-          </div>
-          <div className="flex flex-col gap-[16px] lg:gap-[30px]">
-            <h3 className="h3">3. Способ оплаты</h3>
-            <label className="flex gap-[10px]">
-              <input
-                type="radio"
-                className="radio"
-                name="payment"
-                checked={paymentType == 'OFFLINE'}
-                onChange={() => setPaymentType('OFFLINE')}
-              />
-              <div className="flex flex-col gap-[10px]">
-                <p className="h5">При получении</p>
-                <p className="p1">Картой или наличными</p>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        {cart.length > 0 && (
-          <SideBar cls="hidden 2xl:flex right-[var(--sides-padding)] max-w-[450px] sticky top-[100px] right-[var(--sides-padding)]" />
-        )}
+          )
+        })}
       </div>
-
-      {cart.length > 0 && <SideBar cls="flex 2xl:hidden w-[100%_!important]" />}
-    </div>
+    </>
   )
 }
+// ─── Order Item Row ───────────────────────────────────────────────────────────
 
-const CartPage = ({ cart }: any) => {
-  return (
-    <div className="cart flex flex-col lg:flex-row gap-[20px] lg:justify-between">
-      <div className="flex flex-col gap-[20px] w-full">
-        {cart?.map((item: any, index: number) => (
-          <CartItem key={index} item={item} index={index} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const CartSideBar = ({
-  totalProductsPrice,
-  totalDiscount,
-  totalPrice,
-  cart,
-  deliveryType,
-  promo,
-  cls,
-  changePromo,
-  payRulesAgreed,
-  setPayRulesAgreed,
-  personalDataAgreed,
-  setPersonalDataAgreed,
-  handleSubmit,
-  promoDiscount,
-}: any) => {
-  const [promoCode, setPromoCode] = useState(promo)
+const OrderItemRow = ({ item }: { item: OrderItem }) => {
+  const img = getProductImage(item)
+  const color =
+    item.colorAlias || item.variant.colorAlias || item.variant.colorAttrValue?.value || '—'
+  const size = item.variant.sizeValue?.name || '—'
+  const colorCode = item.variant.colorAttrValue?.meta?.colorCode
+  const oldPrice = Number(item?.variant.product.oldPrice)
+  const price = Number(item.price)
 
   return (
-    <div
-      className={`flex flex-col gap-[18px] xl:gap-[30px] w-full lg:w-[34%] bg-[var(--gray)] rounded-[12px] py-[12px] px-[16px] 2xl:px-[32px] 2xl:pt-[52px] 2xl:pb-[32px] h-fit xl:min-w-[408px] lg:min-w-[337px] 2xl:min-w-[520px] ${cls}`}
-    >
-      <div className="flex flex-col gap-[16px]">
-        <div className="flex items-center justify-between pt-[10px] xl:pt-[20px]">
-          <p className="p1">Товары ({cart.length})</p>
-          <NumericFormat
-            value={totalProductsPrice}
-            suffix=" ₽"
-            className="p1"
-            thousandSeparator=" "
-            displayType="text"
-          />
-        </div>
-
-        {totalDiscount > 0 && (
-          <div className="flex items-center justify-between">
-            <p className="p1">Скидка</p>
-            <NumericFormat
-              value={totalDiscount}
-              allowNegative={false}
-              suffix=" ₽"
-              prefix="-"
-              className="p1"
-              thousandSeparator=" "
-              displayType="text"
-            />
-          </div>
-        )}
-
-        {promoDiscount && (
-          <div className="flex items-center justify-between">
-            <p className="p1">Промокод</p>
-            <NumericFormat
-              value={promoDiscount}
-              allowNegative={false}
-              suffix=" ₽"
-              prefix="-"
-              className="p1"
-              thousandSeparator=" "
-              displayType="text"
-            />
-          </div>
-        )}
-
-        <div className="flex items-center justify-between">
-          <p className="p1">Доставка</p>
-          <div className="flex items-center gap-[10px] p1">
-            {deliveryType}
-            {', '}
-            {deliveryType === 'Курьером' ? (
-              <NumericFormat
-                value={1000}
-                allowNegative={false}
-                suffix=" ₽"
-                thousandSeparator=" "
-                displayType="text"
-              />
-            ) : (
-              <>бесплатно</>
-            )}
-          </div>
-        </div>
-      </div>
-      <span className="block w-full h-[3px] bg-[#fff]"></span>
-      <div className="flex flex-col gap-[10px]">
-        <p className="h5">Промокод</p>
-        <div className="flex gap-[10px] items-center">
-          <input
-            type="text"
-            value={promoCode}
-            onChange={e => setPromoCode(e.target.value)}
-            placeholder="ПРОМОКОД"
-            className="w-full p-[12px] h-[40px] rounded-[8px] border-[#00000020] border-solid border-[1px] outline-none bg-[transparent]"
-          />
-          {promoCode && (
-            <button
-              className="w-[72px] h-[40px] rounded-[8px] bg-[#000] flex items-center justify-center"
-              onClick={() => changePromo(promoCode)}
-            >
-              <BsCheck className="text-[24px] text-[#fff]" />
-            </button>
-          )}
-        </div>
-      </div>{' '}
-      <div className="flex items-center justify-between py-[10px] xl:py-[20px]">
-        <p className="h5">Итого</p>
-        <NumericFormat
-          value={totalPrice}
-          suffix=" ₽"
-          className="h5"
-          thousandSeparator=" "
-          displayType="text"
-        />
-      </div>
-      <button className="button" onClick={handleSubmit}>
-        Оформить заказ
-      </button>
-      <div className="flex flex-col gap-[15px] xl:gap-[30px]">
-        <label className="flex gap-[10px]">
-          <input
-            type="checkbox"
-            className="checkbox"
-            checked={payRulesAgreed}
-            onChange={() => setPayRulesAgreed((prev: any) => !prev)}
-          />
-          <p className="p2">
-            Я соглашаюсь с&nbsp;
-            <a href="#" className="text-[var(--red)]">
-              правилами оплаты и возврата
-            </a>
-          </p>
-        </label>
-        <label className="flex gap-[10px]">
-          <input
-            type="checkbox"
-            className="checkbox"
-            checked={personalDataAgreed}
-            onChange={() => setPersonalDataAgreed((prev: any) => !prev)}
-          />
-          <p className="p2">
-            Я соглашаюсь с&nbsp;
-            <a href="#" className="text-[var(--red)]">
-              обработкой персональных данных
-            </a>
-          </p>
-        </label>
-      </div>
-    </div>
-  )
-}
-
-const CartItem = ({ item, index }: any) => {
-  return (
-    <div key={index} className="flex flex-col sm:flex-row gap-[20px]">
-      <img src={item?.imageUrl} className="w-[120px] aspect-[12/17] object-cover" alt="" />
+    <div key={color} className="flex flex-col sm:flex-row gap-[20px]">
+      <img src={img || ''} className="w-[120px] aspect-[12/17] object-cover" alt="" />
       <div className="flex flex-row w-full justify-between gap-[16px] md:gap-[24px]">
         <div className="flex flex-col gap-[16px] md:gap-[20px]">
-          <h5 className="h5 -mb-[10px] md:mb-0">{item?.name}</h5>
+          <h5 className="h5 -mb-[10px] md:mb-0">{item?.variant.product.name}</h5>
           <div className="flex sm:hidden gap-[8px]">
             <NumericFormat
               allowNegative={false}
@@ -1002,11 +249,11 @@ const CartItem = ({ item, index }: any) => {
               thousandSeparator=" "
               displayType="text"
             />
-            {item.oldPrice && item.oldPrice > 0 ? (
+            {oldPrice && oldPrice > 0 ? (
               <>
                 <NumericFormat
                   allowNegative={false}
-                  value={item.oldPrice}
+                  value={item?.variant.product.oldPrice}
                   suffix=" ₽"
                   className="text-[var(--service)_!important] p1 line-through"
                   thousandSeparator=" "
@@ -1014,7 +261,7 @@ const CartItem = ({ item, index }: any) => {
                 />
 
                 <NumericFormat
-                  value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
+                  value={Math.round(((oldPrice - price) / oldPrice) * 100)}
                   suffix="%"
                   prefix="-"
                   allowNegative={false}
@@ -1027,11 +274,11 @@ const CartItem = ({ item, index }: any) => {
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p1 text-[15px] md:text-[18px] w-[90px]">Модель:</p>
-            <p className="p1 text-[15px] md:text-[18px] w-[90px]">{item.articul}</p>
+            <p className="p1 text-[15px] md:text-[18px] w-[90px]">{item.variant.product.articul}</p>
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p1 text-[15px] md:text-[18px] w-[90px]">Размер:</p>
-            <p className="p1 text-[15px] md:text-[18px] w-[90px]">{item.size}</p>
+            <p className="p1 text-[15px] md:text-[18px] w-[90px]">{size}</p>
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p1 text-[15px] md:text-[18px] w-[90px]">Цвет:</p>
@@ -1039,7 +286,7 @@ const CartItem = ({ item, index }: any) => {
               {' '}
               <span
                 className="block min-w-[24px] h-[24px] rounded-[50%] mr-[8px]"
-                style={{ background: item.colorCode }}
+                style={{ background: colorCode }}
               ></span>{' '}
               {item.colorAlias ? item.colorAlias : 'Без цвета'}
             </p>
@@ -1057,10 +304,10 @@ const CartItem = ({ item, index }: any) => {
                 displayType="text"
               />
 
-              {item.oldPrice && item.oldPrice > 0 ? (
+              {oldPrice && oldPrice > 0 ? (
                 <NumericFormat
                   allowNegative={false}
-                  value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
+                  value={Math.round(((oldPrice - price) / oldPrice) * 100)}
                   suffix="%"
                   prefix="-"
                   className="text-[var(--red)_!important] p1"
@@ -1069,9 +316,9 @@ const CartItem = ({ item, index }: any) => {
                 />
               ) : null}
             </div>
-            {item.oldPrice && item.oldPrice > 0 ? (
+            {oldPrice && oldPrice > 0 ? (
               <NumericFormat
-                value={item.oldPrice}
+                value={oldPrice}
                 suffix=" ₽"
                 className="text-[var(--service)_!important] p1 line-through ml-auto"
                 thousandSeparator=" "
@@ -1080,6 +327,189 @@ const CartItem = ({ item, index }: any) => {
               />
             ) : null}
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Info Row (label + value) ─────────────────────────────────────────────────
+
+const InfoRow = ({ label, value }: { label: string; value?: string | null }) => (
+  <div className="flex flex-col gap-[12px]">
+    <p className="h5 mb-[2px]">{label}</p>
+    <p className="p1">{value || '—'}</p>
+  </div>
+)
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
+export const Order = () => {
+  const { id } = useParams<{ id: string }>()
+  const [order, setOrder] = useState<Order | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const token = localStorage.getItem('token')
+  const headers = { Authorization: `Bearer ${token}` }
+
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    Promise.all([
+      axios.get(`${API_URL}/orders/my/${id}`, { headers }),
+      axios.get(`${API_URL}/users/me`, { headers }),
+    ])
+      .then(([orderRes, userRes]) => {
+        setOrder(orderRes.data)
+        setUser(userRes.data)
+        window.document.title = `Заказ №${orderRes.data.orderNumber}`
+      })
+      .catch(() => setError('Не удалось загрузить заказ'))
+      .finally(() => setLoading(false))
+
+    window.scrollTo(0, 0)
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-[15px] text-[#9B9B9B]">Загрузка заказа...</p>
+      </div>
+    )
+  }
+
+  if (error || !order) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-[15px] text-[#D42B2B]">{error || 'Заказ не найден'}</p>
+      </div>
+    )
+  }
+
+  const fullName = [user?.surName, user?.name, user?.middleName].filter(Boolean).join(' ')
+  const totalItems = order.items.reduce((acc, i) => acc + i.quantity, 0)
+
+  return (
+    <div className="w-full bg-white flex flex-col gap-[12px] p-[var(--sides-padding)] pt-[48px]">
+      <div className="flex flex-col gap-[40px]">
+        <div className="flex flex-col gap-[12px]">
+          {/* ── Breadcrumb ── */}
+          <div className="flex items-center gap-2 text-[12px] text-[#9B9B9B]">
+            <Link to={PROFILE} className="text-[#D42B2B] transition-colors">
+              {'<-'} В историю заказов
+            </Link>
+          </div>
+          {/* ── Title ── */}
+          <h1 className="h2 font-bold text-[#1A1A1A] leading-tight">
+            Заказ №{order.orderNumber}
+          </h1>{' '}
+          {/* ── Title ── */}
+          <h1 className="h5 font-bold text-[#B0B7BF_!important] leading-tight">
+            {new Date(order.createdAt).toLocaleDateString('ru-RU', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })}
+          </h1>
+        </div>
+        {/* ── Status block ── */}
+        <p className="h4 font-semibold text-[#6B6B6B] tracking-wide">Статус заказа</p>{' '}
+      </div>
+      <div className="flex flex-col lg:flex-row gap-[12px] items-start">
+        <div className="flex flex-col gap-[12px] flex-1">
+          <div className="rounded-2xl shadow-[0px_4px_16.2px_0px_#0000000D] p-[36px]">
+            <StatusBar status={order.status} />
+          </div>
+          {/* ── Items ── */}
+          <div className="shadow-[0px_4px_16.2px_0px_#0000000D] py-[32px] px-[16px] md:px-[32px] rounded-[12px]">
+            <h4 className="mb-[40px] h4">Состав заказа</h4>
+            {order.items.map(item => (
+              <OrderItemRow key={item.id} item={item} />
+            ))}
+            <div className="my-[40px]">
+              <hr className="border-[#F2F2F2]" />
+            </div>
+            {/* Total */}
+            <div className="mt-4 flex items-center justify-between rounded-[12px]">
+              <p className="h5">
+                Итого ({totalItems}{' '}
+                {totalItems === 1 ? 'товар' : totalItems < 5 ? 'товара' : 'товаров'})
+              </p>
+              <p className="h5">{fmtMoney(order.totalAmount)}</p>
+            </div>
+            Promo
+            {order.promoCodeId && (
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-[13px] text-[#9B9B9B]">Промокод применён</p>
+                <p className="text-[13px] font-semibold text-[#D42B2B]">Скидка применена</p>
+              </div>
+            )}
+          </div>
+          {/* ── Order details ── */}
+          <div className="shadow-[0px_4px_16.2px_0px_#0000000D] py-[32px] px-[16px] md:px-[32px] rounded-[12px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+              {/* Customer */}
+              <InfoRow label="Покупатель" value={fullName || '—'} />
+              <InfoRow
+                label="Способ оплаты"
+                value={PAYMENT_LABELS[order.paymentType] || order.paymentType}
+              />
+              <InfoRow label="Контактный телефон" value={user?.phone} />
+              <InfoRow label="Статус оплаты" value="Оплачен" />
+              <InfoRow label="Адрес доставки" value={order.address.fullAddress} />
+              {order.address.type !== 'PVZ' && (
+                <InfoRow
+                  label="Дата доставки"
+                  value={
+                    order.deliveryFrom && order.deliveryTo
+                      ? `${fmt(order.deliveryFrom)} — ${fmt(order.deliveryTo)}`
+                      : fmt(order.deliveryFrom)
+                  }
+                />
+              )}
+              <InfoRow
+                label="Способ получения"
+                value={order.address.type === 'PVZ' ? 'Пункт выдачи' : 'Курьер'}
+              />
+            </div>
+
+            {/* Tracking */}
+            {(order.trackingNumber || order.invoiceNumber) && (
+              <div className="mt-5 pt-5 border-t border-[#F2F2F2]">
+                <p className="mb-2 text-[11px] text-[#9B9B9B] uppercase tracking-wide font-semibold">
+                  Номер отслеживания
+                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-[15px] font-bold text-[#1A1A1A]">
+                    {order.trackingNumber || order.invoiceNumber}
+                  </span>
+                  {order.trackingUrl && (
+                    <a
+                      href={order.trackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#D42B2B] px-3 py-1 text-[12px] font-semibold text-white hover:bg-[#B52020] transition-colors"
+                    >
+                      Отследить →
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="shadow-[0px_4px_16.2px_0px_#0000000D] rounded-[12px] h-fit px-[24px] py-[32px] flex flex-col w-full lg:w-fit gap-[24px]">
+          <button id="admin-button" className="flex justify-center text-center">
+            Отменить заказ
+          </button>
+          <button
+            id="admin-button"
+            className="text-[#282B32_!important] flex justify-center text-center bg-[#FAFAFA_!important] rounded-lg py-3 px-4 font-semibold hover:bg-[#F5F5F5_!important] transition-colors"
+          >
+            Помощь с заказом
+          </button>
         </div>
       </div>
     </div>

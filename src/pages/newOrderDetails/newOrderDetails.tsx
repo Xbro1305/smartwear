@@ -29,7 +29,7 @@ interface Order {
   }[]
 }
 
-export const OrderDetails = () => {
+export const NewOrderDetails = () => {
   const [isListOpened, setIsListOpened] = useState<boolean>(true)
   const [order, setOrder] = useState<Order>()
   const { data: articles, isLoading } = useGetArticlesQuery()

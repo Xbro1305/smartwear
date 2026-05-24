@@ -1,34 +1,60 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable max-lines */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link, useNavigate } from 'react-router-dom'
 import Slider from 'react-slick'
-
-//import arrow from '@/assets/images/Vector 46 (Stroke).svg'
-import acs from '@/assets/images/homeAcs.png'
 import brands from '@/assets/images/homeBrands.png'
 import catalog from '@/assets/images/homeCatalog.jpeg'
-import fire from '@/assets/images/homeFire.svg'
 import heart from '@/assets/images/homeHeart.svg'
 import info from '@/assets/images/homeInfo.png'
 import intro from '@/assets/images/homeIntro.png'
-import man from '@/assets/images/homeMan.jpeg'
 import sales from '@/assets/images/homeSales.png'
-import star from '@/assets/images/homeStar.svg'
-import woman from '@/assets/images/homeWoman.jpeg'
 import homeadv1 from '@/assets/images/homeadv (1).svg'
 import homeadv4 from '@/assets/images/homeadv (2).svg'
 import homeadv3 from '@/assets/images/homeadv (3).svg'
 import homeadv2 from '@/assets/images/homeadv (4).svg'
 import { useGetArticlesBySectionQuery } from '@/entities/article'
 import { Section } from '@/entities/article/article.types'
-
 import styles from '../home.module.scss'
+import { BsGrid, BsTag, BsStars, BsTruck } from 'react-icons/bs'
+
+const API_URL = import.meta.env.VITE_APP_API_URL
+
+type Category = {
+  id: number
+  parentId: number | null
+  name: string
+  slug: string
+  orderNum: number | null
+  showInMenu: boolean
+  imageUrl: string | null
+}
+
+const iconItems = [
+  { icon: <BsGrid className="text-[28px] text-[#D42B2B]" />, label: 'Каталог', to: '/catalog' },
+  { icon: <BsTag className="text-[28px] text-[#D42B2B]" />, label: 'Скидки', to: '/sale' },
+  { icon: <BsStars className="text-[28px] text-[#D42B2B]" />, label: 'Новинки', to: '/new' },
+  { icon: <BsTruck className="text-[28px] text-[#D42B2B]" />, label: 'Доставка', to: '/delivery' },
+]
 
 export const HomePage = () => {
   const { data: newsData } = useGetArticlesBySectionQuery(Section.NEWS)
   const [checkedInfo, setCheckedInfo] = useState(0)
+
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch(`${API_URL}/categories`)
+      .then(res => res.json())
+      .then((data: Category[]) => {
+        const filtered = data
+          .filter(c => c.parentId === null && c.showInMenu)
+          .sort((a, b) => (a.orderNum ?? 999) - (b.orderNum ?? 999))
+        setCategories(filtered)
+      })
+      .catch(console.error)
+  }, [])
 
   const navigate = useNavigate()
 
@@ -36,14 +62,14 @@ export const HomePage = () => {
     <div className={styles.home}>
       <div className={styles.home_intro}>
         <img alt={''} src={intro} />
-        <h1 className={'h1'}>Мембранная одежда с климат-контролем</h1>
+        <h1 className={'h1'}>
+          Мембранная одежда <span>с климат-контролем</span>
+        </h1>
         <button className={'button'}>В каталог</button>
       </div>
-      <div className={styles.home_brands}>
-        <img alt={''} src={brands} />
-      </div>
       <div className={styles.home_categories}>
-        <h1 className={'h1'}>Категории</h1>
+        <h1 className={'h1 hidden lg:flex'}>Категории</h1>
+
         <div className={styles.home_categories_wrapper}>
           {catalogItems.map(i => (
             <div className={styles.home_categories_item}>
@@ -55,7 +81,7 @@ export const HomePage = () => {
           ))}
         </div>
         <div className={styles.home_categories_mob}>
-          <div className={styles.home_categories_mob_top}>
+          {/* <div className={styles.home_categories_mob_top}>
             <Link to={''}>
               <img alt={''} src={fire} />
               Скидки
@@ -78,8 +104,58 @@ export const HomePage = () => {
               <img alt={''} src={acs} />
               Аксессуары
             </Link>
+          </div> */}
+
+          <div className="flex flex-col">
+            {/* ── Иконки ── */}
+            <div className="grid grid-cols-4 gap-2 px-4 py-4">
+              {iconItems.map(item => (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className="flex flex-col items-center gap-[6px] no-underline"
+                >
+                  <div className="flex h-[72px] w-[72px] items-center justify-center rounded-[18px] bg-[#F2F2F2]">
+                    {item.icon}
+                  </div>
+                  <span className="text-[12px] font-medium text-[#1A1A1A]">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* ── Список категорий ── */}
+            <div className="flex flex-col gap-[12px]">
+              {categories.map(cat => (
+                <Link
+                  key={cat.id}
+                  to={cat.slug}
+                  className="flex items-center no-underline rounded-[12px] overflow-hidden shadow-[0px_2px_10px_0px_#6969691A]"
+                >
+                  <div className="h-[108px] w-[92px] shrink-0 overflow-hidden ">
+                    {cat.imageUrl ? (
+                      <img
+                        src={cat.imageUrl}
+                        alt={cat.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full" />
+                    )}
+                  </div>
+
+                  <span className="flex-1 px-5 text-[18px] font-medium text-[#1A1A1A]">
+                    {cat.name}
+                  </span>
+
+                  <span className="mr-5 text-[20px] text-[#9B9B9B]">›</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
+      </div>
+      <div className={styles.home_brands}>
+        <img alt={''} src={brands} />
       </div>
       <div className={styles.home_sales}>
         <div className={styles.home_sales_left}>

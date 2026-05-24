@@ -2,32 +2,36 @@ import { useEffect, useState } from 'react'
 import styles from './Components.module.scss'
 import { NumericFormat } from 'react-number-format'
 import { IoEnter } from 'react-icons/io5'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { ROUTER_PATHS } from '@/shared/config/routes'
 
 interface order {
   id: number
-  date: string
+  createdAt: Date
   status: string
-  price: number
+  totalAmount: string
 }
 
 export const Orders = () => {
-  const data = [
-    { id: 100000, date: '10.01.2025 г.', status: 'В обработке', price: 7835.0 },
-    { id: 100001, date: '10.01.2025 г.', status: 'В обработке', price: 7835.0 },
-    { id: 100002, date: '10.01.2025 г.', status: 'Выполнен', price: 7835.0 },
-    { id: 100003, date: '10.01.2025 г.', status: 'Выполнен', price: 7835.0 },
-    { id: 100004, date: '10.01.2025 г.', status: 'Выполнен', price: 7835.0 },
-  ]
-  const [orders, setOrders] = useState<order[]>(data)
-  const [ordersCount, setOrdersCount] = useState(20)
+  const [orders, setOrders] = useState<order[]>([])
+  const [ordersCount, setOrdersCount] = useState(0)
+  const navigate = useNavigate()
+
+  const { ORDERPROFILE } = ROUTER_PATHS
 
   useEffect(() => {
-    setOrdersCount(20)
-    setOrders(data)
+    axios(`${import.meta.env.VITE_APP_API_URL}/orders/my`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    })
+      .then(res => {
+        setOrders(res.data)
+        setOrdersCount(res.data.length)
+      })
+      .catch(console.error)
   }, [])
 
-  
-  const getMoreOrders = () => {}
+  // const getMoreOrders = () => {}
 
   return (
     <div className={styles.orders}>
@@ -52,28 +56,35 @@ export const Orders = () => {
         {orders.map(i => (
           <div className={styles.orders_list_item}>
             <p className="p2">№ {i.id}</p>
-            <p className="p2">{i.date}</p>
-            <p
-              className="p2"
-              style={{ color: i.status == 'Выполнен' ? 'var(--green)' : 'var(--dark)' }}
-            >
-              {i.status}
+            <p className="p2">
+              {new Date(i.createdAt).toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit',
+              })}
+            </p>
+            <p className="p2" style={{ color: i.status == 'NEW' ? 'var(--green)' : 'var(--dark)' }}>
+              {i.status == 'NEW' ? 'Новый' : 'Завершён'}
             </p>
             <NumericFormat
               className="p2"
-              value={i.price}
+              value={i.totalAmount}
               decimalSeparator="."
               thousandSeparator=" "
               displayType="text"
             />
-            <p>
+            <p
+              className="p2"
+              onClick={() => navigate(`${ORDERPROFILE}/${i.id}`)}
+              style={{ cursor: 'pointer' }}
+            >
               <IoEnter />
             </p>
           </div>
         ))}
       </div>
 
-      <button onClick={getMoreOrders}>Показать ещё</button>
+      {/* <button onClick={getMoreOrders}>Показать ещё</button> */}
     </div>
   )
 }

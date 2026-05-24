@@ -19,6 +19,7 @@ import { AdminStores } from '@/pages/admin/Stores/Stores'
 import { EditProduct } from '@/pages/admin/products/Edit/EditProduct'
 import { ProductCategories } from '@/pages/admin/products/Categories/Categories'
 import NewOrdersPage from '@/pages/admin/home/orders/newOrders/NewOrdersPage'
+import { OrderAdminPage } from '@/pages/admin/home/orders/order/Order'
 
 const { ADMINPRODUCTS_FEATURES, ADMINPRODUCTS_ATRIBUTES, ADMIN_COLLECTION } = ROUTER_PATHS
 const { ADMIN, ADMINARTICLES, ADMINLOGIN, CREATEARTICLE, RESTOREPASS, EDIT_PRODUCT } = ROUTER_PATHS
@@ -50,6 +51,7 @@ export const adminRoutes: RouteObject[] = [
       { element: <EditArticle />, path: `${EDITARTICLE}/:id` },
       { element: <CloneArticle />, path: `${CLONEARTICLE}/:id` },
       { element: <NewOrdersPage />, path: `${ADMINORDERS}` },
+      { element: <OrderAdminPage />, path: `${ADMINORDERS}/:id` },
     ],
     element: <AdminGuard />,
   },
