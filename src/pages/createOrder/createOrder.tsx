@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NumericFormat, PatternFormat } from 'react-number-format'
 import { Link, useNavigate } from 'react-router-dom'
 import { FaChevronRight, FaPlus } from 'react-icons/fa'
@@ -34,6 +34,25 @@ export const CreateOrder = () => {
   const pathname = location.pathname
   const navigate = useNavigate()
   const dispatch = useDispatch()
+
+  const addressTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  useEffect(() => {
+    const textarea = addressTextareaRef.current
+    if (!textarea) return
+
+    textarea.style.height = 'auto'
+    textarea.style.height = `${textarea.scrollHeight}px`
+  }, [selectedAddress?.location?.address_full])
+  const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  useEffect(() => {
+    const textarea = commentTextareaRef.current
+    if (!textarea) return
+
+    textarea.style.height = 'auto'
+    textarea.style.height = `${textarea.scrollHeight}px`
+  }, [selectedAddress?.comment])
 
   useEffect(() => {
     document.title = `Оформление заказа - Умная одежда`
@@ -179,9 +198,6 @@ export const CreateOrder = () => {
       return toast.error('Пожалуйста, выберите дату доставки')
     }
 
-    // we need to put deliveryFrom and deliveryTo in data, but they have different values for different delivery types
-    //put current date
-
     axios(`${import.meta.env.VITE_APP_API_URL}/orders`, {
       method: 'POST',
       headers: {
@@ -201,7 +217,7 @@ export const CreateOrder = () => {
         console.log('Order created:', res.data)
         localStorage.removeItem('cart')
         dispatch(setCartCount(0))
-        navigate(`${ORDER}/${res.data.id}`)
+        navigate(`${ORDER}/${res.data.orders[0].id}`)
       })
       .catch(err => {
         console.error('Error saving address:', err)
@@ -214,10 +230,8 @@ export const CreateOrder = () => {
       })
   }
 
-  console.log(selectedAddress)
-
   useEffect(() => {
-    if (deliveryType === 'Курьером' && selectedAddress?.id) {
+    if (selectedAddress?.id) {
       axios(`${import.meta.env.VITE_APP_API_URL}/orders/delivery-dates`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -270,6 +284,7 @@ export const CreateOrder = () => {
         })
         .catch(err => {
           console.error('Error fetching delivery dates:', err)
+          toast.error('Не удалось получить даты доставки. Пожалуйста, попробуйте снова.')
           setDeliveryDates([])
         })
     }
@@ -365,28 +380,57 @@ export const CreateOrder = () => {
             {deliveryType == 'До пункта выдачи' &&
               (isAddressSelected ? (
                 selectedAddress ? (
-                  <div className="flex flex-col gap-[10px] pl-[30px]">
-                    <div className="flex gap-[10px] items-start mb-[10px]">
-                      <img src={locationMark} alt="" />
-                      <div className="flex flex-col gap-[10px]">
-                        <h5 className="h5 flex gap-[10px] items-center">
-                          {selectedAddress.location?.address_full}
-                        </h5>
-                        <p className="p1 text-[var(--service)_!important]">
-                          {selectedAddress?.note}
-                        </p>
-                        <button
-                          className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
-                          onClick={() => {
-                            setSelectedAddress(null)
-                            setAddressModalOpened(true)
-                          }}
-                        >
-                          Изменить адрес
-                        </button>
+                  <>
+                    {' '}
+                    <div className="flex flex-col gap-[10px] pl-[30px]">
+                      <div className="flex gap-[10px] items-start mb-[10px]">
+                        <img src={locationMark} alt="" />
+                        <div className="flex flex-col gap-[10px]">
+                          <h5 className="h5 flex gap-[10px] items-center">
+                            {selectedAddress.location?.address_full}
+                          </h5>
+                          <p className="p1 text-[var(--service)_!important]">
+                            {selectedAddress?.note}
+                          </p>
+                          <button
+                            className="text-[14px] px-[16px] py-[10px] rounded-[12px] bg-[#4D4E50] text-[#fff] w-fit"
+                            onClick={() => {
+                              setSelectedAddress(null)
+                              setAddressModalOpened(true)
+                            }}
+                          >
+                            Изменить адрес
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                    {deliveryDates.length ? (
+                      <div className="flex flex-col gap-[20px]">
+                        <h2 className="h2">Дата доставки</h2>
+                        <div className="flex items-center gap-[8px]">
+                          {deliveryDates?.map((d: any, index: number) => (
+                            <div
+                              key={index}
+                              className="p-[12px] rounded-[4px] border-solid border-[1px] border-[var(--service)]"
+                              style={{
+                                background:
+                                  selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
+                                    ? 'var(--gray)'
+                                    : '',
+                              }}
+                              onClick={() => setSelectedDeliveryDate(d)}
+                            >
+                              {formatDate(d.deliveryFrom)}
+                              {' - '}
+                              {formatDate(d.deliveryTo)}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      ''
+                    )}
+                  </>
                 ) : addressModalOpened &&
                   user?.addresses?.filter((address: any) => address.type === 'PVZ').length ? (
                   <>
@@ -751,9 +795,11 @@ export const CreateOrder = () => {
               <label>
                 <p className="p2 text-[var(--service)_!important]">Адрес</p>
                 <textarea
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  ref={addressTextareaRef}
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1 resize-none overflow-hidden"
                   value={selectedAddress?.location?.address_full || ''}
-                  style={{ height: 'fit-content', minHeight: '40px', maxHeight: '120px' }}
+                  readOnly
+                  rows={1}
                 />
               </label>{' '}
               {deliveryType === 'Курьером' && (
@@ -784,13 +830,15 @@ export const CreateOrder = () => {
               )}
               <label>
                 <p className="p2 text-[var(--service)_!important]">Комментарий</p>
-                <input
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+
+                <textarea
+                  ref={commentTextareaRef}
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1 resize-y overflow-hidden"
                   value={selectedAddress?.comment || ''}
                   onChange={e =>
                     setSelectedAddress((prev: any) => ({ ...prev, comment: e.target.value }))
                   }
+                  rows={1}
                 />
               </label>
             </div>

@@ -1,10 +1,12 @@
-import styles from "./Footer.module.scss";
-import i1 from "../../../assets/images/Vector.svg";
-import i2 from "../../../assets/images/Vector (1).svg";
-import i3 from "../../../assets/images/vk logo.svg";
-import i4 from "../../../assets/images/Union.svg";
-import { Link } from "react-router-dom";
-import { ROUTER_PATHS } from "@/shared/config/routes";
+import styles from './Footer.module.scss'
+import i1 from '../../../assets/images/Vector.svg'
+import i2 from '../../../assets/images/Vector (1).svg'
+import i3 from '../../../assets/images/vk logo.svg'
+import i4 from '../../../assets/images/Union.svg'
+import { Link } from 'react-router-dom'
+import { ROUTER_PATHS } from '@/shared/config/routes'
+import { IoExit } from 'react-icons/io5'
+import { MdExitToApp } from 'react-icons/md'
 
 export const Footer: React.FC = () => {
   return (
@@ -57,9 +59,13 @@ export const Footer: React.FC = () => {
         <p> © 0000–2023 Интернет-магазин «Умная Одежда» </p>
         <Link to={ROUTER_PATHS.POLITICS}>Политика конфиденциальности</Link>
         <Link to={ROUTER_PATHS.OFERTA}>Оферта</Link>
+        <p className="flex items-[center_!important] gap-[5px] cursor-pointer justify-center">
+          Выйти из профиля
+          <MdExitToApp />
+        </p>
       </div>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

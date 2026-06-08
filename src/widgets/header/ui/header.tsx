@@ -25,6 +25,76 @@ export const Header: React.FC = () => {
   const dispatch = useDispatch()
   const searchParams = new URLSearchParams(location.search)
 
+  const getCartCount = (items: any[] = []) => {
+    return items.reduce((total, item) => {
+      return total + Number(item.quantity || 1)
+    }, 0)
+  }
+
+  const updateCartCount = (items: any[] = []) => {
+    const count = getCartCount(items)
+
+    localStorage.setItem('cartCount', String(count))
+    dispatch(setCartCount(count))
+  }
+
+  useEffect(() => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/categories`).then(res => {
+      const data = res?.data?.filter((cat: any) => cat.showInMenu)
+      setCategories(data)
+    })
+
+    const handleResize = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+
+    const token = localStorage.getItem('token')
+
+    if (!token) {
+      const localCart = localStorage.getItem('cart')
+
+      if (localCart) {
+        try {
+          const items = JSON.parse(localCart)
+          updateCartCount(Array.isArray(items) ? items : [])
+        } catch {
+          updateCartCount([])
+        }
+      } else {
+        updateCartCount([])
+      }
+    } else {
+      axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(res => {
+          const items = res.data?.items || []
+
+          localStorage.setItem('cart', JSON.stringify(items))
+          updateCartCount(items)
+        })
+        .catch(err => {
+          console.error('Error fetching cart:', err)
+
+          const localCart = localStorage.getItem('cart')
+          if (localCart) {
+            try {
+              const items = JSON.parse(localCart)
+              updateCartCount(Array.isArray(items) ? items : [])
+            } catch {
+              updateCartCount([])
+            }
+          }
+        })
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [dispatch])
+
   useEffect(() => {
     const main = document.querySelector('main')
     const navigation = document.querySelector('.navigation')!
@@ -41,43 +111,6 @@ export const Header: React.FC = () => {
       if (navigation) navigation?.removeEventListener('click', close)
     }
   }, [isOpen])
-
-  useEffect(() => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/categories`).then(res => {
-      const data = res?.data?.filter((cat: any) => cat.showInMenu)
-      setCategories(data)
-    })
-
-    if (!localStorage.getItem('token')) {
-      const localCart = localStorage.getItem('cart')
-      if (localCart) {
-        const items = JSON.parse(localCart)
-
-        localStorage.setItem('cartCount', String(items.length))
-        dispatch(setCartCount(items.length))
-      }
-      return
-    }
-
-    axios(`${import.meta.env.VITE_APP_API_URL}/cart`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then(res => {
-        localStorage.setItem('cartCount', String(res.data?.items?.length || 0))
-        dispatch(setCartCount(res.data?.items?.length || 0))
-      })
-      .catch(err => console.error('Error fetching cart:', err))
-
-    const handleResize = () => setWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
 
   useEffect(() => {
     setTimeout(() => {

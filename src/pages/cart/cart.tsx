@@ -72,6 +72,13 @@ export const Cart = () => {
   }
 
   const removeItem = (itemId: number) => {
+    if (!localStorage.getItem('token')) {
+      setCart((prevCart: any) => prevCart.filter((item: any) => item.id !== itemId))
+      localStorage.setItem('cartCount', String(cart.length - 1))
+      localStorage.setItem('cart', JSON.stringify(cart?.filter((item: any) => item.id !== itemId)))
+      return dispatch({ type: 'cartCount/setCartCount', payload: cart.length - 1 })
+    }
+
     const data = [
       {
         variantId: itemId,

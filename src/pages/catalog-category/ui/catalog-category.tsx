@@ -5,7 +5,7 @@ import { NumericFormat } from 'react-number-format'
 import { Link, useSearchParams } from 'react-router-dom'
 import { FaChevronDown } from 'react-icons/fa'
 import banner from '@/assets/images/catalogBanner.svg'
-import heart from '@/assets/images/homeHeart.svg'
+// import heart from '@/assets/images/homeHeart.svg'
 import styles from './catalog-category.module.scss'
 import axios from 'axios'
 import { IoMdSwitch } from 'react-icons/io'
@@ -614,7 +614,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                             ></div>
                           ))}
                         </div>
-                        <img className={styles.catalog_item_heart} src={heart} alt="" />
+                        {/* <img className={styles.catalog_item_heart} src={heart} alt="" /> */}
                       </div>
 
                       <h5 className="h5 font-[400_!important]">{i.name}</h5>

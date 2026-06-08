@@ -3,8 +3,9 @@ import styles from './Components.module.scss'
 import { NumericFormat } from 'react-number-format'
 import { IoEnter } from 'react-icons/io5'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { CgChevronDown } from 'react-icons/cg'
 
 interface order {
   id: number
@@ -16,7 +17,6 @@ interface order {
 export const Orders = () => {
   const [orders, setOrders] = useState<order[]>([])
   const [ordersCount, setOrdersCount] = useState(0)
-  const navigate = useNavigate()
 
   const { ORDERPROFILE } = ROUTER_PATHS
 
@@ -31,7 +31,7 @@ export const Orders = () => {
       .catch(console.error)
   }, [])
 
-  // const getMoreOrders = () => {}
+
 
   return (
     <div className={styles.orders}>
@@ -40,9 +40,10 @@ export const Orders = () => {
         <p className="p2">
           Всего заказов: <b>{ordersCount}</b>
         </p>
-        <select>
-          <option value="all">Все заказы</option>
-        </select>
+        <div>
+          <p>Все заказы</p>
+          <CgChevronDown />
+        </div>
       </section>
 
       <div className={styles.orders_list}>
@@ -54,7 +55,7 @@ export const Orders = () => {
           <p className="p2"></p>
         </div>
         {orders.map(i => (
-          <div className={styles.orders_list_item}>
+          <Link className={styles.orders_list_item} to={`${ORDERPROFILE}/${i.id}`}>
             <p className="p2">№ {i.id}</p>
             <p className="p2">
               {new Date(i.createdAt).toLocaleDateString('ru-RU', {
@@ -73,14 +74,10 @@ export const Orders = () => {
               thousandSeparator=" "
               displayType="text"
             />
-            <p
-              className="p2"
-              onClick={() => navigate(`${ORDERPROFILE}/${i.id}`)}
-              style={{ cursor: 'pointer' }}
-            >
+            <p className="p2" style={{ cursor: 'pointer' }}>
               <IoEnter />
             </p>
-          </div>
+          </Link>
         ))}
       </div>
 

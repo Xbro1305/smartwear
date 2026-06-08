@@ -91,8 +91,9 @@ export const NewOrderDetails = () => {
           Состав заказа{' '}
           <CgChevronDown style={{ transform: !isListOpened ? 'rotate(180deg)' : '' }} />
         </h4>
-        {isListOpened &&
-          order?.items?.map((i: any, index: number) => <CartItem item={i} index={index} />)}
+        {isListOpened && (
+          <>{order?.items?.map((i: any, index: number) => <CartItem item={i} index={index} />)}</>
+        )}
       </div>
       <div className="flex flex-col gap-[24px] lg:gap-[48px] items-center">
         <Link
@@ -179,7 +180,7 @@ const CartItem = ({ item, index }: any) => {
                 className="block min-w-[24px] h-[24px] rounded-[50%] mr-[8px]"
                 style={{ background: item.colorCode }}
               ></span>{' '}
-              {item.color ? item.color : 'Без цвета'}
+              {item.colorAlias ? item.colorAlias : 'Без цвета'}
             </p>
           </div>
         </div>

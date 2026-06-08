@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Slider from 'react-slick'
 import brands from '@/assets/images/homeBrands.png'
 import catalog from '@/assets/images/homeCatalog.jpeg'
-import heart from '@/assets/images/homeHeart.svg'
+// import heart from '@/assets/images/homeHeart.svg'
 import info from '@/assets/images/homeInfo.png'
 import intro from '@/assets/images/homeIntro.png'
 import sales from '@/assets/images/homeSales.png'
@@ -180,7 +180,7 @@ export const HomePage = () => {
                       ></div>
                     ))}
                   </div>
-                  <img alt={''} src={heart} />
+                  {/* <img alt={''} src={heart} /> */}
                 </div>
                 <h5 className={'h5'}>{i.title}</h5>
                 <NumericFormat
@@ -213,7 +213,7 @@ export const HomePage = () => {
                       ></div>
                     ))}
                   </div>
-                  <img alt={''} src={heart} />
+                  {/* <img alt={''} src={heart} /> */}
                 </div>
                 <h5 className={'h5'}>{i.title}</h5>
                 <NumericFormat

@@ -59,9 +59,11 @@ export default function PvzMapWidget({
       setMapCenter([lat, long])
       type == 'DELIVERY' && setDeliveryCoords([lat, long])
     }
-
-    isEditing == false && getLocation()
   }, [])
+
+  useEffect(() => {
+    isOpen == true && getLocation()
+  }, [isOpen])
 
   async function getLocation() {
     if (!navigator.geolocation) {

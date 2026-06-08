@@ -6,9 +6,9 @@ import { HiThumbUp } from 'react-icons/hi'
 import { NumericFormat } from 'react-number-format'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 import { CgClose, CgRuler } from 'react-icons/cg'
-import { BsHeart, BsQuestionCircle } from 'react-icons/bs'
+import { BsQuestionCircle } from 'react-icons/bs'
 import styles from '@/pages/home/home.module.scss'
-import heart from '@/assets/images/homeHeart.svg'
+// import heart from '@/assets/images/homeHeart.svg'
 import catalog from '@/assets/images/homeCatalog.jpeg'
 import Slider from 'react-slick'
 import top from './assets/top.png'
@@ -339,15 +339,16 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
           dispatch(setCartCount(cartCount + 1))
         })
         .catch(err => {
+          if (err.response.data.message == 'Invalid token') {
+            localStorage.removeItem('token')
+            return addCart()
+          }
+
           toast.error(
             err.response.data.message == 'max 2 items'
               ? 'В корзину нельзя добавить более 2 товаров одновременно!'
-              : err.response.data.message == 'Invalid token'
-                ? 'Токен не действителен, пожалуйста, авторизуйтесь или нажмите кнопку заново'
-                : err.response.data.message || 'Что-то пошло не так'
+              : 'Что-то пошло не так'
           )
-
-          err.response.data.message == 'Invalid token' && localStorage.removeItem('token')
         })
     }
   }
@@ -636,7 +637,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         : 'Нет в наличии'}{' '}
                     </button>
                     <button className="w-[40px] lg:w-[60px] h-[40px] lg:h-[60px] flex items-center lg:text-xl justify-center text-red bg-[#F2F2F2] rounded-[8px]">
-                      <BsHeart />
+                      {/* <BsHeart /> */}
                     </button>
                   </div>
                   <p className="text-[#B0B7BF_!important] p2 text-center lg:text-left">
@@ -924,7 +925,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                           ></div>
                         ))}
                       </div>
-                      <img alt={''} src={heart} />
+                      {/* <img alt={''} src={heart} /> */}
                     </div>
                     <h5 className={'h5'}>{i.title}</h5>
                     <NumericFormat
@@ -964,7 +965,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                           ></div>
                         ))}
                       </div>
-                      <img alt={''} src={heart} />
+                      {/* <img alt={''} src={heart} /> */}
                     </div>
                     <h5 className={'h5'}>{i.title}</h5>
                     <NumericFormat
