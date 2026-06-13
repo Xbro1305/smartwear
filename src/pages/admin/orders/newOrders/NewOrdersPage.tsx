@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { FiChevronDown, FiTrash2 } from 'react-icons/fi'
 
@@ -107,6 +107,9 @@ export default function NewOrdersPage() {
   const [error, setError] = useState('')
   const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null)
 
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const toggleRef = useRef<HTMLButtonElement | null>(null)
+
   const fetchOrders = async () => {
     try {
       setIsLoading(true)
@@ -133,6 +136,21 @@ export default function NewOrdersPage() {
     window.scrollTo(0, 0)
     window.document.title = 'Новые заказы - Умная одежда'
   }, [])
+
+  useEffect(() => {
+    if (openedOrderId === null) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (dropdownRef.current?.contains(target) || toggleRef.current?.contains(target)) {
+        return
+      }
+      setOpenedOrderId(null)
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [openedOrderId])
 
   return (
     <main className="min-h-screen bg-[#FFFFFF] px-[48px] py-[56px] text-[#1F2937]">
@@ -195,6 +213,7 @@ export default function NewOrdersPage() {
 
                     <button
                       type="button"
+                      ref={isOpened ? toggleRef : undefined}
                       className="flex items-center justify-center gap-[8px] text-[16px] font-[600]"
                       onClick={() => setOpenedOrderId(isOpened ? null : order.id)}
                     >
@@ -245,6 +264,7 @@ export default function NewOrdersPage() {
 
                   {isOpened && (
                     <div
+                      ref={dropdownRef}
                       className={[
                         'absolute left-[480px] z-[5] w-[510px] overflow-hidden rounded-[8px] bg-[#FFFFFF]',
                         shouldOpenUp ? 'bottom-[58px]' : 'top-[58px]',
