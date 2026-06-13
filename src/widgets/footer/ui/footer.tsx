@@ -5,7 +5,6 @@ import i3 from '../../../assets/images/vk logo.svg'
 import i4 from '../../../assets/images/Union.svg'
 import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import { IoExit } from 'react-icons/io5'
 import { MdExitToApp } from 'react-icons/md'
 
 export const Footer: React.FC = () => {

@@ -12,6 +12,8 @@ type OrderUser = {
 }
 
 type OrderItem = {
+  storeName: any
+  variant: any
   id: number
   orderId: number
   variantId: number
@@ -259,7 +261,9 @@ export default function NewOrdersPage() {
                           key={item.id}
                           className="grid min-h-[64px] grid-cols-[1fr_1fr_1fr] items-center border-t-[1px] border-solid border-[#ECEEF2] px-[22px] text-[15px] font-[500] text-[#222222]"
                         >
-                          <p>{item.variantId}</p>
+                          <p>
+                            {item.variant.product.articul}, {item.storeName}
+                          </p>
                           <p>{item.colorAlias || '-'}</p>
                           <p>{formatMoney(item.price)}</p>
                         </div>
