@@ -391,13 +391,13 @@ const OrderItemCard = ({
           Скидка
           {promoDetails?.type === 'PERCENT'
             ? ` ${promoDetails.value}%`
-            : ` ${formatMoney(promoDetails.value)} руб.`}
+            : ` ${formatMoney(promoDetails?.value)} руб.`}
         </InfoPill>
         <InfoPill>
           Размер скидки <br />
           {promoDetails?.type === 'PERCENT'
-            ? ` ${formatMoney((Number(item.price) * promoDetails.value) / 100)} руб.`
-            : ` ${formatMoney(promoDetails.value)} руб.`}
+            ? ` ${formatMoney((Number(item.price) * promoDetails?.value) / 100)} руб.`
+            : ` ${formatMoney(promoDetails?.value)} руб.`}
         </InfoPill>
       </div>
 
@@ -913,8 +913,8 @@ export const OrderAdminPage = () => {
           <div className="flex flex-col gap-[8px]">
             <div className="h-[21px]" />
             <InfoPill>
-              Скидка {order.promoCode.value}
-              {order.promoCode.type == 'PERCENT' ? '%' : 'руб'}
+              Скидка {order.promoCode?.value}
+              {order.promoCode?.type == 'PERCENT' ? '%' : 'руб'}
             </InfoPill>
           </div>
 
@@ -923,9 +923,9 @@ export const OrderAdminPage = () => {
             <div className="h-[21px]" />
             <InfoPill>
               Размер скидки <br />
-              {order.promoCode.type == 'PERCENT'
-                ? `-${Math.round((Number(order.totalAmount) * order.promoCode.value) / 100)} руб`
-                : `-${order.promoCode.value} руб`}
+              {order.promoCode?.type == 'PERCENT'
+                ? `-${Math.round((Number(order.totalAmount) * order.promoCode?.value) / 100)} руб`
+                : `-${order.promoCode?.value} руб`}
             </InfoPill>
           </div>
 

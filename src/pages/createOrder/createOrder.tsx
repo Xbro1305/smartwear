@@ -411,7 +411,7 @@ export const CreateOrder = () => {
                           {deliveryDates?.map((d: any, index: number) => (
                             <div
                               key={index}
-                              className="p-[12px] rounded-[4px] border-solid border-[1px] border-[var(--service)]"
+                              className="p-[12px] cursor-pointer rounded-[4px] border-solid border-[1px] border-[var(--service)]"
                               style={{
                                 background:
                                   selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
@@ -604,7 +604,7 @@ export const CreateOrder = () => {
                           {deliveryDates?.map((d: any, index: number) => (
                             <div
                               key={index}
-                              className="p-[12px] rounded-[4px] border-solid border-[1px] border-[var(--service)]"
+                              className="p-[12px] cursor-pointer rounded-[4px] border-solid border-[1px] border-[var(--service)]"
                               style={{
                                 background:
                                   selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom

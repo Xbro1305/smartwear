@@ -53,7 +53,12 @@ export const SideBar = ({ redirectingPage }: { redirectingPage: string }) => {
           <p>{user?.name}</p>
           <span>Админ</span>
         </section>
-        <button>
+        <button
+          onClick={() => {
+            localStorage.removeItem('token')
+            window.location.href = rp.HOME
+          }}
+        >
           <IoExitOutline />
         </button>
       </div>
