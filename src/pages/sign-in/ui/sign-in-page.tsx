@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { PatternFormat } from 'react-number-format'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
@@ -11,9 +11,12 @@ import styles from '../../sign-up/Signup.module.scss'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
+const RESEND_SECONDS = 30
+
 export const SignInPage: React.FC = () => {
   const [stage, setStage] = useState<number>(1)
-  const [timer, setTimer] = useState<number>(30)
+  const [timer, setTimer] = useState<number>(0)
+  const [expiresAt, setExpiresAt] = useState<number | null>(null)
   const [prefix, setPrefix] = useState<any>('+7')
   const [phone, setPhone] = useState<string>('')
   const location = useLocation()
@@ -22,12 +25,34 @@ export const SignInPage: React.FC = () => {
   const searchParams = new URLSearchParams(location.search)
   const from = searchParams.get('redirectUrl') || ROUTER_PATHS.PROFILE
 
-  console.log(from)
-
   const navigate = useNavigate()
 
   const [requestCode] = useRequestCodeMutation()
   const [login] = useLoginMutation()
+
+  useEffect(() => {
+    if (!expiresAt) return
+
+    let id: ReturnType<typeof setInterval>
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
+      setTimer(remaining)
+      if (remaining <= 0) clearInterval(id)
+    }
+
+    id = setInterval(tick, 250)
+    tick()
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') tick()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [expiresAt])
 
   const getCode = async (phone: string) => {
     const formattedPhone = phone.replace(/\D/g, '') // Удаляем все нецифровые символы
@@ -48,18 +73,11 @@ export const SignInPage: React.FC = () => {
       return
     }
 
-    console.log(phone)
-
     try {
       await requestCode({ phone }).unwrap()
       setStage(2)
-      let tm = 30
-      const interval = setInterval(() => {
-        tm -= 1
-        setTimer(tm)
-      }, 1000)
-
-      setTimeout(() => clearInterval(interval), 30100)
+      setTimer(RESEND_SECONDS) // чтобы кнопка сразу была disabled, без мигания
+      setExpiresAt(Date.now() + RESEND_SECONDS * 1000)
     } catch (error: any) {
       if (error?.data?.message === 'User not found') {
         alert('Пользователь с таким номером телефона не наиден')

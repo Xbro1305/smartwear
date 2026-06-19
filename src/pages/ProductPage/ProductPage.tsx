@@ -636,9 +636,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         ? 'Добавить в корзину'
                         : 'Нет в наличии'}{' '}
                     </button>
-                    <button className="w-[40px] lg:w-[60px] h-[40px] lg:h-[60px] flex items-center lg:text-xl justify-center text-red bg-[#F2F2F2] rounded-[8px]">
-                      {/* <BsHeart /> */}
-                    </button>
+                    {/* <button className="w-[40px] lg:w-[60px] h-[40px] lg:h-[60px] flex items-center lg:text-xl justify-center text-red bg-[#F2F2F2] rounded-[8px]">
+ <BsHeart /> 
+                    </button> */}
                   </div>
                   <p className="text-[#B0B7BF_!important] p2 text-center lg:text-left">
                     Цвет изделия может незначительно отличаться от цвета на вашем устройстве

@@ -555,6 +555,8 @@ export const OrderAdminPage = () => {
   const [deliveryCalOpen, setDeliveryCalOpen] = useState(false)
   const shippingRef = useRef<HTMLDivElement>(null)
   const deliveryRef = useRef<HTMLDivElement>(null)
+  const [copied, setCopied] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { id } = useParams()
   const token = localStorage.getItem('token')
@@ -682,7 +684,19 @@ export const OrderAdminPage = () => {
     .filter(Boolean)
     .join(' ')
 
-  const copyFullName = () => copyText(fullName)
+  const copyFullName = () => {
+    copyText(fullName)
+
+    setCopied(true)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current) // защита от повторных кликов
+    timeoutRef.current = setTimeout(() => setCopied(false), 10000)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -741,10 +755,11 @@ export const OrderAdminPage = () => {
           {/* Copies full name only */}
           <button
             id="admin-button"
-            className="flex items-center gap-[8px] rounded-[12px] bg-[#4D4E50_!important] px-[22px] py-[10px] text-[14px] font-[600] text-[#FFFFFF]"
             onClick={copyFullName}
+            className="flex items-center gap-[8px] rounded-[12px] bg-[#4D4E50_!important] px-[22px] py-[10px] text-[14px] font-[600] text-[#FFFFFF]"
           >
-            Скопировать <BsCopy className="rotate-[270deg]" />
+            {copied ? 'Скопировано' : 'Скопировать'}
+            <BsCopy className="rotate-[270deg] shrink-0" />
           </button>
         </div>
 
@@ -798,25 +813,29 @@ export const OrderAdminPage = () => {
         <h3 id="h3">Описание заказа</h3>
 
         {/* Delivery address row */}
-        <div className="grid grid-cols-3 gap-[24px]">
+        <div className="grid grid-cols-[1fr_2fr] gap-[24px]">
           <CopyField
             label="Город"
             value={order.address.city}
             onCopy={() => undefined}
             isCopyable={false}
           />
-          <CopyField
-            label="Адрес ПВЗ"
-            value={order.address.type === 'PVZ' ? order.address.fullAddress : '-'}
-            onCopy={() => undefined}
-            isCopyable={false}
-          />
-          <CopyField
-            label="Адрес доставки"
-            value={order.address.type !== 'PVZ' ? order.address.fullAddress : '-'}
-            onCopy={() => undefined}
-            isCopyable={false}
-          />
+          {order.address.type === 'PVZ' && (
+            <CopyField
+              label="Адрес ПВЗ"
+              value={order.address.type === 'PVZ' ? order.address.fullAddress : '-'}
+              onCopy={() => undefined}
+              isCopyable={false}
+            />
+          )}
+          {order.address.type !== 'PVZ' && (
+            <CopyField
+              label="Адрес доставки"
+              value={order.address.type !== 'PVZ' ? order.address.fullAddress : '-'}
+              onCopy={() => undefined}
+              isCopyable={false}
+            />
+          )}
         </div>
 
         <Divider />
@@ -913,7 +932,7 @@ export const OrderAdminPage = () => {
           <div className="flex flex-col gap-[8px]">
             <div className="h-[21px]" />
             <InfoPill>
-              Скидка {order.promoCode?.value}
+              Скидка {order.promoCode?.value || '0 '}
               {order.promoCode?.type == 'PERCENT' ? '%' : 'руб'}
             </InfoPill>
           </div>
@@ -923,9 +942,11 @@ export const OrderAdminPage = () => {
             <div className="h-[21px]" />
             <InfoPill>
               Размер скидки <br />
-              {order.promoCode?.type == 'PERCENT'
-                ? `-${Math.round((Number(order.totalAmount) * order.promoCode?.value) / 100)} руб`
-                : `-${order.promoCode?.value} руб`}
+              {order.promoCode == null
+                ? '0'
+                : order.promoCode?.type == 'PERCENT'
+                  ? `-${Math.round((Number(order.totalAmount) * order.promoCode?.value) / 100)} руб`
+                  : `-${order.promoCode?.value} руб`}
             </InfoPill>
           </div>
 

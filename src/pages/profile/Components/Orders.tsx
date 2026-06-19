@@ -31,8 +31,6 @@ export const Orders = () => {
       .catch(console.error)
   }, [])
 
-
-
   return (
     <div className={styles.orders}>
       <h2 className="h2">История заказов</h2>
@@ -65,7 +63,7 @@ export const Orders = () => {
               })}
             </p>
             <p className="p2" style={{ color: i.status == 'NEW' ? 'var(--green)' : 'var(--dark)' }}>
-              {i.status == 'NEW' ? 'Новый' : 'Завершён'}
+              {i.status == 'NEW' ? 'Новый' : i.status == 'CANCELLED' ? 'Отменен' : 'Завершен'}
             </p>
             <NumericFormat
               className="p2"

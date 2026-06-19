@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import axios from 'axios'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-
+import styles from './Order.module.scss'
 import handed from './handed.png'
 import packing from './packing.png'
 import processing from './processing.png'
 import shipping from './shipping.png'
 import { NumericFormat } from 'react-number-format'
+import { toast } from 'react-toastify'
+import { FcCancel } from 'react-icons/fc'
 
 const API_URL = import.meta.env.VITE_APP_API_URL
 
@@ -80,7 +82,7 @@ const STATUS_CONFIG: Record<string, { label: string; step: number; color: string
   PROCESSING: { label: 'В сборке', step: 1, color: '#D42B2B' },
   SHIPPED: { label: 'Отправлен', step: 2, color: '#D42B2B' },
   DELIVERED: { label: 'Доставлен', step: 3, color: '#22C55E' },
-  CANCELLED: { label: 'Отменён', step: 0, color: '#9B9B9B' },
+  CANCELLED: { label: 'Отменён', step: 2, color: '#D42B2B' },
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -129,19 +131,29 @@ const steps = [
 
 const StatusBar = ({ status }: { status: string }) => {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.NEW
+  const currentIdx = cfg.step - 1
+  const nextStep = currentIdx + 1 < steps.length ? steps[currentIdx + 1] : null
 
   if (status === 'CANCELLED') {
     return (
       <div className="flex items-center gap-2">
-        <span className="inline-block rounded-full bg-[#F2F2F2] px-3 py-1 text-[13px] font-semibold text-[#9B9B9B]">
-          Отменён
-        </span>
+        <div className="flex items-center gap-[12px]">
+          <div className="h-[30px] min-w-[40px]">{steps[0].image}</div>
+          <span className="text-[11px] font-medium whitespace-nowrap text-[#D42B2B]">
+            {steps[0].label}
+          </span>
+        </div>
+        <div className="h-[2px] w-full bg-[#D42B2B] mx-auto" />
+
+        <div className="flex items-center gap-[12px]">
+          <div className="min-w-[36px]">
+            <FcCancel className="text-[36px]" />
+          </div>
+          <span className="text-[11px] font-medium whitespace-nowrap text-[#D42B2B]">Отменен</span>
+        </div>
       </div>
     )
   }
-
-  const currentIdx = cfg.step - 1
-  const nextStep = currentIdx + 1 < steps.length ? steps[currentIdx + 1] : null
 
   return (
     <>
@@ -350,6 +362,7 @@ export const Order = () => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isCancelling, setIsCancelling] = useState(false)
 
   const token = localStorage.getItem('token')
   const headers = { Authorization: `Bearer ${token}` }
@@ -390,6 +403,19 @@ export const Order = () => {
 
   const fullName = [user?.surName, user?.name, user?.middleName].filter(Boolean).join(' ')
   const totalItems = order.items.reduce((acc, i) => acc + i.quantity, 0)
+
+  const cancelOrder = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    axios
+      .post(`${API_URL}/orders/my/${order.id}/cancel`, null, { headers })
+      .then(() => {
+        setOrder({ ...order, status: 'CANCELLED' })
+        toast.info('Заказ успешно отменён')
+      })
+      .catch(() => {
+        alert('Не удалось отменить заказ. Пожалуйста, попробуйте снова.')
+      })
+  }
 
   return (
     <div className="w-full bg-white flex flex-col gap-[12px] p-[var(--sides-padding)] pt-[48px]">
@@ -457,7 +483,7 @@ export const Order = () => {
                 value={PAYMENT_LABELS[order.paymentType] || order.paymentType}
               />
               <InfoRow label="Контактный телефон" value={user?.phone} />
-              <InfoRow label="Статус оплаты" value="Оплачен" />
+              <InfoRow label="Статус оплаты" value="Оплата при получении" />
               <InfoRow label="Адрес доставки" value={order.address.fullAddress} />
               {order.address.type !== 'PVZ' && (
                 <InfoRow
@@ -500,18 +526,49 @@ export const Order = () => {
             )}
           </div>
         </div>
-        <div className="shadow-[0px_4px_16.2px_0px_#0000000D] rounded-[12px] h-fit px-[24px] py-[32px] flex flex-col w-full lg:w-fit gap-[24px]">
-          <button id="admin-button" className="flex justify-center text-center">
-            Отменить заказ
-          </button>
-          <button
-            id="admin-button"
-            className="text-[#282B32_!important] flex justify-center text-center bg-[#FAFAFA_!important] rounded-lg py-3 px-4 font-semibold hover:bg-[#F5F5F5_!important] transition-colors"
-          >
-            Помощь с заказом
-          </button>
-        </div>
+        {order.status !== 'CANCELLED' && (
+          <div className="shadow-[0px_4px_16.2px_0px_#0000000D] rounded-[12px] h-fit px-[24px] py-[32px] flex flex-col w-full lg:w-fit gap-[24px]">
+            <button
+              id="admin-button"
+              className="flex justify-center text-center"
+              onClick={() => setIsCancelling(true)}
+            >
+              Отменить заказ
+            </button>
+            {/* <button
+          id="admin-button"
+          className="text-[#282B32_!important] flex justify-center text-center bg-[#FAFAFA_!important] rounded-lg py-3 px-4 font-semibold hover:bg-[#F5F5F5_!important] transition-colors"
+        >
+          Помощь с заказом
+        </button> */}
+          </div>
+        )}
       </div>
+
+      {isCancelling && (
+        <div className={`${styles.modal} flex p-[10px] `}>
+          <button
+            className="z-40 absolute w-full h-screen opacity-0"
+            onClick={() => setIsCancelling(false)}
+          ></button>
+          <form onSubmit={cancelOrder} className={styles.modal_body}>
+            <h2 id="h2">Вы уверены,что хотите отменить заказ?</h2>
+
+            <section className="ml-auto flex gap-[10px] mt-[20px]">
+              <button
+                type="button"
+                onClick={() => setIsCancelling(false)}
+                className="bg-service text-white px-[15px] h-[40px] rounded-[12px]"
+              >
+                Отмена
+              </button>
+              <button id="admin-button" type="submit">
+                Да, уверен
+              </button>
+            </section>
+          </form>
+        </div>
+      )}
     </div>
   )
 }

@@ -66,6 +66,8 @@ const adminStatusLabels: Record<string, string> = {
   DELIVERED: 'Доставлен',
   NOT_REDEEMED: 'Не выкуплен',
   RETURNED: 'Возврат',
+  CANCELLED: 'Отменен',
+  NOT_PICKED_UP: 'Отменен',
 }
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {

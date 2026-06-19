@@ -194,7 +194,7 @@ export const CreateOrder = () => {
       comment: selectedAddress.comment || '',
     }
 
-    if (deliveryType === 'Курьером' && !selectedDeliveryDate.deliveryFrom) {
+    if (!selectedDeliveryDate.deliveryFrom) {
       return toast.error('Пожалуйста, выберите дату доставки')
     }
 
@@ -204,14 +204,7 @@ export const CreateOrder = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json',
       },
-      data:
-        deliveryType == 'Курьером'
-          ? { ...data, ...selectedDeliveryDate }
-          : {
-              ...data,
-              deliveryFrom: '2026-05-03T00:00:00.000Z',
-              deliveryTo: '2026-05-07T00:00:00.000Z',
-            },
+      data: { ...data, ...selectedDeliveryDate },
     })
       .then(res => {
         console.log('Order created:', res.data)
@@ -329,6 +322,21 @@ export const CreateOrder = () => {
       promoDiscount={promoDiscount}
     />
   )
+
+  console.log(selectedDeliveryDate)
+
+  const getPhoneFormat = (phone?: string) => {
+    switch ((phone || '').trim()[0]) {
+      case '8':
+        return '# (###) ###-##-##'
+      case '9':
+        return '+7 (###) ###-##-##'
+      case '+':
+      case '7':
+      default:
+        return '+# (###) ###-##-##'
+    }
+  }
 
   return (
     <div className="flex flex-col w-full gap-[16px] lg:gap-[30px] py-[12px] px-[var(--sides-padding)_!important] w-full">
@@ -747,15 +755,6 @@ export const CreateOrder = () => {
             <h4 className="h4">2. Ваши данные</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[16px]">
               <label>
-                <p className="p2 text-[var(--service)_!important]">Имя</p>
-                <input
-                  type="text"
-                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
-                  value={user?.name || ''}
-                  onChange={e => setUser((prev: any) => ({ ...prev, name: e.target.value }))}
-                />
-              </label>{' '}
-              <label>
                 <p className="p2 text-[var(--service)_!important]">Фамилия</p>
                 <input
                   type="text"
@@ -764,6 +763,15 @@ export const CreateOrder = () => {
                   onChange={e => setUser((prev: any) => ({ ...prev, surName: e.target.value }))}
                 />
               </label>
+              <label>
+                <p className="p2 text-[var(--service)_!important]">Имя</p>
+                <input
+                  type="text"
+                  className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
+                  value={user?.name || ''}
+                  onChange={e => setUser((prev: any) => ({ ...prev, name: e.target.value }))}
+                />
+              </label>{' '}
               <label>
                 <p className="p2 text-[var(--service)_!important]">Отчество</p>
                 <input
@@ -785,7 +793,7 @@ export const CreateOrder = () => {
               <label>
                 <p className="p2 text-[var(--service)_!important]">Телефон</p>
                 <PatternFormat
-                  format="+7 (###) ###-##-##"
+                  format={getPhoneFormat(user?.phone)}
                   type="text"
                   className="border-b-[1px] border-solid border-[var(--service)] w-full outline-none p-[8px] p1"
                   value={user?.phone || ''}
