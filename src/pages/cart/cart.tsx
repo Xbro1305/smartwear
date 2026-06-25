@@ -213,42 +213,53 @@ const CartSideBar = ({ totalProductsPrice, totalDiscount, totalPrice, cart, orde
 
 const CartItem = ({ item, index, removeItem }: any) => {
   return (
-    <div key={index} className="flex flex-col sm:flex-row gap-[20px]">
+    <div
+      key={index}
+      className={`flex flex-col sm:flex-row gap-[20px] ${item.isOutOfStock ? 'opacity-[0.5]' : ''}`}
+    >
       <img src={item?.imageUrl} className="w-[120px] aspect-[12/17] object-cover" alt="" />
       <div className="flex flex-row w-full justify-between gap-[16px] md:gap-[24px]">
         <div className="flex flex-col gap-[16px] md:gap-[20px]">
           <h5 className="h3 -mb-[10px] md:mb-0">{item?.name}</h5>
           <div className="flex sm:hidden gap-[8px]">
-            <NumericFormat
-              allowNegative={false}
-              value={item.price}
-              suffix=" ₽"
-              className="h5"
-              thousandSeparator=" "
-              displayType="text"
-            />
-            {item.oldPrice && item.oldPrice > 0 ? (
+            {item.isOutOfStock ? (
+              <>
+                <p className="p2">Нет в наличии</p>
+              </>
+            ) : (
               <>
                 <NumericFormat
                   allowNegative={false}
-                  value={item.oldPrice}
+                  value={item.price}
                   suffix=" ₽"
-                  className="text-[var(--service)_!important] p1 line-through"
+                  className="h5"
                   thousandSeparator=" "
                   displayType="text"
                 />
+                {item.oldPrice && item.oldPrice > 0 ? (
+                  <>
+                    <NumericFormat
+                      allowNegative={false}
+                      value={item.oldPrice}
+                      suffix=" ₽"
+                      className="text-[var(--service)_!important] p1 line-through"
+                      thousandSeparator=" "
+                      displayType="text"
+                    />
 
-                <NumericFormat
-                  value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
-                  suffix="%"
-                  prefix="-"
-                  className="text-[var(--red)_!important] p1"
-                  thousandSeparator=" "
-                  displayType="text"
-                  allowNegative={false}
-                />
+                    <NumericFormat
+                      value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
+                      suffix="%"
+                      prefix="-"
+                      className="text-[var(--red)_!important] p1"
+                      thousandSeparator=" "
+                      displayType="text"
+                      allowNegative={false}
+                    />
+                  </>
+                ) : null}
               </>
-            ) : null}
+            )}
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p2 text-[15px] md:text-[18px] w-[90px]">Модель:</p>

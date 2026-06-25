@@ -253,6 +253,7 @@ type OrderItemCardProps = {
   isSingleItemInInvoice: boolean
   onDeleteInvoice: () => void
   promoDetails: any
+  totalItemsCount: number
 }
 
 const OrderItemCard = ({
@@ -262,6 +263,7 @@ const OrderItemCard = ({
   isSingleItemInInvoice,
   onDeleteInvoice,
   promoDetails,
+  totalItemsCount,
 }: OrderItemCardProps) => {
   const [markingCode, setMarkingCode] = useState(item.markingCode || '')
   const [isEditing, setIsEditing] = useState(false)
@@ -391,13 +393,13 @@ const OrderItemCard = ({
           Скидка
           {promoDetails?.type === 'PERCENT'
             ? ` ${promoDetails.value}%`
-            : ` ${formatMoney(promoDetails?.value)} руб.`}
+            : ` ${formatMoney(promoDetails?.value / totalItemsCount)} руб.`}
         </InfoPill>
         <InfoPill>
           Размер скидки <br />
           {promoDetails?.type === 'PERCENT'
             ? ` ${formatMoney((Number(item.price) * promoDetails?.value) / 100)} руб.`
-            : ` ${formatMoney(promoDetails?.value)} руб.`}
+            : ` ${formatMoney(promoDetails?.value / totalItemsCount)} руб.`}
         </InfoPill>
       </div>
 
@@ -427,6 +429,7 @@ type InvoiceCardProps = {
   onSaveMarking: (itemId: number, markingCode: string) => Promise<void>
   onDeleteItem: (itemId: number) => void
   onDeleteInvoice: () => void
+  totalItemsCount: number
 }
 
 const InvoiceCard = ({
@@ -441,6 +444,7 @@ const InvoiceCard = ({
   onSaveMarking,
   onDeleteItem,
   onDeleteInvoice,
+  totalItemsCount,
 }: InvoiceCardProps) => {
   const [historyOpen, setHistoryOpen] = useState(false)
   const [savingTracking, setSavingTracking] = useState(false)
@@ -499,13 +503,21 @@ const InvoiceCard = ({
             isSingleItemInInvoice={items.length === 1}
             onDeleteInvoice={onDeleteInvoice}
             promoDetails={order.promoCode}
+            totalItemsCount={totalItemsCount}
           />
         ))}
       </div>
 
       {/* Footer: status + history toggle */}
       <div className="flex items-center justify-between">
-        <p className="text-[22px] font-[700] text-[#4D4E50]">Статус: в сборке</p>
+        <p className="text-[22px] font-[700] text-[#4D4E50]">
+          Статус:{' '}
+          {items[0].deliveryStatus == 'NOT_DELIVERED'
+            ? 'В обработке'
+            : items[0].deliveryStatus == 'DELIVERED'
+              ? 'Доставлен'
+              : 'Отменен'}
+        </p>
         <button
           className="flex items-center gap-[8px] text-[18px] font-[700] text-[#4D4E50]"
           onClick={() => setHistoryOpen(v => !v)}
@@ -628,6 +640,7 @@ export const OrderAdminPage = () => {
   const updateTrackingNumber = async (groupIdx: number) => {
     if (!order) return
     const tNum = trackingNumbers[groupIdx]
+    navigator.clipboard.writeText(tNum)
     // Determine which order id to patch (if split orders, order may have sub-ids)
     const orderId = order.id
     try {
@@ -969,6 +982,7 @@ export const OrderAdminPage = () => {
           {itemGroups.map((groupItems, groupIdx) => (
             <InvoiceCard
               key={groupIdx}
+              totalItemsCount={itemGroups.reduce((sum, g) => sum + g.length, 0)}
               order={order}
               groupIndex={groupIdx + 1}
               totalGroups={itemGroups.length}
@@ -994,7 +1008,7 @@ export const OrderAdminPage = () => {
       {/* ── Bottom actions ── */}
       <div className="grid grid-cols-2 gap-[24px]">
         <button className="h-[48px] rounded-[12px] bg-[#4D4E50] text-[14px] font-[600] text-white">
-          Отклонить
+          Отменить
         </button>
         <button
           id="admin-button"

@@ -15,6 +15,7 @@ export const privateRoutes: RouteObject[] = [
   {
     children: [
       { element: <ProfilePage />, path: PROFILE },
+      { element: <ProfilePage />, path: `${PROFILE}/:endpointPage` },
       { element: <ConfirmEmail />, path: '/confirm-email' },
       { element: <CreateOrder />, path: ORDER },
       { element: <NewOrderDetails />, path: `${ORDER}/:id` },

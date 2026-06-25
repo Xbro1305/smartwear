@@ -45,6 +45,7 @@ interface OrderItem {
 }
 
 interface Order {
+  promoDiscountAmount: string | number | null | undefined
   id: number
   orderNumber: string
   orderGroup: string
@@ -114,10 +115,10 @@ const getProductImage = (item: OrderItem): string | null => {
   const media = item.variant.product.media
   // prefer photo matching variant color, then any photo, then cover
   const colorId = item.variant.colorAttrValue?.id
-  const match = media.find(m => m.kind === 'photo' && m.colorAttrValueId === colorId)
+  const match = media.find(m => m.kind === 'cover' && m.colorAttrValueId === colorId)
   const anyPhoto = media.find(m => m.kind === 'photo')
   const cover = media.find(m => m.kind === 'cover')
-  return match?.url || anyPhoto?.url || cover?.url || item.variant.product.imageUrl || null
+  return match?.url || cover?.url || anyPhoto?.url || item.variant.product.imageUrl || null
 }
 
 // ─── Status Progress Bar ──────────────────────────────────────────────────────
@@ -410,6 +411,7 @@ export const Order = () => {
       .post(`${API_URL}/orders/my/${order.id}/cancel`, null, { headers })
       .then(() => {
         setOrder({ ...order, status: 'CANCELLED' })
+        setIsCancelling(false)
         toast.info('Заказ успешно отменён')
       })
       .catch(() => {
@@ -423,7 +425,10 @@ export const Order = () => {
         <div className="flex flex-col gap-[12px]">
           {/* ── Breadcrumb ── */}
           <div className="flex items-center gap-2 text-[12px] text-[#9B9B9B]">
-            <Link to={PROFILE} className="text-[#D42B2B] transition-colors">
+            <Link
+              to={`${PROFILE}/orders`}
+              className="text-[#D42B2B_!important] transition-colors p1"
+            >
               {'<-'} В историю заказов
             </Link>
           </div>
@@ -465,7 +470,14 @@ export const Order = () => {
               </p>
               <p className="h5">{fmtMoney(order.totalAmount)}</p>
             </div>
-            Promo
+
+            {order.promoCodeId && (
+              <div className="mt-4 flex items-center justify-between rounded-[12px]">
+                <p className="p1">Промокод</p>
+                <p className="p1">{fmtMoney(order.promoDiscountAmount)}</p>
+              </div>
+            )}
+
             {order.promoCodeId && (
               <div className="mt-2 flex items-center justify-between">
                 <p className="text-[13px] text-[#9B9B9B]">Промокод применён</p>

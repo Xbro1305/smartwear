@@ -51,8 +51,24 @@ export const Profile_profile = () => {
   const [code, setCode] = useState<string>()
   const [editingAddress, setEditingAddress] = useState<any>(false)
   const [initialData, setInitialData] = useState<InitialData>({})
-  const baseUrl = 'https://test.maxiscomfort.ru/api'
+  const baseUrl = import.meta.env.VITE_APP_API_URL
   const token = getByKey('token')
+
+  const normalizePhone = (value?: string) => String(value || '').replace(/\D/g, '')
+  const normalizeBirthday = (value?: string) => (value ? value.split('T')[0] : '')
+
+  const normalizeInitialData = (response: any): InitialData => ({
+    id: response.id,
+    surname: response.surName || '',
+    name: response.name || '',
+    middlename: response.middleName || '',
+    birthday: normalizeBirthday(response.birthday),
+    email: response.email || '',
+    phone: response.phone?.replace(/^\++/, '+') || '',
+    gender: response.gender || '',
+    city: response.city || '',
+    isSubscribed: response.isSubscribed ?? false,
+  })
 
   const refresh = () => {
     axios(`${baseUrl}/users/me`, {
@@ -63,33 +79,50 @@ export const Profile_profile = () => {
     })
       .then(res => {
         const response = res.data
-        setSurname(response.surName || '')
-        setName(response.name || '')
-        setMiddlename(response.middleName || '')
-        setEmail(response.email || '')
-        setPhone(response.phone.replace(/^\++/, '+') || '')
-        setGender(response.gender || '')
-        setIsSubscribed(response.isSubscribed || '')
-        setCity(response.city || '')
+        const normalizedData = normalizeInitialData(response)
+
+        setSurname(normalizedData.surname || '')
+        setName(normalizedData.name || '')
+        setMiddlename(normalizedData.middlename || '')
+        setEmail(normalizedData.email || '')
+        setPhone(normalizedData.phone || '')
+        setGender(normalizedData.gender || '')
+        setIsSubscribed(normalizedData.isSubscribed ?? false)
+        setCity(normalizedData.city || '')
         setIsEmailConfirmed(response.isEmailConfirmed || '')
         setIsPhoneConfirmed(response.isPhoneConfirmed || '')
         setAddresses(response.addresses || [])
-        setInitialData(response)
+        setInitialData(normalizedData)
         const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
         setDefaultAddress(defaultAddr)
 
-        if (phone.startsWith('8') || phone.startsWith('+8')) {
+        if (normalizedData?.phone?.startsWith('8') || normalizedData?.phone?.startsWith('+8')) {
           setPrefix('')
         } else {
           setPrefix('+')
         }
 
-        setBirthday(response?.birthday?.split('T')[0] || '')
+        setBirthday(normalizedData.birthday || '')
       })
       .catch(err => console.log(err))
   }
 
   useEffect(refresh, [])
+
+  useEffect(() => {
+    if (!initialData.id) return
+
+    setIsProfileEdited(
+      (initialData.surname || '') !== surname ||
+        (initialData.name || '') !== name ||
+        (initialData.middlename || '') !== middlename ||
+        (initialData.birthday || '') !== birthday ||
+        (initialData.email || '') !== email ||
+        normalizePhone(initialData.phone) !== normalizePhone(`${prefix}${phone}`) ||
+        (initialData.gender || '') !== gender ||
+        Boolean(initialData.isSubscribed) !== Boolean(isSubscribed)
+    )
+  }, [surname, name, middlename, birthday, email, phone, prefix, gender, isSubscribed, initialData])
 
   const editDefaultAddress = async (adress: any) => {
     if (defaultAddress && adress.id == defaultAddress?.id) {
@@ -372,7 +405,6 @@ export const Profile_profile = () => {
               onChange={e => {
                 const value = e.target.value
                 setName(value)
-                initialData.name != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
               }}
               title="Имя"
               required={true}
@@ -383,7 +415,6 @@ export const Profile_profile = () => {
               onChange={e => {
                 const value = e.target.value
                 setSurname(value)
-                initialData.surname != value ? setIsProfileEdited(true) : setIsProfileEdited(false)
               }}
               name={'surname'}
               title="Фамилия"
@@ -405,9 +436,6 @@ export const Profile_profile = () => {
               onChange={e => {
                 const value = e.target.value
                 setMiddlename(value)
-                initialData.middlename != value
-                  ? setIsProfileEdited(true)
-                  : setIsProfileEdited(false)
               }}
               value={middlename}
               name={'middlename'}
@@ -421,7 +449,6 @@ export const Profile_profile = () => {
                 onChange={e => {
                   const value = e.target.value
                   setBirthday(value)
-                  setIsProfileEdited(initialData.birthday !== value)
                 }}
                 onFocus={e => {
                   e.currentTarget.showPicker?.() // новый стандарт HTML на некоторых браузерах
@@ -442,9 +469,6 @@ export const Profile_profile = () => {
                   onChange={e => {
                     const value = e.target.value
                     setGender(value)
-                    initialData.gender != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
                   }}
                   className="radio"
                 />
@@ -459,9 +483,6 @@ export const Profile_profile = () => {
                   onChange={e => {
                     const value = e.target.value
                     setGender(value)
-                    initialData.gender != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
                   }}
                   className="radio"
                 />
@@ -481,9 +502,6 @@ export const Profile_profile = () => {
                   onChange={e => {
                     const value = e.target.value
                     setEmail(value)
-                    initialData.email != value
-                      ? setIsProfileEdited(true)
-                      : setIsProfileEdited(false)
                   }}
                   name={'email'}
                   type={'email'}
@@ -523,21 +541,14 @@ export const Profile_profile = () => {
                     mask={'X'}
                     name={'phone'}
                     onValueChange={(e: any) => {
-                      console.log(e)
-
-                      if (e.formattedValue.startsWith(9)) {
+                      if (e.formattedValue.startsWith('9')) {
                         setPrefix('+')
-                      } else if (e.formattedValue.startsWith(8)) {
+                      } else if (e.formattedValue.startsWith('8')) {
                         setPrefix('')
                       } else {
                         setPrefix('+')
                       }
                       setPhone(e.floatValue ? String(e.floatValue) : '')
-
-                      const value = e.formattedValue
-                      initialData.phone != value
-                        ? setIsProfileEdited(true)
-                        : setIsProfileEdited(false)
                     }}
                     value={phone}
                     style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
@@ -569,9 +580,6 @@ export const Profile_profile = () => {
                 onChange={(e: any) => {
                   const value = e.target.checked
                   setIsSubscribed(value)
-                  initialData.isSubscribed != value
-                    ? setIsProfileEdited(true)
-                    : setIsProfileEdited(false)
                 }}
                 className="checkbox"
                 type={'checkbox'}
@@ -672,9 +680,11 @@ export const Profile_profile = () => {
                 })
                   .then(res => {
                     const response = res.data
-                    setCity(response.city || '')
+                    const normalizedData = normalizeInitialData(response)
+
+                    setCity(normalizedData.city || '')
                     setAddresses(response.addresses || [])
-                    setInitialData(response)
+                    setInitialData(normalizedData)
                     const defaultAddr = response?.addresses?.find((i: any) => i.isDefault)
                     setDefaultAddress(defaultAddr)
 

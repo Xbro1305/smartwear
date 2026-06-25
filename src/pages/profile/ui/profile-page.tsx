@@ -1,11 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './Profile.module.scss'
 import { FaCube, FaUser } from 'react-icons/fa'
 import { Profile_profile } from '../Components/Profile_profile'
 import { Orders } from '../Components/Orders'
+import { useParams } from 'react-router-dom'
 
 export const ProfilePage = () => {
   const [page, setPage] = useState('profile')
+
+  const { endpointPage } = useParams()
+
+  useEffect(() => {
+    if (endpointPage === 'orders') {
+      setPage('orders')
+    } else {
+      setPage('profile')
+    }
+  }, [endpointPage])
 
   return (
     <div className={styles.profile_page}>

@@ -8,6 +8,7 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CgChevronDown } from 'react-icons/cg'
 
 interface order {
+  orderNumber: string
   id: number
   createdAt: Date
   status: string
@@ -54,7 +55,7 @@ export const Orders = () => {
         </div>
         {orders.map(i => (
           <Link className={styles.orders_list_item} to={`${ORDERPROFILE}/${i.id}`}>
-            <p className="p2">№ {i.id}</p>
+            <p className="p2">№ {i.orderNumber}</p>
             <p className="p2">
               {new Date(i.createdAt).toLocaleDateString('ru-RU', {
                 day: '2-digit',

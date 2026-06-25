@@ -78,10 +78,12 @@ export const NewOrderDetails = () => {
           <h5 className="h5">Статус оплаты:</h5>
           <p className="p1">Не оплачено</p>
         </div>
-        <button className="bg-[transparent] border-none p-[10px] cursor-pointer p1 flex items-center gap-[5px]">
-          <MdOutlineLocalPrintshop />
-          <span className="border-b-solid border-b-[1px] border-[#000]">Распечатать чек</span>
-        </button>
+        {order?.paymentType == 'ONLINE' && (
+          <button className="bg-[transparent] border-none p-[10px] cursor-pointer p1 flex items-center gap-[5px]">
+            <MdOutlineLocalPrintshop />
+            <span className="border-b-solid border-b-[1px] border-[#000]">Распечатать чек</span>
+          </button>
+        )}
       </div>
       <div className="flex flex-col gap-[30px]">
         <h4
@@ -97,7 +99,7 @@ export const NewOrderDetails = () => {
       </div>
       <div className="flex flex-col gap-[24px] lg:gap-[48px] items-center">
         <Link
-          to={PROFILE}
+          to={`${PROFILE}/orders`}
           id="admin-button"
           className="w-full max-w-[526px] flex items-center justify-center"
         >
@@ -106,7 +108,7 @@ export const NewOrderDetails = () => {
 
         <p className="p1 text-center">
           Вы можете отследить ваш заказ <br /> в{' '}
-          <Link to={PROFILE} className="border-solid border-b-[1px] border-[#000]">
+          <Link to={`${PROFILE}/orders`} className="border-solid border-b-[1px] border-[#000]">
             личном кабинете
           </Link>
         </p>

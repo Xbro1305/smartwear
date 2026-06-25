@@ -46,6 +46,22 @@ export const CreateOrder = () => {
   }, [selectedAddress?.location?.address_full])
   const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
 
+  const getDeliveryDates = () => {
+    axios(`${import.meta.env.VITE_APP_API_URL}/orders/delivery-options`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then(res => {
+        setDeliveryDates(res.data.addresses || [])
+      })
+      .catch(err => {
+        console.error('Error fetching delivery dates:', err)
+        toast.error('Не удалось получить даты доставки. Пожалуйста, попробуйте снова.')
+        setDeliveryDates([])
+      })
+  }
+
   useEffect(() => {
     const textarea = commentTextareaRef.current
     if (!textarea) return
@@ -57,6 +73,7 @@ export const CreateOrder = () => {
   useEffect(() => {
     document.title = `Оформление заказа - Умная одежда`
     window.scrollTo(0, 0)
+    getDeliveryDates()
 
     if (!localStorage.getItem('token')) {
       const localCart = localStorage.getItem('cart')
@@ -194,7 +211,7 @@ export const CreateOrder = () => {
       comment: selectedAddress.comment || '',
     }
 
-    if (!selectedDeliveryDate.deliveryFrom) {
+    if (!selectedDeliveryDate?.deliveryFrom || !selectedDeliveryDate) {
       return toast.error('Пожалуйста, выберите дату доставки')
     }
 
@@ -215,73 +232,15 @@ export const CreateOrder = () => {
       .catch(err => {
         console.error('Error saving address:', err)
         if (err.response?.data?.message == 'not enough stock')
-          toast.error('Товара(ов) нет в наличии')
+          toast.error(
+            'Некоторых товаров из корзины нет в наличии. Уберите их из корзины и попробуйте снова.'
+          )
 
         toast.error(
           err.response.data.message || 'Не удалось создать заказ. Пожалуйста, попробуйте снова.'
         )
       })
   }
-
-  useEffect(() => {
-    if (selectedAddress?.id) {
-      axios(`${import.meta.env.VITE_APP_API_URL}/orders/delivery-dates`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        method: 'POST',
-        data: {
-          addressId: selectedAddress?.id || '',
-        },
-      })
-        .then(res => {
-          const dates = res.data
-
-          const addBusinessDays = (date: Date, days: number) => {
-            const result = new Date(date)
-
-            while (days > 0) {
-              result.setDate(result.getDate() + 1)
-
-              const day = result.getDay()
-              if (day !== 0 && day !== 6) {
-                days--
-              }
-            }
-
-            return result
-          }
-
-          const deliveryFrom = new Date(dates.deliveryFrom)
-          const deliveryTo = new Date(dates.deliveryTo)
-
-          console.log(deliveryFrom, deliveryTo)
-
-          const formatDate = (date: any) => date?.toISOString()?.split('T')[0]
-
-          const options = [
-            {
-              deliveryFrom: dates.deliveryFrom,
-              deliveryTo: dates.deliveryTo,
-            },
-            {
-              deliveryFrom: formatDate(addBusinessDays(deliveryFrom, 1)),
-              deliveryTo: formatDate(addBusinessDays(deliveryTo, 1)),
-            },
-            {
-              deliveryFrom: formatDate(addBusinessDays(deliveryFrom, 2)),
-              deliveryTo: formatDate(addBusinessDays(deliveryTo, 2)),
-            },
-          ]
-          setDeliveryDates(options)
-        })
-        .catch(err => {
-          console.error('Error fetching delivery dates:', err)
-          toast.error('Не удалось получить даты доставки. Пожалуйста, попробуйте снова.')
-          setDeliveryDates([])
-        })
-    }
-  }, [deliveryType, selectedAddress])
 
   useEffect(() => {
     if (promo.length === 0) return
@@ -323,8 +282,6 @@ export const CreateOrder = () => {
     />
   )
 
-  console.log(selectedDeliveryDate)
-
   const getPhoneFormat = (phone?: string) => {
     switch ((phone || '').trim()[0]) {
       case '8':
@@ -336,6 +293,46 @@ export const CreateOrder = () => {
       default:
         return '+# (###) ###-##-##'
     }
+  }
+
+  const addAddressToUser = (pvz: any) => {
+    if (!localStorage.getItem('token')) return
+    const requestData = {
+      fullAddress: pvz.location?.address_full,
+      longitude: String(pvz.location.longitude),
+      latitude: String(pvz.location.latitude),
+      type: pvz.type,
+      city: pvz.location.city,
+      apartment: pvz.apartment,
+      intercom: pvz.intercom,
+      floor: pvz.floor,
+      entrance: pvz.entrance,
+      comment: pvz.comment,
+    }
+
+    // Удаляем пустые поля
+    const filteredData = Object.fromEntries(
+      Object.entries(requestData).filter(([_, value]) => value)
+    )
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/users/add-address/${user.id}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      data: filteredData,
+    })
+      .then(res => {
+        const newAddress = res.data
+        setSelectedAddress({
+          ...newAddress,
+          location: { address_full: newAddress.fullAddress },
+        })
+
+        getDeliveryDates()
+      })
+      .catch(err => console.log(err))
   }
 
   return (
@@ -412,27 +409,30 @@ export const CreateOrder = () => {
                         </div>
                       </div>
                     </div>
-                    {deliveryDates.length ? (
+                    {deliveryDates.find((d: any) => d.address.id == selectedAddress.id)?.ranges
+                      .length ? (
                       <div className="flex flex-col gap-[20px]">
                         <h2 className="h2">Дата доставки</h2>
                         <div className="flex items-center gap-[8px]">
-                          {deliveryDates?.map((d: any, index: number) => (
-                            <div
-                              key={index}
-                              className="p-[12px] cursor-pointer rounded-[4px] border-solid border-[1px] border-[var(--service)]"
-                              style={{
-                                background:
-                                  selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
-                                    ? 'var(--gray)'
-                                    : '',
-                              }}
-                              onClick={() => setSelectedDeliveryDate(d)}
-                            >
-                              {formatDate(d.deliveryFrom)}
-                              {' - '}
-                              {formatDate(d.deliveryTo)}
-                            </div>
-                          ))}
+                          {deliveryDates
+                            .find((d: any) => d.address.id == selectedAddress.id)
+                            ?.ranges?.map((d: any, index: number) => (
+                              <div
+                                key={index}
+                                className="p-[12px] cursor-pointer rounded-[4px] border-solid border-[1px] border-[var(--service)]"
+                                style={{
+                                  background:
+                                    selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
+                                      ? 'var(--gray)'
+                                      : '',
+                                }}
+                                onClick={() => setSelectedDeliveryDate(d)}
+                              >
+                                {formatDate(d.deliveryFrom)}
+                                {' - '}
+                                {formatDate(d.deliveryTo)}
+                              </div>
+                            ))}
                         </div>
                       </div>
                     ) : (
@@ -527,6 +527,7 @@ export const CreateOrder = () => {
                           onSelect={pvz => {
                             setSelectedAddress(pvz)
                             setIsDefaultAddress(false)
+                            addAddressToUser(pvz)
                           }}
                           type="PVZ"
                         />
@@ -605,27 +606,30 @@ export const CreateOrder = () => {
                         </div>
                       </div>
                     </div>
-                    {deliveryDates.length ? (
+                    {deliveryDates.find((d: any) => d.address.id == selectedAddress.id)?.ranges
+                      .length ? (
                       <div className="flex flex-col gap-[20px]">
                         <h2 className="h2">Дата доставки</h2>
                         <div className="flex items-center gap-[8px]">
-                          {deliveryDates?.map((d: any, index: number) => (
-                            <div
-                              key={index}
-                              className="p-[12px] cursor-pointer rounded-[4px] border-solid border-[1px] border-[var(--service)]"
-                              style={{
-                                background:
-                                  selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
-                                    ? 'var(--gray)'
-                                    : '',
-                              }}
-                              onClick={() => setSelectedDeliveryDate(d)}
-                            >
-                              {formatDate(d.deliveryFrom)}
-                              {' - '}
-                              {formatDate(d.deliveryTo)}
-                            </div>
-                          ))}
+                          {deliveryDates
+                            .find((d: any) => d.address.id == selectedAddress.id)
+                            ?.ranges?.map((d: any, index: number) => (
+                              <div
+                                key={index}
+                                className="p-[12px] cursor-pointer rounded-[4px] border-solid border-[1px] border-[var(--service)]"
+                                style={{
+                                  background:
+                                    selectedDeliveryDate?.deliveryFrom == d?.deliveryFrom
+                                      ? 'var(--gray)'
+                                      : '',
+                                }}
+                                onClick={() => setSelectedDeliveryDate(d)}
+                              >
+                                {formatDate(d.deliveryFrom)}
+                                {' - '}
+                                {formatDate(d.deliveryTo)}
+                              </div>
+                            ))}
                         </div>
                       </div>
                     ) : (
@@ -718,6 +722,7 @@ export const CreateOrder = () => {
                           onSelect={pvz => {
                             setSelectedAddress(pvz)
                             setIsDefaultAddress(false)
+                            addAddressToUser(pvz)
                           }}
                           type="DELIVERY"
                         />
@@ -1044,42 +1049,51 @@ const CartSideBar = ({
 
 const CartItem = ({ item, index }: any) => {
   return (
-    <div key={index} className="flex flex-col sm:flex-row gap-[20px]">
+    <div
+      key={index}
+      className={`flex flex-col sm:flex-row gap-[20px] ${item.isOutOfStock ? 'opacity-[0.5]' : ''}`}
+    >
       <img src={item?.imageUrl} className="w-[120px] aspect-[12/17] object-cover" alt="" />
       <div className="flex flex-row w-full justify-between gap-[16px] md:gap-[24px]">
         <div className="flex flex-col gap-[16px] md:gap-[20px]">
           <h5 className="h5 -mb-[10px] md:mb-0">{item?.name}</h5>
           <div className="flex sm:hidden gap-[8px]">
-            <NumericFormat
-              allowNegative={false}
-              value={item.price}
-              suffix=" ₽"
-              className="h5"
-              thousandSeparator=" "
-              displayType="text"
-            />
-            {item.oldPrice && item.oldPrice > 0 ? (
+            {item.isOutOfStock ? (
+              <p className="p1">Нет в наличии</p>
+            ) : (
               <>
                 <NumericFormat
                   allowNegative={false}
-                  value={item.oldPrice}
+                  value={item.price}
                   suffix=" ₽"
-                  className="text-[var(--service)_!important] p1 line-through"
+                  className="h5"
                   thousandSeparator=" "
                   displayType="text"
                 />
+                {item.oldPrice && item.oldPrice > 0 ? (
+                  <>
+                    <NumericFormat
+                      allowNegative={false}
+                      value={item.oldPrice}
+                      suffix=" ₽"
+                      className="text-[var(--service)_!important] p1 line-through"
+                      thousandSeparator=" "
+                      displayType="text"
+                    />
 
-                <NumericFormat
-                  value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
-                  suffix="%"
-                  prefix="-"
-                  allowNegative={false}
-                  className="text-[var(--red)_!important] p1"
-                  thousandSeparator=" "
-                  displayType="text"
-                />
+                    <NumericFormat
+                      value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
+                      suffix="%"
+                      prefix="-"
+                      allowNegative={false}
+                      className="text-[var(--red)_!important] p1"
+                      thousandSeparator=" "
+                      displayType="text"
+                    />
+                  </>
+                ) : null}
               </>
-            ) : null}
+            )}
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p1 text-[15px] md:text-[18px] w-[90px]">Модель:</p>

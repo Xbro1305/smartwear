@@ -638,7 +638,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                             />
                             <NumericFormat
                               className="h5 text-[var(--red)_!important]"
-                              value={-((i.oldPrice * 100) / i.price - 100).toFixed(0)}
+                              value={Math.round(((i.oldPrice - i.price) / i.oldPrice) * 100)}
                               displayType="text"
                               thousandSeparator=" "
                               suffix=" %"

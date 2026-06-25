@@ -156,8 +156,8 @@ export const SignInPage: React.FC = () => {
         navigate(`${from}`, { replace: true })
         window.location.reload()
       })
-      .catch(error => {
-        console.log(error)
+      .catch(() => {
+        toast.error('Неправильный код!')
       })
   }
 
