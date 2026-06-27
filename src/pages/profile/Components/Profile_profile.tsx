@@ -574,20 +574,22 @@ export const Profile_profile = () => {
                 {isPhoneComfirmed ? 'Подтвержден' : 'Подтвердить'}
               </p>
             </div>
-            <label className={styles.profile_form_confirmLabel}>
-              <input
-                checked={isSubscribed}
-                onChange={(e: any) => {
-                  const value = e.target.checked
-                  setIsSubscribed(value)
-                }}
-                className="checkbox"
-                type={'checkbox'}
-              />
-              <p style={{ width: '100%' }} className="p2">
-                Получать информацию о скидках, новинках и выгодных предложениях
-              </p>
-            </label>
+            {isEmailConfirmed && (
+              <label className={styles.profile_form_confirmLabel}>
+                <input
+                  checked={isSubscribed}
+                  onChange={(e: any) => {
+                    const value = e.target.checked
+                    setIsSubscribed(value)
+                  }}
+                  className="checkbox"
+                  type={'checkbox'}
+                />
+                <p style={{ width: '100%' }} className="p2">
+                  Получать информацию о скидках, новинках и выгодных предложениях
+                </p>
+              </label>
+            )}
 
             {isProfileEdited && (
               <div className={styles.profile_form_edited}>

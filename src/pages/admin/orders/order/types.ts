@@ -7,6 +7,8 @@ export type UserRole = 'ADMIN' | 'USER' | string
 export type Gender = 'male' | 'female' | string
 
 export type AdminOrder = {
+  histories: never[]
+  shipmentDate: string | Date | null | undefined
   promoCode: any
   statusHistory: never[]
   id: number
@@ -74,6 +76,8 @@ export type AdminOrderAddress = {
 }
 
 export type AdminOrderItem = {
+  storeName: any
+  discountAmount: any
   storeAddress: string
   storeId: string
   trackingNumber: string | null

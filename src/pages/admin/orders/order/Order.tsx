@@ -253,7 +253,7 @@ type OrderItemCardProps = {
   isSingleItemInInvoice: boolean
   onDeleteInvoice: () => void
   promoDetails: any
-  totalItemsCount: number
+  // totalItemsCount: number
 }
 
 const OrderItemCard = ({
@@ -263,7 +263,7 @@ const OrderItemCard = ({
   isSingleItemInInvoice,
   onDeleteInvoice,
   promoDetails,
-  totalItemsCount,
+  // totalItemsCount,
 }: OrderItemCardProps) => {
   const [markingCode, setMarkingCode] = useState(item.markingCode || '')
   const [isEditing, setIsEditing] = useState(false)
@@ -393,13 +393,13 @@ const OrderItemCard = ({
           Скидка
           {promoDetails?.type === 'PERCENT'
             ? ` ${promoDetails.value}%`
-            : ` ${formatMoney(promoDetails?.value / totalItemsCount)} руб.`}
+            : ` ${item?.discountAmount} руб.`}
         </InfoPill>
         <InfoPill>
           Размер скидки <br />
           {promoDetails?.type === 'PERCENT'
             ? ` ${formatMoney((Number(item.price) * promoDetails?.value) / 100)} руб.`
-            : ` ${formatMoney(promoDetails?.value / totalItemsCount)} руб.`}
+            : ` ${item?.discountAmount} руб.`}
         </InfoPill>
       </div>
 
@@ -444,7 +444,7 @@ const InvoiceCard = ({
   onSaveMarking,
   onDeleteItem,
   onDeleteInvoice,
-  totalItemsCount,
+  // totalItemsCount,
 }: InvoiceCardProps) => {
   const [historyOpen, setHistoryOpen] = useState(false)
   const [savingTracking, setSavingTracking] = useState(false)
@@ -461,7 +461,7 @@ const InvoiceCard = ({
   const historyLabel =
     totalGroups > 1
       ? `История (${order.orderNumber}/${groupIndex})`
-      : `История (${order.orderNumber}/1)`
+      : `История (${order.orderNumber})`
 
   return (
     <div className="flex flex-col gap-[16px] rounded-[12px] bg-[#FAFAFA] p-[24px]">
@@ -503,7 +503,7 @@ const InvoiceCard = ({
             isSingleItemInInvoice={items.length === 1}
             onDeleteInvoice={onDeleteInvoice}
             promoDetails={order.promoCode}
-            totalItemsCount={totalItemsCount}
+            // totalItemsCount={totalItemsCount}
           />
         ))}
       </div>
@@ -530,11 +530,11 @@ const InvoiceCard = ({
       {/* History */}
       {historyOpen && (
         <div className="flex flex-col gap-[12px]">
-          {(order?.statusHistory || []).map((row: { date: string; text: string }, i: number) => (
+          {(order?.histories || []).map((row: any, i: number) => (
             <div key={i} className="grid grid-cols-[90px_72px_1fr] items-center gap-[8px]">
-              <p className="text-[16px] font-[600] text-[#4D4E50]">{row.date}</p>
+              <p className="text-[16px] font-[600] text-[#4D4E50]">{formatDate(row?.changedAt)}</p>
               <div className="h-[1px] bg-[#8B8F97]" />
-              <p className="text-[16px] font-[600] text-[#4D4E50]">{row.text}</p>
+              <p className="text-[16px] font-[600] text-[#4D4E50]">{row.newMoyskladStatus}</p>
             </div>
           ))}
         </div>
@@ -594,6 +594,7 @@ export const OrderAdminPage = () => {
         const data: types.AdminOrder = res.data
         setOrder(data)
         // Initialise tracking numbers from API data
+        window.document.title = `Заказ №${data?.orderNumber}`
         const groups = groupItemsByShop(data.items)
         setTrackingNumbers(groups.map(g => g[0]?.trackingNumber || data.trackingNumber || ''))
         if (data.deliveryFrom) setShippingDate(new Date(data.deliveryFrom))
@@ -602,7 +603,6 @@ export const OrderAdminPage = () => {
       .catch(console.error)
 
     window.scrollTo(0, 0)
-    window.document.title = `Заказ №${id}`
   }, [id, authHeaders])
 
   // ─── Grouping items by shop ──────────────────────────────────────────────
@@ -824,7 +824,6 @@ export const OrderAdminPage = () => {
       {/* ── Order description ── */}
       <section className="flex w-full flex-col gap-[24px]">
         <h3 id="h3">Описание заказа</h3>
-
         {/* Delivery address row */}
         <div className="grid grid-cols-[1fr_2fr] gap-[24px]">
           <CopyField
@@ -850,9 +849,7 @@ export const OrderAdminPage = () => {
             />
           )}
         </div>
-
         <Divider />
-
         {/* Payment + dates row */}
         <div className="grid grid-cols-4 gap-[24px]">
           <CopyField
@@ -866,7 +863,7 @@ export const OrderAdminPage = () => {
           <div ref={shippingRef} className="relative">
             <DateField
               label="Дата отправки"
-              displayValue={formatDate(shippingDate)}
+              displayValue={formatDate(order.shipmentDate) || '-'}
               onCalendarClick={() => {
                 setDeliveryCalOpen(false)
                 setShippingCalOpen(v => !v)
@@ -917,9 +914,7 @@ export const OrderAdminPage = () => {
             isCopyable={false}
           />
         </div>
-
         <Divider />
-
         {/* Price row */}
         <div className="grid grid-cols-[1fr_auto_0.6fr_0.8fr_0.7fr] gap-[24px] items-end">
           {/* Общая стоимость */}
@@ -945,8 +940,9 @@ export const OrderAdminPage = () => {
           <div className="flex flex-col gap-[8px]">
             <div className="h-[21px]" />
             <InfoPill>
-              Скидка {order.promoCode?.value || '0 '}
-              {order.promoCode?.type == 'PERCENT' ? '%' : 'руб'}
+              Скидка{' '}
+              {order.items.reduce((sum, item) => sum + Number(item.discountAmount || 0), 0) || '0 '}
+              {order.promoCode?.type == 'PERCENT' ? '%' : ' руб'}
             </InfoPill>
           </div>
 
@@ -959,7 +955,10 @@ export const OrderAdminPage = () => {
                 ? '0'
                 : order.promoCode?.type == 'PERCENT'
                   ? `-${Math.round((Number(order.totalAmount) * order.promoCode?.value) / 100)} руб`
-                  : `-${order.promoCode?.value} руб`}
+                  : `-${order.items.reduce(
+                      (sum, item) => sum + Number(item.discountAmount || 0),
+                      0
+                    )} руб`}
             </InfoPill>
           </div>
 
@@ -967,6 +966,21 @@ export const OrderAdminPage = () => {
           <CopyField
             label="Стоимость доставки"
             value="0"
+            onCopy={() => undefined}
+            isCopyable={false}
+          />
+        </div>{' '}
+        <Divider />
+        {/* Price row */}
+        <div className="grid grid-cols-[1fr] gap-[24px] items-end">
+          {/* Стоимость доставки — всегда 0 */}
+          <CopyField
+            label="Адрес отправителя"
+            value={
+              `${order.items[0]?.storeName} – ${order.items[0]?.storeAddress}` ||
+              order.address.fullAddress ||
+              '-'
+            }
             onCopy={() => undefined}
             isCopyable={false}
           />

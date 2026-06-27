@@ -2,6 +2,7 @@ import styles from './adminHader.module.scss'
 import { FaSearch } from 'react-icons/fa'
 
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { useEffect } from 'react'
 const { ADMIN } = ROUTER_PATHS
 
 export const AdminHeader = ({
@@ -21,6 +22,11 @@ export const AdminHeader = ({
     // { name: 'Новости', path: '/admin/news', end: false },
     // { name: 'Статьи', path: ADMINARTICLES, end: false },
   ]
+
+  useEffect(() => {
+    const currentPath = window.location.pathname.split('/')[2]
+    setPage(currentPath)
+  }, [setPage])
 
   return (
     <header className={styles.adminHeader}>

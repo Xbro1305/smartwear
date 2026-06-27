@@ -45,6 +45,8 @@ interface OrderItem {
 }
 
 interface Order {
+  canCancel: boolean
+  customerStatus: string
   promoDiscountAmount: string | number | null | undefined
   id: number
   orderNumber: string
@@ -79,10 +81,10 @@ interface User {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<string, { label: string; step: number; color: string }> = {
-  NEW: { label: 'В сборке', step: 1, color: '#D42B2B' },
-  PROCESSING: { label: 'В сборке', step: 1, color: '#D42B2B' },
-  SHIPPED: { label: 'Отправлен', step: 2, color: '#D42B2B' },
-  DELIVERED: { label: 'Доставлен', step: 3, color: '#22C55E' },
+  ACCEPTED: { label: 'В сборке', step: 1, color: '#D42B2B' },
+  ASSEMBLING: { label: 'В сборке', step: 2, color: '#D42B2B' },
+  SHIPPED: { label: 'Отправлен', step: 3, color: '#D42B2B' },
+  DELIVERED: { label: 'Доставлен', step: 4, color: '#22C55E' },
   CANCELLED: { label: 'Отменён', step: 2, color: '#D42B2B' },
 }
 
@@ -451,7 +453,7 @@ export const Order = () => {
       <div className="flex flex-col lg:flex-row gap-[12px] items-start">
         <div className="flex flex-col gap-[12px] flex-1">
           <div className="rounded-2xl shadow-[0px_4px_16.2px_0px_#0000000D] p-[36px]">
-            <StatusBar status={order.status} />
+            <StatusBar status={order.customerStatus} />
           </div>
           {/* ── Items ── */}
           <div className="shadow-[0px_4px_16.2px_0px_#0000000D] py-[32px] px-[16px] md:px-[32px] rounded-[12px]">
@@ -538,7 +540,7 @@ export const Order = () => {
             )}
           </div>
         </div>
-        {order.status !== 'CANCELLED' && (
+        {order.status !== 'CANCELLED' && order.canCancel && (
           <div className="shadow-[0px_4px_16.2px_0px_#0000000D] rounded-[12px] h-fit px-[24px] py-[32px] flex flex-col w-full lg:w-fit gap-[24px]">
             <button
               id="admin-button"

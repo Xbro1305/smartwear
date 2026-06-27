@@ -125,7 +125,24 @@ export default function NewOrdersPage() {
           },
         }
       )
-      setOrders(response.data)
+      const page = window.location.pathname.split('/').pop()
+      let filteredOrders = response.data
+
+      if (page === 'new') {
+        filteredOrders = response.data.filter(order => order.adminStatus === 'NEW_ORDERS')
+      } else if (page === 'inProgress') {
+        filteredOrders = response.data.filter(order => order.adminStatus === 'IN_PROGRESS')
+      } else if (page === 'delivered') {
+        filteredOrders = response.data.filter(order => order.adminStatus === 'DELIVERED')
+      } else if (page === 'cancelled') {
+        filteredOrders = response.data.filter(order => order.adminStatus === 'CANCELLED')
+      } else if (page === 'notPickedUp') {
+        filteredOrders = response.data.filter(order => order.adminStatus === 'NOT_PICKED_UP')
+      } else if (page === 'returns') {
+        filteredOrders = response.data.filter(order => order.adminStatus === 'RETURNED')
+      }
+
+      setOrders(filteredOrders)
     } catch (requestError) {
       setError('Не удалось загрузить новые заказы')
     } finally {
@@ -137,7 +154,7 @@ export default function NewOrdersPage() {
     fetchOrders()
     window.scrollTo(0, 0)
     window.document.title = 'Новые заказы - Умная одежда'
-  }, [])
+  }, [window.location.pathname])
 
   useEffect(() => {
     if (openedOrderId === null) return
@@ -318,7 +335,7 @@ export default function NewOrdersPage() {
                 type="button"
                 className="w-fit h-[42px] rounded-[12px] bg-[#E02844] px-[22px] text-[14px] font-[600] text-[#FFFFFF]"
                 onClick={() => {
-                  axios(`${import.meta.env.VITE_APP_API_URL}/orders/${deletingOrderId}`, {
+                  axios(`${import.meta.env.VITE_APP_API_URL}/orders/admin/${deletingOrderId}`, {
                     method: 'DELETE',
                     headers: {
                       Authorization: `Bearer ${localStorage.getItem('token')}`,

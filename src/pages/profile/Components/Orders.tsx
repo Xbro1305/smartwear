@@ -8,6 +8,8 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CgChevronDown } from 'react-icons/cg'
 
 interface order {
+  customerStatus: string
+  adminStatus: any
   orderNumber: string
   id: number
   createdAt: Date
@@ -20,6 +22,15 @@ export const Orders = () => {
   const [ordersCount, setOrdersCount] = useState(0)
 
   const { ORDERPROFILE } = ROUTER_PATHS
+  const statusLabels: Record<string, string> = {
+    ACCEPTED: 'Новый',
+    ASSEMBLING: 'В процессе',
+    SHIPPED: 'Отправлен',
+    DELIVERED: 'Доставлен',
+    CANCELLED: 'Отменен',
+    NOT_REDEEMED: 'Не выкуплен',
+    RETURNED: 'Возврат',
+  }
 
   useEffect(() => {
     axios(`${import.meta.env.VITE_APP_API_URL}/orders/my`, {
@@ -63,8 +74,11 @@ export const Orders = () => {
                 year: '2-digit',
               })}
             </p>
-            <p className="p2" style={{ color: i.status == 'NEW' ? 'var(--green)' : 'var(--dark)' }}>
-              {i.status == 'NEW' ? 'Новый' : i.status == 'CANCELLED' ? 'Отменен' : 'Завершен'}
+            <p
+              className="p2"
+              style={{ color: i.customerStatus == 'ACCEPTED' ? 'var(--green)' : 'var(--dark)' }}
+            >
+              {statusLabels[i.customerStatus] || i.customerStatus}
             </p>
             <NumericFormat
               className="p2"

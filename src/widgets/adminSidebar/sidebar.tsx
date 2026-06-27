@@ -96,5 +96,12 @@ const menuItems: MenuItems = {
     { name: 'Особенности', icon: <FaQuestion />, path: rp.ADMINPRODUCTS_FEATURES, end: false },
     { name: 'Цены', icon: <IoCard />, path: rp.ADMINPRODUCTS_PRICES, end: false },
   ],
-  orders: [{ name: 'Новые заказы', icon: <FaList />, path: rp.ADMINORDERS, end: true }],
+  orders: [
+    { name: 'Новые заказы', icon: <FaList />, path: `${rp.ADMINORDERS}/new`, end: true },
+    { name: 'В процессе', icon: <FaList />, path: `${rp.ADMINORDERS}/inProgress`, end: false },
+    { name: 'Отмененные', icon: <FaList />, path: `${rp.ADMINORDERS}/cancelled`, end: false },
+    { name: 'Доставленные', icon: <FaList />, path: `${rp.ADMINORDERS}/delivered`, end: false },
+    { name: 'Вовзвраты', icon: <FaList />, path: `${rp.ADMINORDERS}/returns`, end: false },
+    { name: 'Не забранные', icon: <FaList />, path: `${rp.ADMINORDERS}/notPickedUp`, end: false },
+  ],
 }

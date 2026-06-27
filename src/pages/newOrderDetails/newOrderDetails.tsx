@@ -15,6 +15,7 @@ interface Order {
   deliveryType: string
   paymentType: 'ONLINE' | 'OFFLINE'
   paymentStatus: string
+  orderNumber: string
   items: {
     imageUrl: string
     name: string
@@ -55,7 +56,7 @@ export const NewOrderDetails = () => {
         <h2 className="h2">Спасибо за покупку</h2>
       </div>
       <div className="flex flex-col gap-[16px] pb-[16px] lg:pb-[30px]  border-b-solid border-b-[2px] border-b-[var(--gray)]">
-        <h3 className="h3">Детали заказа №{id}</h3>
+        <h3 className="h3">Детали заказа №{order?.orderNumber}</h3>
         <div className="flex items-center gap-[5px]">
           <h5 className="h5">Способ получения:</h5>
           <p className="p1">
