@@ -36,6 +36,16 @@ export const CreateOrder = () => {
   const dispatch = useDispatch()
 
   const addressTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window === 'undefined' ? 0 : window.innerWidth
+  )
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const textarea = addressTextareaRef.current
@@ -43,7 +53,8 @@ export const CreateOrder = () => {
 
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
-  }, [selectedAddress?.location?.address_full])
+  }, [selectedAddress?.location?.address_full, windowWidth])
+
   const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   const getDeliveryDates = () => {
@@ -68,7 +79,7 @@ export const CreateOrder = () => {
 
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
-  }, [selectedAddress?.comment])
+  }, [selectedAddress?.comment, windowWidth])
 
   useEffect(() => {
     document.title = `Оформление заказа - Умная одежда`

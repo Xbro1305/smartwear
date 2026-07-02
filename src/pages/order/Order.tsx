@@ -173,7 +173,7 @@ const StatusBar = ({ status }: { status: string }) => {
           <>
             <div className="w-[2px] h-[24px] bg-[#D42B2B] mx-auto" />
             <div className="flex items-center gap-[12px]">
-              <div className="h-[30px] min-w-[40px] opacity-35">{nextStep.image}</div>
+              <div className="h-[30px] min-w-[40px] opacity-35 checked">{nextStep.image}</div>
               <span className="text-[11px] font-medium whitespace-nowrap text-[#9B9B9B]">
                 {nextStep.label}
               </span>
@@ -199,7 +199,7 @@ const StatusBar = ({ status }: { status: string }) => {
 
             {/* Следующий */}
             <div className="flex items-center gap-[12px] shrink-0">
-              <div className="h-[30px] min-w-[40px] opacity-35">{nextStep.image}</div>
+              <div className="h-[30px] min-w-[40px] opacity-35 checked">{nextStep.image}</div>
               <span className="text-[11px] font-medium whitespace-nowrap text-[#9B9B9B]">
                 {nextStep.label}
               </span>
@@ -217,7 +217,9 @@ const StatusBar = ({ status }: { status: string }) => {
           return (
             <div key={step.label} className="flex items-center gap-[16px]">
               <div className="flex items-center gap-[12px]">
-                <div className="h-[30px] min-w-[40px]">{step.image}</div>
+                <div className={`h-[30px] min-w-[40px] ${active ? styles.checked : ''}`}>
+                  {step.image}
+                </div>
                 <span
                   className="text-[11px] font-medium whitespace-nowrap transition-colors"
                   style={{ color: active ? '#D42B2B' : '#9B9B9B' }}

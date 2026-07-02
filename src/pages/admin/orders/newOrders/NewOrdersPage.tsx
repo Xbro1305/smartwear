@@ -289,7 +289,7 @@ export default function NewOrdersPage() {
                         shouldOpenUp ? 'bottom-[58px]' : 'top-[58px]',
                       ].join(' ')}
                     >
-                      <div className="grid h-[52px] grid-cols-[1fr_1fr_1fr] items-center bg-[#E7E7E8] px-[22px] text-[14px] font-[500] text-[#5F636B]">
+                      <div className="grid h-[52px] grid-cols-[2fr_1fr_1fr] items-center bg-[#E7E7E8] px-[22px] text-[14px] font-[500] text-[#5F636B]">
                         <p>Артикул и магазин</p>
                         <p>Цвет</p>
                         <p>Цена</p>
@@ -298,7 +298,7 @@ export default function NewOrdersPage() {
                       {order.items.map(item => (
                         <div
                           key={item.id}
-                          className="grid min-h-[64px] grid-cols-[1fr_1fr_1fr] items-center border-t-[1px] border-solid border-[#ECEEF2] px-[22px] text-[15px] font-[500] text-[#222222]"
+                          className="grid min-h-[64px] grid-cols-[2fr_1fr_1fr] items-center border-t-[1px] border-solid border-[#ECEEF2] px-[22px] text-[15px] font-[500] text-[#222222]"
                         >
                           <p>
                             {item.variant.product.articul}, {item.storeName}

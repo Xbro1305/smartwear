@@ -18,7 +18,7 @@ const API_URL = import.meta.env.VITE_APP_API_URL
 
 const statusLabels: Record<string, string> = {
   NEW: 'Принят',
-  PROCESSING: 'В обработке',
+  PROCESSING: 'В процессе',
   SHIPPED: 'Отправлен',
   DELIVERED: 'Доставлен',
   CANCELLED: 'Отменён',
@@ -511,12 +511,7 @@ const InvoiceCard = ({
       {/* Footer: status + history toggle */}
       <div className="flex items-center justify-between">
         <p className="text-[22px] font-[700] text-[#4D4E50]">
-          Статус:{' '}
-          {items[0].deliveryStatus == 'NOT_DELIVERED'
-            ? 'В обработке'
-            : items[0].deliveryStatus == 'DELIVERED'
-              ? 'Доставлен'
-              : 'Отменен'}
+          Статус: {order.histories[0]?.newMoyskladStatus}
         </p>
         <button
           className="flex items-center gap-[8px] text-[18px] font-[700] text-[#4D4E50]"
@@ -738,7 +733,7 @@ export const OrderAdminPage = () => {
       )
       .then(() => {
         toast.success('Даты успешно обновлены')
-        navigate(`/admin/orders`) // Refresh page to get updated data from API
+        navigate(`/admin/orders/new`) // Refresh page to get updated data from API
       })
       .catch(console.error)
   }
@@ -755,7 +750,7 @@ export const OrderAdminPage = () => {
         <div className="flex items-center gap-[8px]">
           <h3 id="h3">Статус заказа</h3>
           <p className="p2 w-fit text-[12px_!important]" id="admin-button">
-            {statusDisplay}
+            {order.histories[0]?.newMoyskladStatus || statusDisplay}
           </p>
         </div>
       </div>

@@ -192,7 +192,7 @@ const CartItem = ({ item, index }: any) => {
             <div className="flex items-center justify-end gap-[4px] whitespace-nowrap">
               <NumericFormat
                 allowNegative={false}
-                value={item.price}
+                value={item.itemTotalAmount}
                 suffix=" ₽"
                 className="h5"
                 thousandSeparator=" "
@@ -202,7 +202,7 @@ const CartItem = ({ item, index }: any) => {
               {item.oldPrice && item.oldPrice > 0 ? (
                 <NumericFormat
                   allowNegative={false}
-                  value={Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}
+                  value={Math.round(((item.oldPrice - item.itemTotalAmount) / item.oldPrice) * 100)}
                   suffix="%"
                   prefix="-"
                   className="text-[var(--red)_!important] p1"

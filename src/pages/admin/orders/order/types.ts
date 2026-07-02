@@ -7,7 +7,7 @@ export type UserRole = 'ADMIN' | 'USER' | string
 export type Gender = 'male' | 'female' | string
 
 export type AdminOrder = {
-  histories: never[]
+  histories: any[]
   shipmentDate: string | Date | null | undefined
   promoCode: any
   statusHistory: never[]
