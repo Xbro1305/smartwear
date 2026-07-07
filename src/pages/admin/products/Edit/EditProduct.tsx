@@ -177,9 +177,9 @@ export const EditProduct = () => {
 
           const stocksFormatted = data.variants.flatMap(v =>
             v.codes
-              .filter((c: any) => c.code && c.code.trim() !== '') // ← проверка code
+              .filter((c: any) => c?.code && c?.code.trim() !== '') // ← проверка code
               .map((c: any) => ({
-                code: c.code,
+                code: c?.code,
                 stores: c.stocks.map((s: any) => ({
                   storeId: s.storeId,
                   name: s.store?.name,
@@ -274,11 +274,11 @@ export const EditProduct = () => {
 
     const codes =
       i?.variantCodes
-        ?.map(c => c.codes.map(vc => vc.code).filter(code => code && code.trim() !== ''))
+        ?.map(c => c.codes.map(vc => vc?.code).filter(code => code && code.trim() !== ''))
         .filter(arr => arr && arr.length > 0)
         .flat() || []
 
-    const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
+    const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes?.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
 
     axios(url, {
       method: 'GET',
@@ -312,7 +312,7 @@ export const EditProduct = () => {
     const filteredVariants = item?.variantCodes?.map(variant => {
       return {
         ...variant,
-        codes: variant.codes.map((codeObj: any) => ({ code: codeObj.code })),
+        codes: variant.codes.map((codeObj: any) => ({ code: codeObj?.code })),
       }
     })
 
@@ -447,7 +447,7 @@ export const EditProduct = () => {
       }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      window.location.href = '/admin/products'
+      // window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
@@ -1332,7 +1332,7 @@ export const EditProduct = () => {
             }}
           />
         </div>
-        <div className="flex flex-col gap-[24px] z-[1]">
+        <div className="flex flex-col gap-[24px] max-w-[790px] z-[1]">
           <h3 id="sync" className="text-[24px] pt-[50px]">
             Синхронизация остатков
           </h3>
@@ -1467,7 +1467,7 @@ export const EditProduct = () => {
                               }) as Item
                           )
                         }}
-                        value={variant.codes[0].code || ''}
+                        value={variant.codes[0]?.code || ''}
                       />
                     </label>
                     <label className="px-[5px]">
@@ -1488,7 +1488,7 @@ export const EditProduct = () => {
                               }) as Item
                           )
                         }}
-                        value={variant.codes[1].code || ''}
+                        value={variant.codes[1]?.code || ''}
                       />
                     </label>
                     <label className="px-[5px]">
@@ -1509,7 +1509,7 @@ export const EditProduct = () => {
                               }) as Item
                           )
                         }}
-                        value={variant.codes[2].code || ''}
+                        value={variant.codes[2]?.code || ''}
                       />
                     </label>
                     <div className="px-[5px]">
@@ -1617,7 +1617,7 @@ export const EditProduct = () => {
                     </div>
                     {warehouses.map(warehouse => {
                       const quantity = stock
-                        .filter(s => variant.codes.some(vc => vc.code === s.code))
+                        .filter(s => variant.codes.some(vc => vc?.code === s?.code))
                         .filter(s => s.stores.some(st => st.storeId === warehouse.storeId))
                         ?.reduce((acc, s) => {
                           const store = s.stores.find(st => st.storeId === warehouse.storeId)
@@ -1689,7 +1689,7 @@ export const EditProduct = () => {
                   <img
                     src={m?.url || URL.createObjectURL(m?.file)}
                     alt=""
-                    className="w-[185px] aspect-square rounded-[12px]"
+                    className="w-[185px] aspect-square object-contain rounded-[12px]"
                   />
                   <div className="flex flex-col gap-[24px] z-[1]">
                     <label className="flex items-center gap-[5px] cursor-pointer">
@@ -1837,7 +1837,7 @@ export const EditProduct = () => {
                   <img
                     src={item.url || URL.createObjectURL(item.file)}
                     alt=""
-                    className="w-[185px] aspect-square rounded-[12px]"
+                    className="w-[185px] aspect-square object-contain rounded-[12px]"
                   />
                   <div className="flex flex-col gap-[24px] z-[1]">
                     <p
@@ -1908,7 +1908,7 @@ export const EditProduct = () => {
                 >
                   <video
                     src={item.url || URL.createObjectURL(item.file)}
-                    className="w-[185px] aspect-square rounded-[12px]"
+                    className="w-[185px] aspect-square object-contain rounded-[12px]"
                     controls
                   />
                   <div className="flex flex-col gap-[24px]">

@@ -212,7 +212,11 @@ export const ProductFeatures = () => {
         <div className={`${styles.features_modal} flex`}>
           <button
             className="z-40 absolute w-full h-screen opacity-0"
-            onClick={() => setIsCreating(false)}
+            onClick={() => {
+              setIsCreating(false)
+              setDescription('')
+              setName('' )
+            }}
           ></button>
           <div className={`z-50 ${styles.features_modal_body}`}>
             <h2 id="h2">Создание особенности</h2>

@@ -1235,7 +1235,7 @@ export const CreateProduct = () => {
             }}
           />
         </div>
-        <div className="flex flex-col gap-[24px] max-w-[1020px] w-full">
+        <div className="flex flex-col gap-[24px] max-w-[790px] w-full">
           <h3 id="sync" className="text-[24px] pt-[50px]">
             Синхронизация остатков
           </h3>
@@ -1381,7 +1381,6 @@ export const CreateProduct = () => {
                           </label>
                           <label className="px-[5px]">
                             <NumericFormat
-                              autoFocus
                               allowLeadingZeros={true}
                               type="text"
                               className="admin-input max-w-full"
@@ -1603,7 +1602,7 @@ export const CreateProduct = () => {
                   <img
                     src={URL.createObjectURL(m.file)}
                     alt=""
-                    className="w-[185px] aspect-square rounded-[12px]"
+                    className="w-[185px] aspect-square object-contain rounded-[12px]"
                   />
                   <div className="flex flex-col gap-[24px]">
                     <label className="flex items-center gap-[5px] cursor-pointer">
@@ -1732,7 +1731,7 @@ export const CreateProduct = () => {
                   <img
                     src={URL.createObjectURL(item.file)}
                     alt=""
-                    className="w-[185px] aspect-square rounded-[12px]"
+                    className="w-[185px] aspect-square object-contain rounded-[12px]"
                   />
                   <div className="flex flex-col gap-[24px]">
                     <p
@@ -1783,7 +1782,7 @@ export const CreateProduct = () => {
                 >
                   <video
                     src={URL.createObjectURL(item.file)}
-                    className="w-[185px] aspect-square rounded-[12px]"
+                    className="w-[185px] aspect-square object-contain rounded-[12px]"
                     controls
                   />
                   <div className="flex flex-col gap-[24px]">

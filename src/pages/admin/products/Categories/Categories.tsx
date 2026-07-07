@@ -76,7 +76,25 @@ export const ProductCategories = () => {
     refresh()
 
     axios(`${baseUrl}/attributes/`)
-      .then(res => setAttributes(res.data))
+      .then(res => {
+        axios(`${baseUrl}/product/lengths`)
+          .then(innerRes => {
+            const attributesWithLengths = res.data.map((attr: any) => {
+              if (attr.name === 'Длина изделия') {
+                return {
+                  ...attr,
+                  values: [
+                    ...innerRes.data.map((length: any) => ({ id: length.id, value: length.name })),
+                  ],
+                }
+              }
+              return attr
+            })
+
+            setAttributes(attributesWithLengths)
+          })
+          .catch(err => console.log(err))
+      })
       .catch(err => console.log(err))
   }, [])
 

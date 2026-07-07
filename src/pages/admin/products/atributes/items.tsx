@@ -1632,7 +1632,7 @@ export const Colors = () => {
                           setAdding('')
                         }
                       }}
-                      style={{ width: '150px' }}
+                      style={{ width: '250px' }}
                     />
                     <button
                       onClick={() => {

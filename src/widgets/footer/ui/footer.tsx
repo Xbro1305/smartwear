@@ -5,7 +5,6 @@ import i3 from '../../../assets/images/vk logo.svg'
 import i4 from '../../../assets/images/Union.svg'
 import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
-import { MdExitToApp } from 'react-icons/md'
 
 export const Footer: React.FC = () => {
   return (
@@ -60,7 +59,6 @@ export const Footer: React.FC = () => {
         <Link to={ROUTER_PATHS.OFERTA}>Оферта</Link>
         <p className="flex items-[center_!important] gap-[5px] cursor-pointer justify-center">
           Выйти из профиля
-          <MdExitToApp />
         </p>
       </div>
     </footer>

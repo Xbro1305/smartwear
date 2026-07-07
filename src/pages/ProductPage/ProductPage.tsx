@@ -347,7 +347,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
           toast.error(
             err.response.data.message == 'max 2 items'
               ? 'В корзину нельзя добавить более 2 товаров одновременно!'
-              : 'Что-то пошло не так'
+              : err.response.data.message || 'Ошибка при добавлении товара в корзину'
           )
         })
     }
@@ -401,17 +401,32 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               </div>
               <div className="sm:grid lg:grid-cols-2 flex flex-row gap-[10px] xl:gap-[20px] w-full max-h-[200px] h-[200px] sm:h-auto sm:max-h-full lg:max-h-none overflow-y-auto lg:overflow-initial sm:w-[40%] lg:w-full">
                 {(media?.find((m: Media) => m.colorAttrValueId == selectedColor?.id)
-                  ? media.filter((m: Media) => m.colorAttrValueId == selectedColor?.id)
+                  ? media.filter(
+                      (m: Media) =>
+                        m.colorAttrValueId == selectedColor?.id ||
+                        m.kind == 'lining' ||
+                        m.kind == 'video'
+                    )
                   : media || []
-                ).map(m => (
-                  <img
-                    key={m.id}
-                    className="object-cover w-auto sm:w-full sm:h-auto h-full aspect-[3/4]"
-                    onClick={() => setSelectedPhoto(m)}
-                    src={m.url || img1}
-                    alt={item.name}
-                  />
-                ))}
+                ).map(m =>
+                  m.kind !== 'video' ? (
+                    <img
+                      key={m.id}
+                      className="object-cover w-auto sm:w-full sm:h-auto h-full aspect-[3/4]"
+                      onClick={() => setSelectedPhoto(m)}
+                      src={m.url || img1}
+                      alt={item.name}
+                    />
+                  ) : (
+                    <video
+                      key={m.id}
+                      className="object-cover w-auto sm:w-full sm:h-auto h-full aspect-[3/4]"
+                      onClick={() => setSelectedPhoto(m)}
+                      src={m.url}
+                      controls
+                    ></video>
+                  )
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-[32px] w-full lg:w-[40%]">

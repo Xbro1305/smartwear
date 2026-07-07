@@ -33,6 +33,7 @@ type OrderAddress = {
 }
 
 type Order = {
+  adminStatusLabel: string
   id: number
   orderNumber: string
   orderGroup: string
@@ -58,16 +59,6 @@ const paymentTypeLabels: Record<string, string> = {
   OFFLINE: 'Офлайн',
   CASH: 'Наличные',
   CARD: 'Карта',
-}
-
-const adminStatusLabels: Record<string, string> = {
-  NEW_ORDERS: 'Новый',
-  IN_PROGRESS: 'В процессе',
-  DELIVERED: 'Доставлен',
-  NOT_REDEEMED: 'Не выкуплен',
-  RETURNED: 'Возврат',
-  CANCELLED: 'Отменен',
-  NOT_PICKED_UP: 'Отменен',
 }
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {
@@ -96,10 +87,6 @@ const formatDate = (value: string | null) => {
 
 const getPaymentLabel = (paymentType: string) => {
   return paymentTypeLabels[paymentType] || paymentType
-}
-
-const getStatusLabel = (adminStatus: string) => {
-  return adminStatusLabels[adminStatus] || adminStatus
 }
 
 export default function NewOrdersPage() {
@@ -176,7 +163,21 @@ export default function NewOrdersPage() {
       <div className="mx-auto max-w-[1380px]">
         <div className="mb-[54px] flex items-center justify-between gap-[24px]">
           <div>
-            <h1 id="h1">Новые заказы</h1>
+            <h1 id="h1">
+              {window.location.pathname.split('/').pop() === 'new'
+                ? 'Новые заказы'
+                : window.location.pathname.split('/').pop() === 'inProgress'
+                  ? 'Заказы в процессе'
+                  : window.location.pathname.split('/').pop() === 'delivered'
+                    ? 'Доставленные заказы'
+                    : window.location.pathname.split('/').pop() === 'cancelled'
+                      ? 'Отмененные заказы'
+                      : window.location.pathname.split('/').pop() === 'notPickedUp'
+                        ? 'Не выкупленные заказы'
+                        : window.location.pathname.split('/').pop() === 'returns'
+                          ? 'Возвраты'
+                          : ''}
+            </h1>
           </div>
         </div>
 
@@ -251,13 +252,13 @@ export default function NewOrdersPage() {
                     <div className="h-full">
                       <span
                         className={[
-                          'inline-flex h-full min-w-[116px] items-center justify-center rounded-[0px] px-[14px] text-[14px] font-[500]',
+                          'inline-flex text-center h-full min-w-[116px] items-center justify-center rounded-[0px] px-[14px] text-[14px] font-[500]',
                           order.adminStatus === 'NEW_ORDERS'
                             ? 'bg-[#C9FFD0] text-[#1F2937]'
                             : 'bg-[#F2F4F7] text-[#1F2937]',
                         ].join(' ')}
                       >
-                        {getStatusLabel(order.adminStatus)}
+                        {order.adminStatusLabel}
                       </span>
                     </div>
 
@@ -265,7 +266,7 @@ export default function NewOrdersPage() {
                       <button
                         type="button"
                         className="flex h-[46px] text-[12px] whitespace-nowrap min-w-[150px] items-center justify-center gap-[8px] rounded-[12px] bg-[#4B4B4D] font-[600] text-[#FFFFFF]"
-                        onClick={() => window.open(`/admin/orders/${order.id}`, '_blank')}
+                        onClick={() => window.open(`/admin/orders/${order.id}`)}
                       >
                         Просмотр заказа
                       </button>

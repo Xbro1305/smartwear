@@ -980,6 +980,17 @@ export const OrderAdminPage = () => {
             isCopyable={false}
           />
         </div>
+        <Divider />
+        {/* Price row */}
+        <div className="grid grid-cols-[1fr] gap-[24px] items-end">
+          {/* Стоимость доставки — всегда 0 */}
+          <CopyField
+            label="Коментарий к заказу"
+            value={order.address.comment || '-'}
+            onCopy={() => undefined}
+            isCopyable={false}
+          />
+        </div>
       </section>
 
       {/* ── Order composition ── */}
