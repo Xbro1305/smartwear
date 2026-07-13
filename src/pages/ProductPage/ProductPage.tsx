@@ -1046,7 +1046,7 @@ const SizeTable = ({ size, onClose }: SizeTableProps) => {
 
         {/* Table */}
         <div className="w-full hidden md:flex items-start justify-center">
-          <div className="flex min-w-full">
+          <div className="flex max-w-full overflow-x-auto">
             <div className="flex flex-col items-center">
               <p className="p2 p-[14px] whitespace-nowrap">Российский размер</p>
               <p className="p2 p-[14px] whitespace-nowrap">Рост (см)</p>

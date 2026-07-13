@@ -57,9 +57,11 @@ export const Footer: React.FC = () => {
         <p> © 0000–2023 Интернет-магазин «Умная Одежда» </p>
         <Link to={ROUTER_PATHS.POLITICS}>Политика конфиденциальности</Link>
         <Link to={ROUTER_PATHS.OFERTA}>Оферта</Link>
-        <p className="flex items-[center_!important] gap-[5px] cursor-pointer justify-center">
-          Выйти из профиля
-        </p>
+        {localStorage.getItem('token') && (
+          <p className="flex items-[center_!important] gap-[5px] cursor-pointer justify-center">
+            Выйти из профиля
+          </p>
+        )}
       </div>
     </footer>
   )

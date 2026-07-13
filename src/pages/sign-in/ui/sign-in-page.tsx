@@ -80,7 +80,9 @@ export const SignInPage: React.FC = () => {
       setExpiresAt(Date.now() + RESEND_SECONDS * 1000)
     } catch (error: any) {
       if (error?.data?.message === 'User not found') {
-        alert('Пользователь с таким номером телефона не наиден')
+        navigate(`${ROUTER_PATHS.SIGN_UP}?redirectUrl=${from}&phone=${formattedPhone}`, {
+          replace: true,
+        })
       } else {
         alert('Произошла ошибка при запросе кода. Попробуйте снова.')
       }

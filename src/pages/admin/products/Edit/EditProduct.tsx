@@ -447,7 +447,7 @@ export const EditProduct = () => {
       }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      // window.location.href = '/admin/products'
+      window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
@@ -1456,14 +1456,25 @@ export const EditProduct = () => {
                         className="admin-input max-w-full"
                         placeholder="123456789"
                         maxLength={9}
-                        onChange={(e: any) => {
-                          const newVariantCodes = [...(item.variantCodes || [])]
-                          newVariantCodes[index].codes[0].code = e.target.value
+                        onValueChange={({ value }) => {
                           setItem(
                             prev =>
                               ({
                                 ...prev,
-                                variantCodes: newVariantCodes,
+                                variantCodes: (prev?.variantCodes || []).map((variantCode, i) => {
+                                  if (i !== index) return variantCode
+
+                                  const codes = [...(variantCode.codes || [])]
+                                  codes[0] = {
+                                    ...(codes[0] || {}),
+                                    code: value,
+                                  }
+
+                                  return {
+                                    ...variantCode,
+                                    codes,
+                                  }
+                                }),
                               }) as Item
                           )
                         }}

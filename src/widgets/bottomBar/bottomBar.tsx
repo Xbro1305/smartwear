@@ -3,7 +3,7 @@ import styles from '../header/ui/Header.module.scss'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import home from '../header/icons/home.svg'
 import catalog from '../header/icons/catalog.svg'
-import saved from '../header/icons/saved.svg'
+// import saved from '../header/icons/saved.svg'
 import basket from '../header/icons/basket.svg'
 import profile from '../header/icons/profile.svg'
 import { useSelector } from 'react-redux'
@@ -50,10 +50,10 @@ export const BottomBar = () => {
         Каталог
       </button>
 
-      <Link className="p2" to={'/favorites'} state={getState()}>
+      {/* <Link className="p2" to={'/favorites'} state={getState()}>
         <img src={saved} alt="" />
         Избранное
-      </Link>
+      </Link> */}
 
       <Link className="p2 relative" to={'/cart'} state={getState()}>
         <img src={basket} alt="" />
