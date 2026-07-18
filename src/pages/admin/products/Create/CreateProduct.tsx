@@ -180,37 +180,47 @@ export const CreateProduct = () => {
   }
 
   const syncronize = async () => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/product-stocks/sync-product-codes`, {
       method: 'POST',
-    }).catch(err => toast.error(err.response.data.message))
-
-    const codes =
-      item?.variantCodes
-        ?.map(c => c.codes.map(vc => vc.code).filter(code => code && code.trim() !== ''))
-        .filter(arr => arr && arr.length > 0)
-        .flat() || []
-
-    const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
-
-    axios(url, {
-      method: 'GET',
+      data: {
+        productId: 0,
+        variants:
+          item?.variantCodes?.map(v => ({
+            variantId: 0,
+            codes: v.codes.map(c => c.code).filter(code => code && code.trim() !== ''),
+          })) || [],
+      },
     })
-      .then((res: { data: Stock[] }) => {
-        setStock(res.data as Stock[])
+      .then(() => {
+        const codes =
+          item?.variantCodes
+            ?.map(c => c.codes.map(vc => vc.code).filter(code => code && code.trim() !== ''))
+            .filter(arr => arr && arr.length > 0)
+            .flat() || []
 
-        const uniqueStores = Array.from(
-          new Map(
-            res.data.flatMap(item =>
-              item.stores.map(store => [
-                store.storeId,
-                { storeId: store.storeId, name: store.name, shortName: store.shortName },
-              ])
+        const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
+
+        axios(url, {
+          method: 'GET',
+        })
+          .then((res: { data: Stock[] }) => {
+            setStock(res.data as Stock[])
+
+            const uniqueStores = Array.from(
+              new Map(
+                res.data.flatMap(item =>
+                  item.stores.map(store => [
+                    store.storeId,
+                    { storeId: store.storeId, name: store.name, shortName: store.shortName },
+                  ])
+                )
+              ).values()
             )
-          ).values()
-        )
-        setWarehouses(uniqueStores as Store[])
+            setWarehouses(uniqueStores as Store[])
 
-        console.log(uniqueStores)
+            console.log(uniqueStores)
+          })
+          .catch(err => toast.error(err.response.data.message))
       })
       .catch(err => toast.error(err.response.data.message))
   }
