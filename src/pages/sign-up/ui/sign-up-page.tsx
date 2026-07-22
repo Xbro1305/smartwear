@@ -25,14 +25,33 @@ interface FormData {
 
 const RESEND_SECONDS = 30
 
+/**
+ * Приводит любой ввод к десяти национальным цифрам.
+ * Номер могут вставить как +7 926…, 8 926… или 926… —
+ * значимы всегда последние десять цифр.
+ */
+function toNational(input: string): string {
+  let digits = input.replace(/\D/g, '')
+
+  if (digits.length > 10 && (digits.startsWith('7') || digits.startsWith('8'))) {
+    digits = digits.slice(1)
+  }
+
+  return digits.slice(0, 10)
+}
+
 export const SignUpPage: React.FC = () => {
   const [cb, setCb] = useState<boolean>(false)
   const [stage, setStage] = useState<number>(1)
   const [timer, setTimer] = useState<number>(0)
   const [expiresAt, setExpiresAt] = useState<number | null>(null)
   const [data, setData] = useState<FormData>({})
-  const [phone, setPhone] = useState<null | string>(null)
-  const [prefix, setPrefix] = useState<any>('+7')
+  // Номер из адресной строки читаем один раз при монтировании,
+  // а не на каждое нажатие клавиши, как было раньше.
+  const [phone, setPhone] = useState<null | string>(() =>
+    toNational(new URLSearchParams(window.location.search).get('phone') ?? '')
+  )
+  const [prefix] = useState<any>('+7')
   const navigate = useNavigate()
 
   // Получение пути возврата из state или использование "/"
@@ -75,15 +94,18 @@ export const SignUpPage: React.FC = () => {
     const formData = new FormData(e.target as HTMLFormElement)
     const value = Object.fromEntries(formData) as FormData
 
-    setData(value)
-    console.log((prefix + value?.phone) as string)
+    // В FormData лежит отображаемое значение со скобками и дефисами —
+    // нормализуем, чтобы дальше по коду номер был в виде +79261234567.
+    const normalizedPhone = '+7' + toNational(value.phone as string)
+
+    setData({ ...value, phone: normalizedPhone })
 
     const registerData = {
       email: value.email as string,
       isSubscribed: cb,
       middleName: value.patronomic as string,
       name: value.name as string,
-      phone: ((prefix as string) + value?.phone) as string,
+      phone: normalizedPhone,
       surName: value.surname as string,
     }
 
@@ -143,26 +165,25 @@ export const SignUpPage: React.FC = () => {
             <section className={styles.signup_form_phonesect}>
               <span>{prefix}</span>
               <PatternFormat
-                // allowEmptyFormatting
-                format={'# (###) ### ##-##'}
+                format={'(###) ###-##-##'}
                 mask={'_'}
                 name={'phone'}
-                value={phone}
-                onChange={(e: any) => {
-                  if (e.target.value.split('')[0] == 9 ) {
-                    setPhone('+7' + e.target.value)
-                    setPrefix('+')
-                  } else if (e.target.value.split('')[0] == 8) setPrefix('')
-                  else if (e.target.value.split('')[0] == 7) setPrefix('+')
-                  else {
-                    setPhone('+79' + e.target.value)
-                    setPrefix('+')
-                  }
+                value={phone ?? ''}
+                onValueChange={({ value }) => {
+                  // Человек по привычке может начать с 8 или 7 — код страны
+                  // уже показан слева, поэтому первую такую цифру не принимаем.
+                  if (value.length === 1 && (value === '7' || value === '8')) return
+                  setPhone(value)
                 }}
-                style={{ paddingLeft: prefix == '+7' ? '30px' : '15px' }}
-                defaultValue={
-                  new URLSearchParams(window.location.search).get('phone')?.replace('+7', '') || ''
-                }
+                /* Вставленный номер маска обрезала бы по первым десяти символам:
+     из «+7 926 123-45-67» получалось бы «7926123456». Разбираем сами. */
+                onPaste={e => {
+                  e.preventDefault()
+                  setPhone(toNational(e.clipboardData.getData('text')))
+                }}
+                style={{ paddingLeft: '30px' }}
+                inputMode={'numeric'}
+                autoComplete={'tel'}
               />
             </section>
           </label>
