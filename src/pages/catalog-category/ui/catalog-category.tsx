@@ -544,7 +544,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                           : 'inherit',
                     }}
                   >
-                    {i.name}
+                    {/* Неразрывный дефис (‑), чтобы номер магазина «2-94» не разрывался переносом */}
+                    {String(i.name ?? '').replace(/-/g, '‑')}
                   </p>
                 </label>
               ))}

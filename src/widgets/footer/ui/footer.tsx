@@ -7,6 +7,17 @@ import { Link } from 'react-router-dom'
 import { ROUTER_PATHS } from '@/shared/config/routes'
 
 export const Footer: React.FC = () => {
+  const handleLogout = () => {
+    // Чистим данные сессии, сохранённые при входе (sign-in-page)
+    ;['token', 'username', 'usersurname', 'usermiddlename', 'useremail', 'userphone'].forEach(
+      key => localStorage.removeItem(key)
+    )
+
+    // Хедер читает токен из localStorage не реактивно — как и вход, уходим с перезагрузкой,
+    // чтобы состояние авторизации в шапке обновилось
+    window.location.href = ROUTER_PATHS.HOME
+  }
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footer_sect}>
@@ -58,7 +69,10 @@ export const Footer: React.FC = () => {
         <Link to={ROUTER_PATHS.POLITICS}>Политика конфиденциальности</Link>
         <Link to={ROUTER_PATHS.OFERTA}>Оферта</Link>
         {localStorage.getItem('token') && (
-          <p className="flex items-[center_!important] gap-[5px] cursor-pointer justify-center">
+          <p
+            onClick={handleLogout}
+            className="flex items-[center_!important] gap-[5px] cursor-pointer justify-center"
+          >
             Выйти из профиля
           </p>
         )}

@@ -177,7 +177,7 @@ const CartItem = ({ item, index }: any) => {
           </div>
           <div className="flex items-center gap-[16px]">
             <p className="p2 text-[15px] md:text-[18px] w-[90px]">Цвет:</p>
-            <p className="p2 text-[15px] md:text-[18px] w-[90px] flex items-center">
+            <p className="p2 text-[15px] md:text-[18px] flex items-center">
               {' '}
               <span
                 className="block min-w-[24px] h-[24px] rounded-[50%] mr-[8px]"

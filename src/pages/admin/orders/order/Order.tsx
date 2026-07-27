@@ -13,6 +13,7 @@ import {
 } from 'react-icons/bs'
 import { PatternFormat } from 'react-number-format'
 import { toast } from 'react-toastify'
+import { IoCopyOutline } from 'react-icons/io5'
 
 const API_URL = import.meta.env.VITE_APP_API_URL
 
@@ -472,7 +473,6 @@ const InvoiceCard = ({
           <input
             value={trackingNumber}
             onChange={e => onTrackingChange(e.target.value)}
-            onBlur={handleSaveTracking}
             className="w-full bg-transparent text-[14px] font-[600] outline-none"
             placeholder="Введите номер"
           />
@@ -511,7 +511,8 @@ const InvoiceCard = ({
       {/* Footer: status + history toggle */}
       <div className="flex items-center justify-between">
         <p className="text-[22px] font-[700] text-[#4D4E50]">
-          Статус: {order.histories[0]?.newMoyskladStatus}
+          Статус:{' '}
+          {order.displayStatus || order.moyskladStatus || order.histories?.[0]?.newMoyskladStatus}
         </p>
         <button
           className="flex items-center gap-[8px] text-[18px] font-[700] text-[#4D4E50]"
@@ -525,7 +526,17 @@ const InvoiceCard = ({
       {/* History */}
       {historyOpen && (
         <div className="flex flex-col gap-[12px]">
-          {(order?.histories || []).map((row: any, i: number) => (
+          {(order?.histories?.length
+            ? order.histories
+            : [
+                {
+                  // Пустой истории быть не должно: если бэкенд ещё не записал ни одной
+                  // смены статуса (новый заказ «Требует обработки»), показываем текущий статус
+                  changedAt: order.createdAt,
+                  newMoyskladStatus: order.displayStatus || order.moyskladStatus,
+                },
+              ]
+          ).map((row: any, i: number) => (
             <div key={i} className="grid grid-cols-[90px_72px_1fr] items-center gap-[8px]">
               <p className="text-[16px] font-[600] text-[#4D4E50]">{formatDate(row?.changedAt)}</p>
               <div className="h-[1px] bg-[#8B8F97]" />
@@ -750,7 +761,7 @@ export const OrderAdminPage = () => {
         <div className="flex items-center gap-[8px]">
           <h3 id="h3">Статус заказа</h3>
           <p className="p2 w-fit text-[12px_!important]" id="admin-button">
-            {order.histories[0]?.newMoyskladStatus || statusDisplay}
+            {order.displayStatus || order.moyskladStatus || statusDisplay}
           </p>
         </div>
       </div>
@@ -767,7 +778,7 @@ export const OrderAdminPage = () => {
             className="flex items-center gap-[8px] rounded-[12px] bg-[#4D4E50_!important] px-[22px] py-[10px] text-[14px] font-[600] text-[#FFFFFF]"
           >
             {copied ? 'Скопировано' : 'Скопировать'}
-            <BsCopy className="rotate-[270deg] shrink-0" />
+            <IoCopyOutline className="rotate-[270deg] shrink-0" />
           </button>
         </div>
 

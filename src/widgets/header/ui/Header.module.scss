@@ -9,35 +9,31 @@
 
   &_sect {
     display: flex;
-    gap: 32px;
+    // Плавный отступ: сжимается вместе с шириной экрана, чтобы всё влезало в строку
+    gap: clamp(12px, 1.4vw, 32px);
     align-items: center;
 
     a {
-      font-size: 23px;
+      // Плавный размер шрифта вместо ступенчатых брейкпоинтов —
+      // масштабируется пропорционально ширине, чтобы меню держалось в одну строку
+      font-size: clamp(13px, 1.05vw, 23px);
       font-weight: 500;
-      line-height: 27.6px;
+      line-height: 1.2;
       text-align: center;
       text-decoration: none;
       color: var(--dark);
       display: flex;
       align-items: center;
       gap: 10px;
+      // Двухсловные пункты («О нас») не должны разбиваться переносом
+      white-space: nowrap;
 
       img {
-        width: 30px;
-        height: 30px;
+        // Иконки (поиск, профиль, корзина) масштабируются вместе со шрифтом:
+        // 30px при максимальном шрифте 23px → ~1.37vw
+        width: clamp(17px, 1.37vw, 30px);
+        height: clamp(17px, 1.37vw, 30px);
       }
-
-      @media screen and (max-width: 1536px) {
-        font-size: 18px;
-      }
-
-      @media screen and (max-width: 1440px) {
-        font-size: 14px;
-      }
-    }
-    @media screen and (max-width: 1400px) {
-      gap: 24px;
     }
   }
 

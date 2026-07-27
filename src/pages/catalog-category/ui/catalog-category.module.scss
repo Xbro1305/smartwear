@@ -71,6 +71,14 @@
         cursor: pointer;
         position: relative;
 
+        // Плавный размер текста пунктов фильтра: сжимается вместе с колонкой,
+        // чтобы длинные названия («Умная Одежда 2‑94») влезали без разрывов
+        p {
+          font-size: clamp(13px, 0.95vw, 16px);
+          line-height: 1.25;
+          overflow-wrap: break-word;
+        }
+
         input {
           opacity: 0;
         }

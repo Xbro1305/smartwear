@@ -271,6 +271,10 @@ export const CreateOrder = () => {
       .catch(err => {
         console.error('Error applying promo code:', err)
         toast.error('Промокод недействителен')
+        // Неверный промокод не должен оставаться применённым и блокировать оформление —
+        // сбрасываем применённый код и скидку (поле в сайдбаре очистится по promo)
+        setPromo('')
+        setPromoDiscount(undefined)
       })
   }, [promo])
 
@@ -924,6 +928,12 @@ const CartSideBar = ({
   promoDiscount,
 }: any) => {
   const [promoCode, setPromoCode] = useState(promo)
+
+  // Синхронизируем поле с применённым промокодом: при сбросе неверного кода
+  // (promo → '') поле очищается автоматически
+  useEffect(() => {
+    setPromoCode(promo)
+  }, [promo])
 
   return (
     <div

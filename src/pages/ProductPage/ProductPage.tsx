@@ -1118,7 +1118,7 @@ const SizeTable = ({ size, onClose }: SizeTableProps) => {
         </div>
 
         <div className="gap-[16px] hidden md:flex">
-          <img src={center} className="min-w-[195px] w-[195px] aspect-square" alt="Обхват талии" />
+          <img src={bottom} className="min-w-[195px] w-[195px] aspect-square" alt="Обхват талии" />
           <div className="flex flex-col gap-[4px]">
             <h5 className="h5">Обхват талии (см)</h5>
             <p className="p1">
@@ -1129,7 +1129,7 @@ const SizeTable = ({ size, onClose }: SizeTableProps) => {
         </div>
 
         <div className="gap-[16px] hidden md:flex">
-          <img src={bottom} className="min-w-[195px] w-[195px] aspect-square" alt="Обхват бёдер" />
+          <img src={center} className="min-w-[195px] w-[195px] aspect-square" alt="Обхват бёдер" />
           <div className="flex flex-col gap-[4px]">
             <h5 className="h5">Обхват бёдер (см)</h5>
             <p className="p1">Измеряется по самым выпуклым точкам ягодиц.</p>

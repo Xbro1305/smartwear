@@ -1,36 +1,31 @@
-import { useEffect, useState } from 'react'
 import styles from './Profile.module.scss'
 import { FaCube, FaUser } from 'react-icons/fa'
 import { Profile_profile } from '../Components/Profile_profile'
 import { Orders } from '../Components/Orders'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ROUTER_PATHS } from '@/shared/config/routes'
+
+const { PROFILE, ORDERPROFILE } = ROUTER_PATHS
 
 export const ProfilePage = () => {
-  const [page, setPage] = useState('profile')
-
   const { endpointPage } = useParams()
+  const navigate = useNavigate()
 
-  useEffect(() => {
-    if (endpointPage === 'orders') {
-      setPage('orders')
-    } else {
-      setPage('profile')
-    }
-  }, [endpointPage])
+  const page = endpointPage === 'orders' ? 'orders' : 'profile'
 
   return (
     <div className={styles.profile_page}>
       <div className={styles.profile_page_navigation}>
         <button
           className={page === 'profile' ? styles.profile_page_navigation_active : ''}
-          onClick={() => setPage('profile')}
+          onClick={() => navigate(PROFILE)}
         >
           <FaUser />
           Профиль
         </button>
         <button
           className={page === 'orders' ? styles.profile_page_navigation_active : ''}
-          onClick={() => setPage('orders')}
+          onClick={() => navigate(ORDERPROFILE)}
         >
           <FaCube />
           История заказов

@@ -28,6 +28,7 @@ export type AdminOrder = {
   moyskladId: string | null
   moyskladHref: string | null
   moyskladStatus: string | null
+  displayStatus: string | null
   trackingNumber: string | null
   trackingUpdatedAt: string | null
   shipmentNotifiedAt: string | null

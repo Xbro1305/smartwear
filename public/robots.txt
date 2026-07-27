@@ -1,0 +1,24 @@
+# robots.txt — Умная Одежда
+# ВАЖНО: замените maxiscomfort.ru на ваш реальный прод-домен, если он другой.
+
+User-agent: *
+Allow: /
+
+# Служебные и приватные разделы — закрыты от индексации
+Disallow: /admin
+Disallow: /profile
+Disallow: /cart
+Disallow: /order
+Disallow: /order-history
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /confirm-email
+Disallow: /track-order
+Disallow: /bookmarks
+Disallow: /search
+Disallow: /pvz
+
+# Не индексировать параметры фильтров/сортировки (дубли контента)
+Disallow: /*?*
+
+Sitemap: https://maxiscomfort.ru/sitemap.xml
