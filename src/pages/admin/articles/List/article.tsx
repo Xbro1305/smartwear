@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { FaEye, FaPen, FaTrash } from 'react-icons/fa'
 
 import styles from './articles.module.scss'
-const { ARTICLES, CLONEARTICLE, CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
+const { CLONEARTICLE, CREATEARTICLE, EDITARTICLE } = ROUTER_PATHS
 
 import { useNavigate } from 'react-router-dom'
 
@@ -109,7 +109,7 @@ export const Article: React.FC<ArticleProps> = ({ index, section }) => {
                 <IoCopy />
               </button>
               {!article?.draft && (
-                <a href={`${ARTICLES}/${article.keyword}`} rel={'noreferrer'} target={'_blank'}>
+                <a href={`/${article.keyword}`} rel={'noreferrer'} target={'_blank'}>
                   <FaEye />
                 </a>
               )}

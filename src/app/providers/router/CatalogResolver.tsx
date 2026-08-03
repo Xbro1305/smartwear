@@ -5,8 +5,9 @@ import axios from 'axios'
 import { CatalogCategory } from '@/pages/catalog-category'
 import { ProductPage } from '@/pages/ProductPage/ProductPage'
 import { NotFound } from '@/pages/NotFound/NotFound'
+import { Article } from '@/pages/article'
 
-type EntityType = 'category' | 'product' | 'loading' | 'not-found'
+type EntityType = 'category' | 'product' | 'article' | 'loading' | 'not-found'
 
 export const CatalogResolver = () => {
   const location = useLocation()
@@ -26,6 +27,13 @@ export const CatalogResolver = () => {
 
   const getProductBySlug = () => axios.get(`${baseUrl}/products/slug/${slug}`).then(r => r.data)
 
+  const getArticleByKeyword = () =>
+    axios.get(`${baseUrl}/articles/search/${slug}`).then(r => {
+      // API может вернуть 200 с null, если статьи нет — считаем это «не найдено»
+      if (!r.data) throw new Error('article not found')
+      return r.data
+    })
+
   useEffect(() => {
     if (!slug) return
 
@@ -43,7 +51,14 @@ export const CatalogResolver = () => {
           setData(product)
           setType('product')
         } catch {
-          setType('not-found')
+          try {
+            // Статьи теперь без префикса /article/ — резолвим их прямо в корне
+            const article = await getArticleByKeyword()
+            setData(article)
+            setType('article')
+          } catch {
+            setType('not-found')
+          }
         }
       }
     }
@@ -56,6 +71,7 @@ export const CatalogResolver = () => {
 
   if (type === 'category') return <CatalogCategory data={data} />
   if (type === 'product') return <ProductPage data={data} />
+  if (type === 'article') return <Article keyword={slug} />
 
   return null
 }

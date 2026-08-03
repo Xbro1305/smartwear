@@ -46,7 +46,17 @@ async function validateSlug(r) {
       return
     }
 
-    // Ни категория, ни товар не найдены → 404
+    // 3) Статья: /articles/search/<slug> (статьи живут в корне, без /article/)
+    const art = await r.subrequest('/__be/articles/search/' + encodeURIComponent(slug), {
+      method: 'GET',
+    })
+    // API может вернуть 200 с пустым телом — тогда статьи нет
+    if (ok(art.status) && art.responseText && art.responseText !== 'null') {
+      r.return(204)
+      return
+    }
+
+    // Ни категория, ни товар, ни статья не найдены → 404
     r.return(403)
   } catch (e) {
     // Бэкенд недоступен: НЕ отдаём ложный 404 (это навредит индексации живых

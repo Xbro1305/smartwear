@@ -75,7 +75,7 @@ export const Articles = () => {
               <div
                 className={styles.articles_list_item}
                 key={index}
-                onClick={() => navigate(`/article/${article.keyword}`)}
+                onClick={() => navigate(`/${article.keyword}`)}
               >
                 <img alt={''} src={article.imageUrl || img} />
                 <span className="p2">

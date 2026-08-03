@@ -12,9 +12,11 @@ const enver = import.meta.env.VITE_APP_API_URL
 
 const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
 
-const Article: React.FC = () => {
-  const { keyword } = useParams<{ keyword: string }>()
-  //const {data: articleData} = useGetArticlesBySectionQuery(category)
+const Article: React.FC<{ keyword?: string }> = ({ keyword: keywordProp }) => {
+  // Статьи теперь живут в корне (/:keyword) и рендерятся из CatalogResolver,
+  // который передаёт keyword пропом. Старый роут /article/:keyword берёт его из URL.
+  const { keyword: keywordParam } = useParams<{ keyword: string }>()
+  const keyword = keywordProp || keywordParam
   const { data: article, error, isLoading } = useSearchArticleByKeywordQuery(keyword || '')
 
   const { data: articleImage, isLoading: isImageLoading } = useGetImageQuery({

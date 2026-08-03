@@ -38,7 +38,7 @@ export const CatalogPage = () => {
   return (
     <div className={styles.catalog}>
       <div className={styles.catalog_wrapper}>
-        <h3 className="h2">Каталог</h3>
+        <h1 className="h2">Каталог</h1>
         <div className={styles.catalog_bottom}>
           {categories?.map((cat: any) => (
             <Link to={cat.slug} className={styles.catalog_item}>

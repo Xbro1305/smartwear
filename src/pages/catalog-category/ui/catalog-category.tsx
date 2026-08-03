@@ -557,7 +557,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           <div className={styles.catalog_right_top}>
             <div className={styles.catalog_right_top_header}>
               <div className={styles.catalog_right_top_title}>
-                <h2 className="h1">{category?.current?.name || 'Каталог'}</h2>
+                <h1 className="h1">{category?.current?.name || 'Каталог'}</h1>
                 <p className="p1">{items.length} товара(ов)</p>
               </div>
               <div className={styles.catalog_right_top_mobile}>

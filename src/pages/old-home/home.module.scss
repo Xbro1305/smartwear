@@ -1,16 +1,11 @@
 .home {
   display: flex;
   flex-direction: column;
-  gap: 64px;
-  padding-bottom: 64px;
-  background: var(--white);
-  color: var(--dark);
 
   &_intro {
     position: relative;
     width: 100%;
     height: 580px;
-    z-index: 0;
     display: flex;
     justify-content: center;
     gap: 20px;
