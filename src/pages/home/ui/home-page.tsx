@@ -2,17 +2,18 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link } from 'react-router-dom'
-import { BsGrid, BsTag, BsStars, BsTruck } from 'react-icons/bs'
+import { BsGrid, BsTag, BsStars, BsTruck, BsChevronLeft, BsChevronRight } from 'react-icons/bs'
 
 import { useGetArticlesBySectionQuery } from '@/entities/article'
 import { Section } from '@/entities/article/article.types'
+import { StoresMap } from '@/widgets/storesMap/StoresMap'
 
 // ── Ассеты (src/assets/home) ──
-import banner1 from '@/assets/home/banner-1.png'
+// import banner1 from '@/assets/home/banner-1.png'
 import banner2 from '@/assets/home/banner-2.png'
 import banner3 from '@/assets/home/banner-3.png'
 import banner4 from '@/assets/home/banner-4.png'
-import banner5 from '@/assets/home/banner-5.png'
+// import banner5 from '@/assets/home/banner-5.png'
 import banner6 from '@/assets/home/banner-6.png'
 import banner7 from '@/assets/home/banner-7.png'
 import brands from '@/assets/home/brands.png'
@@ -34,7 +35,7 @@ import { IoFlame } from 'react-icons/io5'
 const API_URL = import.meta.env.VITE_APP_API_URL
 const BANNER_MS = 30000
 
-const bannerImages = [banner1, banner2, banner3, banner4, banner5, banner6, banner7]
+const bannerImages = [banner2, banner3, banner4, banner6, banner7]
 
 // 6.3 — программный блок категорий
 const bigCats = [
@@ -45,7 +46,7 @@ const smallCats = [
   {
     label: 'Аксессуары',
     note: 'Мужские и женские тёплые аксессуары',
-    to: '/accessories',
+    to: '/accessoires',
     img: catAccessories,
   },
   { label: 'Распродажа?', note: 'Скидки на товары прошлых сезонов', to: '/sale', img: catSale },
@@ -59,7 +60,7 @@ const quickIcons = [
 
 // 6.6 — плитки статей о важном
 const tiles = [
-  { title: 'Климат-контроль', to: '/climate-control', img: tileClimate, scale: 1.5 },
+  { title: 'Климат-контроль', to: '/climate-control-stirka', img: tileClimate, scale: 1.5 },
   { title: 'Как стирать', to: '/kak-stirat-odezhdu-s-klimat-kontrolem', img: tileWash, scale: 1.1 },
   { title: 'Материалы', to: '/autojack-m', img: tileMaterials, scale: 1 },
   { title: 'Условия доставки', to: '/delivery', img: tileDelivery, scale: 1.1 },
@@ -160,25 +161,12 @@ export const HomePage = () => {
   const storeCoords = (s: Store): [number, number] | null => {
     if (s.longitude && s.latitude) return [Number(s.longitude), Number(s.latitude)]
     const byId: Record<number, [number, number]> = {
-      2: [30.434, 59.9327], // Заневский пр., 67к2
-      3: [30.3226, 60.0506], // пр. Энгельса, 154
+      2: [30.437617, 59.933032], // ТРК «Заневский Каскад», Заневский пр., 67к2
+      3: [30.335068, 60.059095], // ТРК «Гранд Каньон», пр. Энгельса, 154
     }
     return byId[s.id] || null
   }
   const points = stores.map(storeCoords).filter(Boolean) as [number, number][]
-  const center =
-    points.length > 0
-      ? [
-          points.reduce((a, p) => a + p[0], 0) / points.length,
-          points.reduce((a, p) => a + p[1], 0) / points.length,
-        ]
-      : [30.379, 59.99]
-  const mapSrc =
-    points.length > 0
-      ? `https://yandex.ru/map-widget/v1/?ll=${center[0].toFixed(4)},${center[1].toFixed(4)}&z=10&pt=${points
-          .map(p => `${p[0]},${p[1]},pm2rdm`)
-          .join('~')}`
-      : ''
 
   return (
     <div className="flex flex-col gap-[48px] bg-[var(--white)] pb-[48px] text-[var(--dark)] max-lg:gap-[28px]">
@@ -193,7 +181,7 @@ export const HomePage = () => {
               key={i}
               src={img}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
+              className="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-700"
               style={{ opacity: i === banner ? 1 : 0 }}
             />
           ))}
@@ -212,7 +200,7 @@ export const HomePage = () => {
                 В каталог
               </Link>
               <Link
-                to="/climate-control"
+                to="/climate-control-stirka"
                 className="flex items-center gap-[6px] text-[14px] font-[500] text-[#fff] no-underline"
               >
                 Подробнее о климат-контроле <span aria-hidden>↗</span>
@@ -308,7 +296,7 @@ export const HomePage = () => {
                 <p className="relative z-[1] max-w-[200px] text-[13px] leading-[17px] text-[#E5E5E5]">
                   {c.note}
                 </p>
-                <span className="relative z-[1] mt-[6px] flex w-fit items-center gap-[6px] text-[14px] text-[#fff] transition-colors group-hover:text-[var(--red)]">
+                <span className="relative z-[1] mt-[6px] flex w-fit items-center gap-[6px] text-[14px] text-[#fff] transition-colors">
                   Перейти <span aria-hidden>↗</span>
                 </span>
               </Link>
@@ -322,7 +310,11 @@ export const HomePage = () => {
         to="/sale"
         className="group relative flex h-[clamp(240px,26vw,360px)] items-center overflow-hidden"
       >
-        <img src={saleBanner} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={saleBanner}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-top"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-black/45 to-transparent" />
         <div className={`relative z-[1] flex flex-col gap-[16px] ${SIDE} max-lg:px-[16px]`}>
           <div className="text-[#fff]">
@@ -420,7 +412,9 @@ export const HomePage = () => {
             <div className="absolute inset-0 bg-black/40" />
             {/* небольшой чёрный градиент сверху — как в макете */}
             <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-black/55 to-transparent" />
-            <p className="relative z-[1] max-w-[150px] h3 leading-[26px] text-[#fff_!important]">{t.title}</p>
+            <p className="relative z-[1] max-w-[150px] h4 leading-[26px] text-[#fff_!important] whitespace-nowrap">
+              {t.title}
+            </p>
             <span className="button relative z-[1] w-fit transition-colors group-hover:!bg-[#282B32]">
               Узнать
             </span>
@@ -436,16 +430,16 @@ export const HomePage = () => {
             <button
               aria-label="Назад"
               onClick={() => scrollBy(newsRef, -1)}
-              className="flex h-[44px] w-[44px] items-center justify-center rounded-full border border-[#C8CDD3] text-[20px] hover:bg-[#F5F5F5]"
+              className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
             >
-              ‹
+              <BsChevronLeft />
             </button>
             <button
               aria-label="Вперёд"
               onClick={() => scrollBy(newsRef, 1)}
-              className="flex h-[44px] w-[44px] items-center justify-center rounded-full border border-[#C8CDD3] text-[20px] hover:bg-[#F5F5F5]"
+              className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
             >
-              ›
+              <BsChevronRight />
             </button>
           </div>
         </div>
@@ -514,15 +508,8 @@ export const HomePage = () => {
           ))}
         </div>
         <div className="h-[420px] w-[42%] overflow-hidden rounded-[14px] max-lg:h-[300px] max-lg:w-full">
-          {mapSrc && (
-            <iframe
-              title="Карта магазинов"
-              src={mapSrc}
-              className="h-full w-full"
-              style={{ border: 0 }}
-              loading="lazy"
-            />
-          )}
+          {/* points у нас [lon, lat] → Leaflet ждёт [lat, lon] */}
+          <StoresMap points={points.map(([lon, lat]) => [lat, lon] as [number, number])} />
         </div>
       </section>
     </div>

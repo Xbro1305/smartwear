@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { useGetArticlesBySectionQuery } from '@/entities/article'
 import { Section } from '@/entities/article/article.types'
+import { StoresMap } from '@/widgets/storesMap/StoresMap'
 
 // TODO: заменить на реальный hero-баннер «О нас» (about-hero.jpg), когда пришлёшь
 import aboutHero from '@/assets/home/banner-8.png'
@@ -16,6 +17,7 @@ import infoShop from '@/assets/home/info-shop.svg'
 import infoDelivery from '@/assets/home/info-delivery.svg'
 import infoRepair from '@/assets/home/info-repair.svg'
 import infoPay from '@/assets/home/info-pay.svg'
+import { BsChevronLeft, BsChevronRight } from 'react-icons/bs'
 
 const API_URL = import.meta.env.VITE_APP_API_URL
 const SIDE = 'px-[var(--sides-padding)]'
@@ -35,7 +37,7 @@ const brandRanges: [number, number][] = [
 ]
 
 const tiles = [
-  { title: 'Климат-контроль', to: '/climate-control', img: tileClimate, scale: 1.5 },
+  { title: 'Климат-контроль', to: '/climate-control-stirka', img: tileClimate, scale: 1.5 },
   { title: 'Как стирать', to: '/kak-stirat-odezhdu-s-klimat-kontrolem', img: tileWash, scale: 1.1 },
   { title: 'Материалы', to: '/autojack-m', img: tileMaterials, scale: 1 },
   { title: 'Условия доставки', to: '/delivery', img: tileDelivery, scale: 1.1 },
@@ -85,16 +87,16 @@ const Carousel = ({ title, items }: { title: string; items: any[] }) => {
           <button
             aria-label="Назад"
             onClick={() => scroll(-1)}
-            className="flex h-[44px] w-[44px] items-center justify-center rounded-full border border-[#C8CDD3] text-[20px] hover:bg-[#F5F5F5]"
+            className="flex h-[44px] w-[44px] text-[14px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
           >
-            ‹
+            <BsChevronLeft />
           </button>
           <button
             aria-label="Вперёд"
             onClick={() => scroll(1)}
-            className="flex h-[44px] w-[44px] items-center justify-center rounded-full border border-[#C8CDD3] text-[20px] hover:bg-[#F5F5F5]"
+            className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
           >
-            ›
+            <BsChevronRight />
           </button>
         </div>
       </div>
@@ -151,19 +153,13 @@ export const AboutPage = () => {
   }, [])
   const storeCoords = (s: Store): [number, number] | null => {
     if (s.longitude && s.latitude) return [Number(s.longitude), Number(s.latitude)]
-    const byId: Record<number, [number, number]> = { 2: [30.434, 59.9327], 3: [30.3226, 60.0506] }
+    const byId: Record<number, [number, number]> = {
+      2: [30.437617, 59.933032], // ТРК «Заневский Каскад», Заневский пр., 67к2
+      3: [30.335068, 60.059095], // ТРК «Гранд Каньон», пр. Энгельса, 154
+    }
     return byId[s.id] || null
   }
   const points = stores.map(storeCoords).filter(Boolean) as [number, number][]
-  const center = points.length
-    ? [
-        points.reduce((a, p) => a + p[0], 0) / points.length,
-        points.reduce((a, p) => a + p[1], 0) / points.length,
-      ]
-    : [30.379, 59.99]
-  const mapSrc = points.length
-    ? `https://yandex.ru/map-widget/v1/?ll=${center[0].toFixed(4)},${center[1].toFixed(4)}&z=10&pt=${points.map(p => `${p[0]},${p[1]},pm2rdm`).join('~')}`
-    : ''
 
   return (
     <div className="flex flex-col gap-[56px] bg-[var(--white)] pb-[48px] text-[var(--dark)] max-lg:gap-[32px]">
@@ -239,7 +235,7 @@ export const AboutPage = () => {
             <div className="absolute inset-0 bg-black/40" />
             {/* небольшой чёрный градиент сверху — как в макете */}
             <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-black/55 to-transparent" />
-            <p className="relative z-[1] max-w-[150px] h3 leading-[26px] text-[#fff_!important]">
+            <p className="relative z-[1] max-w-[150px] h4 leading-[26px] text-[#fff_!important] whitespace-nowrap">
               {t.title}
             </p>
             <span className="button relative z-[1] w-fit transition-colors group-hover:!bg-[#282B32]">
@@ -260,8 +256,8 @@ export const AboutPage = () => {
         <h2 className="h2">Умная одежда — для вас</h2>
         <div className="grid grid-cols-4 gap-[24px] max-sm:grid-cols-1 max-lg:grid-cols-2">
           {advs.map(a => (
-            <div key={a.title} className="flex xl:flex-row flex-col gap-[8px]">
-              <img src={a.img} alt="" className="h-[40px] w-fit" />
+            <div key={a.title} className="flex flex-col gap-[8px] xl:flex-row xl:items-center xl:gap-[16px]">
+              <img src={a.img} alt="" className="h-[56px] w-[56px] shrink-0 object-contain" />
               <div>
                 <p className="h5 leading-[18px]">{a.title}</p>
                 <p className="p1 leading-[16px] text-[var(--service)]">{a.content}</p>
@@ -286,15 +282,8 @@ export const AboutPage = () => {
           ))}
         </div>
         <div className="h-[420px] w-[42%] overflow-hidden rounded-[14px] max-lg:h-[300px] max-lg:w-full">
-          {mapSrc && (
-            <iframe
-              title="Карта магазинов"
-              src={mapSrc}
-              className="h-full w-full"
-              style={{ border: 0 }}
-              loading="lazy"
-            />
-          )}
+          {/* points у нас [lon, lat] → Leaflet ждёт [lat, lon] */}
+          <StoresMap points={points.map(([lon, lat]) => [lat, lon] as [number, number])} />
         </div>
       </section>
     </div>

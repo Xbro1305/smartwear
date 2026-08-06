@@ -39,7 +39,13 @@
       }
 
       img {
-        padding-top: 2px;
+        // Единый бокс под иконку (высота ≈ строке текста), иконка центрируется внутри —
+        // чтобы короткие значки (VK/почта) стояли ровно, как остальные
+        width: 24px;
+        height: 1.3em;
+        flex-shrink: 0;
+        object-fit: contain;
+        object-position: center;
       }
     }
   }
