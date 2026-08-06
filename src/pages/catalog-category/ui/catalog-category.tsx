@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link, useSearchParams } from 'react-router-dom'
 import { FaChevronDown } from 'react-icons/fa'
-import banner from '@/assets/images/catalogBanner.svg'
+import saleBanner from '@/assets/home/sale-women.png'
 // import heart from '@/assets/images/homeHeart.svg'
 import styles from './catalog-category.module.scss'
 import axios from 'axios'
@@ -326,9 +326,29 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   return (
     <div className={styles.catalog_page}>
       <div className={styles.catalog_top}>
-        <div className={styles.catalog_top_banner}>
-          <img src={banner} alt="" />
-        </div>
+        {/* Баннер со скидками — кликабелен целиком, ведёт на /sale */}
+        <Link
+          to="/sale"
+          className="group relative flex h-[clamp(160px,18vw,260px)] items-center overflow-hidden rounded-[14px]"
+        >
+          <img
+            src={saleBanner}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-top"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/45 to-transparent" />
+          <div className="relative z-[1] flex flex-col gap-[14px] px-[var(--sides-padding)] max-lg:px-[16px]">
+            <div className="text-[#fff]">
+              <span className="block text-[clamp(28px,4vw,56px)] font-[600] leading-[1]">
+                Скидки до 50%
+              </span>
+              <span className="block text-[clamp(16px,2.4vw,32px)] font-[400]">
+                на куртки и ветровки
+              </span>
+            </div>
+            <span className="button w-fit transition-colors group-hover:!bg-[#282B32]">Перейти</span>
+          </div>
+        </Link>
         <div className={styles.catalog_top_navigation}>
           <p className="p1">
             <Breadcrumbs data={category} />
