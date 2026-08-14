@@ -172,7 +172,7 @@ const StatusBar = ({ status }: { status: string }) => {
         {nextStep && (
           <>
             {/* соединитель — строго под центром иконки (min-w 40px → center 20px), как в макете */}
-            <div className="ml-[19px] my-[6px] w-[2px] h-[24px] bg-[#D42B2B]" />
+            <div className="ml-[19px] my-[16px] w-[2px] h-[24px] bg-[#D42B2B]" />
             <div className="flex items-center gap-[12px]">
               <div className="h-[30px] min-w-[40px] opacity-35 checked">{nextStep.image}</div>
               <span className="text-[13px] font-medium whitespace-nowrap text-[#9B9B9B]">
@@ -184,7 +184,7 @@ const StatusBar = ({ status }: { status: string }) => {
       </div>
 
       {/* sm → lg: текущий и следующий горизонтально с полоской между */}
-      <div className="hidden sm:flex lg:hidden items-center gap-[16px]">
+      <div className="hidden sm:flex lg:hidden items-center gap-[36px]">
         {/* Текущий */}
         <div className="flex items-center gap-[12px] shrink-0">
           <div className="h-[30px] min-w-[40px]">{steps[currentIdx].image}</div>
@@ -196,7 +196,7 @@ const StatusBar = ({ status }: { status: string }) => {
         {/* Полоска */}
         {nextStep && (
           <>
-            <div className="h-[2px] flex-1 bg-[#D42B2B]" />
+            <div className="h-[2px] flex-1 bg-[#D42B2B] my-[10px]" />
 
             {/* Следующий */}
             <div className="flex items-center gap-[12px] shrink-0">
