@@ -375,11 +375,11 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
           </div>
 
           <div className="flex flex-col lg:flex-row items-start gap-xl">
-            <div className="lg:hidden flex flex-col gap-[20px]">
-              <p className="text-base text-dark">Модель: {item.articul}</p>
-              <h3 className="h1">{item.name}</h3>
+            <div className="lg:hidden flex flex-col gap-[20px] max-[380px]:gap-[14px]">
+              <p className="text-base text-dark max-[380px]:text-[13px]">Модель: {item.articul}</p>
+              <h3 className="h1 max-[380px]:!text-[22px] max-[380px]:!leading-[27px]">{item.name}</h3>
               <div
-                className="p1 bg-[#fff_!important] product_description"
+                className="p1 bg-[#fff_!important] product_description max-[380px]:!text-[13px] max-[380px]:!leading-[18px]"
                 dangerouslySetInnerHTML={{ __html: item.description }}
               ></div>
               {/* <p className="p1 flex items-center gap-[5px]">
@@ -483,7 +483,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                   </p> */}
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-[22px]">Производитель: </p>
+                  <p className="text-[22px] max-[380px]:text-[16px]">Производитель: </p>
                   <div className="flex items-center gap-[10px]">
                     <Link
                       className="p1 flex items-center gap-[10px] underline"
@@ -503,7 +503,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-[22px]">В наличии: </p>
+                  <p className="text-[22px] max-[380px]:text-[16px]">В наличии: </p>
                   <p className="p1 flex items-center gap-[10px]">
                     <div className="flex items-center gap-[5px]">
                       <span
@@ -539,7 +539,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 </div>
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-between">
-                    <p className="text-[22px]">Выберите цвет: </p>
+                    <p className="text-[22px] max-[380px]:text-[16px]">Выберите цвет: </p>
                     <p className="p1 flex items-center gap-[10px]">{selectedColor?.alias}</p>
                   </div>
                   <div className="flex gap-[10px]">
@@ -563,7 +563,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 </div>
                 <div className="flex flex-col gap-[10px]">
                   <div className="flex items-center justify-between">
-                    <p className="text-[22px]">Выберите размер: </p>
+                    <p className="text-[22px] max-[380px]:text-[16px]">Выберите размер: </p>
                     {sizeTable && (
                       <>
                         <p
@@ -590,7 +590,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                           <div
                             key={size.id}
                             className={`
-                              relative text-[23px] p-[10px]
+                              relative text-[23px] p-[10px] max-[380px]:text-[18px] max-[380px]:p-[8px]
                               ${disabled ? 'text-[#00000060] cursor-not-allowed' : 'cursor-pointer'}
                               ${selectedSize?.id === size.id ? 'bg-[#F2F2F2]' : ''}
                             `}
@@ -609,11 +609,11 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       })}
                   </div>
                 </div>
-                <div className="flex lg:hidden justify-center flex-row items-end gap-[20px] -mb-[10px]">
+                <div className="flex lg:hidden justify-center flex-row items-end gap-[20px] max-[380px]:gap-[12px] -mb-[10px]">
                   <NumericFormat
                     value={price}
                     suffix=" ₽"
-                    className="text-red text-[36px] font-medium"
+                    className="text-red text-[36px] font-medium max-[380px]:text-[26px]"
                     thousandSeparator=" "
                     displayType="text"
                   />
@@ -622,7 +622,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       <NumericFormat
                         value={oldPrice}
                         suffix=" ₽"
-                        className="text-[#777777] text-[24px] font-medium line-through mb-[5px]"
+                        className="text-[#777777] text-[24px] font-medium line-through mb-[5px] max-[380px]:text-[18px]"
                         thousandSeparator=" "
                         displayType="text"
                       />
@@ -630,7 +630,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         value={Math.round(((oldPrice - price) / oldPrice) * 100)}
                         suffix="%"
                         prefix="-"
-                        className="text-red text-[18px] font-medium mb-[7px]"
+                        className="text-red text-[18px] font-medium mb-[7px] max-[380px]:text-[14px]"
                         thousandSeparator=" "
                         displayType="text"
                         allowNegative={false}
@@ -684,7 +684,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                   />
                 </span>
                 {selectedInfo == 'features' && (
-                  <ul className="flex md:hidden list-disc ml-[27px] text-[22px] flex-col gap-[5px]">
+                  <ul className="flex md:hidden list-disc ml-[27px] text-[22px] flex-col gap-[5px] max-[380px]:text-[15px]">
                     {item.features
                       .sort((a: any, b: any) =>
                         a.feature.description.localeCompare(b.feature.description)
