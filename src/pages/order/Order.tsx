@@ -164,17 +164,18 @@ const StatusBar = ({ status }: { status: string }) => {
       <div className="flex flex-col sm:hidden">
         <div className="flex items-center gap-[12px]">
           <div className="h-[30px] min-w-[40px]">{steps[currentIdx].image}</div>
-          <span className="text-[11px] font-medium whitespace-nowrap text-[#D42B2B]">
+          <span className="text-[13px] font-medium whitespace-nowrap text-[#D42B2B]">
             {steps[currentIdx].label}
           </span>
         </div>
 
         {nextStep && (
           <>
-            <div className="w-[2px] h-[24px] bg-[#D42B2B] mx-auto" />
+            {/* соединитель — строго под центром иконки (min-w 40px → center 20px), как в макете */}
+            <div className="ml-[19px] my-[6px] w-[2px] h-[24px] bg-[#D42B2B]" />
             <div className="flex items-center gap-[12px]">
               <div className="h-[30px] min-w-[40px] opacity-35 checked">{nextStep.image}</div>
-              <span className="text-[11px] font-medium whitespace-nowrap text-[#9B9B9B]">
+              <span className="text-[13px] font-medium whitespace-nowrap text-[#9B9B9B]">
                 {nextStep.label}
               </span>
             </div>
@@ -460,9 +461,12 @@ export const Order = () => {
           {/* ── Items ── */}
           <div className="shadow-[0px_4px_16.2px_0px_#0000000D] py-[32px] px-[16px] md:px-[32px] rounded-[12px]">
             <h4 className="mb-[40px] h4">Состав заказа</h4>
-            {order.items.map(item => (
-              <OrderItemRow key={item.id} item={item} />
-            ))}
+            {/* ТЗ 10 п.28 — отступы между товарами по макету */}
+            <div className="flex flex-col gap-[40px]">
+              {order.items.map(item => (
+                <OrderItemRow key={item.id} item={item} />
+              ))}
+            </div>
             <div className="my-[40px]">
               <hr className="border-[#F2F2F2]" />
             </div>

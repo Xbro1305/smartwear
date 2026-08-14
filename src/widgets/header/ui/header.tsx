@@ -112,11 +112,7 @@ export const Header: React.FC = () => {
     }
   }, [isOpen])
 
-  useEffect(() => {
-    setTimeout(() => {
-      document.querySelector('.main-container')?.scrollTo(0, 0)
-    }, 1)
-  }, [window.location.pathname])
+  // Скролл при навигации теперь управляется в RootLayout (восстановление позиции при «назад»)
 
   useEffect(() => {
     const setVh = () => {

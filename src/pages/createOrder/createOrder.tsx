@@ -1044,7 +1044,13 @@ const CartSideBar = ({
           />
           <p className="p2">
             Я соглашаюсь с&nbsp;
-            <a href="#" className="text-[var(--red)]">
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="text-[var(--red)]"
+            >
               правилами оплаты и возврата
             </a>
           </p>
@@ -1058,7 +1064,13 @@ const CartSideBar = ({
           />
           <p className="p2">
             Я соглашаюсь с&nbsp;
-            <a href="#" className="text-[var(--red)]">
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="text-[var(--red)]"
+            >
               обработкой персональных данных
             </a>
           </p>

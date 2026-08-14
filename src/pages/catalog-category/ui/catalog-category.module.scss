@@ -42,6 +42,7 @@
       max-width: 256px;
     }
 
+    // На мобильных/планшете десктопный сайдбар скрыт — там отдельная панель (MobileFilters)
     @media (max-width: 1024px) {
       display: none;
     }
@@ -389,6 +390,8 @@
         width: 32px;
         height: 32px;
         border-radius: 50%;
+        border: 1px solid #e5e5e5; /* как на главной */
+        flex-shrink: 0;
 
         @media (max-width: 1024px) {
           width: 27px;

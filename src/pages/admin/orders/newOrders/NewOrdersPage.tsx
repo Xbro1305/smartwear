@@ -41,6 +41,7 @@ type Order = {
   addressId: number
   status: string
   adminStatus: string
+  adminSection?: string
   totalAmount: string
   promoCodeId: number | null
   paymentType: string
@@ -113,20 +114,22 @@ export default function NewOrdersPage() {
         }
       )
       const page = window.location.pathname.split('/').pop()
+      // Раздел заказа определяем по adminSection (item 32); adminStatus — фолбэк
+      const sectionOf = (order: Order) =>   order.adminStatus
       let filteredOrders = response.data
 
       if (page === 'new') {
-        filteredOrders = response.data.filter(order => order.adminStatus === 'NEW_ORDERS')
+        filteredOrders = response.data.filter(order => sectionOf(order) === 'NEW_ORDERS')
       } else if (page === 'inProgress') {
-        filteredOrders = response.data.filter(order => order.adminStatus === 'IN_PROGRESS')
+        filteredOrders = response.data.filter(order => sectionOf(order) === 'IN_PROGRESS')
       } else if (page === 'delivered') {
-        filteredOrders = response.data.filter(order => order.adminStatus === 'DELIVERED')
+        filteredOrders = response.data.filter(order => sectionOf(order) === 'DELIVERED')
       } else if (page === 'cancelled') {
-        filteredOrders = response.data.filter(order => order.adminStatus === 'CANCELLED')
+        filteredOrders = response.data.filter(order => sectionOf(order) === 'CANCELLED')
       } else if (page === 'notPickedUp') {
-        filteredOrders = response.data.filter(order => order.adminStatus === 'NOT_PICKED_UP')
+        filteredOrders = response.data.filter(order => sectionOf(order) === 'NOT_PICKED_UP')
       } else if (page === 'returns') {
-        filteredOrders = response.data.filter(order => order.adminStatus === 'RETURNED')
+        filteredOrders = response.data.filter(order => sectionOf(order) === 'RETURNED')
       }
 
       setOrders(filteredOrders)

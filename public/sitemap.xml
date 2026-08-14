@@ -44,12 +44,12 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://maxiscomfort.ru/politics</loc>
+    <loc>https://maxiscomfort.ru/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://maxiscomfort.ru/oferta</loc>
+    <loc>https://maxiscomfort.ru/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

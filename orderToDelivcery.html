@@ -126,6 +126,7 @@
       align-items: flex-start;
       gap: 12px;
       flex: 1;
+      min-width: 0; /* даёт flex-детям сжиматься — без бокового скролла */
     }
     .item-img {
       width: 52px;
@@ -139,11 +140,19 @@
       font-size: 13px;
       line-height: 1.55;
       color: #1A1A1A;
+      overflow-wrap: anywhere;
     }
     .item-right {
       text-align: right;
       flex-shrink: 0;
-      min-width: 140px;
+      min-width: 120px;
+    }
+    .hero-text { min-width: 0; }
+
+    /* На узких экранах строки товара складываются вертикально — без бокового скролла */
+    @media (max-width: 460px) {
+      .item-row { flex-direction: column; }
+      .item-right { text-align: left; min-width: 0; }
     }
     .tracking-label {
       font-size: 12px;
@@ -272,9 +281,9 @@
       <div class="footer-note">
         <p>После отправки заказа его отмена невозможна.</p>
         <div class="footer-links">
-          <a href="https://test.maxiscomfort.ru/politics">Политика конфиденциальности</a>
+          <a href="https://test.maxiscomfort.ru/privacy">Политика конфиденциальности</a>
           <a href="https://test.maxiscomfort.ru/delivery">Правила доставки</a>
-          <a href="https://test.maxiscomfort.ru/return">Как мы принимаем заказы и возвраты</a>
+          <a href="https://test.maxiscomfort.ru/terms">Как мы принимаем заказы и возвраты</a>
         </div>
       </div>
     </div>

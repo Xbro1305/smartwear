@@ -2,15 +2,12 @@ import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import img1 from '@/assets/images/homeAcs.png'
-import { HiThumbUp } from 'react-icons/hi'
 import { NumericFormat } from 'react-number-format'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 import { CgClose, CgRuler } from 'react-icons/cg'
 import { BsQuestionCircle } from 'react-icons/bs'
-import styles from '@/pages/home/home.module.scss'
 // import heart from '@/assets/images/homeHeart.svg'
-import catalog from '@/assets/images/homeCatalog.jpeg'
-import Slider from 'react-slick'
+import { SeasonalRecommendations } from '@/widgets/seasonalRecommendations/SeasonalRecommendations'
 import top from './assets/top.png'
 import center from './assets/center.png'
 import bottom from './assets/bottom.png'
@@ -385,21 +382,21 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 className="p1 bg-[#fff_!important] product_description"
                 dangerouslySetInnerHTML={{ __html: item.description }}
               ></div>
-              <p className="p1 flex items-center gap-[5px]">
+              {/* <p className="p1 flex items-center gap-[5px]">
                 <HiThumbUp className="text-red" />
                 Купили более 100 раз
-              </p>
+              </p> */}
             </div>
             <div className="lg:w-[60%] w-full flex sm:flex-row flex-col gap-[10px] sm:max-h-screen lg:max-h-none ">
-              <div className="lg:hidden col-span-full w-full">
+              {/* фикс. соотношение сторон — высота не «прыгает» при смене цвета/фото (ТЗ 10 п.24) */}
+              <div className="lg:hidden col-span-full w-full aspect-[3/4] overflow-hidden">
                 <img
-                  className="object-cover w-full h-full aspect-[3/4]"
+                  className="object-cover w-full h-full"
                   src={selectedPhoto?.url || img1}
                   alt={item?.name}
                 />
-                {/* <img className="object-cover w-full h-full aspect-[3/4]" src={img1} alt="" /> */}
               </div>
-              <div className="sm:grid lg:grid-cols-2 flex flex-row gap-[10px] xl:gap-[20px] w-full max-h-[200px] h-[200px] sm:h-auto sm:max-h-full lg:max-h-none overflow-y-auto lg:overflow-initial sm:w-[40%] lg:w-full">
+              <div className="sm:grid lg:grid-cols-2 lg:content-start flex flex-row gap-[10px] xl:gap-[20px] w-full max-h-[200px] h-[200px] sm:h-[560px] sm:max-h-[560px] lg:h-[820px] lg:max-h-[820px] overflow-y-auto lg:overflow-y-auto sm:w-[40%] lg:w-full [scrollbar-width:thin]">
                 {(media?.find((m: Media) => m.colorAttrValueId == selectedColor?.id)
                   ? media.filter(
                       (m: Media) =>
@@ -480,10 +477,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               <div className="flex flex-col gap-[20px]">
                 <div className="hidden lg:flex items-center justify-between">
                   <p className="text-[22px]">Модель: {item.articul}</p>
-                  <p className="p1 flex items-center gap-[10px]">
+                  {/* <p className="p1 flex items-center gap-[10px]">
                     <HiThumbUp className="text-red" />
                     Купили более 100 раз
-                  </p>
+                  </p> */}
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-[22px]">Производитель: </p>
@@ -546,20 +543,22 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     <p className="p1 flex items-center gap-[10px]">{selectedColor?.alias}</p>
                   </div>
                   <div className="flex gap-[10px]">
-                    {colors?.map(color => (
-                      <span
-                        key={color.id}
-                        className={`block w-[27px] h-[27px] rounded-[50%] cursor-pointer`}
-                        style={{
-                          background: color.meta.colorCode,
-                          border:
-                            selectedColor?.id == color.id && selectedColor.alias == color.alias
-                              ? '1px solid black'
-                              : '',
-                        }}
-                        onClick={() => setSelectedColor(color)}
-                      ></span>
-                    ))}
+                    {colors?.map(color => {
+                      const isSelected =
+                        selectedColor?.id == color.id && selectedColor.alias == color.alias
+                      return (
+                        <span
+                          key={color.id}
+                          className={`block w-[27px] h-[27px] rounded-[50%] cursor-pointer`}
+                          style={{
+                            background: color.meta.colorCode,
+                            // выбранный цвет — жирный ободок (ТЗ 10, п.19)
+                            boxShadow: isSelected ? '0 0 0 2px #fff, 0 0 0 4px #000' : undefined,
+                          }}
+                          onClick={() => setSelectedColor(color)}
+                        ></span>
+                      )
+                    })}
                   </div>
                 </div>
                 <div className="flex flex-col gap-[10px]">
@@ -577,34 +576,36 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       </>
                     )}
                   </div>
-                  <div className="flex gap-[10px]">
+                  {/* показываем ВСЕ размеры всегда; недоступные — серые/зачёркнутые.
+                      Так число кнопок не меняется при смене цвета и страница не «прыгает» (ТЗ 10 п.24) */}
+                  <div className="flex flex-wrap gap-[10px]">
                     {sizes
                       ?.sort((a, b) => a.orderNum - b.orderNum)
                       ?.map(size => {
                         const isAvailable = isSizeAvailableForColor(size.id)
-
                         const stock = checkStockForSize(size.id)
+                        const disabled = !isAvailable || !stock
 
-                        return isAvailable ? (
+                        return (
                           <div
                             key={size.id}
                             className={`
-                              relative text-[23px] p-[10px] cursor-pointer
-                              ${!stock ? 'text-[#00000060] cursor-not-allowed' : ''}
+                              relative text-[23px] p-[10px]
+                              ${disabled ? 'text-[#00000060] cursor-not-allowed' : 'cursor-pointer'}
                               ${selectedSize?.id === size.id ? 'bg-[#F2F2F2]' : ''}
                             `}
                             onClick={() => {
-                              if (!isAvailable) return
+                              if (disabled) return
                               setSelectedSize(size)
                             }}
                           >
                             {size.name}
 
-                            {!stock && (
+                            {disabled && (
                               <span className="absolute block border-b border-[1px] border-[#00000060] top-[50%] left-[0] rotate-[45deg] w-full" />
                             )}
                           </div>
-                        ) : null
+                        )
                       })}
                   </div>
                 </div>
@@ -757,9 +758,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                 {selectedInfo == 'shops' && (
                   <div className="flex md:hidden flex-col gap-[10px] w-full">
                     {stores?.map((store: any) => (
-                      <div
+                      <Link
+                        to="/contacts"
                         key={store.id}
-                        className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full"
+                        className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full no-underline text-inherit"
                       >
                         <h3 className="h3 flex items-center justify-between w-full">
                           {store.shortName} <FaChevronRight />
@@ -767,14 +769,14 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                         <p className="p2 text-[#94A3B8_!important]">{store.address}</p>
                         <p className="p2">Пн-вт 9:00-21:00, сб-вс выходной</p>
                         <div className="flex items-center justify-between mt-[20px]">
-                          <button className="bg-red h-[50px] rounded-[8px] text-white px-[24px]">
+                          <span className="bg-red h-[50px] rounded-[8px] text-white px-[24px] flex items-center">
                             Подробнее
-                          </button>
+                          </span>
                           <p className="text-[red_!important] p2">
                             Количество: {getQty(store)} шт.
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}
@@ -821,7 +823,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                     )}
 
                     <Link
-                      to="#"
+                      to="/kak-stirat-odezhdu-s-klimat-kontrolem"
                       className="border-dashed border-b-[1px] border-dark text-dark pb-[1px] w-fit"
                     >
                       Подробнее про уход за одеждой
@@ -870,9 +872,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               {selectedInfo == 'shops' && (
                 <div className="flex flex-col gap-[10px] w-full">
                   {stores?.map((store: any) => (
-                    <div
+                    <Link
+                      to="/contacts"
                       key={store.id}
-                      className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full"
+                      className="flex flex-col gap-[10px] border-t border-[#DDE1E6] pt-[10px] w-full no-underline text-inherit"
                     >
                       <h3 className="h3 flex items-center justify-between w-full">
                         {store.shortName} <FaChevronRight />
@@ -880,12 +883,12 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       <p className="p2 text-[#94A3B8_!important]">{store.address}</p>
                       <p className="p2">Пн-вт 9:00-21:00, сб-вс выходной</p>
                       <div className="flex items-center justify-between mt-[20px]">
-                        <button className="bg-red h-[50px] rounded-[8px] text-white px-[24px]">
+                        <span className="bg-red h-[50px] rounded-[8px] text-white px-[24px] flex items-center">
                           Подробнее
-                        </button>
+                        </span>
                         <p className="text-[red_!important] p2">Количество: {getQty(store)} шт.</p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -914,7 +917,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                   )}
 
                   <Link
-                    to="#"
+                    to="/kak-stirat-odezhdu-s-klimat-kontrolem"
                     className="border-dashed border-b-[1px] border-dark text-dark pb-[1px] w-fit"
                   >
                     Подробнее про уход за одеждой
@@ -923,87 +926,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               )}
             </div>
           </div>
-          <div className={styles.home_recommendations}>
-            <h2 className={'h2'}>Рекомендуем на зиму</h2>
-            <div className={styles.home_recommendations_wrapper}>
-              {recomendations.map((i, index) => (
-                <div className={`${styles.home_recommendations_item}`} key={index}>
-                  <img alt={''} src={i.img} />
-                  <div className={styles.home_recommendations_item_info}>
-                    <div className={styles.home_recommendations_item_top}>
-                      <div className={styles.home_recommendations_item_colors}>
-                        {i.colors.map(c => (
-                          <div
-                            key={c}
-                            className={styles.home_recommendations_item_color}
-                            style={{ background: `${c}` }}
-                          ></div>
-                        ))}
-                      </div>
-                      {/* <img alt={''} src={heart} /> */}
-                    </div>
-                    <h5 className={'h5'}>{i.title}</h5>
-                    <NumericFormat
-                      className={'h5'}
-                      decimalSeparator={'.'}
-                      displayType={'text'}
-                      suffix={' ₽'}
-                      thousandSeparator={' '}
-                      value={i.price}
-                    />
-                    <a
-                      className={
-                        'button w-[100%_!important] h-[60px_!important] text-center items-center flex justify-center rounded-[0_!important] hover:opacity-100 transition-opactiy transition-[0.3s]'
-                      }
-                      href={''}
-                    >
-                      Посмотреть подробнее
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="lg:hidden">
-            <Slider className={`${styles.home_recommendations_mob}`} {...settings}>
-              {recomendations.map((i, index) => (
-                <div className={styles.home_recommendations_item} key={index}>
-                  <img alt={''} src={i.img} />
-                  <div className={styles.home_recommendations_item_info}>
-                    <div className={styles.home_recommendations_item_top}>
-                      <div className={styles.home_recommendations_item_colors}>
-                        {i.colors.map(c => (
-                          <div
-                            key={c}
-                            className={styles.home_recommendations_item_color}
-                            style={{ background: `${c}` }}
-                          ></div>
-                        ))}
-                      </div>
-                      {/* <img alt={''} src={heart} /> */}
-                    </div>
-                    <h5 className={'h5'}>{i.title}</h5>
-                    <NumericFormat
-                      className={'h5'}
-                      decimalSeparator={'.'}
-                      displayType={'text'}
-                      suffix={' ₽'}
-                      thousandSeparator={' '}
-                      value={i.price}
-                    />
-                    <a
-                      className={
-                        'button opacity-85 w-full hover:opacity-100 transition-opactiy transition-[0.3s]'
-                      }
-                      href={''}
-                    >
-                      Посмотреть подробнее
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </Slider>{' '}
-          </div>
+          {/* ТЗ 10 п.23 — блок «Сезонные рекомендации» (последние товары), как на главной */}
+          <SeasonalRecommendations withSide={false} />
         </div>
       )}
     </div>
@@ -1142,57 +1066,3 @@ const SizeTable = ({ size, onClose }: SizeTableProps) => {
 }
 
 export default SizeTable
-const settings = {
-  infinite: true,
-  nextArrow: <SampleNextArrow />,
-  prevArrow: <SamplePrevArrow />,
-  responsive: [
-    {
-      breakpoint: 520,
-      settings: {
-        initialSlide: 1,
-        slidesToScroll: 1,
-        slidesToShow: 1,
-      },
-    },
-  ],
-  slidesToScroll: 2,
-  slidesToShow: 2,
-  speed: 500,
-}
-
-function SampleNextArrow(props: any) {
-  const { onClick } = props
-
-  return <div className={styles.slick_next} onClick={onClick} />
-}
-
-function SamplePrevArrow(props: any) {
-  const { onClick } = props
-
-  return <div className={styles.slick_prev} onClick={onClick} />
-}
-
-const recomendations = [
-  {
-    colors: ['#849051', '#EFC7BD'],
-    img: catalog,
-    price: 24150,
-    sale: false,
-    title: 'Женская демисезонная куртка limolady 3279',
-  },
-  {
-    colors: ['#849051', '#EFC7BD'],
-    img: catalog,
-    price: 24150,
-    sale: false,
-    title: 'Женская демисезонная куртка limolady 3279',
-  },
-  {
-    colors: ['#849051', '#EFC7BD'],
-    img: catalog,
-    price: 24150,
-    sale: true,
-    title: 'Женская демисезонная куртка limolady 3279',
-  },
-]

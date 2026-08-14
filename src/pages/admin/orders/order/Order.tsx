@@ -646,7 +646,12 @@ export const OrderAdminPage = () => {
   const updateTrackingNumber = async (groupIdx: number) => {
     if (!order) return
     const tNum = trackingNumbers[groupIdx]
-    navigator.clipboard.writeText(tNum)
+    // копирование в буфер не должно блокировать сохранение (может кинуть исключение)
+    try {
+      await navigator.clipboard?.writeText(tNum)
+    } catch {
+      /* ignore clipboard errors */
+    }
     // Determine which order id to patch (if split orders, order may have sub-ids)
     const orderId = order.id
     try {
@@ -655,8 +660,12 @@ export const OrderAdminPage = () => {
         { trackingNumber: tNum },
         { headers: authHeaders }
       )
+      // локально сохраняем, чтобы номер не «пропадал» до перезагрузки
+      setOrder(prev => (prev ? { ...prev, trackingNumber: tNum } : prev))
+      toast.success('Номер накладной сохранён')
     } catch (err) {
       console.error(err)
+      toast.error('Не удалось сохранить номер накладной')
     }
   }
 
@@ -732,6 +741,13 @@ export const OrderAdminPage = () => {
     // orders/admin/{orderId}/delivery-range
 
     // PATCH body: { deliveryFrom: string, deliveryTo: string }
+
+    itemGroups.forEach((_, idx) => {
+      const tNum = trackingNumbers[idx]
+      if (tNum) {
+        updateTrackingNumber(idx)
+      }
+    })
 
     axios
       .patch(

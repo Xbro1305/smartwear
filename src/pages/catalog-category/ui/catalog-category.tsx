@@ -1,14 +1,16 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable max-lines */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link, useSearchParams } from 'react-router-dom'
 import { FaChevronDown } from 'react-icons/fa'
 import saleBanner from '@/assets/home/sale-women.png'
 // import heart from '@/assets/images/homeHeart.svg'
 import styles from './catalog-category.module.scss'
+import { MobileFilters } from './MobileFilters'
 import axios from 'axios'
 import { IoMdSwitch } from 'react-icons/io'
+import { IoFlame } from 'react-icons/io5'
 import { CustomSelect } from './CustomSelect'
 import { HiOutlineEmojiSad } from 'react-icons/hi'
 
@@ -33,7 +35,7 @@ const FilterBlock = ({
       onClick={toggle}
       style={{ background: 'var(--gray)' }}
     >
-      <h5 className={'h5'}>{title}</h5>
+      <h5 className="text-[clamp(15px,1.1vw,17px)] font-[600] text-[var(--dark)]">{title}</h5>
       {toggle && <FaChevronDown style={{ transform: isOpen ? '' : 'rotate(180deg)' }} />}
     </div>
     {isOpen && <div className={styles.catalog_filter_items}>{children}</div>}
@@ -64,6 +66,8 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [category, setCategory] = useState<any>([])
+  // ТЗ 10 п.9 — фильтр на мобильных: выезжающая панель
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [filters, setFilters] = useState<any>([])
   const [lengths, setLengths] = useState<any>([])
   const [lengthIds, setLengthIds] = useState<any>([])
@@ -92,6 +96,22 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [filterIds, setFilterIds] = useState<number[]>()
   const [price, setPrice] = useState<number>()
   const [debouncedPrice, setDebouncedPrice] = useState(price)
+  // нижняя граница цены (поле «от» в мобильном фильтре)
+  const [priceFrom, setPriceFrom] = useState<number>()
+  const [debouncedPriceFrom, setDebouncedPriceFrom] = useState(priceFrom)
+
+  // colorAttrValueId → colorCode из вариантов товаров (в фильтре /available-filters кода цвета нет)
+  const colorCodeById = useMemo(() => {
+    const map: Record<number, string> = {}
+    ;(items || []).forEach((p: any) =>
+      (p?.variants || []).forEach((v: any) => {
+        const c = v?.colorAttrValue
+        const code = c?.meta?.colorCode
+        if (c?.id && code) map[c.id] = code
+      })
+    )
+    return map
+  }, [items])
   const [closedFilters, setClosedFilters] = useState<number[]>()
   const [sort, setSort] = useState<string>('')
   const [stores, setStores] = useState<any>()
@@ -134,10 +154,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedPrice(price)
+      setDebouncedPriceFrom(priceFrom)
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [price])
+  }, [price, priceFrom])
 
   // getting by filters
 
@@ -199,7 +220,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
     const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
-    const priceQuery = price && price != 0 ? `&priceTo=${price}` : ''
+    const priceQuery =
+      (price && price != 0 ? `&priceTo=${price}` : '') +
+      (priceFrom && priceFrom != 0 ? `&priceFrom=${priceFrom}` : '')
 
     axios
       .get(
@@ -227,7 +250,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         setAvailableColors(availableColorsInRes)
         setAvailableAttributes(availableAttributesInRes)
       })
-  }, [debouncedPrice])
+  }, [debouncedPrice, debouncedPriceFrom])
 
   // sorting by price/ date
 
@@ -329,7 +352,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         {/* Баннер со скидками — кликабелен целиком, ведёт на /sale */}
         <Link
           to="/sale"
-          className="group relative flex h-[clamp(160px,18vw,260px)] items-center overflow-hidden rounded-[14px]"
+          className="group relative flex h-[clamp(160px,18vw,260px)] items-center overflow-hidden"
         >
           <img
             src={saleBanner}
@@ -346,7 +369,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                 на куртки и ветровки
               </span>
             </div>
-            <span className="button w-fit transition-colors group-hover:!bg-[#282B32]">Перейти</span>
+            <span className="button w-fit transition-colors group-hover:!bg-[#282B32]">
+              Перейти
+            </span>
           </div>
         </Link>
         <div className={styles.catalog_top_navigation}>
@@ -357,7 +382,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       </div>
 
       <div className={styles.catalog}>
-        {/* LEFT */}
+        {/* LEFT — десктопный сайдбар фильтра (на мобильных скрыт, там отдельная панель) */}
         <div className={styles.catalog_left}>
           {filters.slice(0, 2).map((attr: any) => (
             <div key={attr.attributeId}>
@@ -572,6 +597,37 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           </FilterBlock>
         </div>
 
+        {/* Мобильная панель фильтра — по макету (ТЗ 10) */}
+        <MobileFilters
+          open={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          filters={filters}
+          filterIds={filterIds}
+          availableAttributes={availableAttributes}
+          toggleFilterValue={toggleFilterValue}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          price={price}
+          setPrice={setPrice}
+          priceFrom={priceFrom}
+          setPriceFrom={setPriceFrom}
+          isSaled={isSaled}
+          setIsSaled={setIsSaled}
+          colors={colors}
+          colorCodeById={colorCodeById}
+          colorIds={colorIds}
+          availableColors={availableColors}
+          setColorIds={setColorIds}
+          sizes={sizes}
+          sizeIds={sizeIds}
+          availableSizes={availableSizes}
+          setSizeIds={setSizeIds}
+          lengths={lengths}
+          lengthIds={lengthIds}
+          availableLengths={availableLengths}
+          setLengthIds={setLengthIds}
+        />
+
         {/* RIGHT */}
         <div className={styles.catalog_right}>
           <div className={styles.catalog_right_top}>
@@ -581,7 +637,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                 <p className="p1">{items.length} товара(ов)</p>
               </div>
               <div className={styles.catalog_right_top_mobile}>
-                <p className="p2">
+                <p className="p2 cursor-pointer select-none" onClick={() => setIsFilterOpen(true)}>
                   <IoMdSwitch /> Фильтры
                 </p>
                 <Select cls="flex lg:hidden w-[240px]" />
@@ -620,9 +676,14 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                       breadcrumbs: [...(category?.ancestors || []), category?.current],
                       fromCatalog: true,
                     }}
-                    className={styles.catalog_item}
+                    className={`${styles.catalog_item} relative`}
                     key={i.name}
                   >
+                    {Number(i.oldPrice) > Number(i.price) && (
+                      <span className="absolute left-[12px] top-[12px] z-[1] flex items-center gap-[4px] rounded-[6px] bg-white px-[10px] py-[4px] text-[13px] font-[600] text-[var(--red)] shadow-sm">
+                        <IoFlame /> Распродажа
+                      </span>
+                    )}
                     <img src={imageUrl} alt="" />
                     <div className={styles.catalog_item_info}>
                       <div className={styles.catalog_item_top}>

@@ -1,12 +1,14 @@
 /* eslint-disable max-lines */
-import { useEffect, useRef, useState, type RefObject } from 'react'
-import { NumericFormat } from 'react-number-format'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BsGrid, BsTag, BsStars, BsTruck, BsChevronLeft, BsChevronRight } from 'react-icons/bs'
 
 import { useGetArticlesBySectionQuery } from '@/entities/article'
 import { Section } from '@/entities/article/article.types'
-import { StoresMap } from '@/widgets/storesMap/StoresMap'
+import { SeasonalRecommendations } from '@/widgets/seasonalRecommendations/SeasonalRecommendations'
+import { ArticleTiles } from '@/widgets/articleTiles/ArticleTiles'
+import { ContactsBlock } from '@/widgets/contactsBlock/ContactsBlock'
+import { HOME_CONTACT_STORES } from '@/shared/config/stores'
 
 // ── Ассеты (src/assets/home) ──
 // import banner1 from '@/assets/home/banner-1.png'
@@ -22,17 +24,11 @@ import catMen from '@/assets/home/cat-men.png'
 import catAccessories from '@/assets/home/cat-accerssories.png'
 import catSale from '@/assets/home/cat-sales.png'
 import saleBanner from '@/assets/home/sale-women.png'
-import tileClimate from '@/assets/home/tile-climate.png'
-import tileWash from '@/assets/home/tile-wash.png'
-import tileMaterials from '@/assets/home/tile-materials.png'
-import tileDelivery from '@/assets/home/tile-delivery.png'
 import infoShop from '@/assets/home/info-shop.svg'
 import infoDelivery from '@/assets/home/info-delivery.svg'
 import infoRepair from '@/assets/home/info-repair.svg'
 import infoPay from '@/assets/home/info-pay.svg'
-import { IoFlame } from 'react-icons/io5'
 
-const API_URL = import.meta.env.VITE_APP_API_URL
 const BANNER_MS = 30000
 
 const bannerImages = [banner2, banner3, banner4, banner6, banner7]
@@ -51,19 +47,17 @@ const smallCats = [
   },
   { label: 'Распродажа?', note: 'Скидки на товары прошлых сезонов', to: '/sale', img: catSale },
 ]
+// На мобильных — только 3 категории без «Распродажи» (ТЗ 10, п.12)
+const mobileCats = [
+  { label: 'Мужчинам', to: '/men', img: catMen },
+  { label: 'Женщинам', to: '/women', img: catWomen },
+  { label: 'Аксессуары', to: '/accessoires', img: catAccessories },
+]
 const quickIcons = [
   { icon: <BsGrid />, label: 'Каталог', to: '/catalog' },
   { icon: <BsTag />, label: 'Скидки', to: '/sale' },
   { icon: <BsStars />, label: 'Новинки', to: '/new' },
   { icon: <BsTruck />, label: 'Доставка', to: '/delivery' },
-]
-
-// 6.6 — плитки статей о важном
-const tiles = [
-  { title: 'Климат-контроль', to: '/climate-control-stirka', img: tileClimate, scale: 1.5 },
-  { title: 'Как стирать', to: '/kak-stirat-odezhdu-s-klimat-kontrolem', img: tileWash, scale: 1.1 },
-  { title: 'Материалы', to: '/autojack-m', img: tileMaterials, scale: 1 },
-  { title: 'Условия доставки', to: '/delivery', img: tileDelivery, scale: 1.1 },
 ]
 
 // 6.8 — инфо-блок
@@ -86,41 +80,95 @@ const advs = [
   },
 ]
 
-type Store = {
-  id: number
-  name: string
-  address?: string
-  full_address?: string
-  fullAddress?: string
-  city?: string
-  phone: string
-  latitude?: number | string
-  longitude?: number | string
-}
-const storeAddress = (s: Store) => s.full_address || s.fullAddress || s.address || ''
-
-type Product = {
-  id: number
-  name: string
-  price: string | number
-  oldPrice?: string | number
-  discountPercent?: number
-  seoSlug?: string
-  media?: { url: string; kind: string }[]
-  variants?: { colorAttrValue?: { meta?: { colorCode?: string } } }[]
-}
-
-const cover = (p: Product) => p.media?.find(m => m.kind === 'cover')?.url || p.media?.[0]?.url || ''
-const productColors = (p: Product) => {
-  const seen = new Set<string>()
-  ;(p.variants || []).forEach(v => {
-    const c = v.colorAttrValue?.meta?.colorCode
-    if (c) seen.add(c)
-  })
-  return [...seen].slice(0, 4)
-}
-
 const SIDE = 'px-[var(--sides-padding)]'
+
+// Карусель статей/новостей (одинаковый дизайн — ТЗ 10 п.12: «статьи каруселью как новости»)
+const ArticleCarousel = ({
+  title,
+  items,
+  emptyText,
+}: {
+  title: string
+  items: any[]
+  emptyText: string
+}) => {
+  const ref = useRef<HTMLDivElement>(null)
+  const scrollBy = (dir: -1 | 1) =>
+    ref.current?.scrollBy({ left: dir * 360, behavior: 'smooth' })
+  return (
+    <section className={`flex flex-col gap-[20px] ${SIDE}`}>
+      <div className="flex items-center justify-between">
+        <h2 className="h2">{title}</h2>
+        {/* стрелки: справа сверху на десктопе, снизу по центру на ≤1024 */}
+        <div className="hidden gap-[10px] min-[1025px]:flex">
+          <button
+            aria-label="Назад"
+            onClick={() => scrollBy(-1)}
+            className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
+          >
+            <BsChevronLeft />
+          </button>
+          <button
+            aria-label="Вперёд"
+            onClick={() => scrollBy(1)}
+            className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
+          >
+            <BsChevronRight />
+          </button>
+        </div>
+      </div>
+      <div
+        ref={ref}
+        className="flex gap-[20px] overflow-x-auto overflow-y-hidden scroll-smooth pb-[6px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {items.map((n: any) => (
+          <Link
+            key={n.id}
+            to={`/${n.keyword}`}
+            className="flex w-[300px] shrink-0 flex-col gap-[10px] no-underline max-lg:w-[240px]"
+          >
+            <div className="aspect-[16/10] w-full overflow-hidden rounded-[10px] bg-[#F5F5F5]">
+              {n.imageUrl && <img src={n.imageUrl} alt="" className="h-full w-full object-cover" />}
+            </div>
+            <span className="p2 !text-[13px] text-[var(--service)]">
+              {n.createdAt &&
+                new Date(n.createdAt).toLocaleDateString('ru-RU', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+            </span>
+            <h5 className="text-[16px] font-[600] leading-[20px]">{n.title}</h5>
+            {n.description && (
+              <div
+                className="line-clamp-3 text-[13px] leading-[18px] text-[var(--service)]"
+                dangerouslySetInnerHTML={{ __html: n.description }}
+              />
+            )}
+          </Link>
+        ))}
+        {items.length === 0 && <p className="p1 text-[var(--service)]">{emptyText}</p>}
+      </div>
+      {/* стрелки снизу по центру — на ≤1024 */}
+      <div className="flex justify-center gap-[10px] min-[1025px]:hidden">
+        <button
+          aria-label="Назад"
+          onClick={() => scrollBy(-1)}
+          className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
+        >
+          <BsChevronLeft />
+        </button>
+        <button
+          aria-label="Вперёд"
+          onClick={() => scrollBy(1)}
+          className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
+        >
+          <BsChevronRight />
+        </button>
+      </div>
+    </section>
+  )
+}
 
 export const HomePage = () => {
   // 6.2 карусель баннеров
@@ -130,43 +178,11 @@ export const HomePage = () => {
     return () => clearInterval(t)
   }, [])
 
-  // 6.5 — 6 последних товаров
-  const [products, setProducts] = useState<Product[]>([])
-  useEffect(() => {
-    fetch(`${API_URL}/products?page=1&limit=6`)
-      .then(r => r.json())
-      .then(d => setProducts(Array.isArray(d) ? d.slice(0, 6) : []))
-      .catch(() => setProducts([]))
-  }, [])
-
-  // 6.7 — новости (свежая слева)
+  // Новости (свежие слева)
   const { data: news } = useGetArticlesBySectionQuery(Section.NEWS)
   const sortedNews = [...(news || [])].sort(
     (a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
   )
-  const newsRef = useRef<HTMLDivElement>(null)
-  const tilesRef = useRef<HTMLDivElement>(null)
-  const scrollBy = (ref: RefObject<HTMLDivElement>, dir: -1 | 1) =>
-    ref.current?.scrollBy({ left: dir * 360, behavior: 'smooth' })
-
-  // 6.9 — магазины + карта (одна карта с двумя точками)
-  const [stores, setStores] = useState<Store[]>([])
-  useEffect(() => {
-    fetch(`${API_URL}/stores`)
-      .then(r => r.json())
-      .then(d => setStores(Array.isArray(d) ? d : []))
-      .catch(() => setStores([]))
-  }, [])
-  // координаты магазинов [lon, lat] (в /stores координат нет — задаём по известным точкам)
-  const storeCoords = (s: Store): [number, number] | null => {
-    if (s.longitude && s.latitude) return [Number(s.longitude), Number(s.latitude)]
-    const byId: Record<number, [number, number]> = {
-      2: [30.437617, 59.933032], // ТРК «Заневский Каскад», Заневский пр., 67к2
-      3: [30.335068, 60.059095], // ТРК «Гранд Каньон», пр. Энгельса, 154
-    }
-    return byId[s.id] || null
-  }
-  const points = stores.map(storeCoords).filter(Boolean) as [number, number][]
 
   return (
     <div className="flex flex-col gap-[48px] bg-[var(--white)] pb-[48px] text-[var(--dark)] max-lg:gap-[28px]">
@@ -187,20 +203,22 @@ export const HomePage = () => {
           ))}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent" />
           <div
-            className={`relative z-[2] flex h-full flex-col justify-center gap-[14px] ${SIDE} max-lg:px-[16px]`}
+            className={`relative z-[2] flex h-full flex-col justify-center gap-[14px] ${SIDE} max-lg:px-[16px] max-[1024px]:justify-end max-[1024px]:pb-[40px] max-[1024px]:max-w-[750px]`}
           >
-            <p className="h1 !text-[#fff] !font-[500] max-w-[560px] max-lg:!text-[30px] max-lg:!leading-[34px]">
+            <p className="h1 !text-[#fff] !font-[500] max-w-[560px] max-[1024px]:max-w-full max-lg:!text-[30px] max-lg:!leading-[34px]">
               Твой личный климат-контроль.
             </p>
-            <p className="p1 !text-[#fff] max-w-[460px] max-lg:!text-[15px]">
-              Куртка адаптируется к температуре за окном. Забудь о многослойности.
+            <p className="p1 !text-[#fff] max-w-[460px] max-[1024px]:max-w-full max-lg:!text-[15px]">
+              Куртка адаптируется к температуре за окном.
+              <br /> Забудь о многослойности.
             </p>
             <div className="mt-[6px] flex flex-wrap items-center gap-[16px]">
-              <Link className="button" to="/catalog">
+              {/* кнопка баннера — чёрная */}
+              <Link className="button !bg-[#282B32]" to="/catalog">
                 В каталог
               </Link>
               <Link
-                to="/climate-control-stirka"
+                to="/climate-control"
                 className="flex items-center gap-[6px] text-[14px] font-[500] text-[#fff] no-underline"
               >
                 Подробнее о климат-контроле <span aria-hidden>↗</span>
@@ -243,7 +261,7 @@ export const HomePage = () => {
 
       {/* ═══ 6.3 КАТЕГОРИИ — мобильный список (до Brands) ═══ */}
       <section className={`flex flex-col gap-[12px] ${SIDE} lg:hidden`}>
-        {[...bigCats, ...smallCats].map(c => (
+        {mobileCats.map(c => (
           <Link
             key={c.to}
             to={c.to}
@@ -258,9 +276,13 @@ export const HomePage = () => {
         ))}
       </section>
 
-      {/* ═══ Лента брендов (полноширинная полоса, как в макете) ═══ */}
-      <section className="w-full">
-        <img src={brands} alt="Бренды" className="block w-full object-cover" />
+      {/* ═══ Лента брендов — выше и листается пальцем на мобильных/планшете (ТЗ 10 п.12) ═══ */}
+      <section className="w-full max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <img
+          src={brands}
+          alt="Бренды"
+          className="block w-full object-cover max-lg:h-[84px] max-lg:w-auto max-lg:max-w-none"
+        />
       </section>
 
       {/* ═══ 6.3 КАТЕГОРИИ — десктоп сетка ═══ */}
@@ -329,158 +351,19 @@ export const HomePage = () => {
         </div>
       </Link>
 
-      {/* ═══ 6.5 СЕЗОННЫЕ РЕКОМЕНДАЦИИ (6 последних товаров) ═══ */}
-      <section className={`flex flex-col gap-[24px] ${SIDE}`}>
-        <h2 className="h2">Сезонные рекомендации</h2>
-        <div className="grid grid-cols-3 gap-[24px] max-lg:grid-cols-2 max-lg:gap-[14px]">
-          {products.map(p => {
-            const colors = productColors(p)
-            const hasSale = Number(p.oldPrice) > Number(p.price)
-            return (
-              <Link key={p.id} to={`/${p.seoSlug ?? ''}`} className="flex flex-col no-underline">
-                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[10px] bg-[#F5F5F5]">
-                  {cover(p) && (
-                    <img src={cover(p)} alt={p.name} className="h-full w-full object-cover" />
-                  )}
-                  {hasSale && (
-                    <span className="absolute left-[10px] top-[10px] rounded-[16px] bg-white px-[10px] py-[4px] p2 text-[var(--red)_!important] flex items-center gap-[4px] shadow-sm">
-                      <IoFlame /> Распродажа
-                    </span>
-                  )}
-                </div>
-                {/* точки слева, сердце справа — под фото */}
-                <div className="mt-[10px] flex items-center justify-between">
-                  <div className="flex gap-[6px]">
-                    {colors.map((c, i) => (
-                      <span
-                        key={i}
-                        className="h-[16px] w-[16px] md:h-[32px] md:w-[32px] rounded-full border border-[#E5E5E5]"
-                        style={{ background: c }}
-                      />
-                    ))}
-                  </div>
-                  {/* <BsHeart className="text-[20px] text-[var(--red)]" /> */}
-                </div>
-                <h5 className="mt-[10px] h5 leading-[22px] text-[#4D4E50]">{p.name}</h5>
-                <div className="mt-[8px] flex items-center gap-[8px]">
-                  <NumericFormat
-                    className="h5 text-[#1A1A1A]"
-                    value={p.price}
-                    displayType="text"
-                    thousandSeparator=" "
-                    suffix=" ₽"
-                  />
-                  {hasSale && (
-                    <NumericFormat
-                      className="text-[15px] text-[#B0B7BF] line-through"
-                      value={p.oldPrice}
-                      displayType="text"
-                      thousandSeparator=" "
-                      suffix=" ₽"
-                    />
-                  )}
-                </div>
-                <span className="button mt-[12px] w-fit">Подробнее</span>
-              </Link>
-            )
-          })}
-          {products.length === 0 && (
-            <p className="p1 text-[var(--service)]">Товары скоро появятся</p>
-          )}
-        </div>
-      </section>
+      {/* ═══ 6.5 СЕЗОННЫЕ РЕКОМЕНДАЦИИ (последние товары) ═══ */}
+      <SeasonalRecommendations />
 
-      {/* ═══ 6.6 ПЛИТКИ СТАТЕЙ ═══ */}
-      <section
-        ref={tilesRef}
-        className="grid grid-cols-4 gap-0 max-lg:flex max-lg:snap-x max-lg:gap-[10px] max-lg:overflow-x-auto max-lg:px-[16px] max-lg:[scrollbar-width:none] max-lg:[&::-webkit-scrollbar]:hidden"
-      >
-        {tiles.map(t => (
-          <Link
-            key={t.to}
-            to={t.to}
-            className="group relative flex aspect-[4/5] flex-col justify-between overflow-hidden p-[22px] max-lg:aspect-auto max-lg:h-[300px] max-lg:w-[240px] max-lg:shrink-0 max-lg:snap-start max-lg:rounded-[10px]"
-          >
-            <img
-              src={t.img}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{
-                transform: `scale(${t.scale || 1})`,
-              }}
-            />
-            <div className="absolute inset-0 bg-black/40" />
-            {/* небольшой чёрный градиент сверху — как в макете */}
-            <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-black/55 to-transparent" />
-            <p className="relative z-[1] max-w-[150px] h4 leading-[26px] text-[#fff_!important] whitespace-nowrap">
-              {t.title}
-            </p>
-            <span className="button relative z-[1] w-fit transition-colors group-hover:!bg-[#282B32]">
-              Узнать
-            </span>
-          </Link>
-        ))}
-      </section>
+      {/* ═══ 6.6 СТАТЬИ — плитки (десктоп) / карусель как новости (мобилка) ═══ */}
+      <ArticleTiles />
 
       {/* ═══ 6.7 НОВОСТИ ═══ */}
-      <section className={`flex flex-col gap-[20px] ${SIDE}`}>
-        <div className="flex items-center justify-between">
-          <h2 className="h2">Новости</h2>
-          <div className="flex gap-[10px]">
-            <button
-              aria-label="Назад"
-              onClick={() => scrollBy(newsRef, -1)}
-              className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
-            >
-              <BsChevronLeft />
-            </button>
-            <button
-              aria-label="Вперёд"
-              onClick={() => scrollBy(newsRef, 1)}
-              className="flex h-[44px] w-[44px] items-center justify-center text-[20px] hover:bg-[#F5F5F5]"
-            >
-              <BsChevronRight />
-            </button>
-          </div>
-        </div>
-        <div
-          ref={newsRef}
-          className="flex gap-[20px] overflow-x-auto scroll-smooth pb-[6px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {sortedNews.map((n: any) => (
-            <Link
-              key={n.id}
-              to={`/${n.keyword}`}
-              className="flex w-[300px] shrink-0 flex-col gap-[10px] no-underline max-lg:w-[240px]"
-            >
-              <div className="aspect-[16/10] w-full overflow-hidden rounded-[10px] bg-[#F5F5F5]">
-                {n.imageUrl && (
-                  <img src={n.imageUrl} alt="" className="h-full w-full object-cover" />
-                )}
-              </div>
-              <span className="p2 !text-[13px] text-[var(--service)]">
-                {n.createdAt &&
-                  new Date(n.createdAt).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-              </span>
-              <h5 className="text-[16px] font-[600] leading-[20px]">{n.title}</h5>
-              {n.description && (
-                <div
-                  className="line-clamp-3 text-[13px] leading-[18px] text-[var(--service)]"
-                  dangerouslySetInnerHTML={{ __html: n.description }}
-                />
-              )}
-            </Link>
-          ))}
-          {sortedNews.length === 0 && <p className="p1 text-[var(--service)]">Новостей пока нет</p>}
-        </div>
-      </section>
+      <ArticleCarousel title="Новости" items={sortedNews} emptyText="Новостей пока нет" />
 
-      {/* ═══ 6.8 ИНФО-БЛОК ═══ */}
-      <section className={`grid grid-cols-4 gap-[24px] ${SIDE} max-lg:grid-cols-1`}>
+      {/* ═══ 6.8 ИНФО-БЛОК — 4 в ряд (вкл. 1024), 2×2 ниже 768, 1 колонка ≤500 ═══ */}
+      <section
+        className={`grid grid-cols-4 gap-[24px] ${SIDE} max-md:grid-cols-2 max-[500px]:grid-cols-1`}
+      >
         {advs.map(a => (
           <div
             key={a.title}
@@ -494,24 +377,7 @@ export const HomePage = () => {
       </section>
 
       {/* ═══ 6.9 КОНТАКТЫ + КАРТА ═══ */}
-      <section className={`flex gap-[40px] ${SIDE} max-lg:flex-col max-lg:gap-[20px]`}>
-        <div className="flex flex-1 flex-col gap-[20px]">
-          <h2 className="h2">Контакты</h2>
-          {stores.map(s => (
-            <div key={s.id} className="flex flex-col gap-[6px]">
-              <p className="text-[20px] font-[600]">{s.name}</p>
-              <p className="p2 !text-[15px] text-[var(--dark)]">{storeAddress(s)}</p>
-              <a href={`tel:${s.phone.replace(/[^\d+]/g, '')}`} className="button mt-[4px] w-fit">
-                {s.phone}
-              </a>
-            </div>
-          ))}
-        </div>
-        <div className="h-[420px] w-[42%] overflow-hidden rounded-[14px] max-lg:h-[300px] max-lg:w-full">
-          {/* points у нас [lon, lat] → Leaflet ждёт [lat, lon] */}
-          <StoresMap points={points.map(([lon, lat]) => [lat, lon] as [number, number])} />
-        </div>
-      </section>
+      <ContactsBlock stores={HOME_CONTACT_STORES} className={SIDE} />
     </div>
   )
 }

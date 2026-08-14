@@ -115,6 +115,8 @@ export const EditProduct = () => {
   const [stock, setStock] = useState<Stock[]>([])
   const [warehouses, setWarehouses] = useState<Store[]>([])
   const [sending, setSending] = useState<boolean>(false)
+  // id вариантов, удалённых из таблицы синхронизации — их нельзя слать в sync/save
+  const [deletedVariantIds, setDeletedVariantIds] = useState<number[]>([])
 
   const { id } = useParams()
 
@@ -253,17 +255,21 @@ export const EditProduct = () => {
     }
   }, [attributes, features, sizeTypes, cares])
 
-  const deleteRow = (rowIndex: number) => {
-    setItem(prev => {
-      if (!prev) return prev
-      const newVariantCodes = [...(prev.variantCodes || [])]
-      newVariantCodes.splice(rowIndex, 1)
-      return {
-        ...prev,
-        variantCodes: newVariantCodes,
-      }
-    })
-  }
+  // const deleteRow = (rowIndex: number) => {
+  //   const removedId = item?.variantCodes?.[rowIndex]?.id
+  //   if (removedId) {
+  //     setDeletedVariantIds(ids => (ids.includes(removedId) ? ids : [...ids, removedId]))
+  //   }
+  //   setItem(prev => {
+  //     if (!prev) return prev
+  //     const newVariantCodes = [...(prev.variantCodes || [])]
+  //     newVariantCodes.splice(rowIndex, 1)
+  //     return {
+  //       ...prev,
+  //       variantCodes: newVariantCodes,
+  //     }
+  //   })
+  // }
 
   const syncronize = async (i: Item | undefined = item) => {
     if (!i) return
@@ -276,21 +282,27 @@ export const EditProduct = () => {
     //   ]
     // }
 
+    // удалённые из таблицы варианты не отправляем в синхронизацию;
+    // варианты без непустых кодов тоже не отправляем
+    const syncVariants = (i?.variantCodes || [])
+      .filter(v => v.id == null || !deletedVariantIds.includes(v.id))
+      .map(v => ({
+        variantId: v.id,
+        codes: v.codes.map(c => c.code).filter(code => code && code.trim() !== ''),
+      }))
+      .filter(v => v.codes.length > 0)
+
     axios(`${import.meta.env.VITE_APP_API_URL}/product-stocks/sync-product-codes`, {
       method: 'POST',
       data: {
         productId: Number(id),
-        variants:
-          i?.variantCodes?.map(v => ({
-            variantId: v.id,
-            codes: v.codes.map(c => c.code).filter(code => code && code.trim() !== ''),
-          })) || [],
+        variants: syncVariants,
       },
     })
       .then(() => {
         const codes =
-          i?.variantCodes
-            ?.map(c => c.codes.map(vc => vc?.code).filter(code => code && code.trim() !== ''))
+          syncVariants
+            .map(v => v.codes)
             .filter(arr => arr && arr.length > 0)
             .flat() || []
 
@@ -331,12 +343,18 @@ export const EditProduct = () => {
 
     // Remove collection IDs from simpleAttributeIds
     const filteredSimpleAttributeIds = simpleAttributeIds.filter(id => !collectionIds.includes(id))
-    const filteredVariants = item?.variantCodes?.map(variant => {
-      return {
-        ...variant,
-        codes: variant.codes.map((codeObj: any) => ({ code: codeObj?.code })),
-      }
-    })
+    const filteredVariants =
+      item?.variantCodes
+        ?.map(variant => {
+          return {
+            ...variant,
+            codes: variant.codes.map((codeObj: any) => ({ code: codeObj?.code })),
+          }
+        })
+        .filter(variant => variant.codes.length > 0)
+        .filter(variant =>
+          variant.codes.some((codeObj: any) => codeObj?.code && codeObj?.code.trim() !== '')
+        ) || []
 
     const data = {
       name: item?.main?.name,
@@ -469,7 +487,7 @@ export const EditProduct = () => {
       }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      window.location.href = '/admin/products'
+      // window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
@@ -1467,7 +1485,7 @@ export const EditProduct = () => {
 
                 {item?.variantCodes?.map((variant, index) => (
                   <div
-                    key={(variant.id || index) * index}
+                    key={variant.id ?? `row-${index}`}
                     style={{ gridTemplateColumns: columns }}
                     className="w-fit grid bg-[#fff] py-[20px] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px]"
                   >
@@ -1669,7 +1687,39 @@ export const EditProduct = () => {
                     <div className="flex items-center justify-center">
                       <button
                         className="bg-[#FFF3F3] text-[#E02844] h-[36px] w-[36px] flex items-center justify-center text-[18px] rounded-[12px]"
-                        onClick={() => deleteRow(index)}
+                        onClick={() => {
+                          const variantId = variant.id
+                          // удаляем на бэке
+                          axios
+                            .delete(
+                              `${import.meta.env.VITE_APP_API_URL}/products/${id}/variants/${variantId}`,
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                                },
+                              }
+                            )
+                            .then(() => {
+                              // и убираем из таблицы + помечаем, чтобы не слать в синхронизацию
+                              if (variantId) {
+                                setDeletedVariantIds(ids =>
+                                  ids.includes(variantId) ? ids : [...ids, variantId]
+                                )
+                              }
+                              setItem(prev =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      variantCodes: (prev.variantCodes || []).filter(
+                                        (_, i) => i !== index
+                                      ),
+                                    }
+                                  : prev
+                              )
+                              toast.success('Вариант удалён')
+                            })
+                            .catch(() => toast.error('Не удалось удалить вариант'))
+                        }}
                       >
                         <LuTrash2 />
                       </button>

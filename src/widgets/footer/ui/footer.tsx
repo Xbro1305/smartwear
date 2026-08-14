@@ -47,15 +47,15 @@ export const Footer: React.FC = () => {
         <Link to={'/terms'}>Правила оплаты и возврата</Link>
         <Link to={ROUTER_PATHS.DELIVERY}>Доставка</Link>
         <Link to={ROUTER_PATHS.RETURNS}>Возврат товара</Link>
-        <Link to={'/climate-control-stirka'}>Уход за изделиями</Link>
+        <Link to={'/kak-stirat-odezhdu-s-klimat-kontrolem'}>Уход за изделиями</Link>
         {/* <Link to={ROUTER_PATHS.NEWSLETTER}>Рассылка</Link> */}
       </div>
 
       <div className={styles.footer_sect}>
         <h4>Личный кабинет</h4>
         <Link to={ROUTER_PATHS.SIGN_UP}>Регистрация</Link>
-        <Link to={ROUTER_PATHS.ORDER_HISTORY}>История заказов</Link>
-        <Link to={ROUTER_PATHS.TRACK_ORDER}>Отследить заказ</Link>
+        <Link to={ROUTER_PATHS.ORDERPROFILE}>История заказов</Link>
+        <Link to={ROUTER_PATHS.ORDERPROFILE}>Отследить заказ</Link>
         {/* <Link to={ROUTER_PATHS.BOOKMARKS}>Закладки</Link> */}
       </div>
 
@@ -66,7 +66,7 @@ export const Footer: React.FC = () => {
         </p>
         <p>
           <img src={i2} alt="" />
-          Магазины находятся в Санкт-Петербурге. Бесплатная доставка по России
+          Магазины находятся в Санкт-Петербурге. Доставка по России от 0 ₽
         </p>
         <a href="https://vk.ru/maxiscomfort" target="_blank" rel="noreferrer">
           <img src={i3} alt="ВКонтакте" />
@@ -78,7 +78,7 @@ export const Footer: React.FC = () => {
         </a>
       </div>
       <div className={styles.footer_sect}>
-        <p> © 0000–2023 Интернет-магазин «Умная Одежда» </p>
+        <p> © 2013–2026 Интернет-магазин «Умная Одежда» </p>
         <Link to={ROUTER_PATHS.POLITICS}>Политика конфиденциальности</Link>
         <Link to={ROUTER_PATHS.OFERTA}>Оферта</Link>
         {isAuthed && (

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { Outlet, useLocation, useNavigationType } from 'react-router-dom'
 
 import { useGetMeQuery } from '@/entities/auth'
 import { Modal } from '@/pages/home/ui/Modal'
@@ -10,10 +10,32 @@ import { BottomBar } from '@/widgets/bottomBar/bottomBar'
 export const RootLayout = () => {
   const { isLoading } = useGetMeQuery()
   const location = useLocation()
+  const navType = useNavigationType() // POP (назад/вперёд) | PUSH | REPLACE
+  const positions = useRef<Record<string, number>>({})
 
+  // Сохраняем позицию скролла .main-container для текущей записи истории
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [location.pathname])
+    const el = document.querySelector('.main-container') as HTMLElement | null
+    if (!el) return
+    const key = location.key
+    const onScroll = () => {
+      positions.current[key] = el.scrollTop
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [location.key])
+
+  // При «назад/вперёд» восстанавливаем позицию, при обычном переходе — вверх
+  useLayoutEffect(() => {
+    const el = document.querySelector('.main-container') as HTMLElement | null
+    if (!el) return
+    if (navType === 'POP') {
+      el.scrollTop = positions.current[location.key] ?? 0
+    } else {
+      el.scrollTop = 0
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key])
 
   useEffect(() => {
     let closeTimeout: ReturnType<typeof setTimeout>
