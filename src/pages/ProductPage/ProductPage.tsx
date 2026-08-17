@@ -926,8 +926,22 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
               )}
             </div>
           </div>
-          {/* ТЗ 10 п.23 — блок «Сезонные рекомендации» (последние товары), как на главной */}
-          <SeasonalRecommendations withSide={false} />
+          {/* Сезонные рекомендации: 3 товара по полу и сезону текущего товара (Правки 3, п.13) */}
+          {/* отступ 100px до футера (Правки 3, п.12) */}
+          <div className="mb-[100px]">
+            <SeasonalRecommendations
+              withSide={false}
+              limit={3}
+              queryParams={
+                item?.attributeValues
+                  ?.filter((i: any) =>
+                    ['Целевая группа', 'Сезон'].includes(i.attributeValue?.attribute?.name)
+                  )
+                  .map((i: any) => `&attributeValueIds=${i.attributeValue.id}`)
+                  .join('') || ''
+              }
+            />
+          </div>
         </div>
       )}
     </div>

@@ -120,7 +120,16 @@ export const NewOrderDetails = () => {
         <div>
           <h2 className="h2">Статьи</h2>
           <div className={styles.articles_list_items}>
-            {articles?.map((a: any, index: number) => <Article article={a} index={index} />)}
+            {/* только 3 последние статьи (Правки 3, п.11) */}
+            {[...(articles || [])]
+              .sort(
+                (x: any, y: any) =>
+                  new Date(y.createdAt || 0).getTime() - new Date(x.createdAt || 0).getTime()
+              )
+              .slice(0, 3)
+              .map((a: any, index: number) => (
+                <Article key={a.id ?? index} article={a} index={index} />
+              ))}
           </div>
         </div>
       )}

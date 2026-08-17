@@ -29,9 +29,16 @@ export const CatalogResolver = () => {
 
   const getArticleByKeyword = () =>
     axios.get(`${baseUrl}/articles/search/${slug}`).then(r => {
+      const art = r.data
       // API может вернуть 200 с null, если статьи нет — считаем это «не найдено»
-      if (!r.data) throw new Error('article not found')
-      return r.data
+      if (!art) throw new Error('article not found')
+      // точное совпадение слага: бэкенд иногда отдаёт похожую статью
+      // (напр. /climate-control → /climate-control-stirka) — тогда это 404 (Правки 3, п.2)
+      if (art.keyword && (art.keyword !== slug || `/${art.keyword}` !== slug))
+        return console.log('slug mismatch')
+      // удалённые статьи не показываем как страницу — 404 (Правки 3, п.10)
+      if (art.isDeleted) return console.log('article deleted')
+      return art
     })
 
   useEffect(() => {
@@ -67,11 +74,11 @@ export const CatalogResolver = () => {
   }, [slug])
 
   if (type === 'loading') return <div>Загрузка...</div>
-  if (type === 'not-found') return <NotFound />
 
   if (type === 'category') return <CatalogCategory data={data} />
   if (type === 'product') return <ProductPage data={data} />
   if (type === 'article') return <Article keyword={slug} />
 
+  if (type === 'not-found') return <NotFound />
   return null
 }

@@ -66,7 +66,7 @@ const DarkTiles = ({ className }: { className: string }) => (
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-black/55 to-transparent" />
-        <p className="relative z-[1] max-w-[150px] h4 leading-[26px] text-[#fff_!important] lg:-nowrap">
+        <p className="relative z-[1] max-w-[160px] h4 leading-[26px] text-[#fff_!important] lg:-nowrap">
           {t.title}
         </p>
         <span className="button relative z-[1] w-fit transition-colors group-hover:!bg-[#282B32]">
@@ -109,7 +109,7 @@ export const ArticleTiles = ({
   showMobileHeader = true,
 }: Props) => {
   const ref = useRef<HTMLDivElement>(null)
-  const scroll = (dir: -1 | 1) => ref.current?.scrollBy({ left: dir * 260, behavior: 'smooth' })
+  const scroll = (dir: -1 | 1) => ref.current?.scrollBy({ left: dir * 250, behavior: 'smooth' })
 
   // Вариант «О нас»: плитки (4-в-ряд) остаются до 500px, ниже 500 — аккордеон вопросов
   if (mobileVariant === 'accordion') {

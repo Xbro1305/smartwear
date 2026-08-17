@@ -9,8 +9,6 @@ import { DeliveryPage } from '@/pages/delivery'
 import { HomePage } from '@/pages/home'
 import { OldHomePage } from '@/pages/old-home'
 import { New } from '@/pages/new/'
-import { OfertaPage } from '@/pages/oferta'
-import { PoliticsPage } from '@/pages/politics'
 import PvzMapWidget from '@/pages/pvz/PvzMapWidget'
 import { SignInPage } from '@/pages/sign-in'
 import { SignUpPage } from '@/pages/sign-up'
@@ -18,7 +16,7 @@ import { ROUTER_PATHS } from '@/shared/config/routes'
 import { CatalogResolver } from './CatalogResolver'
 import { Cart } from '@/pages/cart/cart'
 
-const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, OFERTA, POLITICS, SIGN_IN } = ROUTER_PATHS
+const { ABOUT, CATALOG, CONTACTS, DELIVERY, HOME, SIGN_IN } = ROUTER_PATHS
 const { ARTICLES, NEWS, SIGN_UP, USER_ARTICLE, CART } = ROUTER_PATHS
 
 // Статьи переехали в корень (/:keyword). Старый путь /article/:keyword редиректим на новый,
@@ -39,8 +37,7 @@ export const publicRoutes: RouteObject[] = [
       { element: <HomePage />, path: HOME },
       { element: <OldHomePage />, path: '/old-home' },
       { element: <SignUpPage />, path: SIGN_UP },
-      { element: <PoliticsPage />, path: POLITICS },
-      { element: <OfertaPage />, path: OFERTA },
+      // /privacy и /terms удалены как отдельные страницы — теперь резолвятся как статьи (Правки 3, п.1)
       { element: <CatalogPage />, path: CATALOG },
       { element: <AboutPage />, path: ABOUT },
       { element: <ContactPage />, path: CONTACTS },

@@ -153,7 +153,7 @@ export const MobileFilters = ({
   const isSeason = (name: string) => /сезон/i.test(name || '')
 
   return (
-    <div className="fixed inset-0 z-[999] flex flex-col bg-white lg:hidden">
+    <div className="fixed inset-0 z-[999] flex flex-col bg-white min-[1025px]:hidden">
       {/* Шапка */}
       <div className="flex items-center justify-between border-b border-[#F0F0F0] px-[16px] py-[16px]">
         <span className="w-[64px]" />

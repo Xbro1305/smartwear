@@ -57,13 +57,13 @@ const Carousel = ({ title, items }: { title: string; items: any[] }) => {
       </div>
       <div
         ref={ref}
-        className="flex gap-[24px] overflow-x-auto overflow-y-hidden scroll-smooth pb-[6px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-[24px] overflow-x-auto overflow-y-hidden scroll-smooth pb-[6px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((n: any) => (
           <Link
             key={n.id}
             to={`/${n.keyword}`}
-            className="flex w-[300px] shrink-0 flex-col gap-[10px] no-underline max-lg:w-[240px]"
+            className="flex w-[300px] shrink-0 snap-start flex-col gap-[10px] no-underline max-lg:w-[240px]"
           >
             <div className="aspect-[16/10] w-full overflow-hidden rounded-[10px] bg-[#F5F5F5]">
               {n.imageUrl && <img src={n.imageUrl} alt="" className="h-full w-full object-cover" />}

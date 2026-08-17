@@ -958,7 +958,7 @@ export const CreateProduct = () => {
                     'Коллекция',
                   ].includes(attr.name)
               )
-              .filter(attr => attr.isSystem)
+              // показываем и новые простые атрибуты (isSystem:false) — Правки 3, п.21
               .filter(
                 attr =>
                   !dependencies

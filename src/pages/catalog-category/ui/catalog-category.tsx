@@ -417,10 +417,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           ))}
           <FilterBlock title="Цена" isOpen>
             <section className={styles.catalog_filter_price}>
-              <span className="p2" style={{ color: 'var(--service)' }}>
+              {/* nowrap — число «12 000» не должно ломаться на две строки (Правки 3, п.4) */}
+              <span className="p2 whitespace-nowrap" style={{ color: 'var(--service)' }}>
                 от <NumericFormat value={minPrice} displayType="text" thousandSeparator=" " />
               </span>
-              <span className="p2" style={{ color: 'var(--service)' }}>
+              <span className="p2 whitespace-nowrap" style={{ color: 'var(--service)' }}>
                 до <NumericFormat value={price} displayType="text" thousandSeparator=" " />
               </span>
             </section>
@@ -640,9 +641,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
                 <p className="p2 cursor-pointer select-none" onClick={() => setIsFilterOpen(true)}>
                   <IoMdSwitch /> Фильтры
                 </p>
-                <Select cls="flex lg:hidden w-[240px]" />
+                <Select cls="flex min-[1025px]:hidden w-[240px]" />
               </div>
-              <Select cls="hidden lg:flex w-[230px]" />
+              <Select cls="hidden min-[1025px]:flex w-[230px]" />
             </div>
             <div className={styles.catalog_right_top_brands}>
               {category?.descendants

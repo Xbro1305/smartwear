@@ -38,6 +38,16 @@ const deliveryStatusLabels: Record<string, string> = {
   RETURNED: 'возврат',
 }
 
+// Раздел админ-заказов → путь (для возврата в нужный раздел, Правки 3, п.17/19)
+const SECTION_ROUTES: Record<string, string> = {
+  NEW_ORDERS: 'new',
+  IN_PROGRESS: 'inProgress',
+  DELIVERED: 'delivered',
+  CANCELLED: 'cancelled',
+  NOT_PICKED_UP: 'notPickedUp',
+  RETURNED: 'returns',
+}
+
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 const addWorkingDays = (date: Date, days: number): Date => {
@@ -760,7 +770,8 @@ export const OrderAdminPage = () => {
       )
       .then(() => {
         toast.success('Даты успешно обновлены')
-        navigate(`/admin/orders/new`) // Refresh page to get updated data from API
+        // возвращаемся в раздел, к которому относится заказ, а не всегда в «новые»
+        navigate(`/admin/orders/${SECTION_ROUTES[order.adminStatus] || 'new'}`)
       })
       .catch(console.error)
   }
@@ -1054,7 +1065,10 @@ export const OrderAdminPage = () => {
 
       {/* ── Bottom actions ── */}
       <div className="grid grid-cols-2 gap-[24px]">
-        <button className="h-[48px] rounded-[12px] bg-[#4D4E50] text-[14px] font-[600] text-white">
+        <button
+          onClick={() => navigate(`/admin/orders/${SECTION_ROUTES[order.adminStatus] || 'new'}`)}
+          className="h-[48px] rounded-[12px] bg-[#4D4E50] text-[14px] font-[600] text-white"
+        >
           Отменить
         </button>
         <button

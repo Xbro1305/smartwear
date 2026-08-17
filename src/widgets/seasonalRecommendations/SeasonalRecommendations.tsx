@@ -33,6 +33,10 @@ type Props = {
   title?: string
   /** добавлять горизонтальные отступы страницы (для главной), false — если родитель уже с паддингом */
   withSide?: boolean
+  /** сколько товаров показывать (главная/о-нас — 6, карточка товара — 3) */
+  limit?: number
+  /** доп. параметры фильтра к /products (напр. пол/сезон для карточки товара) */
+  queryParams?: string
 }
 
 /**
@@ -43,6 +47,8 @@ type Props = {
 export const SeasonalRecommendations = ({
   title = 'Сезонные рекомендации',
   withSide = true,
+  limit = 6,
+  queryParams = '',
 }: Props) => {
   const [products, setProducts] = useState<Product[]>([])
   const trackRef = useRef<HTMLDivElement>(null)
@@ -50,11 +56,11 @@ export const SeasonalRecommendations = ({
     trackRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' })
 
   useEffect(() => {
-    fetch(`${API_URL}/products?page=1&limit=6`)
+    fetch(`${API_URL}/products?page=1&limit=${limit}${queryParams}`)
       .then(r => r.json())
-      .then(d => setProducts(Array.isArray(d) ? d.slice(0, 6) : []))
+      .then(d => setProducts(Array.isArray(d) ? d.slice(0, limit) : []))
       .catch(() => setProducts([]))
-  }, [])
+  }, [limit, queryParams])
 
   return (
     <section className={`flex flex-col gap-[24px] ${withSide ? SIDE : ''}`}>

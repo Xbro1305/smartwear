@@ -40,10 +40,11 @@ export const EditArticle = () => {
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [metaTitle, setMetaTitle] = useState<string>('')
-  const [count, setCount] = useState(0)
   const [metaDescription, setMetaDescription] = useState<string>('')
   const [paragraphs, setParagraphs] = useState<ParagraphDto[]>([])
   const [file, setFile] = useState<any>(null)
+  // реальный File обложки (для загрузки при сохранении) — Правки 3, п.16
+  const [fileObj, setFileObj] = useState<File | null>(null)
   const [url, setUrl] = useState<string>('')
   const [section, setSection] = useState<Section>(Section.SEO)
   const [composition, setComposition] = useState<any>()
@@ -209,8 +210,9 @@ export const EditArticle = () => {
         }
       }
 
-      if (count > 100) {
-        await uploadArticleImage({ file, id: article?.id as number })
+      // загружаем обложку, если выбрали новый файл (раньше условие count>100 не срабатывало никогда)
+      if (fileObj) {
+        await uploadArticleImage({ file: fileObj, id: article?.id as number })
       }
 
       for (let i = 0; i < paragraphs.length; i++) {
@@ -238,6 +240,7 @@ export const EditArticle = () => {
     event.preventDefault()
     if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
       setFile(URL.createObjectURL(event.dataTransfer.files[0] as Blob))
+      setFileObj(event.dataTransfer.files[0])
       event.dataTransfer.clearData()
     }
   }
@@ -249,7 +252,7 @@ export const EditArticle = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(URL.createObjectURL(e.target.files[0] as Blob))
-      setCount(prev => prev + 1)
+      setFileObj(e.target.files[0])
     }
   }
 

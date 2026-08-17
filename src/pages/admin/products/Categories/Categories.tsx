@@ -53,6 +53,8 @@ export const ProductCategories = () => {
   const [file, setFile] = useState<File | null>(null)
   const [attributes, setAttributes] = useState<any>(null)
 
+  const [selectedLengths, setSelectedLengths] = useState<number[]>([])
+
   const baseUrl = import.meta.env.VITE_APP_API_URL
   const token = localStorage.getItem('token')
 
@@ -215,7 +217,10 @@ export const ProductCategories = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      data: creatingItem,
+      data: {
+        ...creatingItem,
+        filters: { ...creatingItem?.filters, lengths: selectedLengths },
+      },
     })
       .then(res => {
         toast.success('Создано')
@@ -418,6 +423,8 @@ export const ProductCategories = () => {
         attributes={attributes}
         file={file}
         setFile={setFile}
+        setLengths={setSelectedLengths}
+        lengths={selectedLengths}
       />{' '}
       <Modal
         data={editingItem}
@@ -429,9 +436,11 @@ export const ProductCategories = () => {
             : categories?.filter(c => brands?.some(b => hasBrand(c, b)))
         }
         attributes={attributes}
+        setLengths={setSelectedLengths}
         file={file}
         setFile={setFile}
         isEdit={true}
+        lengths={selectedLengths}
       />
     </div>
   )
@@ -515,6 +524,8 @@ interface ModalProps {
   file: File | null
   setFile: (file: File | null) => void
   isEdit?: boolean
+  setLengths: React.Dispatch<React.SetStateAction<any | null>>
+  lengths?: any
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -526,6 +537,8 @@ const Modal: React.FC<ModalProps> = ({
   file,
   setFile,
   isEdit = false,
+  setLengths,
+  lengths,
 }) => {
   const getCategoryPath = (categories: any[], categoryId: number): string => {
     const path: string[] = []
@@ -740,9 +753,31 @@ const Modal: React.FC<ModalProps> = ({
             )}
 
             <h3 className="font-normal text-[20px]">Добавление товаров</h3>
+            <AttributeSelector
+              title="Длина изделия"
+              attributes={
+                attributes.find(a => a.name === 'Длина изделия')
+                  ? [attributes.find(a => a.name === 'Длина изделия')]
+                  : []
+              }
+              selectedIds={lengths || []}
+              onChange={ids => {
+                const selected = lengths || []
+                if (selected.includes(ids)) {
+                  // Удаление
+                  const newSelected = selected.filter((id: number | string) => id !== ids)
+                  setLengths(newSelected)
+                } else {
+                  // Добавление
+                  const newSelected = [...selected, ids]
+                  setLengths(newSelected)
+                }
+              }}
+            />
 
             {attributes
-              .filter(a => a.name != 'Размер')
+              // не показываем «Размер» и устаревший простой атрибут «Коллекция» (Правки 3, п.22)
+              .filter(a => a.name != 'Размер' && a.name != 'Коллекция' && a.name != 'Длина изделия')
               .map(attr => (
                 <AttributeSelector
                   key={attr.id}
