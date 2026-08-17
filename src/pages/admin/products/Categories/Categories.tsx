@@ -21,6 +21,7 @@ export interface Category {
   discountMode: 'ALL' | 'DISCOUNTED' | 'NOT_DISCOUNTED'
   productsCount?: number
   filters?: {
+    lengths?: number[]
     attributeValueIds: number[]
     //  {
     //   brand?: string[] | any
@@ -162,12 +163,13 @@ export const ProductCategories = () => {
               </button>
               <button
                 className="text-service text-[20px] cursor-pointer"
-                onClick={() =>
+                onClick={() => {
                   setEditingItem({
                     ...category,
                     slug: category.slug.split('/').pop() || category.slug,
                   })
-                }
+                  setSelectedLengths(category?.filters?.lengths || [])
+                }}
               >
                 <LuPencil />
               </button>
@@ -297,6 +299,7 @@ export const ProductCategories = () => {
       .then(() => {
         toast.success('Создано')
         setEditingItem(null)
+        setSelectedLengths([])
         setFile(null)
         refresh()
       })
