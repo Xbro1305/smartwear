@@ -42,7 +42,7 @@ const smallCats = [
   {
     label: 'Аксессуары',
     note: 'Мужские и женские тёплые аксессуары',
-    to: '/accessoires',
+    to: '/aksessuary',
     img: catAccessories,
   },
   { label: 'Распродажа?', note: 'Скидки на товары прошлых сезонов', to: '/sale', img: catSale },
@@ -51,7 +51,7 @@ const smallCats = [
 const mobileCats = [
   { label: 'Мужчинам', to: '/men', img: catMen },
   { label: 'Женщинам', to: '/women', img: catWomen },
-  { label: 'Аксессуары', to: '/accessoires', img: catAccessories },
+  { label: 'Аксессуары', to: '/aksessuary', img: catAccessories },
 ]
 const quickIcons = [
   { icon: <BsGrid />, label: 'Каталог', to: '/catalog' },

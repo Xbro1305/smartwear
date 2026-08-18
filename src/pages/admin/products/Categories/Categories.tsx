@@ -297,10 +297,30 @@ export const ProductCategories = () => {
       data,
     })
       .then(() => {
-        toast.success('Создано')
+        toast.success('Изменено!')
+
+        if (!file) return
+
+        const formData = new FormData()
+        formData.append('file', file)
+
+        axios
+          .post(`${baseUrl}/categories/${editingItem.id}/image`, formData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(() => {
+            toast.success('Обложка загружена')
+            setCreatingItem(null)
+            setFile(null)
+            refresh()
+          })
+          .catch(err => console.log(err))
         setEditingItem(null)
         setSelectedLengths([])
         setFile(null)
+
         refresh()
       })
       .catch(err => console.log(err))

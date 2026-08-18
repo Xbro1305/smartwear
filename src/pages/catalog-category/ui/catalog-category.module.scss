@@ -253,11 +253,15 @@
           padding: 8px 16px;
           border-radius: 30px;
           cursor: pointer;
+          @media (max-width: 1024px) {
+            padding: 5px 10px;
+            font-size: 14px;
+          }
         }
 
-        @media (max-width: 1024px) {
-          display: none;
-        }
+        // @media (max-width: 1024px) {
+        //   display: none;
+        // }
       }
 
       &_title {

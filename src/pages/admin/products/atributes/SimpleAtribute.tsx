@@ -171,6 +171,7 @@ export const SimpleAtribute = () => {
     })
       .then(() => {
         navigate(-1)
+        refetch()
         toast.success('Успешно обновлено')
       })
       .catch(err => {
@@ -233,7 +234,13 @@ export const SimpleAtribute = () => {
           <div className="flex gap-[28px]">
             <label className={`w-[370px] ${styles.modal_body_label}`}>
               <p>Название</p>
-              <input type="text" value={attribute?.name} />
+              <input
+                type="text"
+                value={attribute?.name}
+                onChange={e =>
+                  setAttribute(prev => (prev ? { ...prev, name: e.target.value } : null))
+                }
+              />
             </label>{' '}
             <label className={`w-[370px] ${styles.modal_body_label}`}>
               <p>Порядок сортировки</p>

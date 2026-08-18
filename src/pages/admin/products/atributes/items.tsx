@@ -861,7 +861,7 @@ export const Brands = () => {
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault()
 
-    const item = editing
+    const item = { ...editing, meta: { ...editing?.meta, description } }
 
     const categoryData = {
       name: item?.value,
