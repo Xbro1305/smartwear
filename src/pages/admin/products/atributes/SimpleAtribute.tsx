@@ -153,7 +153,7 @@ export const SimpleAtribute = () => {
         const errorText = err.response.data.message || 'Ошибка получения данных'
         toast.error(errorText)
       })
-    setDeletingValue(null)
+    setCreatingValue(null)
   }
 
   const handleSubmit = () => {

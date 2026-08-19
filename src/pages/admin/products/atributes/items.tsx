@@ -3956,7 +3956,8 @@ export const Collection = () => {
               </button>
             </section>
           </section>
-          <div className={styles.sizeTypes_list}>
+          <div className={`relative ${styles.sizeTypes_list}`}>
+            <div className="sticky top-[-30px] bg-[#fff] w-full h-[30px]"></div>
             <div
               className={`${styles.sizeTypes_list_top} pl-[10px] sticky top-[0px] grid-cols-[1fr_1fr_1fr_1fr_220px_!important] gap-[20px] grid`}
             >
@@ -3995,7 +3996,6 @@ export const Collection = () => {
                       setAddingRow({ ...addingRow, season: option ? option.title : '' })
                     }}
                     isEmpty={addingRow.season === ''}
-                    className="mt-[-10px]"
                   />
                   <Select1
                     options={genders?.map(gender => ({ id: gender.id, title: gender.value })) || []}
@@ -4013,7 +4013,6 @@ export const Collection = () => {
                       setAddingRow({ ...addingRow, gender: option ? option.title : '' })
                     }}
                     isEmpty={addingRow.gender === ''}
-                    className="mt-[-10px]"
                   />
                   <NumericFormat
                     thousandSeparator=" "

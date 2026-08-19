@@ -720,7 +720,7 @@ const Modal: React.FC<ModalProps> = ({
               <p>Ссылка на категорию</p>
               <div className="flex admin-input">
                 {data.parentId && data.parentId !== '0' && (
-                  <p className="flex items-center">
+                  <p className="flex items-center whitespace-nowrap text-[#20222460]">
                     {categories.find(c => c.id == data.parentId).slug}/
                   </p>
                 )}

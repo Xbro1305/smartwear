@@ -1,7 +1,10 @@
 // CustomSelect.tsx
+import axios from 'axios'
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { BsCheck } from 'react-icons/bs'
 import { FaChevronDown } from 'react-icons/fa'
+import { toast } from 'react-toastify'
 
 interface ItemType {
   id: number
@@ -16,6 +19,8 @@ interface SelectProps {
   showSuggestions?: boolean
   className?: string
   onClick?: () => void
+  id?: number
+  isFreeValue?: boolean
 }
 
 function getScrollParents(node: HTMLElement | null): (Window | HTMLElement)[] {
@@ -41,12 +46,15 @@ export const CustomSelect: React.FC<SelectProps> = ({
   showSuggestions = true,
   className,
   onClick,
+  isFreeValue,
+  id,
 }) => {
   const [opened, setOpened] = useState(false)
   const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const scrollParentsRef = useRef<(Window | HTMLElement)[]>([])
+  const [freeValue, setFreeValue] = useState('')
 
   // вычислить позицию триггера
   const updatePosition = () => {
@@ -85,12 +93,14 @@ export const CustomSelect: React.FC<SelectProps> = ({
     const onDocClick = (e: MouseEvent) => {
       const target = e.target as Node
       if (!wrapperRef.current) return
+      if (isFreeValue) return
       if (!wrapperRef.current.contains(target)) {
         setTimeout(() => {
           setOpened(false)
         }, 100)
       }
     }
+
     document.addEventListener('mousedown', onDocClick)
 
     return () => {
@@ -112,6 +122,31 @@ export const CustomSelect: React.FC<SelectProps> = ({
     if (opened) updatePosition()
   }, [value, data, opened])
 
+  const handleSubmitFreeValue = () => {
+    if (freeValue.trim() == '') {
+      return toast.error('Пожалуйста, выберите значение из списка или введите новое значение')
+    }
+
+    axios(`${import.meta.env.VITE_APP_API_URL}/attributes/${id || 0}/values/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      data: { attributeId: id, value: freeValue },
+    })
+      .then(res => {
+        // {"id":90,"value":"fsadfdsa","attributeId":17,"meta":{},"colorGroupId":null}
+        const newValue = res.data
+        onChange(newValue.id, newValue.value)
+        setOpened(false)
+      })
+      .catch(err => {
+        const errorText = err.response.data.message || 'Ошибка получения данных'
+        toast.error(errorText)
+      })
+  }
+
   return (
     <div ref={wrapperRef} className={`relative ${className || ''}`} onClick={onClick}>
       <button
@@ -126,7 +161,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
         <p
           className={`text-[14px] text-left max-w-[calc(100%-10px)] ${!value || value.id === 0 ? 'text-[#20222460]' : ''}`}
         >
-          {value && value.id !== 0 ? value.value : placeholder}
+          {value && value.id !== 0   ? value.value : placeholder}
         </p>
 
         <FaChevronDown
@@ -167,11 +202,28 @@ export const CustomSelect: React.FC<SelectProps> = ({
             }}
           >
             <div className="bg-white shadow-lg rounded-xl max-h-[300px] overflow-auto">
+              {isFreeValue && (
+                <div className="p-[12px_15px] flex items-center justify-between hover:bg-[#F2F3F5] cursor-pointer text-[14px] select-none">
+                  <input
+                    type="text"
+                    className={`admin-input border-none bg-[transparent] w-[80%] h-auto p-0`}
+                    placeholder="Введите значение"
+                    required
+                    onChange={e => setFreeValue(e.target.value)}
+                    value={freeValue}
+                  />
+                  <BsCheck className="text-[20px]" onClick={handleSubmitFreeValue} />
+                </div>
+              )}
               {data.length === 0 ? (
-                <div className="p-[12px_15px] text-[#777]">Нет данных</div>
+                isFreeValue ? (
+                  ''
+                ) : (
+                  <div className="p-[12px_15px] text-[#777]">Нет данных</div>
+                )
               ) : (
                 data
-                  .sort((a, b) => a.value .localeCompare(b.value , 'ru'))
+                  .sort((a, b) => a.value.localeCompare(b.value, 'ru'))
                   .map(item => (
                     <div
                       key={item.id}

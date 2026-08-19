@@ -418,7 +418,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           <FilterBlock title="Цена" isOpen>
             <section className={styles.catalog_filter_price}>
               {/* nowrap — число «12 000» не должно ломаться на две строки (Правки 3, п.4) */}
-              <span className="p2 whitespace-nowrap" style={{ color: 'var(--service)' }}>
+              <span className="p2 whitespace-nowrap mr-[15px]" style={{ color: 'var(--service)' }}>
                 от <NumericFormat value={minPrice} displayType="text" thousandSeparator=" " />
               </span>
               <span className="p2 whitespace-nowrap" style={{ color: 'var(--service)' }}>

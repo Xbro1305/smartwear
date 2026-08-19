@@ -349,6 +349,32 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
         })
     }
   }
+
+  const getVisibleMedia = (colorId?: number) => {
+    const colorMedia = media?.filter(m => m.colorAttrValueId === colorId) ?? []
+
+    // Для цвета без собственных фото показываем все медиа товара.
+    if (!colorMedia.length) return media ?? []
+
+    // В остальных случаях показываем общие фото, фото выбранного цвета,
+    // а обложку и lining — всегда, независимо от привязки к цвету.
+    return (
+      media?.filter(
+        m =>
+          !m.colorAttrValueId ||
+          m.colorAttrValueId === colorId ||
+          m.kind === 'cover' ||
+          m.kind === 'lining'
+      ) ?? []
+    )
+  }
+
+  const visibleMedia = getVisibleMedia(selectedColor?.id)
+
+  // Резервируем место под полный набор медиа товара: высота галереи не меняется,
+  // даже если для следующего цвета фотографий меньше.
+  const maxMediaCount = Math.max(1, media?.length ?? 0)
+
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
       {item && (
@@ -377,7 +403,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
           <div className="flex flex-col lg:flex-row items-start gap-xl">
             <div className="lg:hidden flex flex-col gap-[20px] max-[380px]:gap-[14px]">
               <p className="text-base text-dark max-[380px]:text-[13px]">Модель: {item.articul}</p>
-              <h3 className="h1 max-[380px]:!text-[22px] max-[380px]:!leading-[27px]">{item.name}</h3>
+              <h3 className="h1 max-[380px]:!text-[22px] max-[380px]:!leading-[27px]">
+                {item.name}
+              </h3>
               <div
                 className="p1 bg-[#fff_!important] product_description max-[380px]:!text-[13px] max-[380px]:!leading-[18px]"
                 dangerouslySetInnerHTML={{ __html: item.description }}
@@ -396,16 +424,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                   alt={item?.name}
                 />
               </div>
-              <div className="sm:grid lg:grid-cols-2 lg:content-start flex flex-row gap-[10px] xl:gap-[20px] w-full max-h-[200px] h-[200px] sm:h-[560px] sm:max-h-[560px] lg:h-[820px] lg:max-h-[820px] overflow-y-auto lg:overflow-y-auto sm:w-[40%] lg:w-full [scrollbar-width:thin]">
-                {(media?.find((m: Media) => m.colorAttrValueId == selectedColor?.id)
-                  ? media.filter(
-                      (m: Media) =>
-                        m.colorAttrValueId == selectedColor?.id ||
-                        m.kind == 'lining' ||
-                        m.kind == 'video'
-                    )
-                  : media || []
-                ).map(m =>
+              <div className="sm:grid lg:grid-cols-2 lg:content-start flex flex-row gap-[10px] xl:gap-[20px] w-full overflow-y-auto lg:overflow-y-auto sm:w-[40%] lg:w-full [scrollbar-width:thin]">
+                {visibleMedia.map(m =>
                   m.kind !== 'video' ? (
                     <img
                       key={m.id}
@@ -421,7 +441,18 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       onClick={() => setSelectedPhoto(m)}
                       src={m.url}
                       controls
-                    ></video>
+                    />
+                  )
+                )}
+
+                {/* Невидимые ячейки сохраняют высоту галереи при смене цвета */}
+                {Array.from({ length: Math.max(0, maxMediaCount - visibleMedia.length) }).map(
+                  (_, index) => (
+                    <div
+                      key={`media-placeholder-${index}`}
+                      aria-hidden="true"
+                      className="hidden sm:block aspect-[3/4] invisible"
+                    />
                   )
                 )}
               </div>

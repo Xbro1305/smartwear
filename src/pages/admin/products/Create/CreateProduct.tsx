@@ -977,7 +977,9 @@ export const CreateProduct = () => {
                       }) || []
                     }
                     placeholder={`Выберите ${attr?.name}`}
-                    onChange={id => {
+                    isFreeValue={attr?.isFreeValue}
+                    id={attr?.id}
+                    onChange={(id, value) => {
                       setItem(
                         prev =>
                           ({
@@ -993,6 +995,19 @@ export const CreateProduct = () => {
                             },
                           }) as Item
                       )
+                      attr?.values
+                        .map(item => {
+                          return { id: item.id, value: item.value }
+                        })
+                        .find(
+                          val =>
+                            val.id ===
+                            item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
+                              Number(attr?.id)
+                            ]
+                        )
+                        ? ''
+                        : attr.values.push({ id, value: String(value), attributeId: attr.id })
                     }}
                     value={
                       attr?.values
@@ -1040,7 +1055,7 @@ export const CreateProduct = () => {
                             return { id: item.id, value: item.value }
                           }) || []
                         }
-                        placeholder="Выберите Вид изделия"
+                        placeholder={`Выберите ${attr?.name}`}
                         onChange={id => {
                           setItem(
                             prev =>
@@ -1059,6 +1074,8 @@ export const CreateProduct = () => {
                               }) as Item
                           )
                         }}
+                        isFreeValue={attr?.isFreeValue}
+                        id={attr?.id}
                         value={
                           attr?.values
                             .map(item => {
