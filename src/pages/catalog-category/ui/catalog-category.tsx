@@ -179,14 +179,20 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${saled}${query}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
       )
       .then(res => {
-        setItems(res.data.items)
-
         const maximalPriceInRes = res.data.facets.price.max
         const minimalPriceInRes = res.data.facets.price.min
 
         setMaxPrice(maximalPriceInRes)
-        setPrice(maximalPriceInRes)
         setMinPrice(minimalPriceInRes)
+        setPrice(currentPrice => {
+          // Диапазон цены строится только по остальным фильтрам. При первом
+          // запросе ставим верхнюю границу, далее не сбрасываем выбор пользователя.
+          if (currentPrice === undefined) return maximalPriceInRes
+
+          // При смене категории или остальных атрибутов диапазон может сузиться.
+          // В этом единственном случае приводим значение к новому допустимому диапазону.
+          return Math.min(Math.max(currentPrice, minimalPriceInRes), maximalPriceInRes)
+        })
 
         const availableSizesInRes = res.data.facets.sizes.map((s: any) => s.id)
         const availableColorsInRes = res.data.facets.colors.map((c: any) => c.id)
@@ -198,8 +204,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         const availableStoresInRes = res.data.facets.stores.map((s: any) => s.id)
 
         const availableLengthsInRes = res.data.facets.lengths.map((l: any) => l.id)
-
-        console.log(availableAttributesInRes)
 
         setAvailableSizes(availableSizesInRes)
         setAvailableColors(availableColorsInRes)
@@ -220,9 +224,11 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
     const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
+    // weakPrice* влияет только на список товаров. Фасеты и границы слайдера
+    // всегда рассчитываются сильным запросом выше, без цены.
     const priceQuery =
-      (price && price != 0 ? `&priceTo=${price}` : '') +
-      (priceFrom && priceFrom != 0 ? `&priceFrom=${priceFrom}` : '')
+      (debouncedPrice && debouncedPrice != 0 ? `&weakPriceTo=${debouncedPrice}` : '') +
+      (debouncedPriceFrom && debouncedPriceFrom != 0 ? `&weakPriceFrom=${debouncedPriceFrom}` : '')
 
     axios
       .get(
@@ -230,27 +236,18 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       )
       .then(res => {
         setItems(res.data.items)
-
-        const maximalPriceInRes = res.data.facets.price.max
-        const minimalPriceInRes = res.data.facets.price.min
-
-        setMaxPrice(maximalPriceInRes)
-        setMinPrice(minimalPriceInRes)
-
-        price && maximalPriceInRes < price && setPrice(maximalPriceInRes)
-
-        const availableSizesInRes = res.data.facets.sizes.map((s: any) => s.id)
-        const availableColorsInRes = res.data.facets.colors.map((c: any) => c.id)
-
-        const availableAttributesInRes = res.data.facets.available.flatMap((a: any) =>
-          a.valueIds.map((v: number) => v)
-        )
-
-        setAvailableSizes(availableSizesInRes)
-        setAvailableColors(availableColorsInRes)
-        setAvailableAttributes(availableAttributesInRes)
       })
-  }, [debouncedPrice, debouncedPriceFrom])
+  }, [
+    category,
+    debouncedPrice,
+    debouncedPriceFrom,
+    filterIds,
+    sizeIds,
+    colorIds,
+    isSaled,
+    storeIds,
+    lengthIds,
+  ])
 
   // sorting by price/ date
 
