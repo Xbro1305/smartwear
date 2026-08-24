@@ -82,6 +82,8 @@ interface Media {
   file: File
   colorAttrValueId: number
   id?: any
+  /** Уникален для каждого файла и не зависит от его имени. */
+  clientId: string
 }
 
 interface Store {
@@ -122,6 +124,11 @@ export const CreateProduct = () => {
   const [sending, setSending] = useState<boolean>(false)
 
   const navigate = useNavigate()
+
+  const createMediaClientId = () =>
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`
 
   useEffect(() => {
     document.title = 'Создать товар - Панель администратора'
@@ -1619,7 +1626,10 @@ export const CreateProduct = () => {
                 if (!files || files.length === 0) return
 
                 Array.from(files).forEach(file => {
-                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'photo' }])
+                  setItemMedia(prev => [
+                    ...(prev || []),
+                    { file, type: 'photo', colorAttrValueId: 0, clientId: createMediaClientId() },
+                  ])
                 })
               }}
             />
@@ -1630,7 +1640,7 @@ export const CreateProduct = () => {
               ?.filter(item => item.type === 'cover' || item.type === 'photo')
               ?.map(m => (
                 <div
-                  key={m.file.name}
+                  key={m.clientId}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <img
@@ -1648,7 +1658,7 @@ export const CreateProduct = () => {
                             prev?.map(media => ({
                               ...media,
                               type:
-                                media.file.name === m.file.name
+                                media.clientId === m.clientId
                                   ? 'cover'
                                   : media.type === 'cover'
                                     ? 'photo'
@@ -1690,7 +1700,7 @@ export const CreateProduct = () => {
                         onChange={id => {
                           setItemMedia(prev =>
                             prev?.map(media =>
-                              media.file.name === m.file.name
+                              media.clientId === m.clientId
                                 ? { ...media, colorAttrValueId: id }
                                 : media
                             )
@@ -1718,7 +1728,7 @@ export const CreateProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        setItemMedia(prev => prev?.filter(it => it.file.name !== m.file.name))
+                        setItemMedia(prev => prev?.filter(it => it.clientId !== m.clientId))
                       }}
                     >
                       Удалить фото
@@ -1748,7 +1758,10 @@ export const CreateProduct = () => {
                 if (!files || files.length === 0) return
 
                 Array.from(files).forEach(file => {
-                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'lining' }])
+                  setItemMedia(prev => [
+                    ...(prev || []),
+                    { file, type: 'lining', colorAttrValueId: 0, clientId: createMediaClientId() },
+                  ])
                 })
               }}
             />
@@ -1759,7 +1772,7 @@ export const CreateProduct = () => {
               ?.filter(item => item.type === 'lining')
               ?.map(item => (
                 <div
-                  key={item.file.name}
+                  key={item.clientId}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <img
@@ -1771,7 +1784,7 @@ export const CreateProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        setItemMedia(prev => prev?.filter(it => it.file.name !== item.file.name))
+                        setItemMedia(prev => prev?.filter(it => it.clientId !== item.clientId))
                       }}
                     >
                       Удалить фото
@@ -1800,7 +1813,7 @@ export const CreateProduct = () => {
                 if (!file) return
                 setItemMedia((prev: any) => [
                   ...(prev || []),
-                  { file, type: 'video', colorAttrValueId: 0 },
+                  { file, type: 'video', colorAttrValueId: 0, clientId: createMediaClientId() },
                 ])
               }}
             />
@@ -1811,7 +1824,7 @@ export const CreateProduct = () => {
               ?.filter(item => item.type === 'video')
               ?.map(item => (
                 <div
-                  key={item.file.name}
+                  key={item.clientId}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420]"
                 >
                   <video
@@ -1823,7 +1836,7 @@ export const CreateProduct = () => {
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
                       onClick={() => {
-                        setItemMedia(prev => prev?.filter(it => it.file.name !== item.file.name))
+                        setItemMedia(prev => prev?.filter(it => it.clientId !== item.clientId))
                       }}
                     >
                       Удалить видео
