@@ -161,7 +161,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
         <p
           className={`text-[14px] text-left max-w-[calc(100%-10px)] ${!value || value.id === 0 ? 'text-[#20222460]' : ''}`}
         >
-          {value && value.id !== 0   ? value.value : placeholder}
+          {value && value.id !== 0 ? value.value : placeholder}
         </p>
 
         <FaChevronDown

@@ -364,6 +364,13 @@ export const CreateProduct = () => {
 
   return (
     <div className="py-[80px] px-[36px] flex justify-between relative">
+      {sending && (
+        <div className="fixed top-[0] left-[0] z-[9999] w-full h-screen bg-[#00000080] flex items-center justify-center">
+          <h5 id="h5" className="text-[#fff]">
+            Загрузка...
+          </h5>
+        </div>
+      )}
       <div className="flex flex-col gap-[48px]">
         <h1 id="h1">Редактор товара</h1>
         <div className="flex flex-col gap-[24px]">

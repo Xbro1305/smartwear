@@ -83,9 +83,11 @@ interface Feature {
 interface Media {
   url?: string
   type: 'photo' | 'lining' | 'cover' | 'video'
-  file: File
-  colorAttrValueId: number
+  file?: File
+  colorAttrValueId?: number
   id?: any
+  /** Уникален на клиенте и не зависит от имени загруженного файла. */
+  clientId: string
 }
 
 interface Store {
@@ -117,10 +119,16 @@ export const EditProduct = () => {
   const [sending, setSending] = useState<boolean>(false)
   // id вариантов, удалённых из таблицы синхронизации — их нельзя слать в sync/save
   const [deletedVariantIds, setDeletedVariantIds] = useState<number[]>([])
+  const [loading, setLoading] = useState(true)
 
   const { id } = useParams()
 
   const navigate = useNavigate()
+
+  const createMediaClientId = () =>
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`
 
   useEffect(() => {
     document.title = 'Редактировать товар - Панель администратора'
@@ -194,8 +202,6 @@ export const EditProduct = () => {
           const stocks = stocksFormatted
           setStock(stocks)
 
-          console.log(stocks, data.variants)
-
           const product: Item = {
             main: {
               articul: data.articul || '',
@@ -237,6 +243,7 @@ export const EditProduct = () => {
 
           syncronize(product)
           setItem(product)
+          setLoading(false)
         })
         .catch(err => {
           console.error('Error fetching size types:', err)
@@ -249,41 +256,17 @@ export const EditProduct = () => {
             colorAttrValueId: m.colorAttrValueId,
             url: m.url,
             id: m.id,
+            clientId: createMediaClientId(),
           }))
         )
       })
     }
   }, [attributes, features, sizeTypes, cares])
 
-  // const deleteRow = (rowIndex: number) => {
-  //   const removedId = item?.variantCodes?.[rowIndex]?.id
-  //   if (removedId) {
-  //     setDeletedVariantIds(ids => (ids.includes(removedId) ? ids : [...ids, removedId]))
-  //   }
-  //   setItem(prev => {
-  //     if (!prev) return prev
-  //     const newVariantCodes = [...(prev.variantCodes || [])]
-  //     newVariantCodes.splice(rowIndex, 1)
-  //     return {
-  //       ...prev,
-  //       variantCodes: newVariantCodes,
-  //     }
-  //   })
-  // }
-
   const syncronize = async (i: Item | undefined = item) => {
     if (!i) return
+    setLoading(true)
 
-    // {
-    //   "productId": 41,
-    //   "variants": [
-    //     { "variantId": 1284, "codes": ["09997"] },
-    //     { "variantId": 1285, "codes": ["09998"] }
-    //   ]
-    // }
-
-    // удалённые из таблицы варианты не отправляем в синхронизацию;
-    // варианты без непустых кодов тоже не отправляем
     const syncVariants = (i?.variantCodes || [])
       .filter(v => v.id == null || !deletedVariantIds.includes(v.id))
       .map(v => ({
@@ -331,6 +314,7 @@ export const EditProduct = () => {
             console.error(err.response.data.message)
             toast.error(err.response.data.message)
           })
+          .finally(() => setLoading(false))
       })
       .catch(err => toast.error(err.response.data.message))
   }
@@ -401,6 +385,7 @@ export const EditProduct = () => {
 
     if (sending) return
     setSending(true)
+    setLoading(true)
 
     try {
       // 1️⃣ UPDATE MAIN PRODUCT
@@ -439,6 +424,9 @@ export const EditProduct = () => {
 
           continue
         }
+
+        // Новое медиа без файла отправлять нельзя.
+        if (!mediaItem.file) continue
 
         const formData = new FormData()
         formData.append('file', mediaItem.file)
@@ -487,11 +475,13 @@ export const EditProduct = () => {
       }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
-      // window.location.href = '/admin/products'
+      window.location.href = '/admin/products'
     } catch (e) {
       console.log(e)
     }
   }
+
+  console.log(itemMedia)
 
   const columns = `110px 110px 110px 110px 120px 110px 50px ${warehouses
     .map(() => '110px')
@@ -499,6 +489,13 @@ export const EditProduct = () => {
 
   return (
     <div className="py-[80px] px-[36px] flex justify-between relative">
+      {loading && (
+        <div className="fixed top-[0] left-[0] z-[9999] w-full h-screen bg-[#00000080] flex items-center justify-center">
+          <h5 id="h5" className="text-[#fff]">
+            Загрузка...
+          </h5>
+        </div>
+      )}
       <div className="flex flex-col gap-[48px]">
         <h1 id="h1">Редактор товара</h1>
         <div className="flex flex-col gap-[24px]">
@@ -1755,7 +1752,10 @@ export const EditProduct = () => {
                 if (!files || files.length === 0) return
 
                 Array.from(files).forEach(file => {
-                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'photo' }])
+                  setItemMedia(prev => [
+                    ...(prev || []),
+                    { file, type: 'photo', colorAttrValueId: 0, clientId: createMediaClientId() },
+                  ])
                 })
               }}
             />
@@ -1766,11 +1766,11 @@ export const EditProduct = () => {
               ?.filter(item => item.type == 'cover' || item.type == 'photo')
               ?.map(m => (
                 <div
-                  key={m?.file?.name || m?.id}
+                  key={m.clientId}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420] bg-[#fff]"
                 >
                   <img
-                    src={m?.url || URL.createObjectURL(m?.file)}
+                    src={m.url || (m.file ? URL.createObjectURL(m.file) : '')}
                     alt=""
                     className="w-[185px] aspect-square object-contain rounded-[12px]"
                   />
@@ -1784,8 +1784,7 @@ export const EditProduct = () => {
                             prev?.map(media => ({
                               ...media,
                               type:
-                                (m?.id != null && media?.id == m?.id) ||
-                                (m?.file?.name != null && media?.file?.name === m?.file?.name)
+                                media.clientId === m.clientId
                                   ? 'cover'
                                   : media.type === 'cover'
                                     ? 'photo'
@@ -1826,11 +1825,11 @@ export const EditProduct = () => {
                         className="w-[170px]"
                         onChange={id => {
                           setItemMedia(prev =>
-                            prev?.map(media =>
-                              media?.id == m?.id || media?.file?.name === m?.file?.name
-                                ? { ...media, colorAttrValueId: id }
-                                : media
-                            )
+                            prev?.map(media => ({
+                              ...media,
+                              colorAttrValueId:
+                                media.clientId === m.clientId ? id : media.colorAttrValueId,
+                            }))
                           )
                         }}
                         value={
@@ -1864,16 +1863,10 @@ export const EditProduct = () => {
                             })
                               .then(res => {
                                 toast.success(res.data.message)
-                                setItemMedia(prev =>
-                                  prev?.filter(
-                                    it => it?.id != m?.id || it?.file?.name != m?.file?.name
-                                  )
-                                )
+                                setItemMedia(prev => prev?.filter(it => it.clientId !== m.clientId))
                               })
                               .catch(err => console.log(err))
-                          : setItemMedia(prev =>
-                              prev?.filter(it => it?.id != m?.id || it?.file?.name != m?.file?.name)
-                            )
+                          : setItemMedia(prev => prev?.filter(it => it.clientId !== m.clientId))
                       }}
                     >
                       Удалить фото
@@ -1903,7 +1896,10 @@ export const EditProduct = () => {
                 if (!files || files.length === 0) return
 
                 Array.from(files).forEach(file => {
-                  setItemMedia((prev: any) => [...(prev || []), { file, type: 'lining' }])
+                  setItemMedia(prev => [
+                    ...(prev || []),
+                    { file, type: 'lining', colorAttrValueId: 0, clientId: createMediaClientId() },
+                  ])
                 })
               }}
             />
@@ -1914,11 +1910,11 @@ export const EditProduct = () => {
               ?.filter(item => item.type === 'lining')
               ?.map(item => (
                 <div
-                  key={item.id || item.file.name}
+                  key={item.clientId}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420] bg-[#fff]"
                 >
                   <img
-                    src={item.url || URL.createObjectURL(item.file)}
+                    src={item.url || (item.file ? URL.createObjectURL(item.file) : '')}
                     alt=""
                     className="w-[185px] aspect-square object-contain rounded-[12px]"
                   />
@@ -1936,17 +1932,11 @@ export const EditProduct = () => {
                               .then(res => {
                                 toast.success(res.data.message)
                                 setItemMedia(prev =>
-                                  prev?.filter(
-                                    it => it?.id != item?.id || it?.file?.name != item?.file?.name
-                                  )
+                                  prev?.filter(it => it.clientId !== item.clientId)
                                 )
                               })
                               .catch(err => console.log(err))
-                          : setItemMedia(prev =>
-                              prev?.filter(
-                                it => it?.id != item?.id || it?.file?.name != item?.file?.name
-                              )
-                            )
+                          : setItemMedia(prev => prev?.filter(it => it.clientId !== item.clientId))
                       }}
                     >
                       Удалить фото
@@ -1975,7 +1965,7 @@ export const EditProduct = () => {
                 if (!file) return
                 setItemMedia((prev: any) => [
                   ...(prev || []),
-                  { file, type: 'video', colorAttrValueId: 0 },
+                  { file, type: 'video', colorAttrValueId: 0, clientId: createMediaClientId() },
                 ])
               }}
             />
@@ -1986,11 +1976,11 @@ export const EditProduct = () => {
               ?.filter(item => item.type === 'video')
               ?.map(item => (
                 <div
-                  key={item.id || item.file.name}
+                  key={item.clientId}
                   className="flex items-center gap-[12px] pl-[15px] border-l-[1px] border-solid border-[#20222420] bg-[#fff]"
                 >
                   <video
-                    src={item.url || URL.createObjectURL(item.file)}
+                    src={item.url || (item.file ? URL.createObjectURL(item.file) : '')}
                     className="w-[185px] aspect-square object-contain rounded-[12px]"
                     controls
                   />
@@ -2008,17 +1998,11 @@ export const EditProduct = () => {
                               .then(res => {
                                 toast.success(res.data.message)
                                 setItemMedia(prev =>
-                                  prev?.filter(
-                                    it => it?.id != item?.id || it?.file?.name != item?.file?.name
-                                  )
+                                  prev?.filter(it => it.clientId !== item.clientId)
                                 )
                               })
                               .catch(err => console.log(err))
-                          : setItemMedia(prev =>
-                              prev?.filter(
-                                it => it?.id != item?.id || it?.file?.name != item?.file?.name
-                              )
-                            )
+                          : setItemMedia(prev => prev?.filter(it => it.clientId !== item.clientId))
                       }}
                     >
                       Удалить видео
