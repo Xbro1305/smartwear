@@ -2397,12 +2397,12 @@ const SizeTypes = () => {
               )}
               {adding != null ? (
                 <>
-                  <button
+                  {/* <button
                     className="absolute z-[50] w-full h-screen bg-[transparent] border-none top-[0] left-[0]"
                     onClick={() => setAdding(null)}
                   >
                     {' '}
-                  </button>
+                  </button> */}
                   <section className="flex items-center gap-[10px] mb-[10px] border-[#BDBFC7] border-solid border-[1px] p-[32px] rounded-[12px]">
                     <div
                       onSubmit={e => e.preventDefault()}
@@ -2464,7 +2464,7 @@ const SizeTypes = () => {
                         <button
                           type="button"
                           onClick={() => setAdding(null)}
-                          className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px]"
+                          className="bg-gray-400 text-white px-[15px] h-[40px] rounded-[12px] relative z-[60]"
                         >
                           Отмена
                         </button>
