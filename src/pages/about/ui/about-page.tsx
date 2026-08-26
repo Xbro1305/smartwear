@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 import { useGetArticlesBySectionQuery } from '@/entities/article'
@@ -33,6 +33,10 @@ const brandRanges: [number, number][] = [
 const Carousel = ({ title, items }: { title: string; items: any[] }) => {
   const ref = useRef<HTMLDivElement>(null)
   const scroll = (dir: -1 | 1) => ref.current?.scrollBy({ left: dir * 360, behavior: 'smooth' })
+  useEffect(() => {
+    document.title =
+      'О компани | MaxisComfort'
+  }, [])
   return (
     <section className={`flex flex-col gap-[20px] ${SIDE}`}>
       <div className="flex items-center justify-between">

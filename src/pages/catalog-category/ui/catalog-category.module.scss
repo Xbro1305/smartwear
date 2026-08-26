@@ -34,6 +34,10 @@
     position: sticky;
     top: 1px !important;
 
+    > :last-child {
+      border-bottom: none !important;
+    }
+
     @media (max-width: 1565px) {
       max-width: 310px;
     }

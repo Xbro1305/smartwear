@@ -93,8 +93,12 @@ const ArticleCarousel = ({
   emptyText: string
 }) => {
   const ref = useRef<HTMLDivElement>(null)
-  const scrollBy = (dir: -1 | 1) =>
-    ref.current?.scrollBy({ left: dir * 360, behavior: 'smooth' })
+  const scrollBy = (dir: -1 | 1) => ref.current?.scrollBy({ left: dir * 360, behavior: 'smooth' })
+
+  useEffect(() => {
+    document.title =
+      'Купить куртки с климат-контролем и мембранную одежду с доставкой по России | MaxisComfort'
+  }, [])
   return (
     <section className={`flex flex-col gap-[20px] ${SIDE}`}>
       <div className="flex items-center justify-between">

@@ -1178,7 +1178,7 @@ export const Brands = () => {
         <div className={`${styles.modal} flex p-[10px] `}>
           <button
             className="z-40 absolute w-full h-screen opacity-0"
-            onClick={() => setCreating(null)}
+            onClick={() => setEditing(null)}
           ></button>
           <form onSubmit={e => handleUpdate(e)} className={styles.modal_body}>
             <h2 id="h2">Редактирование бренда</h2>

@@ -284,7 +284,7 @@ export const ProductsList = () => {
             </p>
             <p></p>
           </div>
-          <div className={`max-h-[400px] ${styles.productsList_wrapper_bottom}`}>
+          <div className={`${styles.productsList_wrapper_bottom}`}>
             {products &&
               products?.map((i, index) => (
                 <div key={index} className={styles.productsList_wrapper_item}>
