@@ -28,6 +28,7 @@ import infoShop from '@/assets/home/info-shop.svg'
 import infoDelivery from '@/assets/home/info-delivery.svg'
 import infoRepair from '@/assets/home/info-repair.svg'
 import infoPay from '@/assets/home/info-pay.svg'
+import { RiArrowRightUpFill } from 'react-icons/ri'
 
 const BANNER_MS = 30000
 
@@ -225,7 +226,10 @@ export const HomePage = () => {
                 to="/climate-control"
                 className="flex items-center gap-[6px] text-[14px] font-[500] text-[#fff] no-underline"
               >
-                Подробнее о климат-контроле <span aria-hidden>↗</span>
+                Подробнее о климат-контроле{' '}
+                <span aria-hidden>
+                  <RiArrowRightUpFill />
+                </span>
               </Link>
             </div>
           </div>
@@ -323,7 +327,10 @@ export const HomePage = () => {
                   {c.note}
                 </p>
                 <span className="relative z-[1] mt-[6px] flex w-fit items-center gap-[6px] text-[14px] text-[#fff] transition-colors">
-                  Перейти <span aria-hidden>↗</span>
+                  Перейти{' '}
+                  <span aria-hidden>
+                    <RiArrowRightUpFill />
+                  </span>
                 </span>
               </Link>
             ))}

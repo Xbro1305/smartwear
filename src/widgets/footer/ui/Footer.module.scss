@@ -72,7 +72,6 @@
     grid-template-columns: repeat(2, calc(50%));
     padding: 20px;
     row-gap: 50px;
-    padding-bottom: 100px !important;
 
     > :last-child {
       grid-column: 1 / span 2;
@@ -90,8 +89,6 @@
   }
 
   @media (max-width: 1214px) {
-    padding-bottom: 70px;
-
     &_sect {
       display: none;
     }
