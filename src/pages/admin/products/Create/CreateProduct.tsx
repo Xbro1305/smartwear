@@ -43,6 +43,8 @@ interface Item {
     oldPrice: number
   }[]
   variantCodes?: {
+    /** Стабильный id строки: React не пересоздаёт инпуты при каждом вводе. */
+    clientId?: string
     colorAlias: string
     colorAttrValue?: string
     colorAttrValueId: number
@@ -129,6 +131,20 @@ export const CreateProduct = () => {
     typeof crypto !== 'undefined' && crypto.randomUUID
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+  const updateVariant = (
+    clientId: string,
+    update: (
+      variant: NonNullable<Item['variantCodes']>[number]
+    ) => NonNullable<Item['variantCodes']>[number]
+  ) => {
+    setItem(prev => ({
+      ...prev,
+      variantCodes: (prev.variantCodes || []).map(variant =>
+        variant.clientId === clientId ? update(variant) : variant
+      ),
+    }))
+  }
 
   useEffect(() => {
     document.title = 'Создать товар - Панель администратора'
@@ -1336,6 +1352,7 @@ export const CreateProduct = () => {
                   onClick={() => {
                     const newVariantCodes = item?.variantCodes ? [...item.variantCodes] : []
                     newVariantCodes.push({
+                      clientId: createMediaClientId(),
                       colorAttrValueId: 0,
                       sizeValueId: 0,
                       colorCode: '',
@@ -1395,7 +1412,7 @@ export const CreateProduct = () => {
 
                       {item?.variantCodes?.map((variant, index) => (
                         <div
-                          key={index * index + Math.random() * 100}
+                          key={variant.clientId || `variant-${index}`}
                           style={{ gridTemplateColumns: columns }}
                           className="w-fit grid bg-[#fff] py-[20px] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px]"
                         >
@@ -1407,15 +1424,12 @@ export const CreateProduct = () => {
                               placeholder="123456789"
                               maxLength={9}
                               onChange={(e: any) => {
-                                const newVariantCodes = [...(item.variantCodes || [])]
-                                newVariantCodes[index].codes[0].code = e.target.value
-                                setItem(
-                                  prev =>
-                                    ({
-                                      ...prev,
-                                      variantCodes: newVariantCodes,
-                                    }) as Item
-                                )
+                                updateVariant(variant.clientId!, current => ({
+                                  ...current,
+                                  codes: current.codes.map((code, codeIndex) =>
+                                    codeIndex === 0 ? { ...code, code: e.target.value } : code
+                                  ),
+                                }))
                               }}
                               value={variant.codes[0].code || ''}
                             />
@@ -1428,15 +1442,12 @@ export const CreateProduct = () => {
                               placeholder="123456"
                               maxLength={6}
                               onChange={(e: any) => {
-                                const newVariantCodes = [...(item.variantCodes || [])]
-                                newVariantCodes[index].codes[1].code = e.target.value
-                                setItem(
-                                  prev =>
-                                    ({
-                                      ...prev,
-                                      variantCodes: newVariantCodes,
-                                    }) as Item
-                                )
+                                updateVariant(variant.clientId!, current => ({
+                                  ...current,
+                                  codes: current.codes.map((code, codeIndex) =>
+                                    codeIndex === 1 ? { ...code, code: e.target.value } : code
+                                  ),
+                                }))
                               }}
                               value={variant.codes[1].code || ''}
                             />
@@ -1449,15 +1460,12 @@ export const CreateProduct = () => {
                               placeholder="123456"
                               maxLength={6}
                               onChange={(e: any) => {
-                                const newVariantCodes = [...(item?.variantCodes || [])]
-                                newVariantCodes[index].codes[2].code = e.target.value
-                                setItem(
-                                  prev =>
-                                    ({
-                                      ...prev,
-                                      variantCodes: newVariantCodes,
-                                    }) as Item
-                                )
+                                updateVariant(variant.clientId!, current => ({
+                                  ...current,
+                                  codes: current.codes.map((code, codeIndex) =>
+                                    codeIndex === 2 ? { ...code, code: e.target.value } : code
+                                  ),
+                                }))
                               }}
                               value={variant.codes[2].code || ''}
                             />
@@ -1475,15 +1483,10 @@ export const CreateProduct = () => {
                               }
                               placeholder="Pазмер"
                               onChange={id => {
-                                const newVariantCodes = [...(item?.variantCodes || [])]
-                                newVariantCodes[index].sizeValueId = id
-                                setItem(
-                                  prev =>
-                                    ({
-                                      ...prev,
-                                      variantCodes: newVariantCodes,
-                                    }) as Item
-                                )
+                                updateVariant(variant.clientId!, current => ({
+                                  ...current,
+                                  sizeValueId: id,
+                                }))
                               }}
                               value={
                                 sizeTypes
@@ -1519,22 +1522,17 @@ export const CreateProduct = () => {
                               }
                               placeholder="Цвет"
                               onChange={(_, value) => {
-                                const newVariantCodes = [...(item?.variantCodes || [])]
-
                                 const color = attributes
                                   .find(attr => attr.name == 'Цвет')
                                   ?.values.find(item => item.meta?.aliases?.includes(value || ''))
-                                newVariantCodes[index].colorAttrValueId = color?.id || 0
-                                newVariantCodes[index].colorAttrValue = color?.value || ''
-                                newVariantCodes[index].colorAlias = value || ''
-                                newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
-                                setItem(
-                                  prev =>
-                                    ({
-                                      ...prev,
-                                      variantCodes: newVariantCodes,
-                                    }) as Item
-                                )
+
+                                updateVariant(variant.clientId!, current => ({
+                                  ...current,
+                                  colorAttrValueId: color?.id || 0,
+                                  colorAttrValue: color?.value || '',
+                                  colorAlias: value || '',
+                                  colorCode: color?.meta?.colorCode || '',
+                                }))
 
                                 // newVariantCodes[index].colorAttrValueId = id
 
@@ -1589,6 +1587,7 @@ export const CreateProduct = () => {
                           })}
                           <div className="flex items-center justify-center">
                             <button
+                              type="button"
                               className="bg-[#FFF3F3] text-[#E02844] h-[36px] w-[36px] flex items-center justify-center text-[18px] rounded-[12px]"
                               onClick={() => deleteRow(index)}
                             >

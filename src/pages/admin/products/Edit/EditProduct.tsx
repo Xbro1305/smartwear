@@ -45,6 +45,8 @@ interface Item {
     id?: number
   }[]
   variantCodes?: {
+    /** Стабильный id строки для React и точечных обновлений состояния. */
+    clientId?: string
     colorAttrValueId: number
     id?: number
     colorAlias: string
@@ -129,6 +131,24 @@ export const EditProduct = () => {
     typeof crypto !== 'undefined' && crypto.randomUUID
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+  const updateVariant = (
+    clientId: string,
+    update: (
+      variant: NonNullable<Item['variantCodes']>[number]
+    ) => NonNullable<Item['variantCodes']>[number]
+  ) => {
+    setItem(prev =>
+      prev
+        ? {
+            ...prev,
+            variantCodes: (prev.variantCodes || []).map(variant =>
+              variant.clientId === clientId ? update(variant) : variant
+            ),
+          }
+        : prev
+    )
+  }
 
   useEffect(() => {
     document.title = 'Редактировать товар - Панель администратора'
@@ -237,7 +257,10 @@ export const EditProduct = () => {
               metaDescription: data.metaDescription || '',
               seoSlug: data.seoSlug || '',
             },
-            variantCodes: data.variants || [],
+            variantCodes: (data.variants || []).map((variant: any) => ({
+              ...variant,
+              clientId: createMediaClientId(),
+            })),
             prices: data.colorPrices,
           }
 
@@ -1455,10 +1478,12 @@ export const EditProduct = () => {
                   <p></p>
                 )}
                 <button
+                  type="button"
                   className="flex items-center justify-center border-solid border-[1px] border-[#DADADA] rounded-[12px] h-[40px] p-[13px] bg-[#fff]"
                   onClick={() => {
                     const newVariantCodes = item?.variantCodes ? [...item.variantCodes] : []
                     newVariantCodes.push({
+                      clientId: createMediaClientId(),
                       colorAttrValueId: 0,
                       sizeValueId: 0,
                       colorCode: '',
@@ -1512,7 +1537,7 @@ export const EditProduct = () => {
 
                 {item?.variantCodes?.map((variant, index) => (
                   <div
-                    key={variant.id ?? `row-${index}`}
+                    key={variant.clientId || variant.id || `row-${index}`}
                     style={{ gridTemplateColumns: columns }}
                     className="w-fit grid bg-[#fff] py-[20px] border-[#DDE1E6] border-solid border-b-[1px] gap-[5px]"
                   >
@@ -1524,26 +1549,12 @@ export const EditProduct = () => {
                         placeholder="123456789"
                         maxLength={9}
                         onValueChange={({ value }) => {
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: (prev?.variantCodes || []).map((variantCode, i) => {
-                                  if (i !== index) return variantCode
-
-                                  const codes = [...(variantCode.codes || [])]
-                                  codes[0] = {
-                                    ...(codes[0] || {}),
-                                    code: value,
-                                  }
-
-                                  return {
-                                    ...variantCode,
-                                    codes,
-                                  }
-                                }),
-                              }) as Item
-                          )
+                          updateVariant(variant.clientId!, current => ({
+                            ...current,
+                            codes: current.codes.map((code, codeIndex) =>
+                              codeIndex === 0 ? { ...code, code: value } : code
+                            ),
+                          }))
                         }}
                         value={variant.codes[0]?.code || ''}
                       />
@@ -1556,15 +1567,12 @@ export const EditProduct = () => {
                         placeholder="123456"
                         maxLength={6}
                         onChange={(e: any) => {
-                          const newVariantCodes = [...(item.variantCodes || [])]
-                          newVariantCodes[index].codes[1].code = e.target.value
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
+                          updateVariant(variant.clientId!, current => ({
+                            ...current,
+                            codes: current.codes.map((code, codeIndex) =>
+                              codeIndex === 1 ? { ...code, code: e.target.value } : code
+                            ),
+                          }))
                         }}
                         value={variant.codes[1]?.code || ''}
                       />
@@ -1577,15 +1585,12 @@ export const EditProduct = () => {
                         placeholder="123456"
                         maxLength={6}
                         onChange={(e: any) => {
-                          const newVariantCodes = [...(item?.variantCodes || [])]
-                          newVariantCodes[index].codes[2].code = e.target.value
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
+                          updateVariant(variant.clientId!, current => ({
+                            ...current,
+                            codes: current.codes.map((code, codeIndex) =>
+                              codeIndex === 2 ? { ...code, code: e.target.value } : code
+                            ),
+                          }))
                         }}
                         value={variant.codes[2]?.code || ''}
                       />
@@ -1603,15 +1608,10 @@ export const EditProduct = () => {
                         }
                         placeholder="Pазмер"
                         onChange={id => {
-                          const newVariantCodes = [...(item?.variantCodes || [])]
-                          newVariantCodes[index].sizeValueId = id
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
+                          updateVariant(variant.clientId!, current => ({
+                            ...current,
+                            sizeValueId: id,
+                          }))
                         }}
                         value={
                           sizeTypes
@@ -1647,22 +1647,17 @@ export const EditProduct = () => {
                         }
                         placeholder="Цвет"
                         onChange={(_, value) => {
-                          const newVariantCodes = [...(item?.variantCodes || [])]
-
                           const color = attributes
                             .find(attr => attr.name == 'Цвет')
                             ?.values.find(item => item.meta?.aliases?.includes(value || ''))
-                          newVariantCodes[index].colorAttrValueId = color?.id || 0
-                          newVariantCodes[index].colorAttrValue = color?.value || ''
-                          newVariantCodes[index].colorAlias = value || ''
-                          newVariantCodes[index].colorCode = color?.meta?.colorCode || ''
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                variantCodes: newVariantCodes,
-                              }) as Item
-                          )
+
+                          updateVariant(variant.clientId!, current => ({
+                            ...current,
+                            colorAttrValueId: color?.id || 0,
+                            colorAttrValue: color,
+                            colorAlias: value || '',
+                            colorCode: color?.meta?.colorCode || '',
+                          }))
                           // const newVariantCodes = [...(item?.variantCodes || [])]
 
                           // newVariantCodes[index].colorAttrValueId = id
@@ -1713,6 +1708,7 @@ export const EditProduct = () => {
                     })}
                     <div className="flex items-center justify-center">
                       <button
+                        type="button"
                         className="bg-[#FFF3F3] text-[#E02844] h-[36px] w-[36px] flex items-center justify-center text-[18px] rounded-[12px]"
                         onClick={() => {
                           const variantId = variant.id
@@ -1755,6 +1751,7 @@ export const EditProduct = () => {
                 ))}
               </div>
               <button
+                type="button"
                 className="admin-input w-fit flex items-center"
                 onClick={() => syncronize(item)}
               >

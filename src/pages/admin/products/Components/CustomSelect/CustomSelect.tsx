@@ -53,6 +53,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
   const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
   const scrollParentsRef = useRef<(Window | HTMLElement)[]>([])
   const [freeValue, setFreeValue] = useState('')
 
@@ -94,7 +95,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
       const target = e.target as Node
       if (!wrapperRef.current) return
       if (isFreeValue) return
-      if (!wrapperRef.current.contains(target)) {
+      if (!wrapperRef.current.contains(target) && !dropdownRef.current?.contains(target)) {
         setTimeout(() => {
           setOpened(false)
         }, 100)
@@ -193,6 +194,8 @@ export const CustomSelect: React.FC<SelectProps> = ({
         coords &&
         createPortal(
           <div
+            ref={dropdownRef}
+            onMouseDown={e => e.stopPropagation()}
             style={{
               position: 'fixed',
               top: coords.top, // позиция относительно viewport
@@ -222,7 +225,7 @@ export const CustomSelect: React.FC<SelectProps> = ({
                   <div className="p-[12px_15px] text-[#777]">Нет данных</div>
                 )
               ) : (
-                data
+                [...data]
                   .sort((a, b) => a.value.localeCompare(b.value, 'ru'))
                   .map(item => (
                     <div
