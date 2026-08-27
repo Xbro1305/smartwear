@@ -1107,7 +1107,9 @@ export const EditProduct = () => {
                       }) || []
                     }
                     placeholder={`Выберите ${attr?.name}`}
-                    onChange={id => {
+                    isFreeValue={attr?.isFreeValue}
+                    id={attr?.id}
+                    onChange={(id, value) => {
                       setItem(
                         prev =>
                           ({
@@ -1123,6 +1125,19 @@ export const EditProduct = () => {
                             },
                           }) as Item
                       )
+                      attr?.values
+                        .map(item => {
+                          return { id: item.id, value: item.value }
+                        })
+                        .find(
+                          val =>
+                            val.id ===
+                            item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
+                              Number(attr?.id)
+                            ]
+                        )
+                        ? ''
+                        : attr.values.push({ id, value: String(value), attributeId: attr.id })
                     }}
                     value={
                       attr?.values
@@ -1170,8 +1185,8 @@ export const EditProduct = () => {
                             return { id: item.id, value: item.value }
                           }) || []
                         }
-                        placeholder="Выберите Вид изделия"
-                        onChange={id => {
+                        placeholder={`Выберите ${attr?.name}`}
+                        onChange={(id, value) => {
                           setItem(
                             prev =>
                               ({
@@ -1188,7 +1203,22 @@ export const EditProduct = () => {
                                 },
                               }) as Item
                           )
+                          attr?.values
+                            .map(item => {
+                              return { id: item.id, value: item.value }
+                            })
+                            .find(
+                              val =>
+                                val.id ===
+                                item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
+                                  Number(attr?.id)
+                                ]
+                            )
+                            ? ''
+                            : attr?.values.push({ id, value: String(value), attributeId: attr.id })
                         }}
+                        isFreeValue={attr?.isFreeValue}
+                        id={attr?.id}
                         value={
                           attr?.values
                             .map(item => {
@@ -1197,8 +1227,8 @@ export const EditProduct = () => {
                             .find(
                               val =>
                                 val.id ===
-                                item?.main?.attributeValueIds?.find(av => av[String(attr?.id)])?.[
-                                  String(attr?.id)
+                                item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
+                                  Number(attr?.id)
                                 ]
                             ) || {
                             id: 0,
