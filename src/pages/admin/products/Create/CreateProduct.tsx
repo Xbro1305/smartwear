@@ -209,7 +209,6 @@ export const CreateProduct = () => {
         productId: 0,
         variants:
           item?.variantCodes?.map(v => ({
-            variantId: 0,
             codes: v.codes.map(c => c.code).filter(code => code && code.trim() !== ''),
           })) || [],
       },
