@@ -130,7 +130,7 @@ export const ProductsList = () => {
   }
 
   useEffect(() => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/products?categoryName=Одежда&page=1&limit=10`, {
+    axios(`${import.meta.env.VITE_APP_API_URL}/products?categoryName=Одежда&page=1&limit=100000`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
