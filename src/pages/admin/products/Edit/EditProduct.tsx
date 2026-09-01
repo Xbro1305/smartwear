@@ -290,56 +290,153 @@ export const EditProduct = () => {
     if (!i) return
     setLoading(true)
 
-    const syncVariants = (i?.variantCodes || [])
+    const variantsForSync = (i?.variantCodes || [])
       .filter(v => v.id == null || !deletedVariantIds.includes(v.id))
       .map(v => ({
-        variantId: v.id,
-        codes: v.codes.map(c => c.code).filter(code => code && code.trim() !== ''),
+        ...v,
+        codes: (v.codes || [])
+          .map(c => ({ code: c.code?.trim() || '' }))
+          .filter(c => c.code),
       }))
       .filter(v => v.codes.length > 0)
 
-    axios(`${import.meta.env.VITE_APP_API_URL}/product-stocks/sync-product-codes`, {
-      method: 'POST',
-      data: {
-        productId: Number(id),
-        variants: syncVariants,
-      },
-    })
-      .then(() => {
-        const codes =
-          syncVariants
-            .map(v => v.codes)
-            .filter(arr => arr && arr.length > 0)
-            .flat() || []
+    const invalidNewVariant = variantsForSync.find(
+      v => v.id == null && (!v.colorAttrValueId || !v.sizeValueId || !v.colorAlias?.trim())
+    )
 
-        const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes?.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
+    if (invalidNewVariant) {
+      const rowIndex = (i.variantCodes || []).findIndex(v => v.clientId === invalidNewVariant.clientId)
+      toast.error(
+        `Для синхронизации новой строки ${rowIndex >= 0 ? rowIndex + 1 : ''} выберите цвет, размер и alias`
+      )
+      setLoading(false)
+      return
+    }
 
-        axios(url, {
-          method: 'GET',
-        })
-          .then((res: { data: Stock[] }) => {
-            setStock(res.data as Stock[])
+    const syncVariants = variantsForSync.map(v =>
+      v.id != null
+        ? {
+            variantId: v.id,
+            codes: v.codes.map(c => c.code),
+          }
+        : {
+            colorAttrValueId: v.colorAttrValueId,
+            sizeValueId: v.sizeValueId,
+            colorAlias: v.colorAlias,
+            codes: v.codes.map(c => c.code),
+          }
+    )
 
-            const uniqueStores = Array.from(
-              new Map(
-                res.data.flatMap(item =>
-                  item.stores.map(store => [
-                    store.storeId,
-                    { storeId: store.storeId, name: store.name, shortName: store.shortName },
-                  ])
-                )
-              ).values()
-            )
-            toast.success('Синхронизация прошла успешно')
-            setWarehouses(uniqueStores as Store[])
-          })
-          .catch(err => {
-            console.error(err.response.data.message)
-            toast.error(err.response.data.message)
-          })
-          .finally(() => setLoading(false))
+    const getResponseVariants = (data: any): any[] => {
+      if (Array.isArray(data)) return data
+
+      const possibleArrays = [
+        data?.variants,
+        data?.data?.variants,
+        data?.createdVariants,
+        data?.data?.createdVariants,
+        data?.result?.variants,
+        data?.data,
+      ]
+
+      const variants = possibleArrays.find(Array.isArray)
+      if (variants) return variants
+
+      return data && typeof data === 'object' && (data.variantId || data.id) ? [data] : []
+    }
+
+    const getVariantId = (variant: any) => {
+      const variantId = Number(variant?.variantId ?? variant?.id ?? variant?.variant?.id)
+      return Number.isFinite(variantId) && variantId > 0 ? variantId : undefined
+    }
+
+    try {
+      const syncResponse = await axios(`${import.meta.env.VITE_APP_API_URL}/product-stocks/sync-product-codes`, {
+        method: 'POST',
+        data: {
+          productId: Number(id),
+          variants: syncVariants,
+        },
       })
-      .catch(err => toast.error(err.response.data.message))
+
+      const responseVariants = getResponseVariants(syncResponse.data)
+      const newVariantsForSync = variantsForSync.filter(v => v.id == null)
+
+      if (newVariantsForSync.length && responseVariants.length) {
+        const createdVariantIds = newVariantsForSync
+          .map((variant, newVariantIndex) => {
+            const syncIndex = variantsForSync.findIndex(v => v.clientId === variant.clientId)
+            const responseVariant =
+              responseVariants.find(
+                resVariant =>
+                  Number(resVariant?.colorAttrValueId) === Number(variant.colorAttrValueId) &&
+                  Number(resVariant?.sizeValueId) === Number(variant.sizeValueId) &&
+                  (!resVariant?.colorAlias || resVariant.colorAlias === variant.colorAlias)
+              ) ||
+              (responseVariants.length === variantsForSync.length ? responseVariants[syncIndex] : undefined) ||
+              (responseVariants.length === newVariantsForSync.length
+                ? responseVariants[newVariantIndex]
+                : undefined)
+
+            return {
+              clientId: variant.clientId,
+              variantId: getVariantId(responseVariant),
+            }
+          })
+          .filter((variant): variant is { clientId: string; variantId: number } =>
+            Boolean(variant.clientId && variant.variantId)
+          )
+
+        if (createdVariantIds.length) {
+          setItem(prev =>
+            prev
+              ? {
+                  ...prev,
+                  variantCodes: (prev.variantCodes || []).map(variant => {
+                    const createdVariant = createdVariantIds.find(
+                      item => item.clientId === variant.clientId
+                    )
+
+                    return createdVariant ? { ...variant, id: createdVariant.variantId } : variant
+                  }),
+                }
+              : prev
+          )
+        }
+      }
+
+      const codes = variantsForSync.flatMap(v => v.codes.map(c => c.code))
+
+      const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes?.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
+
+      axios(url, {
+        method: 'GET',
+      })
+        .then((res: { data: Stock[] }) => {
+          setStock(res.data as Stock[])
+
+          const uniqueStores = Array.from(
+            new Map(
+              res.data.flatMap(item =>
+                item.stores.map(store => [
+                  store.storeId,
+                  { storeId: store.storeId, name: store.name, shortName: store.shortName },
+                ])
+              )
+            ).values()
+          )
+          toast.success('Синхронизация прошла успешно')
+          setWarehouses(uniqueStores as Store[])
+        })
+        .catch(err => {
+          console.error(err.response.data.message)
+          toast.error(err.response.data.message)
+        })
+        .finally(() => setLoading(false))
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Ошибка синхронизации остатков')
+      setLoading(false)
+    }
   }
 
   const sendData = async () => {
@@ -392,12 +489,21 @@ export const EditProduct = () => {
     }
 
     try {
-      await axios.put(`${import.meta.env.VITE_APP_API_URL}/products/${id}`, data, {
+      // get response and syncronize with response data
+      const response = await axios({
+        url: `${import.meta.env.VITE_APP_API_URL}/products/${id}`,
+        method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
         },
+        data,
       })
+      syncronize({ ...response.data, variantCodes: response.data.variants })
+
+      axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
+        method: 'POST',
+      }).catch(err => toast.error(err.response.data.message))
     } catch (err) {
       console.log(err)
     }
@@ -490,12 +596,6 @@ export const EditProduct = () => {
           toast.error('Ошибка при добавлении цвета')
         }
       }
-
-      syncronize()
-
-      axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
-        method: 'POST',
-      }).catch(err => toast.error(err.response.data.message))
 
       // 5️⃣ REDIRECT AFTER ALL REQUESTS
       window.location.href = '/admin/products'
