@@ -45,6 +45,7 @@ interface Item {
   variantCodes?: {
     /** Стабильный id строки: React не пересоздаёт инпуты при каждом вводе. */
     clientId?: string
+    id?: number
     colorAlias: string
     colorAttrValue?: string
     colorAttrValueId: number
@@ -83,6 +84,7 @@ interface Media {
   type: 'photo' | 'lining' | 'cover' | 'video'
   file: File
   colorAttrValueId: number
+  colorAlias?: string
   id?: any
   /** Уникален для каждого файла и не зависит от его имени. */
   clientId: string
@@ -202,49 +204,125 @@ export const CreateProduct = () => {
     })
   }
 
-  const syncronize = async () => {
-    axios(`${import.meta.env.VITE_APP_API_URL}/product-stocks/sync-product-codes`, {
-      method: 'POST',
-      data: {
-        productId: 0,
-        variants:
-          item?.variantCodes?.map(v => ({
-            codes: v.codes.map(c => c.code).filter(code => code && code.trim() !== ''),
-          })) || [],
-      },
-    })
-      .then(() => {
-        const codes =
-          item?.variantCodes
-            ?.map(c => c.codes.map(vc => vc.code).filter(code => code && code.trim() !== ''))
-            .filter(arr => arr && arr.length > 0)
-            .flat() || []
+  const syncronize = async (productId?: number, i: Item | undefined = item) => {
+    if (!productId) {
+      toast.error('Сначала сохраните товар')
+      return false
+    }
 
-        const url = `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes.map(c => `codes=${encodeURIComponent(c)}`).join('&')}`
+    const variantsForSync = (i?.variantCodes || [])
+      .map(variant => ({
+        ...variant,
+        codes: (variant.codes || [])
+          .map(code => ({ code: code.code?.trim() || '' }))
+          .filter(code => code.code),
+      }))
+      .filter(variant => variant.codes.length > 0)
 
-        axios(url, {
-          method: 'GET',
+    const invalidVariant = variantsForSync.find(
+      variant => !variant.colorAttrValueId || !variant.sizeValueId || !variant.colorAlias?.trim()
+    )
+    if (invalidVariant) {
+      toast.error('Для синхронизации выберите цвет, размер и alias')
+      return false
+    }
+
+    const syncVariants = variantsForSync.map(variant => ({
+      ...(variant.id != null ? { variantId: variant.id } : {}),
+      colorAttrValueId: variant.colorAttrValueId,
+      sizeValueId: variant.sizeValueId,
+      colorAlias: variant.colorAlias,
+      codes: variant.codes.map(code => code.code),
+    }))
+
+    const extractVariants = (data: any): any[] => {
+      if (Array.isArray(data)) return data
+      return (
+        [
+          data?.variants,
+          data?.data?.variants,
+          data?.createdVariants,
+          data?.data?.createdVariants,
+          data?.result?.variants,
+          data?.data,
+        ].find(Array.isArray) || (data?.variantId || data?.id ? [data] : [])
+      )
+    }
+
+    try {
+      const syncResponse = await axios.post(
+        `${import.meta.env.VITE_APP_API_URL}/product-stocks/sync-product-codes`,
+        { productId, variants: syncVariants }
+      )
+      const responseVariants = extractVariants(syncResponse.data)
+      const newVariants = variantsForSync.filter(variant => variant.id == null)
+
+      const createdIds = newVariants
+        .map((variant, newVariantIndex) => {
+          const syncIndex = variantsForSync.findIndex(
+            candidate => candidate.clientId === variant.clientId
+          )
+          const responseVariant =
+            responseVariants.find(
+              candidate =>
+                Number(candidate?.colorAttrValueId) === Number(variant.colorAttrValueId) &&
+                Number(candidate?.sizeValueId) === Number(variant.sizeValueId) &&
+                (!candidate?.colorAlias || candidate.colorAlias === variant.colorAlias)
+            ) ||
+            (responseVariants.length === variantsForSync.length
+              ? responseVariants[syncIndex]
+              : undefined) ||
+            (responseVariants.length === newVariants.length
+              ? responseVariants[newVariantIndex]
+              : undefined)
+          const variantId = Number(
+            responseVariant?.variantId ?? responseVariant?.id ?? responseVariant?.variant?.id
+          )
+
+          return {
+            clientId: variant.clientId,
+            variantId: Number.isFinite(variantId) && variantId > 0 ? variantId : undefined,
+          }
         })
-          .then((res: { data: Stock[] }) => {
-            setStock(res.data as Stock[])
+        .filter((entry): entry is { clientId: string; variantId: number } =>
+          Boolean(entry.clientId && entry.variantId)
+        )
 
-            const uniqueStores = Array.from(
-              new Map(
-                res.data.flatMap(item =>
-                  item.stores.map(store => [
-                    store.storeId,
-                    { storeId: store.storeId, name: store.name, shortName: store.shortName },
-                  ])
-                )
-              ).values()
-            )
-            setWarehouses(uniqueStores as Store[])
+      if (createdIds.length) {
+        setItem(prev => ({
+          ...prev,
+          variantCodes: (prev.variantCodes || []).map(variant => {
+            const created = createdIds.find(entry => entry.clientId === variant.clientId)
+            return created ? { ...variant, id: created.variantId } : variant
+          }),
+        }))
+      }
 
-            console.log(uniqueStores)
-          })
-          .catch(err => toast.error(err.response.data.message))
-      })
-      .catch(err => toast.error(err.response.data.message))
+      const codes = variantsForSync.flatMap(variant => variant.codes.map(code => code.code))
+      const storesResponse = await axios.get<Stock[]>(
+        `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes
+          .map(code => `codes=${encodeURIComponent(code)}`)
+          .join('&')}`
+      )
+      setStock(storesResponse.data)
+
+      const uniqueStores = Array.from(
+        new Map(
+          storesResponse.data.flatMap(stockItem =>
+            stockItem.stores.map(store => [
+              store.storeId,
+              { storeId: store.storeId, name: store.name, shortName: store.shortName },
+            ])
+          )
+        ).values()
+      )
+      setWarehouses(uniqueStores as Store[])
+      toast.success('Синхронизация прошла успешно')
+      return true
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Ошибка синхронизации остатков')
+      return false
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -295,7 +373,6 @@ export const CreateProduct = () => {
       oldPrice: item?.main?.oldPrice,
       careRecommendation: item?.main?.careRecommendation,
       careIconIds: item?.main?.careIds,
-      variantCodes: item?.variantCodes,
       categoryName: 'Одежда',
       attributeValueIds: [
         item?.main.brandId,
@@ -324,6 +401,11 @@ export const CreateProduct = () => {
       })
 
       const productId = res.data.id
+      const synchronized = await syncronize(productId, item)
+
+      if (!synchronized) {
+        throw new Error('Не удалось синхронизировать коды вариантов')
+      }
 
       // Добавление цен
       for (const price of prices) {
@@ -368,9 +450,9 @@ export const CreateProduct = () => {
         }
       }
 
-      axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
+      await axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
         method: 'POST',
-      }).catch(err => toast.error(err.response.data.message))
+      })
 
       // После успешного добавления — редирект
       navigate('/admin/products')
@@ -379,6 +461,29 @@ export const CreateProduct = () => {
       console.error(err)
     }
   }
+
+  const mediaColorOptions = Array.from(
+    (item.variantCodes || []).reduce((options, variant, index) => {
+      if (!variant.colorAttrValueId || !variant.colorAlias?.trim()) return options
+
+      const colorName = attributes
+        .find(attribute => attribute.name === 'Цвет')
+        ?.values.find(value => value.id === variant.colorAttrValueId)?.value
+      const colorAlias = variant.colorAlias.trim()
+      const key = `${variant.colorAttrValueId}:${colorAlias}`
+
+      if (!options.has(key)) {
+        options.set(key, {
+          id: index + 1,
+          value: `${colorName || 'Цвет'} (${colorAlias})`,
+          colorAttrValueId: variant.colorAttrValueId,
+          colorAlias,
+        })
+      }
+
+      return options
+    }, new Map<string, { id: number; value: string; colorAttrValueId: number; colorAlias: string }>())
+  ).map(([, option]) => option)
 
   const columns = `110px 110px 110px 110px 120px 110px 50px ${warehouses
     .map(() => '110px')
@@ -1596,7 +1701,11 @@ export const CreateProduct = () => {
                         </div>
                       ))}
                     </div>
-                    <button className="admin-input w-fit flex items-center" onClick={syncronize}>
+                    <button
+                      type="button"
+                      className="admin-input w-fit flex items-center"
+                      onClick={() => toast.error('Сначала сохраните товар')}
+                    >
                       Синхронизировать остатки
                     </button>
                   </div>
@@ -1678,46 +1787,34 @@ export const CreateProduct = () => {
                     <div className="flex items-center gap-[5px]">
                       <p className="text-[16px]">Для цвета</p>
                       <CustomSelect
-                        data={
-                          attributes
-                            .find(attr => attr.name === 'Цвет')
-                            ?.values.filter(v =>
-                              item?.variantCodes?.some(m => m.colorAttrValueId === v.id)
-                            )
-                            .map(v => ({
-                              id: v.id,
-                              value: item.variantCodes?.find(
-                                variant => variant.colorAlias && variant.colorAttrValueId === v.id
-                              )
-                                ? `${v.value} (${item.variantCodes?.find(vc => vc.colorAlias && vc.colorAttrValueId === v.id)?.colorAlias})`
-                                : v.value,
-                            })) || []
-                        }
+                        data={mediaColorOptions}
                         placeholder="Выберите цвет"
                         className="w-[170px]"
-                        onChange={id => {
+                        onChange={optionId => {
+                          const selected = mediaColorOptions.find(option => option.id === optionId)
+                          if (!selected) return
+
                           setItemMedia(prev =>
                             prev?.map(media =>
                               media.clientId === m.clientId
-                                ? { ...media, colorAttrValueId: id }
+                                ? {
+                                    ...media,
+                                    colorAttrValueId: selected.colorAttrValueId,
+                                    colorAlias: selected.colorAlias,
+                                  }
                                 : media
                             )
                           )
                         }}
                         value={
-                          attributes
-                            .find(attr => attr.name === 'Цвет')
-                            ?.values.map(i => {
-                              return {
-                                id: i.id,
-                                value: item.variantCodes?.find(
-                                  variant => variant.colorAlias && variant.colorAttrValueId === i.id
-                                )
-                                  ? `${i.value} (${item.variantCodes?.find(vc => vc.colorAlias && vc.colorAttrValueId === i.id)?.colorAlias})`
-                                  : i.value,
-                              }
-                            })
-                            .find(val => val.id === m.colorAttrValueId) || { id: 0, value: '' }
+                          mediaColorOptions.find(
+                            option =>
+                              option.colorAttrValueId === m.colorAttrValueId &&
+                              option.colorAlias === m.colorAlias
+                          ) ||
+                          mediaColorOptions.find(
+                            option => option.colorAttrValueId === m.colorAttrValueId
+                          ) || { id: 0, value: '' }
                         }
                         showSuggestions={false}
                       />
