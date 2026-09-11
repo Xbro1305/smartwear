@@ -11,6 +11,17 @@ import { FaCheck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import './Create.css'
 import { ROUTER_PATHS } from '@/shared/config/routes'
+import { FreeValueInput } from '../Components/FreeValueInput/FreeValueInput'
+import {
+  authHeaders,
+  extractResponseStocks,
+  getErrorMessage,
+  getSyncWarnings,
+  getVariantRowError,
+  getWarehouses,
+  matchCreatedVariantIds,
+  resolveFreeValueIds,
+} from '../lib/productSave'
 
 interface Item {
   main: {
@@ -31,6 +42,8 @@ interface Item {
     careIds?: number[]
     careRecommendation?: string
     lengthValue?: number
+    /** Текст атрибутов с «произвольным значением»: id атрибута → значение. */
+    freeValues?: Record<number, string>
   }
   seo: {
     seoSlug?: string
@@ -41,6 +54,7 @@ interface Item {
     colorAttrValueId: number
     price: number
     oldPrice: number
+    id?: number
   }[]
   variantCodes?: {
     /** Стабильный id строки: React не пересоздаёт инпуты при каждом вводе. */
@@ -88,6 +102,8 @@ interface Media {
   id?: any
   /** Уникален для каждого файла и не зависит от его имени. */
   clientId: string
+  /** Файл уже загружен — повторное сохранение не отправит его второй раз. */
+  uploaded?: boolean
 }
 
 interface Store {
@@ -126,6 +142,8 @@ export const CreateProduct = () => {
   const [stock, setStock] = useState<Stock[]>([])
   const [warehouses, setWarehouses] = useState<Store[]>([])
   const [sending, setSending] = useState<boolean>(false)
+  // id уже созданного товара: если сохранилось не всё, повторное «Сохранить» его обновит
+  const [createdProductId, setCreatedProductId] = useState<number>()
 
   const navigate = useNavigate()
 
@@ -192,21 +210,63 @@ export const CreateProduct = () => {
       })
   }, [])
 
-  const deleteRow = (rowIndex: number) => {
-    setItem(prev => {
-      if (!prev) return prev
-      const newVariantCodes = [...(prev.variantCodes || [])]
-      newVariantCodes.splice(rowIndex, 1)
-      return {
-        ...prev,
-        variantCodes: newVariantCodes,
+  const deleteRow = async (clientId?: string) => {
+    const variant = item.variantCodes?.find(v => v.clientId === clientId)
+
+    // строка уже ушла на бэк при прошлом сохранении — удаляем и там
+    if (variant?.id != null && createdProductId) {
+      try {
+        await axios.delete(
+          `${import.meta.env.VITE_APP_API_URL}/products/${createdProductId}/variants/${variant.id}`,
+          { headers: authHeaders() }
+        )
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Не удалось удалить вариант'))
+        return
       }
-    })
+    }
+
+    setItem(prev => ({
+      ...prev,
+      variantCodes: (prev.variantCodes || []).filter(v => v.clientId !== clientId),
+    }))
   }
 
-  const syncronize = async (productId?: number, i: Item | undefined = item) => {
+  const setSimpleAttribute = (attributeId: number, valueId: number) =>
+    setItem(prev => ({
+      ...prev,
+      main: {
+        ...prev.main,
+        attributeValueIds: [
+          ...(prev.main.attributeValueIds || []).filter(
+            av => !Object.keys(av).includes(String(attributeId))
+          ),
+          { [String(attributeId)]: valueId },
+        ],
+      },
+    }))
+
+  const setFreeValue = (attributeId: number, text: string) =>
+    setItem(prev => ({
+      ...prev,
+      main: { ...prev.main, freeValues: { ...prev.main.freeValues, [attributeId]: text } },
+    }))
+
+  const getSimpleAttributeValue = (attr: Attribute) => {
+    const selectedId = item.main.attributeValueIds?.find(av => av[attr.id])?.[attr.id]
+    const selected = attr.values.find(value => value.id === selectedId)
+    return selected ? { id: selected.id, value: selected.value } : { id: 0, value: '' }
+  }
+
+  const syncronize = async (productId?: number, i: Item | undefined = item, withToast = true) => {
     if (!productId) {
       toast.error('Сначала сохраните товар')
+      return false
+    }
+
+    const rowError = getVariantRowError(i?.variantCodes)
+    if (rowError) {
+      toast.error(rowError)
       return false
     }
 
@@ -219,14 +279,6 @@ export const CreateProduct = () => {
       }))
       .filter(variant => variant.codes.length > 0)
 
-    const invalidVariant = variantsForSync.find(
-      variant => !variant.colorAttrValueId || !variant.sizeValueId || !variant.colorAlias?.trim()
-    )
-    if (invalidVariant) {
-      toast.error('Для синхронизации выберите цвет, размер и alias')
-      return false
-    }
-
     const syncVariants = variantsForSync.map(variant => ({
       ...(variant.id != null ? { variantId: variant.id } : {}),
       colorAttrValueId: variant.colorAttrValueId,
@@ -235,59 +287,21 @@ export const CreateProduct = () => {
       codes: variant.codes.map(code => code.code),
     }))
 
-    const extractVariants = (data: any): any[] => {
-      if (Array.isArray(data)) return data
-      return (
-        [
-          data?.variants,
-          data?.data?.variants,
-          data?.createdVariants,
-          data?.data?.createdVariants,
-          data?.result?.variants,
-          data?.data,
-        ].find(Array.isArray) || (data?.variantId || data?.id ? [data] : [])
-      )
-    }
+    const rowNumber = (variant: { clientId?: string }) =>
+      (i?.variantCodes || []).findIndex(v => v.clientId === variant.clientId) + 1
+    let syncWarnings: string[] = []
+    let responseStocks: Stock[] | undefined
 
     try {
       const syncResponse = await axios.post(
         `${import.meta.env.VITE_APP_API_URL}/product-stocks/sync-product-codes`,
         { productId, variants: syncVariants }
       )
-      const responseVariants = extractVariants(syncResponse.data)
-      const newVariants = variantsForSync.filter(variant => variant.id == null)
 
-      const createdIds = newVariants
-        .map((variant, newVariantIndex) => {
-          const syncIndex = variantsForSync.findIndex(
-            candidate => candidate.clientId === variant.clientId
-          )
-          const responseVariant =
-            responseVariants.find(
-              candidate =>
-                Number(candidate?.colorAttrValueId) === Number(variant.colorAttrValueId) &&
-                Number(candidate?.sizeValueId) === Number(variant.sizeValueId) &&
-                (!candidate?.colorAlias || candidate.colorAlias === variant.colorAlias)
-            ) ||
-            (responseVariants.length === variantsForSync.length
-              ? responseVariants[syncIndex]
-              : undefined) ||
-            (responseVariants.length === newVariants.length
-              ? responseVariants[newVariantIndex]
-              : undefined)
-          const variantId = Number(
-            responseVariant?.variantId ?? responseVariant?.id ?? responseVariant?.variant?.id
-          )
+      syncWarnings = getSyncWarnings(variantsForSync, syncResponse.data, rowNumber)
+      responseStocks = extractResponseStocks<Stock>(syncResponse.data)
 
-          return {
-            clientId: variant.clientId,
-            variantId: Number.isFinite(variantId) && variantId > 0 ? variantId : undefined,
-          }
-        })
-        .filter((entry): entry is { clientId: string; variantId: number } =>
-          Boolean(entry.clientId && entry.variantId)
-        )
-
+      const createdIds = matchCreatedVariantIds(variantsForSync, syncResponse.data)
       if (createdIds.length) {
         setItem(prev => ({
           ...prev,
@@ -297,36 +311,139 @@ export const CreateProduct = () => {
           }),
         }))
       }
-
-      const codes = variantsForSync.flatMap(variant => variant.codes.map(code => code.code))
-      const storesResponse = await axios.get<Stock[]>(
-        `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes
-          .map(code => `codes=${encodeURIComponent(code)}`)
-          .join('&')}`
-      )
-      setStock(storesResponse.data)
-
-      const uniqueStores = Array.from(
-        new Map(
-          storesResponse.data.flatMap(stockItem =>
-            stockItem.stores.map(store => [
-              store.storeId,
-              { storeId: store.storeId, name: store.name, shortName: store.shortName },
-            ])
-          )
-        ).values()
-      )
-      setWarehouses(uniqueStores as Store[])
-      toast.success('Синхронизация прошла успешно')
-      return true
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Ошибка синхронизации остатков')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Ошибка синхронизации остатков'))
       return false
     }
+
+    // Остатки по складам — только для отображения, их ошибка не отменяет синхронизацию.
+    // Обычно они приходят прямо в ответе синхронизации.
+    const codes = variantsForSync.flatMap(variant => variant.codes.map(code => code.code))
+    if (responseStocks) {
+      setStock(responseStocks)
+      setWarehouses(getWarehouses(responseStocks))
+    } else if (codes.length) {
+      try {
+        const storesResponse = await axios.get<Stock[]>(
+          `${import.meta.env.VITE_APP_API_URL}/product-stocks/which-stores?${codes
+            .map(code => `codes=${encodeURIComponent(code)}`)
+            .join('&')}`
+        )
+        setStock(storesResponse.data)
+        setWarehouses(getWarehouses(storesResponse.data))
+      } catch (err) {
+        console.error('Error fetching stocks:', err)
+      }
+    }
+
+    if (syncWarnings.length) {
+      toast.error(`Сервер сохранил варианты не так, как в таблице: ${syncWarnings.join('; ')}`, {
+        autoClose: false,
+      })
+      return false
+    }
+
+    if (withToast) toast.success('Синхронизация прошла успешно')
+    return true
+  }
+
+  const buildProductData = (freeValueIds: number[]) => {
+    const simpleAttributeIds = item.main.attributeValueIds?.map(av => Object.values(av)[0]) || []
+
+    return {
+      name: item.main.name,
+      articul: item.main.articul,
+      description: item.main.description,
+      price: item.main.price,
+      sizeTypeId: item.main.sizeTypeId,
+      status: true,
+      featureIds: item.main.featureIds,
+      isPublished: item.main.isPublished,
+      isDeliverable: item.main.isDeliverable,
+      oldPrice: item.main.oldPrice,
+      careRecommendation: item.main.careRecommendation,
+      careIconIds: item.main.careIds,
+      categoryName: 'Одежда',
+      attributeValueIds: [
+        item.main.brandId,
+        item.main.seasonId,
+        item.main.typeId,
+        item.main.materialId,
+        ...simpleAttributeIds,
+        ...freeValueIds,
+      ].filter((attrValueId): attrValueId is number => Boolean(attrValueId)),
+      quantity: 1,
+      seoSlug: item.seo?.seoSlug,
+      metaTitle: item.seo?.metaTitle,
+      metaDescription: item.seo?.metaDescription,
+      lengthValue: item.main.lengthValue,
+    }
+  }
+
+  /** Возвращает число фото/видео, которые не удалось загрузить. */
+  const saveMedia = async (productId: number) => {
+    let failed = 0
+
+    for (const mediaItem of itemMedia || []) {
+      if (mediaItem.uploaded) continue
+
+      const formData = new FormData()
+      formData.append('file', mediaItem.file)
+      formData.append('kind', mediaItem.type)
+      if ((mediaItem.type === 'cover' || mediaItem.type === 'photo') && mediaItem.colorAttrValueId)
+        formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
+
+      try {
+        await axios.post(`${import.meta.env.VITE_APP_API_URL}/media/${productId}/`, formData, {
+          headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
+        })
+        // помечаем сразу — повторное «Сохранить» не загрузит файл второй раз
+        setItemMedia(prev =>
+          prev?.map(m => (m.clientId === mediaItem.clientId ? { ...m, uploaded: true } : m))
+        )
+        await new Promise(resolve => setTimeout(resolve, 500)) // небольшой интервал
+      } catch (err) {
+        failed++
+        console.error('Media upload failed:', mediaItem, err)
+      }
+    }
+
+    return failed
+  }
+
+  /** Возвращает число цен, которые не удалось сохранить. */
+  const savePrices = async (productId: number) => {
+    let failed = 0
+
+    for (const price of item.prices || []) {
+      if (!price.colorAttrValueId) continue
+      try {
+        const res = await axios({
+          url: `${import.meta.env.VITE_APP_API_URL}/products/${productId}/prices/color`,
+          method: price.id ? 'PUT' : 'POST',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          data: price,
+        })
+        const priceId = Number(res.data?.id)
+        if (!price.id && priceId > 0) {
+          setItem(prev => ({
+            ...prev,
+            prices: (prev.prices || []).map(p => (p === price ? { ...p, id: priceId } : p)),
+          }))
+        }
+        await new Promise(resolve => setTimeout(resolve, 300)) // небольшой интервал
+      } catch (err) {
+        failed++
+        console.error('Price save failed:', price, err)
+      }
+    }
+
+    return failed
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (sending) return
 
     if (!item?.main?.name || item?.main?.name.trim() === '') {
       toast.error('Название товара обязательно для заполнения')
@@ -353,112 +470,69 @@ export const CreateProduct = () => {
       return
     }
 
-    if (sending) return
-    setSending(true)
-
-    const simpleAttributeIds = item.main.attributeValueIds?.map(av => Object.values(av)[0]) || []
-
-    console.log(simpleAttributeIds)
-
-    const data = {
-      name: item?.main?.name,
-      articul: item?.main?.articul,
-      description: item?.main?.description,
-      price: item?.main?.price,
-      sizeTypeId: item?.main?.sizeTypeId,
-      status: true,
-      featureIds: item?.main?.featureIds,
-      isPublished: item?.main?.isPublished,
-      isDeliverable: item?.main?.isDeliverable,
-      oldPrice: item?.main?.oldPrice,
-      careRecommendation: item?.main?.careRecommendation,
-      careIconIds: item?.main?.careIds,
-      categoryName: 'Одежда',
-      attributeValueIds: [
-        item?.main.brandId,
-        item?.main.seasonId,
-        item?.main.typeId,
-        item?.main.materialId,
-        ...simpleAttributeIds,
-      ].filter(id => id != null),
-      quantity: 1,
-      seoSlug: item?.seo.seoSlug,
-      metaTitle: item?.seo.metaTitle,
-      metaDescription: item?.seo.metaDescription,
-      lengthValue: item?.main?.lengthValue,
+    const rowError = getVariantRowError(item.variantCodes)
+    if (rowError) {
+      toast.error(rowError)
+      return
     }
 
-    const prices = [...(item?.prices || [])]
-    const media = [...(itemMedia || [])]
+    setSending(true)
 
     try {
-      // Создание продукта
-      const res = await axios.post(`${import.meta.env.VITE_APP_API_URL}/products`, data, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
+      // 1. Сам товар. После первого успешного создания повторное «Сохранить»
+      // обновляет его, а не создаёт дубль.
+      let productId = createdProductId
+      try {
+        const freeValueIds = await resolveFreeValueIds(item.main.freeValues, attributes)
+        const data = buildProductData(freeValueIds)
+        const config = { headers: { ...authHeaders(), 'Content-Type': 'application/json' } }
 
-      const productId = res.data.id
-      const synchronized = await syncronize(productId, item)
-
-      if (!synchronized) {
-        throw new Error('Не удалось синхронизировать коды вариантов')
-      }
-
-      // Добавление цен
-      for (const price of prices) {
-        try {
-          await axios.post(
-            `${import.meta.env.VITE_APP_API_URL}/products/${productId}/prices/color`,
-            price,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-              },
-            }
-          )
-          await new Promise(resolve => setTimeout(resolve, 300)) // небольшой интервал
-        } catch (err) {
-          toast.error('Произошла ошибка при добавлении цены')
-          console.error(err)
+        if (productId) {
+          await axios.put(`${import.meta.env.VITE_APP_API_URL}/products/${productId}`, data, config)
+        } else {
+          const res = await axios.post(`${import.meta.env.VITE_APP_API_URL}/products`, data, config)
+          productId = Number(res.data?.id)
+          if (!productId) throw new Error('Сервер не вернул id товара')
+          setCreatedProductId(productId)
         }
+      } catch (err) {
+        console.error(err)
+        toast.error(getErrorMessage(err, 'Не удалось сохранить товар'))
+        return
       }
 
-      // Добавление медиа
-      for (const mediaItem of media) {
-        try {
-          const formData = new FormData()
-          formData.append('file', mediaItem.file)
-          formData.append('kind', mediaItem.type)
-          if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
-            formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
-          }
+      // 2. Фото, цены и варианты сохраняем независимо друг от друга: раньше ошибка
+      // синхронизации обрывала сохранение, и фото даже не отправлялись на сервер.
+      const failures: string[] = []
 
-          await axios.post(`${import.meta.env.VITE_APP_API_URL}/media/${productId}/`, formData, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'multipart/form-data',
-            },
-          })
-          await new Promise(resolve => setTimeout(resolve, 500)) // небольшой интервал
-        } catch (err) {
-          toast.error('Произошла ошибка при добавлении медиа')
-          console.error(err)
-        }
+      const mediaFailed = await saveMedia(productId)
+      if (mediaFailed) failures.push(`не загружено фото/видео: ${mediaFailed}`)
+
+      const pricesFailed = await savePrices(productId)
+      if (pricesFailed) failures.push(`не сохранено цен: ${pricesFailed}`)
+
+      if (!(await syncronize(productId, item, false)))
+        failures.push('не сохранены варианты и остатки')
+
+      try {
+        await axios.post(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`)
+      } catch (err) {
+        console.error(err)
+        toast.warning('Товар сохранён, но общая синхронизация с МойСклад не запустилась')
       }
 
-      await axios(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`, {
-        method: 'POST',
-      })
+      // Не уходим со страницы, пока всё не сохранилось: иначе выбранные файлы теряются
+      if (failures.length) {
+        toast.error(
+          `Товар создан, но сохранено не всё: ${failures.join('; ')}. Проверьте и нажмите «Сохранить» ещё раз — дубль не создастся`,
+          { autoClose: false }
+        )
+        return
+      }
 
-      // После успешного добавления — редирект
       navigate('/admin/products')
-    } catch (err) {
-      toast.error('Произошла ошибка при создании продукта')
-      console.error(err)
+    } finally {
+      setSending(false)
     }
   }
 
@@ -1103,63 +1177,23 @@ export const CreateProduct = () => {
               .map(attr => (
                 <div className="flex flex-col gap-sm w-[372px]" key={attr?.name}>
                   <p className="font-semibold text-[14px]">{attr?.name}</p>
-                  <CustomSelect
-                    className="w-[372px]"
-                    data={
-                      attr?.values.map(item => {
-                        return { id: item.id, value: item.value }
-                      }) || []
-                    }
-                    placeholder={`Выберите ${attr?.name}`}
-                    isFreeValue={attr?.isFreeValue}
-                    id={attr?.id}
-                    onChange={(id, value) => {
-                      setItem(
-                        prev =>
-                          ({
-                            ...prev,
-                            main: {
-                              ...prev?.main,
-                              attributeValueIds: [
-                                ...(prev?.main?.attributeValueIds || []).filter(
-                                  av => !Object.keys(av).includes(String(attr?.id))
-                                ),
-                                { [String(attr?.id)]: id },
-                              ],
-                            },
-                          }) as Item
-                      )
-                      attr?.values
-                        .map(item => {
-                          return { id: item.id, value: item.value }
-                        })
-                        .find(
-                          val =>
-                            val.id ===
-                            item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
-                              Number(attr?.id)
-                            ]
-                        )
-                        ? ''
-                        : attr.values.push({ id, value: String(value), attributeId: attr.id })
-                    }}
-                    value={
-                      attr?.values
-                        .map(item => {
-                          return { id: item.id, value: item.value }
-                        })
-                        .find(
-                          val =>
-                            val.id ===
-                            item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
-                              Number(attr?.id)
-                            ]
-                        ) || {
-                        id: 0,
-                        value: '',
-                      }
-                    }
-                  />
+                  {attr.isFreeValue ? (
+                    <FreeValueInput
+                      className="w-[372px]"
+                      values={attr.values}
+                      placeholder={`Введите ${attr.name}`}
+                      value={item.main.freeValues?.[attr.id] || ''}
+                      onChange={text => setFreeValue(attr.id, text)}
+                    />
+                  ) : (
+                    <CustomSelect
+                      className="w-[372px]"
+                      data={attr.values.map(value => ({ id: value.id, value: value.value }))}
+                      placeholder={`Выберите ${attr.name}`}
+                      onChange={valueId => setSimpleAttribute(attr.id, valueId)}
+                      value={getSimpleAttributeValue(attr)}
+                    />
+                  )}
                 </div>
               ))}
             {dependencies
@@ -1176,60 +1210,31 @@ export const CreateProduct = () => {
                 return d
               })
               .map(dependency => {
-                {
-                  const attr = attributes.find(attr => attr?.id === dependency.attributeId)
+                const attr = attributes.find(attr => attr?.id === dependency.attributeId)
+                if (!attr) return null
 
-                  return (
-                    <div className="flex flex-col gap-sm" key={attr?.name}>
-                      <p className="font-semibold text-[14px]">{attr?.name}</p>
+                return (
+                  <div className="flex flex-col gap-sm" key={attr.name}>
+                    <p className="font-semibold text-[14px]">{attr.name}</p>
+                    {attr.isFreeValue ? (
+                      <FreeValueInput
+                        className="w-[372px]"
+                        values={attr.values}
+                        placeholder={`Введите ${attr.name}`}
+                        value={item.main.freeValues?.[attr.id] || ''}
+                        onChange={text => setFreeValue(attr.id, text)}
+                      />
+                    ) : (
                       <CustomSelect
                         className="w-[372px]"
-                        data={
-                          attr?.values.map(item => {
-                            return { id: item.id, value: item.value }
-                          }) || []
-                        }
-                        placeholder={`Выберите ${attr?.name}`}
-                        onChange={id => {
-                          setItem(
-                            prev =>
-                              ({
-                                ...prev,
-                                main: {
-                                  ...prev?.main,
-                                  attributeValueIds: [
-                                    ...(prev?.main?.attributeValueIds || []).filter(
-                                      av =>
-                                        !Object.keys(av).includes(String(dependency.attributeId))
-                                    ),
-                                    { [String(dependency.attributeId)]: id },
-                                  ],
-                                },
-                              }) as Item
-                          )
-                        }}
-                        isFreeValue={attr?.isFreeValue}
-                        id={attr?.id}
-                        value={
-                          attr?.values
-                            .map(item => {
-                              return { id: item.id, value: item.value }
-                            })
-                            .find(
-                              val =>
-                                val.id ===
-                                item?.main?.attributeValueIds?.find(av => av[Number(attr?.id)])?.[
-                                  Number(attr?.id)
-                                ]
-                            ) || {
-                            id: 0,
-                            value: '',
-                          }
-                        }
+                        data={attr.values.map(value => ({ id: value.id, value: value.value }))}
+                        placeholder={`Выберите ${attr.name}`}
+                        onChange={valueId => setSimpleAttribute(attr.id, valueId)}
+                        value={getSimpleAttributeValue(attr)}
                       />
-                    </div>
-                  )
-                }
+                    )}
+                  </div>
+                )
               })}
           </div>
         </div>
@@ -1693,7 +1698,7 @@ export const CreateProduct = () => {
                             <button
                               type="button"
                               className="bg-[#FFF3F3] text-[#E02844] h-[36px] w-[36px] flex items-center justify-center text-[18px] rounded-[12px]"
-                              onClick={() => deleteRow(index)}
+                              onClick={() => deleteRow(variant.clientId)}
                             >
                               <LuTrash2 />
                             </button>
@@ -1704,7 +1709,7 @@ export const CreateProduct = () => {
                     <button
                       type="button"
                       className="admin-input w-fit flex items-center"
-                      onClick={() => toast.error('Сначала сохраните товар')}
+                      onClick={() => syncronize(createdProductId)}
                     >
                       Синхронизировать остатки
                     </button>
