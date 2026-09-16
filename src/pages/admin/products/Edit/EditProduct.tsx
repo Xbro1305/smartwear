@@ -531,8 +531,12 @@ export const EditProduct = () => {
       const formData = new FormData()
       if (isNew && mediaItem.file) formData.append('file', mediaItem.file)
       formData.append('kind', mediaItem.type)
-      if ((mediaItem.type === 'cover' || mediaItem.type === 'photo') && mediaItem.colorAttrValueId)
-        formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
+      if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
+        if (mediaItem.colorAttrValueId)
+          formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
+        // оттенок: по нему бэкенд отличает фото «зелёный (оливковый)» от «зелёный (зелёный)»
+        if (mediaItem.colorAlias) formData.append('colorAlias', mediaItem.colorAlias)
+      }
 
       const config = {
         headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
