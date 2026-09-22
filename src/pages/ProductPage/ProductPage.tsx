@@ -371,10 +371,6 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
 
   const visibleMedia = getVisibleMedia(selectedColor?.id)
 
-  // Резервируем место под полный набор медиа товара: высота галереи не меняется,
-  // даже если для следующего цвета фотографий меньше.
-  const maxMediaCount = Math.max(1, media?.length ?? 0)
-
   return (
     <div className="flex flex-col p-[15px] xl:p-[100px]">
       {item && (
@@ -441,17 +437,6 @@ export const ProductPage: React.FC<ProductPageProps> = ({ data }) => {
                       onClick={() => setSelectedPhoto(m)}
                       src={m.url}
                       controls
-                    />
-                  )
-                )}
-
-                {/* Невидимые ячейки сохраняют высоту галереи при смене цвета */}
-                {Array.from({ length: Math.max(0, maxMediaCount - visibleMedia.length) }).map(
-                  (_, index) => (
-                    <div
-                      key={`media-placeholder-${index}`}
-                      aria-hidden="true"
-                      className="hidden sm:block aspect-[3/4] invisible"
                     />
                   )
                 )}
