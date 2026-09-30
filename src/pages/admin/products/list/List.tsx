@@ -161,8 +161,8 @@ export const ProductsList = () => {
         toast.success('Товар успешно удален')
         setDeletingId(null)
       })
-      .catch(() => {
-        toast.error('Ошибка при удалении товара')
+      .catch(err => {
+        toast.error(err?.response?.data?.message || 'Ошибка при удалении товара')
       })
   }
 

@@ -22,6 +22,7 @@ import {
   matchCreatedVariantIds,
   resolveFreeValueIds,
 } from '../lib/productSave'
+import { compressImage, type MediaProgress, runQueue } from '../lib/mediaUpload'
 
 interface Item {
   main: {
@@ -142,6 +143,7 @@ export const CreateProduct = () => {
   const [stock, setStock] = useState<Stock[]>([])
   const [warehouses, setWarehouses] = useState<Store[]>([])
   const [sending, setSending] = useState<boolean>(false)
+  const [mediaProgress, setMediaProgress] = useState<MediaProgress | null>(null)
   // id уже созданного товара: если сохранилось не всё, повторное «Сохранить» его обновит
   const [createdProductId, setCreatedProductId] = useState<number>()
 
@@ -380,24 +382,26 @@ export const CreateProduct = () => {
     }
   }
 
-  /** Возвращает число фото/видео, которые не удалось загрузить. */
+  /**
+   * Загружает новые фото/видео очередью по несколько файлов, фото перед отправкой сжимаются.
+   * Возвращает число файлов, которые не удалось загрузить.
+   */
   const saveMedia = async (productId: number) => {
-    let failed = 0
+    const pending = (itemMedia || []).filter(mediaItem => !mediaItem.uploaded)
 
-    for (const mediaItem of itemMedia || []) {
-      if (mediaItem.uploaded) continue
+    const failed = await runQueue(
+      pending,
+      async mediaItem => {
+        const formData = new FormData()
+        formData.append('file', await compressImage(mediaItem.file))
+        formData.append('kind', mediaItem.type)
+        if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
+          if (mediaItem.colorAttrValueId)
+            formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
+          // оттенок: по нему бэкенд отличает фото «зелёный (оливковый)» от «зелёный (зелёный)»
+          if (mediaItem.colorAlias) formData.append('colorAlias', mediaItem.colorAlias)
+        }
 
-      const formData = new FormData()
-      formData.append('file', mediaItem.file)
-      formData.append('kind', mediaItem.type)
-      if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
-        if (mediaItem.colorAttrValueId)
-          formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
-        // оттенок: по нему бэкенд отличает фото «зелёный (оливковый)» от «зелёный (зелёный)»
-        if (mediaItem.colorAlias) formData.append('colorAlias', mediaItem.colorAlias)
-      }
-
-      try {
         await axios.post(`${import.meta.env.VITE_APP_API_URL}/media/${productId}/`, formData, {
           headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
         })
@@ -405,12 +409,11 @@ export const CreateProduct = () => {
         setItemMedia(prev =>
           prev?.map(m => (m.clientId === mediaItem.clientId ? { ...m, uploaded: true } : m))
         )
-        await new Promise(resolve => setTimeout(resolve, 500)) // небольшой интервал
-      } catch (err) {
-        failed++
-        console.error('Media upload failed:', mediaItem, err)
-      }
-    }
+      },
+      (done, total) => setMediaProgress({ done, total })
+    )
+
+    setMediaProgress(null)
 
     return failed
   }
@@ -505,18 +508,18 @@ export const CreateProduct = () => {
         return
       }
 
-      // 2. Фото, цены и варианты сохраняем независимо друг от друга: раньше ошибка
-      // синхронизации обрывала сохранение, и фото даже не отправлялись на сервер.
+      // 2. Цены, варианты и остатки, затем медиа — долгая загрузка фото не задерживает
+      // остальное. Шаги независимы: ошибка одного не мешает сохранить другие.
       const failures: string[] = []
-
-      const mediaFailed = await saveMedia(productId)
-      if (mediaFailed) failures.push(`не загружено фото/видео: ${mediaFailed}`)
 
       const pricesFailed = await savePrices(productId)
       if (pricesFailed) failures.push(`не сохранено цен: ${pricesFailed}`)
 
       if (!(await syncronize(productId, item, false)))
         failures.push('не сохранены варианты и остатки')
+
+      const mediaFailed = await saveMedia(productId)
+      if (mediaFailed) failures.push(`не загружено фото/видео: ${mediaFailed}`)
 
       try {
         await axios.post(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`)
@@ -572,7 +575,9 @@ export const CreateProduct = () => {
       {sending && (
         <div className="fixed top-[0] left-[0] z-[9999] w-full h-screen bg-[#00000080] flex items-center justify-center">
           <h5 id="h5" className="text-[#fff]">
-            Загрузка...
+            {mediaProgress
+              ? `Загрузка фото и видео: ${mediaProgress.done} из ${mediaProgress.total}`
+              : 'Загрузка...'}
           </h5>
         </div>
       )}

@@ -24,6 +24,7 @@ import {
   padCodes,
   resolveFreeValueIds,
 } from '../lib/productSave'
+import { compressImage, type MediaProgress, runQueue } from '../lib/mediaUpload'
 
 /** Эти атрибуты редактируются отдельными полями, а не в общем списке простых. */
 const MAIN_ATTRIBUTE_NAMES = ['Бренд', 'Сезон', 'Вид изделия', 'Вид утеплителя']
@@ -142,6 +143,9 @@ export const EditProduct = () => {
   const [sending, setSending] = useState<boolean>(false)
   // id вариантов, удалённых из таблицы синхронизации — их нельзя слать в sync/save
   const [deletedVariantIds, setDeletedVariantIds] = useState<number[]>([])
+  // id фото/видео, удалённых в форме: DELETE уходит только при сохранении
+  const [deletedMediaIds, setDeletedMediaIds] = useState<number[]>([])
+  const [mediaProgress, setMediaProgress] = useState<MediaProgress | null>(null)
   const [loading, setLoading] = useState(true)
 
   const { id } = useParams()
@@ -520,29 +524,53 @@ export const EditProduct = () => {
     }
   }
 
-  /** Возвращает число фото/видео, которые не удалось сохранить. */
+  /** Убирает медиа из формы; уже загруженное удалится на сервере при сохранении. */
+  const removeMedia = (mediaItem: Media) => {
+    if (mediaItem.id != null) setDeletedMediaIds(prev => [...prev, mediaItem.id])
+    setItemMedia(prev => prev?.filter(it => it.clientId !== mediaItem.clientId))
+  }
+
+  /**
+   * Удаляет отмеченные медиа, затем очередью загружает новые (фото сжимаются)
+   * и обновляет привязку к цвету у существующих.
+   * Возвращает число фото/видео, которые не удалось сохранить.
+   */
   const saveMedia = async () => {
-    let failed = 0
+    const toUpload = (itemMedia || []).filter(
+      mediaItem => mediaItem.id != null || (!mediaItem.uploaded && mediaItem.file)
+    )
+    const tasks = [
+      ...deletedMediaIds.map(mediaId => ({ kind: 'delete' as const, mediaId })),
+      ...toUpload.map(mediaItem => ({ kind: 'save' as const, mediaItem })),
+    ]
+    const config = {
+      headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
+    }
 
-    for (const mediaItem of itemMedia || []) {
-      const isNew = mediaItem.id == null
-      if (isNew && (mediaItem.uploaded || !mediaItem.file)) continue
+    const failed = await runQueue(
+      tasks,
+      async task => {
+        if (task.kind === 'delete') {
+          await axios.delete(`${import.meta.env.VITE_APP_API_URL}/media/${task.mediaId}`, {
+            headers: authHeaders(),
+          })
+          // не удалилось — id остаётся в списке и уйдёт при следующем сохранении
+          setDeletedMediaIds(prev => prev.filter(mediaId => mediaId !== task.mediaId))
+          return
+        }
 
-      const formData = new FormData()
-      if (isNew && mediaItem.file) formData.append('file', mediaItem.file)
-      formData.append('kind', mediaItem.type)
-      if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
-        if (mediaItem.colorAttrValueId)
-          formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
-        // оттенок: по нему бэкенд отличает фото «зелёный (оливковый)» от «зелёный (зелёный)»
-        if (mediaItem.colorAlias) formData.append('colorAlias', mediaItem.colorAlias)
-      }
+        const { mediaItem } = task
+        const isNew = mediaItem.id == null
+        const formData = new FormData()
+        if (isNew && mediaItem.file) formData.append('file', await compressImage(mediaItem.file))
+        formData.append('kind', mediaItem.type)
+        if (mediaItem.type === 'cover' || mediaItem.type === 'photo') {
+          if (mediaItem.colorAttrValueId)
+            formData.append('colorAttrValueId', String(mediaItem.colorAttrValueId))
+          // оттенок: по нему бэкенд отличает фото «зелёный (оливковый)» от «зелёный (зелёный)»
+          if (mediaItem.colorAlias) formData.append('colorAlias', mediaItem.colorAlias)
+        }
 
-      const config = {
-        headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
-      }
-
-      try {
         if (isNew) {
           const res = await axios.post(
             `${import.meta.env.VITE_APP_API_URL}/media/${id}/`,
@@ -564,11 +592,11 @@ export const EditProduct = () => {
             config
           )
         }
-      } catch (err) {
-        failed++
-        console.error('Media save failed:', mediaItem, err)
-      }
-    }
+      },
+      (done, total) => setMediaProgress({ done, total })
+    )
+
+    setMediaProgress(null)
 
     return failed
   }
@@ -634,17 +662,17 @@ export const EditProduct = () => {
         return
       }
 
-      // 2. Фото, цены и варианты сохраняем независимо друг от друга: раньше ошибка
-      // синхронизации обрывала сохранение, и фото даже не отправлялись на сервер.
+      // 2. Цены, варианты и остатки, затем медиа — долгая загрузка фото не задерживает
+      // остальное. Шаги независимы: ошибка одного не мешает сохранить другие.
       const failures: string[] = []
-
-      const mediaFailed = await saveMedia()
-      if (mediaFailed) failures.push(`не сохранено фото/видео: ${mediaFailed}`)
 
       const pricesFailed = await savePrices()
       if (pricesFailed) failures.push(`не сохранено цен: ${pricesFailed}`)
 
       if (!(await syncronize(item, false))) failures.push('не сохранены варианты и остатки')
+
+      const mediaFailed = await saveMedia()
+      if (mediaFailed) failures.push(`не сохранено фото/видео: ${mediaFailed}`)
 
       try {
         await axios.post(`${import.meta.env.VITE_APP_API_URL}/moysklad/sync/full`)
@@ -680,7 +708,9 @@ export const EditProduct = () => {
       {loading && (
         <div className="fixed top-[0] left-[0] z-[9999] w-full h-screen bg-[#00000080] flex items-center justify-center">
           <h5 id="h5" className="text-[#fff]">
-            Загрузка...
+            {mediaProgress
+              ? `Загрузка фото и видео: ${mediaProgress.done} из ${mediaProgress.total}`
+              : 'Загрузка...'}
           </h5>
         </div>
       )}
@@ -1952,21 +1982,7 @@ export const EditProduct = () => {
 
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
-                      onClick={() => {
-                        m.id != null
-                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${m.id}`, {
-                              method: 'DELETE',
-                              headers: {
-                                Authorization: `Bearer ${localStorage.getItem('token')}`,
-                              },
-                            })
-                              .then(res => {
-                                toast.success(res.data.message)
-                                setItemMedia(prev => prev?.filter(it => it.clientId !== m.clientId))
-                              })
-                              .catch(err => console.log(err))
-                          : setItemMedia(prev => prev?.filter(it => it.clientId !== m.clientId))
-                      }}
+                      onClick={() => removeMedia(m)}
                     >
                       Удалить фото
                     </p>
@@ -2020,23 +2036,7 @@ export const EditProduct = () => {
                   <div className="flex flex-col gap-[24px] z-[1]">
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
-                      onClick={() => {
-                        item.id != null
-                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${item.id}`, {
-                              method: 'DELETE',
-                              headers: {
-                                Authorization: `Bearer ${localStorage.getItem('token')}`,
-                              },
-                            })
-                              .then(res => {
-                                toast.success(res.data.message)
-                                setItemMedia(prev =>
-                                  prev?.filter(it => it.clientId !== item.clientId)
-                                )
-                              })
-                              .catch(err => console.log(err))
-                          : setItemMedia(prev => prev?.filter(it => it.clientId !== item.clientId))
-                      }}
+                      onClick={() => removeMedia(item)}
                     >
                       Удалить фото
                     </p>
@@ -2086,23 +2086,7 @@ export const EditProduct = () => {
                   <div className="flex flex-col gap-[24px]">
                     <p
                       className="text-[#E02844] text-[14px] cursor-pointer"
-                      onClick={() => {
-                        item.id != null
-                          ? axios(`${import.meta.env.VITE_APP_API_URL}/media/${item.id}`, {
-                              method: 'DELETE',
-                              headers: {
-                                Authorization: `Bearer ${localStorage.getItem('token')}`,
-                              },
-                            })
-                              .then(res => {
-                                toast.success(res.data.message)
-                                setItemMedia(prev =>
-                                  prev?.filter(it => it.clientId !== item.clientId)
-                                )
-                              })
-                              .catch(err => console.log(err))
-                          : setItemMedia(prev => prev?.filter(it => it.clientId !== item.clientId))
-                      }}
+                      onClick={() => removeMedia(item)}
                     >
                       Удалить видео
                     </p>
