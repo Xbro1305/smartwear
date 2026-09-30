@@ -54,6 +54,7 @@ export type UpdateArticleDto = {
   section?: Section
   title?: string
   draft?: boolean
+  keyword?: string
 }
 
 export type ParagraphDto = {

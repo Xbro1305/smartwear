@@ -182,6 +182,7 @@ export const EditArticle = () => {
       section,
       title,
       draft,
+      keyword: url,
     }
 
     if (!draft) {
