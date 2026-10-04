@@ -22,7 +22,9 @@ export const CatalogResolver = () => {
 
   const getCategoryBySlug = () =>
     axios
-      .get(`${baseUrl}/catalog/products?category=${category}&attributeIds=25&priceTo=10000`)
+      .get(
+        `${baseUrl}/catalog/products?category=${category}&attributeIds=25&priceTo=10000&page=1&limit=20`
+      )
       .then(r => r.data)
 
   const getProductBySlug = () => axios.get(`${baseUrl}/products/slug/${slug}`).then(r => r.data)

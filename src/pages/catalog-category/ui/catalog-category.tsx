@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable max-lines */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link, useSearchParams } from 'react-router-dom'
 import { FaChevronDown } from 'react-icons/fa'
@@ -17,6 +17,9 @@ import { HiOutlineEmojiSad } from 'react-icons/hi'
 interface Props {
   data: any
 }
+
+/** Сколько товаров запрашиваем за одну страницу. */
+const PAGE_LIMIT = 20
 
 const FilterBlock = ({
   title,
@@ -77,6 +80,14 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [sizeIds, setSizeIds] = useState<any>()
   const [sizes, setSizes] = useState<any>()
   const [items, setItems] = useState<any>([])
+  // сколько всего товаров под текущие фильтры — до этого числа догружаем страницы
+  const [total, setTotal] = useState<number>(0)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const pageRef = useRef(1)
+  const loadingRef = useRef(false)
+  // номер актуального набора фильтров: ответы на устаревшие запросы отбрасываем
+  const requestRef = useRef(0)
+  const sentinelRef = useRef<HTMLDivElement>(null)
   const [maxPrice, setMaxPrice] = useState<number>(0)
   const [minPrice, setMinPrice] = useState<number>(0)
   const [availableSizes, setAvailableSizes] = useState<any>([])
@@ -213,9 +224,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       })
   }, [filterIds, category, sizeIds, colorIds, isSaled, storeIds, lengthIds])
 
-  useEffect(() => {
-    if (!category) return
-
+  // Параметры списка товаров. weakPrice* влияет только на список: фасеты и границы
+  // слайдера всегда рассчитываются сильным запросом выше, без цены.
+  const listQuery = useMemo(() => {
     const query = filterIds?.length
       ? `&attributeValueIds=${filterIds.join('&attributeValueIds=')}`
       : ''
@@ -224,21 +235,12 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     const saled = isSaled ? '&isDiscounted=true' : ''
     const storeQuery = storeIds?.length ? `&storeIds=${storeIds.join('&storeIds=')}` : ''
     const productLengthQuery = lengthIds?.length ? `&lengthId=${lengthIds.join('&lengthId=')}` : ''
-    // weakPrice* влияет только на список товаров. Фасеты и границы слайдера
-    // всегда рассчитываются сильным запросом выше, без цены.
     const priceQuery =
       (debouncedPrice && debouncedPrice != 0 ? `&weakPriceTo=${debouncedPrice}` : '') +
       (debouncedPriceFrom && debouncedPriceFrom != 0 ? `&weakPriceFrom=${debouncedPriceFrom}` : '')
 
-    axios
-      .get(
-        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${priceQuery}${saled}${query}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
-      )
-      .then(res => {
-        setItems(res.data.items)
-      })
+    return `${priceQuery}${saled}${query}${sizesQuery}${colorsQuery}${storeQuery}${productLengthQuery}`
   }, [
-    category,
     debouncedPrice,
     debouncedPriceFrom,
     filterIds,
@@ -249,11 +251,89 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     lengthIds,
   ])
 
-  // sorting by price/ date
+  const fetchPage = (page: number) =>
+    axios.get(
+      `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${listQuery}&page=${page}&limit=${PAGE_LIMIT}`
+    )
+
+  // первая страница — при смене категории или фильтров
 
   useEffect(() => {
     if (!category) return
 
+    const requestId = ++requestRef.current
+
+    loadingRef.current = true
+    fetchPage(1)
+      .then(res => {
+        if (requestId !== requestRef.current) return
+
+        pageRef.current = 1
+        setItems(res.data.items)
+        setTotal(res.data.total ?? res.data.items.length)
+      })
+      .catch(err => console.log(err))
+      .finally(() => {
+        if (requestId !== requestRef.current) return
+
+        loadingRef.current = false
+        setLoadingMore(false)
+      })
+  }, [category, listQuery])
+
+  // следующие страницы — когда при скролле показался конец списка
+
+  const loadMore = () => {
+    if (loadingRef.current || items.length >= total) return
+
+    const requestId = requestRef.current
+    const nextPage = pageRef.current + 1
+
+    loadingRef.current = true
+    setLoadingMore(true)
+    fetchPage(nextPage)
+      .then(res => {
+        if (requestId !== requestRef.current) return
+
+        const loadedIds = new Set(items.map((p: any) => p.id))
+        const fresh = res.data.items.filter((p: any) => !loadedIds.has(p.id))
+
+        pageRef.current = nextPage
+        // новых товаров нет — список закончился раньше, чем обещал total; дальше не запрашиваем
+        setTotal(fresh.length ? (res.data.total ?? total) : items.length)
+        setItems([...items, ...fresh])
+      })
+      .catch(err => console.log(err))
+      .finally(() => {
+        if (requestId !== requestRef.current) return
+
+        loadingRef.current = false
+        setLoadingMore(false)
+      })
+  }
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+
+    if (!sentinel || items.length >= total) return
+
+    // observer пересоздаётся после каждой подгрузки: если конец списка всё ещё
+    // на экране, сразу запрашиваем следующую страницу
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) loadMore()
+      },
+      { rootMargin: '400px' }
+    )
+
+    observer.observe(sentinel)
+
+    return () => observer.disconnect()
+  }, [items, total, listQuery])
+
+  // sorting by price/ date — сортируются уже загруженные товары
+
+  const sortedItems = useMemo(() => {
     const newItems = [...items]
 
     if (sort === 'price_down') {
@@ -265,8 +345,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     } else if (sort === 'old_first') {
       newItems.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     }
-    setItems(newItems)
-  }, [sort])
+
+    return newItems
+  }, [items, sort])
 
   // getting category information, attributes
 
@@ -309,7 +390,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       })
       .catch(err => console.log(err))
 
-    setItems(data.items)
+    pageRef.current = 1
+    setItems(data.items.slice(0, PAGE_LIMIT))
+    setTotal(data.total ?? data.items.length)
   }, [data])
 
   const Select = ({ cls }: { cls: string }) => (
@@ -632,7 +715,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
             <div className={styles.catalog_right_top_header}>
               <div className={styles.catalog_right_top_title}>
                 <h1 className="h1">{category?.current?.name || 'Каталог'}</h1>
-                <p className="p1">{items.length} товара(ов)</p>
+                <p className="p1">{total} товара(ов)</p>
               </div>
               <div className={styles.catalog_right_top_mobile}>
                 <p className="p2 cursor-pointer select-none" onClick={() => setIsFilterOpen(true)}>
@@ -654,7 +737,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
           </div>
           {items.length ? (
             <div className={styles.catalog_wrapper}>
-              {items.map((i: any) => {
+              {sortedItems.map((i: any) => {
                 const imageUrl = i.media.find((m: any) => m.kind === 'cover')?.url || ''
 
                 const colors = Object.values(
@@ -745,6 +828,9 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               <p>По вашему запросу ничего не найдено</p>{' '}
             </div>
           )}
+          {/* конец списка: когда он появляется на экране, подгружается следующая страница */}
+          <div ref={sentinelRef} />
+          {loadingMore && <p className="p1 py-[20px] text-center">Загрузка...</p>}
         </div>
       </div>
     </div>
