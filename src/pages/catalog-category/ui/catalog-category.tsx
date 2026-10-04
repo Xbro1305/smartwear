@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { Link, useSearchParams } from 'react-router-dom'
-import { FaChevronDown } from 'react-icons/fa'
+import { FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import saleBanner from '@/assets/home/sale-women.png'
 // import heart from '@/assets/images/homeHeart.svg'
 import styles from './catalog-category.module.scss'
@@ -18,8 +18,23 @@ interface Props {
   data: any
 }
 
-/** Сколько товаров запрашиваем за одну страницу. */
+/** Сколько товаров показываем на одной странице. */
 const PAGE_LIMIT = 20
+
+/**
+ * Номера страниц для навигации: первая, последняя и 4 страницы подряд, пропуски — `null`.
+ * 10 страниц: на 1–5 → 1 2 3 4 5 … 10, на 6 → 1 … 5 6 7 8 … 10, на 7–10 → 1 … 6 7 8 9 10.
+ */
+const getPageNumbers = (page: number, pageCount: number): (null | number)[] => {
+  const range = (from: number, to: number) =>
+    Array.from({ length: to - from + 1 }, (_, index) => from + index)
+
+  if (pageCount <= 7) return range(1, pageCount)
+  if (page <= 5) return [...range(1, 5), null, pageCount]
+  if (page >= pageCount - 3) return [1, null, ...range(pageCount - 4, pageCount)]
+
+  return [1, null, ...range(page - 1, page + 2), null, pageCount]
+}
 
 const FilterBlock = ({
   title,
@@ -80,14 +95,13 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
   const [sizeIds, setSizeIds] = useState<any>()
   const [sizes, setSizes] = useState<any>()
   const [items, setItems] = useState<any>([])
-  // сколько всего товаров под текущие фильтры — до этого числа догружаем страницы
+  // сколько всего товаров под текущие фильтры — по нему считается число страниц
   const [total, setTotal] = useState<number>(0)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const pageRef = useRef(1)
-  const loadingRef = useRef(false)
-  // номер актуального набора фильтров: ответы на устаревшие запросы отбрасываем
+  // страница запоминается вместе с фильтрами: при их смене снова открывается первая
+  const [pageState, setPageState] = useState({ page: 1, query: '' })
+  // номер актуального запроса: ответы на устаревшие отбрасываем
   const requestRef = useRef(0)
-  const sentinelRef = useRef<HTMLDivElement>(null)
+  const listTopRef = useRef<HTMLDivElement>(null)
   const [maxPrice, setMaxPrice] = useState<number>(0)
   const [minPrice, setMinPrice] = useState<number>(0)
   const [availableSizes, setAvailableSizes] = useState<any>([])
@@ -251,87 +265,35 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
     lengthIds,
   ])
 
-  const fetchPage = (page: number) =>
-    axios.get(
-      `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${listQuery}&page=${page}&limit=${PAGE_LIMIT}`
-    )
+  const page = pageState.query === listQuery ? pageState.page : 1
+  const pageCount = Math.ceil(total / PAGE_LIMIT)
 
-  // первая страница — при смене категории или фильтров
+  const goToPage = (nextPage: number) => {
+    setPageState({ page: nextPage, query: listQuery })
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  // товары текущей страницы — при смене категории, фильтров или страницы
 
   useEffect(() => {
     if (!category) return
 
     const requestId = ++requestRef.current
 
-    loadingRef.current = true
-    fetchPage(1)
+    axios
+      .get(
+        `${import.meta.env.VITE_APP_API_URL}/catalog/products?category=${url}${listQuery}&page=${page}&limit=${PAGE_LIMIT}`
+      )
       .then(res => {
         if (requestId !== requestRef.current) return
 
-        pageRef.current = 1
         setItems(res.data.items)
         setTotal(res.data.total ?? res.data.items.length)
       })
       .catch(err => console.log(err))
-      .finally(() => {
-        if (requestId !== requestRef.current) return
+  }, [category, listQuery, page])
 
-        loadingRef.current = false
-        setLoadingMore(false)
-      })
-  }, [category, listQuery])
-
-  // следующие страницы — когда при скролле показался конец списка
-
-  const loadMore = () => {
-    if (loadingRef.current || items.length >= total) return
-
-    const requestId = requestRef.current
-    const nextPage = pageRef.current + 1
-
-    loadingRef.current = true
-    setLoadingMore(true)
-    fetchPage(nextPage)
-      .then(res => {
-        if (requestId !== requestRef.current) return
-
-        const loadedIds = new Set(items.map((p: any) => p.id))
-        const fresh = res.data.items.filter((p: any) => !loadedIds.has(p.id))
-
-        pageRef.current = nextPage
-        // новых товаров нет — список закончился раньше, чем обещал total; дальше не запрашиваем
-        setTotal(fresh.length ? (res.data.total ?? total) : items.length)
-        setItems([...items, ...fresh])
-      })
-      .catch(err => console.log(err))
-      .finally(() => {
-        if (requestId !== requestRef.current) return
-
-        loadingRef.current = false
-        setLoadingMore(false)
-      })
-  }
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-
-    if (!sentinel || items.length >= total) return
-
-    // observer пересоздаётся после каждой подгрузки: если конец списка всё ещё
-    // на экране, сразу запрашиваем следующую страницу
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting) loadMore()
-      },
-      { rootMargin: '400px' }
-    )
-
-    observer.observe(sentinel)
-
-    return () => observer.disconnect()
-  }, [items, total, listQuery])
-
-  // sorting by price/ date — сортируются уже загруженные товары
+  // sorting by price/ date — сортируются товары текущей страницы
 
   const sortedItems = useMemo(() => {
     const newItems = [...items]
@@ -390,7 +352,6 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
       })
       .catch(err => console.log(err))
 
-    pageRef.current = 1
     setItems(data.items.slice(0, PAGE_LIMIT))
     setTotal(data.total ?? data.items.length)
   }, [data])
@@ -710,7 +671,7 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
         />
 
         {/* RIGHT */}
-        <div className={styles.catalog_right}>
+        <div className={styles.catalog_right} ref={listTopRef}>
           <div className={styles.catalog_right_top}>
             <div className={styles.catalog_right_top_header}>
               <div className={styles.catalog_right_top_title}>
@@ -828,9 +789,48 @@ export const CatalogCategory: React.FC<Props> = ({ data }) => {
               <p>По вашему запросу ничего не найдено</p>{' '}
             </div>
           )}
-          {/* конец списка: когда он появляется на экране, подгружается следующая страница */}
-          <div ref={sentinelRef} />
-          {loadingMore && <p className="p1 py-[20px] text-center">Загрузка...</p>}
+          {pageCount > 1 && (
+            <div className="flex items-center justify-center gap-[6px] py-[24px]">
+              {/* на первой и последней странице соответствующую стрелку не показываем */}
+              {page > 1 && (
+                <button
+                  type="button"
+                  aria-label="Предыдущая страница"
+                  className="flex h-[36px] w-[36px] items-center justify-center text-[12px]"
+                  onClick={() => goToPage(page - 1)}
+                >
+                  <FaChevronLeft />
+                </button>
+              )}
+              {getPageNumbers(page, pageCount).map((number, index) =>
+                number === null ? (
+                  <span key={`gap-${index}`} className="p1 w-[36px] text-center">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={number}
+                    type="button"
+                    className="p1 h-[36px] min-w-[36px] px-[6px]"
+                    style={{ color: number === page ? 'var(--red)' : 'inherit' }}
+                    onClick={() => number !== page && goToPage(number)}
+                  >
+                    {number}
+                  </button>
+                )
+              )}
+              {page < pageCount && (
+                <button
+                  type="button"
+                  aria-label="Следующая страница"
+                  className="flex h-[36px] w-[36px] items-center justify-center text-[12px]"
+                  onClick={() => goToPage(page + 1)}
+                >
+                  <FaChevronRight />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
